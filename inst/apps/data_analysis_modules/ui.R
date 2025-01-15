@@ -3,75 +3,76 @@
 ui_elements <- list(
   ##############################################################################
   #########
+  #########  Home panel
+  #########
+  ##############################################################################
+  "home" = bslib::nav_panel(
+    title = "freesearcheR",
+    shiny::markdown(readLines("www/intro.md")),
+    icon = shiny::icon("home")
+  ),
+  ##############################################################################
+  #########
   #########  Import panel
   #########
   ##############################################################################
   "import" = bslib::nav_panel(
     title = "Import",
-    shiny::fluidRow(
-      column(
-        width = 6,
-        shiny::h4("Choose your data source"),
-        # shiny::conditionalPanel(
-        #   condition = "output.has_input=='yes'",
-        #   # Input: Select a file ----
-        #   shiny::helpText("Analyses are performed on provided data")
+    shiny::tagList(
+      shiny::h4("Choose your data source"),
+      # shiny::conditionalPanel(
+      #   condition = "output.has_input=='yes'",
+      #   # Input: Select a file ----
+      #   shiny::helpText("Analyses are performed on provided data")
+      # ),
+      # shiny::conditionalPanel(
+      #   condition = "output.has_input=='no'",
+      # Input: Select a file ----
+      shinyWidgets::radioGroupButtons(
+        inputId = "source",
+        selected = "env",
+        # label = "Choice: ",
+        choices = c(
+          "File upload" = "file",
+          "REDCap server" = "redcap",
+          "Local data" = "env"
+        ),
+        # checkIcon = list(
+        #   yes = icon("square-check"),
+        #   no = icon("square")
         # ),
-        # shiny::conditionalPanel(
-        #   condition = "output.has_input=='no'",
-        # Input: Select a file ----
-        shinyWidgets::radioGroupButtons(
-          inputId = "source",
-          # label = "Choice: ",
-          choices = c(
-            "File upload" = "file",
-            "REDCap server" = "redcap",
-            "Local data" = "env"
-          ),
-          # checkIcon = list(
-          #   yes = icon("square-check"),
-          #   no = icon("square")
-          # ),
-          width = "100%"
-        ),
-        shiny::conditionalPanel(
-          condition = "input.source=='file'",
-          datamods::import_file_ui("file_import",
-            title = "Choose a datafile to upload",
-            file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat", ".sav", ".ods", ".dta")
-          )
-        ),
-        shiny::conditionalPanel(
-          condition = "input.source=='redcap'",
-          m_redcap_readUI("redcap_import")
-        ),
-        shiny::conditionalPanel(
-          condition = "input.source=='env'",
-          import_globalenv_ui(id = "env", title = NULL)
-        )
-
-
-        # )
+        width = "100%"
       ),
-      column(
-        width = 6,
-        shiny::markdown(readLines("www/intro.md"))
-      )
-    ),
-    shiny::conditionalPanel(
-      condition = "input.source=='redcap'",
-      DT::DTOutput(outputId = "redcap_prev")
-    ),
-    shiny::br(),
-    shiny::actionButton(
-      inputId = "act_start",
-      label = "Start",
-      width = "100%",
-      icon = shiny::icon("play")
-    ),
-    shiny::helpText('After importing, hit "Start" or navigate to the desired tab.'),
-    shiny::br(),
-    shiny::br()
+      shiny::conditionalPanel(
+        condition = "input.source=='file'",
+        datamods::import_file_ui("file_import",
+          title = "Choose a datafile to upload",
+          file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat", ".sav", ".ods", ".dta")
+        )
+      ),
+      shiny::conditionalPanel(
+        condition = "input.source=='redcap'",
+        m_redcap_readUI("redcap_import")
+      ),
+      shiny::conditionalPanel(
+        condition = "input.source=='env'",
+        import_globalenv_ui(id = "env", title = NULL)
+      ),
+      shiny::conditionalPanel(
+        condition = "input.source=='redcap'",
+        DT::DTOutput(outputId = "redcap_prev")
+      ),
+      shiny::br(),
+      shiny::actionButton(
+        inputId = "act_start",
+        label = "Start",
+        width = "100%",
+        icon = shiny::icon("play")
+      ),
+      shiny::helpText('After importing, hit "Start" or navigate to the desired tab.'),
+      shiny::br(),
+      shiny::br()
+    )
   ),
   ##############################################################################
   #########
@@ -79,47 +80,24 @@ ui_elements <- list(
   #########
   ##############################################################################
   "overview" =
-    # bslib::nav_panel_hidden(
+  # bslib::nav_panel_hidden(
     bslib::nav_panel(
       # value = "overview",
-      title = "Modifications",
+      title = "Data",
       bslib::navset_bar(
         fillable = TRUE,
-        # bslib::nav_panel(
-        #   title = "Edit",
-        #   datamods::edit_data_ui(id = "edit_data")
-        # ),
-        # bslib::nav_panel(
-        #   title = "Overview",
-        #   DT::DTOutput(outputId = "table")
-        # ),
         bslib::nav_panel(
-          title = "Rename and select",
-          tags$h3("Select, rename and convert variables"),
+          title = "Summary & filter",
+          tags$h3("Data summary and filtering"),
           fluidRow(
-            column(
-              width = 6,
-              # radioButtons(),
-              shiny::actionButton("data_reset", "Restore original data"),
-              shiny::tags$br(),
-              shiny::helpText("Reset to original imported dataset"),
-              shiny::tags$br(),
-              datamods::update_variables_ui("vars_update")
-            ),
-            column(
-              width = 6,
-              tags$b("Original data:"),
-              # verbatimTextOutput("original"),
-              verbatimTextOutput("original_str"),
-              tags$b("Modified data:"),
-              # verbatimTextOutput("modified"),
-              verbatimTextOutput("modified_str")
+            shiny::column(
+              width = 9,
+              shiny::tags$p(
+              "Below is a short summary table of the provided data.
+              On the right hand side you have the option to create filters.
+              At the bottom you'll find a raw overview of the original vs the modified data.")
             )
-          )
-        ),
-        bslib::nav_panel(
-          title = "Filter and modify",
-          shinyWidgets::html_dependency_winbox(),
+          ),
           fluidRow(
             # column(
             #   width = 3,
@@ -136,23 +114,117 @@ ui_elements <- list(
             #   verbatimTextOutput(outputId = "filtered_code")
             # ),
             shiny::column(
-              width = 8,
-              toastui::datagridOutput(outputId = "table_mod"),
+              width = 9,
+              toastui::datagridOutput(outputId = "tbl_overview"),
+              # data_summary_ui(id = "data_summary"),
               shiny::tags$b("Reproducible code:"),
               shiny::verbatimTextOutput(outputId = "filtered_code")
             ),
             shiny::column(
-              width = 4,
-              shiny::actionButton("modal_cut", "Create factor from a variable"),
+              width = 3,
+              IDEAFilter::IDEAFilter_ui("data_filter") # ,
+              # shiny::actionButton("save_filter", "Apply the filter")
+            )
+          ),
+          fluidRow(
+            column(
+              width = 6,
+              tags$b("Original data:"),
+              # verbatimTextOutput("original"),
+              verbatimTextOutput("original_str")
+            ),
+            column(
+              width = 6,
+              tags$b("Modified data:"),
+              # verbatimTextOutput("modified"),
+              verbatimTextOutput("modified_str")
+            )
+          )
+        ),
+        # bslib::nav_panel(
+        #   title = "Overview",
+        #   DT::DTOutput(outputId = "table")
+        # ),
+        bslib::nav_panel(
+          title = "Modify",
+          tags$h3("Subset, rename and convert variables"),
+          fluidRow(
+            shiny::column(
+              width = 9,
+              shiny::tags$p("Below, you can subset the data (by not selecting the variables to exclude on applying changes), rename variables, set new labels (for nicer tables in the analysis report) and change variable classes.
+                            Italic text can be edited/changed.
+                            On the right, you can create and modify factor/categorical variables as well as resetting the data to the originally imported data.")
+            )
+          ),
+          fluidRow(
+            shiny::column(
+              width = 9,
+              update_variables_ui("vars_update")
+            ),
+            shiny::column(
+              width = 3,
+              shiny::actionButton("modal_cut", "Create factor variable"),
+              shiny::tags$br(),
+              shiny::helpText("Create factor/categorical variable from an other value."),
               shiny::tags$br(),
               shiny::tags$br(),
               shiny::actionButton("modal_update", "Reorder factor levels"),
               shiny::tags$br(),
+              shiny::helpText("Reorder the levels of factor/categorical variables."),
               shiny::tags$br(),
-              IDEAFilter::IDEAFilter_ui("data_filter") # ,
+              shiny::tags$br(),
+              shiny::actionButton("data_reset", "Restore original data"),
+              shiny::tags$br(),
+              shiny::helpText("Reset to original imported dataset. Careful! There is no un-doing."),
+              shiny::tags$br() # ,
+              # shiny::tags$br(),
+              # shiny::tags$br(),
+              # IDEAFilter::IDEAFilter_ui("data_filter") # ,
               # shiny::actionButton("save_filter", "Apply the filter")
             )
+            # datamods::update_variables_ui("vars_update")
           )
+        ),
+        bslib::nav_panel(
+          title = "Browser",
+          tags$h3("Browse the provided data"),
+          shiny::tags$p(
+                "Below is a data table with all the modified data provided to browse and understand data."
+                ),
+          shinyWidgets::html_dependency_winbox(),
+          # fluidRow(
+          # column(
+          #   width = 3,
+          #   shiny::uiOutput("filter_vars"),
+          #   shiny::conditionalPanel(
+          #     condition = "(typeof input.filter_vars !== 'undefined' && input.filter_vars.length > 0)",
+          #     datamods::filter_data_ui("filtering", max_height = "500px")
+          #   )
+          # ),
+          # column(
+          #   width = 9,
+          #   DT::DTOutput(outputId = "filtered_table"),
+          #   tags$b("Code dplyr:"),
+          #   verbatimTextOutput(outputId = "filtered_code")
+          # ),
+          # shiny::column(
+          #   width = 8,
+          toastui::datagridOutput(outputId = "table_mod") # ,
+          # shiny::tags$b("Reproducible code:"),
+          # shiny::verbatimTextOutput(outputId = "filtered_code")
+          #   ),
+          #   shiny::column(
+          #     width = 4,
+          #     shiny::actionButton("modal_cut", "Create factor from a variable"),
+          #     shiny::tags$br(),
+          #     shiny::tags$br(),
+          #     shiny::actionButton("modal_update", "Reorder factor levels")#,
+          #     # shiny::tags$br(),
+          #     # shiny::tags$br(),
+          #     # IDEAFilter::IDEAFilter_ui("data_filter") # ,
+          #     # shiny::actionButton("save_filter", "Apply the filter")
+          #   )
+          # )
         )
 
 
@@ -170,7 +242,7 @@ ui_elements <- list(
   #########
   ##############################################################################
   "analyze" =
-    # bslib::nav_panel_hidden(
+  # bslib::nav_panel_hidden(
     bslib::nav_panel(
       # value = "analyze",
       title = "Analyses",
@@ -181,6 +253,20 @@ ui_elements <- list(
         sidebar = bslib::sidebar(
           shiny::helpText(em("Please specify relevant settings for your data, and press 'Analyse'")),
           shiny::uiOutput("outcome_var"),
+          shiny::radioButtons(
+            inputId = "all",
+            label = "Specify covariables",
+            inline = TRUE, selected = 2,
+            choiceNames = c(
+              "Yes",
+              "No"
+            ),
+            choiceValues = c(1, 2)
+          ),
+          shiny::conditionalPanel(
+            condition = "input.all==1",
+            shiny::uiOutput("include_vars")
+          ),
           shiny::uiOutput("strat_var"),
           shiny::conditionalPanel(
             condition = "input.strat_var!='none'",
@@ -195,20 +281,6 @@ ui_elements <- list(
               )
             ),
             shiny::helpText("Option to perform statistical comparisons between strata in baseline table.")
-          ),
-          shiny::radioButtons(
-            inputId = "all",
-            label = "Specify covariables",
-            inline = TRUE, selected = 2,
-            choiceNames = c(
-              "Yes",
-              "No"
-            ),
-            choiceValues = c(1, 2)
-          ),
-          shiny::conditionalPanel(
-            condition = "input.all==1",
-            shiny::uiOutput("include_vars")
           ),
           shiny::radioButtons(
             inputId = "specify_factors",
@@ -230,8 +302,8 @@ ui_elements <- list(
             icon = shiny::icon("pencil", lib = "glyphicon"),
             label_busy = "Working...",
             icon_busy = fontawesome::fa_i("arrows-rotate",
-                                          class = "fa-spin",
-                                          "aria-hidden" = "true"
+              class = "fa-spin",
+              "aria-hidden" = "true"
             ),
             type = "secondary",
             auto_reset = TRUE
@@ -258,13 +330,29 @@ ui_elements <- list(
           # Button
           shiny::downloadButton(
             outputId = "report",
-            label = "Download",
+            label = "Download report",
             icon = shiny::icon("download")
           ),
-          shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead.")
-          ## https://github.com/quarto-dev/quarto-cli/issues/7151
-          # )
-          # )
+          shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
+          shiny::tags$hr(),
+          shiny::h4("Download data"),
+          shiny::helpText("Choose your favourite output data format to download the modified data."),
+          shiny::selectInput(
+            inputId = "data_type",
+            label = "Data format",
+            selected = NULL,
+            choices = list(
+              "R" = "rds",
+              "stata" = "dta"
+            )
+          ),
+          shiny::br(),
+          # Button
+          shiny::downloadButton(
+            outputId = "data_modified",
+            label = "Download data",
+            icon = shiny::icon("download")
+          )
         ),
         bslib::nav_panel(
           title = "Baseline characteristics",
@@ -303,28 +391,39 @@ dark <- custom_theme(
 # Fonts to consider:
 # https://webdesignerdepot.com/17-open-source-fonts-youll-actually-love/
 
-ui <- bslib::page_fluid(
+ui <- bslib::page_fixed(
+  shiny::tags$style(
+    type = "text/css",
+    # add the name of the tab you want to use as title in data-value
+    shiny::HTML(
+      ".container-fluid > .nav > li >
+                        a[data-value='freesearcheR'] {font-size: 28px}"
+    )
+  ),
   title = "freesearcheR",
   theme = light,
   shiny::useBusyIndicators(),
-  bslib::page_navbar(title = "freesearcheR",
+  bslib::page_navbar(
+    # title = "freesearcheR",
     id = "main_panel",
     # header = shiny::tags$header(shiny::p("Data is only stored temporarily for analysis and deleted immediately afterwards.")),
+    ui_elements$home,
     ui_elements$import,
     ui_elements$overview,
     ui_elements$analyze,
     ui_elements$docs,
     # bslib::nav_spacer(),
     # bslib::nav_item(shinyWidgets::circleButton(inputId = "mode", icon = icon("moon"),status = "primary")),
-    fillable = TRUE,
+    fillable = FALSE,
     footer = shiny::tags$footer(
       style = "background-color: #14131326; padding: 4px; text-align: center; bottom: 0; width: 100%;",
       shiny::p(
         style = "margin: 1",
-        "Data is only stored for analyses and deleted immediately afterwards."),
+        "Data is only stored for analyses and deleted immediately afterwards."
+      ),
       shiny::p(
         style = "margin: 1; color: #888;",
-        "Andreas G Damsbo | AGPLv3 license | ", shiny::tags$a("Source on Github", href = "https://github.com/agdamsbo/freesearcheR/", target="_blank", rel="noopener noreferrer")
+        "Andreas G Damsbo | AGPLv3 license | ", shiny::tags$a("Source on Github", href = "https://github.com/agdamsbo/freesearcheR/", target = "_blank", rel = "noopener noreferrer")
       ),
     )
   )

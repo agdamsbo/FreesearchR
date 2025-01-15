@@ -97,9 +97,9 @@ footer <- tags$p(
 # redcap_browser_app <- teal_init(data = tdm_data_upload)
 
 app <- teal::init(
-  # data=tdm_data_read,
+  data=tdm_data_read,
   # data = tdm_data_upload,
-  data = tdm_redcap_read,
+  # data = tdm_redcap_read,
   filter = filters,
   modules = modules(
     tm_data_table("Data Table"),

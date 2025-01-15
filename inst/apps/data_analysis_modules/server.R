@@ -18,8 +18,10 @@ library(broom.helpers)
 library(easystats)
 library(patchwork)
 library(DHARMa)
-library(datamods)
+library(apexcharter)
 library(toastui)
+library(datamods)
+library(data.table)
 library(IDEAFilter)
 library(shinyWidgets)
 library(DT)
@@ -39,9 +41,9 @@ server <- function(input, output, session) {
   ## everything else.
   files.to.keep <- list.files("www/")
 
-  output$docs_file <- renderUI({
+  output$docs_file <- shiny::renderUI({
     # shiny::includeHTML("www/docs.html")
-    HTML(readLines("www/docs.html"))
+    shiny::HTML(readLines("www/docs.html"))
   })
 
   ##############################################################################
@@ -136,16 +138,34 @@ server <- function(input, output, session) {
     rv$data_original <- from_env$data()
   })
 
+
   ##############################################################################
   #########
   #########  Data modification section
   #########
   ##############################################################################
 
-  #########  Modifications
-
   shiny::observeEvent(rv$data_original, rv$data <- rv$data_original |> default_parsing())
   shiny::observeEvent(input$data_reset, rv$data <- rv$data_original |> default_parsing())
+
+  #########  Overview
+
+  output$tbl_overview <- toastui::renderDatagrid(
+    data_filter() |>
+      overview_vars() |>
+      create_overview_datagrid()|>
+      add_sparkline(
+        column = "vals",
+        color.main = "#2A004E",
+        color.sec = "#C62300"
+      )
+  )
+
+  # data_summary_server(id = "data_summary",
+  #                     data = data_filter())
+
+  #########  Modifications
+
 
   ## Using modified version of the datamods::cut_variable_server function
   ## Further modifications are needed to have cut/bin options based on class of variable
@@ -187,7 +207,8 @@ server <- function(input, output, session) {
     attr(rv$data, "code")
   })
 
-  updated_data <- datamods::update_variables_server(
+  # updated_data <- datamods::update_variables_server(
+    updated_data <- update_variables_server(
     id = "vars_update",
     data = reactive(rv$data),
     return_data_on_init = FALSE
@@ -201,7 +222,7 @@ server <- function(input, output, session) {
     str(rv$data)
   })
 
-  observeEvent(updated_data(), {
+  shiny::observeEvent(updated_data(), {
     rv$data <- updated_data()
   })
 
@@ -308,10 +329,6 @@ server <- function(input, output, session) {
   #     gt::gt()
   # })
 
-  shiny::observeEvent(input$act_start, {
-    bslib::nav_select(id = "main_panel", selected = "Modifications")
-  })
-
   shiny::observeEvent(
     {
       input$load
@@ -326,7 +343,8 @@ server <- function(input, output, session) {
           data <- data_filter() |>
             dplyr::mutate(dplyr::across(dplyr::where(is.character), as.factor)) |>
             REDCapCAST::fct_drop.data.frame() |>
-            factorize(vars = input$factor_vars)
+            factorize(vars = input$factor_vars) |>
+            remove_na_attr()
 
           if (input$strat_var == "none") {
             by.var <- NULL
@@ -479,7 +497,22 @@ server <- function(input, output, session) {
   #   )
   # })
 
+  ##############################################################################
+  #########
+  #########  Page navigation
+  #########
+  ##############################################################################
 
+  shiny::observeEvent(input$act_start, {
+    bslib::nav_select(id = "main_panel", selected = "Modifications")
+  })
+
+
+  ##############################################################################
+  #########
+  #########  Reactivity
+  #########
+  ##############################################################################
 
   output$uploaded <- shiny::reactive({
     if (is.null(rv$ds)) {
@@ -512,6 +545,12 @@ server <- function(input, output, session) {
 
   # shiny::outputOptions(output, "has_input", suspendWhenHidden = FALSE)
 
+  ##############################################################################
+  #########
+  #########  Downloads
+  #########
+  ##############################################################################
+
   # Could be rendered with other tables or should show progress
   # Investigate quarto render problems
   # On temp file handling: https://github.com/quarto-dev/quarto-cli/issues/3992
@@ -532,6 +571,26 @@ server <- function(input, output, session) {
       file.rename(paste0("www/report.", type), file)
     }
   )
+
+  output$data_modified <- downloadHandler(
+    filename = shiny::reactive({
+      paste0("modified_data.", input$data_type)
+    }),
+    content = function(file, type = input$data_type) {
+      if (type == "rds"){
+        readr::write_rds(rv$list$data,file = file)
+      } else {
+        haven::write_dta(as.data.frame(rv$list$data),path = file)
+      }
+
+    }
+  )
+
+  ##############################################################################
+  #########
+  #########  Clearing the session on end
+  #########
+  ##############################################################################
 
   session$onSessionEnded(function() {
     cat("Session Ended\n")

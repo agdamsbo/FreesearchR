@@ -148,7 +148,7 @@ file_export <- function(data, output.format = c("df", "teal", "list"), filename,
       teal_data(),
       {
         assign(name, value |>
-          dplyr::bind_cols() |>
+          dplyr::bind_cols(.name_repair = "unique_quiet") |>
           default_parsing())
       },
       value = data,
@@ -185,8 +185,42 @@ file_export <- function(data, output.format = c("df", "teal", "list"), filename,
 #'   default_parsing() |>
 #'   str()
 default_parsing <- function(data) {
-  data |>
+  name_labels <- lapply(data,\(.x) REDCapCAST::get_attr(.x,attr = "label"))
+
+  out <- data |>
     REDCapCAST::parse_data() |>
     REDCapCAST::as_factor() |>
     REDCapCAST::numchar2fct()
+
+  purrr::map2(out,name_labels,\(.x,.l){
+    if (!(is.na(.l) | .l=="")) {
+      REDCapCAST::set_attr(.x, .l, attr = "label")
+    } else {
+      attr(x = .x, which = "label") <- NULL
+      .x
+    }
+    # REDCapCAST::set_attr(data = .x, label = .l,attr = "label", overwrite = FALSE)
+  }) |> dplyr::bind_cols()
+}
+
+#' Remove NA labels
+#'
+#' @param data data
+#'
+#' @returns data.frame
+#' @export
+#'
+#' @examples
+#' ds <- mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x,label=NA,attr = "label"))
+#' ds |> remove_na_attr() |> str()
+remove_na_attr <- function(data,attr="label"){
+  out <- data |> lapply(\(.x){
+    ls <- REDCapCAST::get_attr(data = .x,attr = attr)
+    if (is.na(ls) | ls == ""){
+      attr(x = .x, which = attr) <- NULL
+    }
+    .x
+  })
+
+  dplyr::bind_cols(out)
 }

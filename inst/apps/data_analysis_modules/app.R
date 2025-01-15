@@ -1,13 +1,13 @@
 
 
 ########
-#### Current file: /Users/au301842/freesearcheR/inst/apps/data_analysis_modules/functions.R
+#### Current file: /Users/au301842/freesearcheR/inst/apps/data_analysis_modules/functions.R 
 ########
 
 
 
 ########
-#### Current file: R//baseline_table.R
+#### Current file: R//baseline_table.R 
 ########
 
 
@@ -35,7 +35,7 @@ baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, 
 
 
 ########
-#### Current file: R//cut-variable-dates.R
+#### Current file: R//cut-variable-dates.R 
 ########
 
 library(datamods)
@@ -677,7 +677,250 @@ plot_histogram <- function(data, column, bins = 30, breaks = NULL, color = "#112
 
 
 ########
-#### Current file: R//file-import-module.R
+#### Current file: R//data-summary.R 
+########
+
+data_summary_ui <- function(id) {
+  ns <- NS(id)
+
+  toastui::datagridOutput(outputId = "tbl_summary")
+}
+
+
+data_summary_server <- function(id,
+                                data) {
+  shiny::moduleServer(
+    id = id,
+    module = function(input, output, session) {
+      ns <- session$ns
+
+      data_r <- shiny::reactive({
+        if (shiny::is.reactive(data)) {
+          data()
+        } else {
+          data
+        }
+      })
+
+      output$tbl_summary <- shiny::reactive({
+        toastui::renderDatagrid(
+        data_r() |>
+          overview_vars() |>
+          create_overview_datagrid() |>
+          add_sparkline(
+            column = "vals"
+          )
+      )
+      })
+    }
+  )
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+add_sparkline <- function(grid, column = "vals", color.main = "#2a8484", color.sec = "#84EF84") {
+  out <- toastui::grid_sparkline(
+    grid = grid,
+    column = column,
+    renderer = function(data) {
+      data_cl <- class(data)
+      if (identical(data_cl, "factor")) {
+        type <- "column"
+        s <- summary(data)
+        ds <- data.frame(x = names(s), y = s)
+        horizontal <- FALSE
+      } else if (any(c("numeric", "integer") %in% data_cl)) {
+        if (length(unique(data)) == length(data)) {
+          type <- "line"
+          ds <- data.frame(x = NA, y = NA)
+          horizontal <- FALSE
+        } else {
+          type <- "box"
+          ds <- data.frame(x = 1, y = data)
+          horizontal <- TRUE
+        }
+      } else if (any(c("Date", "POSIXct", "POSIXt", "hms", "difftime") %in% data_cl)) {
+        type <- "line"
+        ds <- data.frame(x = seq_along(data), y = data)
+        horizontal <- FALSE
+      } else {
+        type <- "line"
+        ds <- data.frame(x = NA, y = NA)
+        horizontal <- FALSE
+      }
+      apexcharter::apex(
+        ds,
+        apexcharter::aes(x, y),
+        type = type,
+        auto_update = TRUE
+      ) |>
+        apexcharter::ax_chart(sparkline = list(enabled = TRUE)) |>
+        apexcharter::ax_plotOptions(
+          boxPlot = apexcharter::boxplot_opts(color.upper = color.sec, color.lower = color.main),
+          bar = apexcharter::bar_opts(horizontal = horizontal)
+        ) |>
+        apexcharter::ax_colors(
+          c(color.main, color.sec)
+        )
+    }
+  )
+
+  toastui::grid_columns(
+    grid = out,
+    columns = column,
+    minWidth = 200
+  )
+}
+
+
+
+
+
+
+
+
+
+
+overview_vars <- function(data) {
+  data <- as.data.frame(data)
+
+  dplyr::tibble(
+    class = get_classes(data),
+    name = names(data),
+    n_missing = unname(colSums(is.na(data))),
+    p_complete = 1 - n_missing / nrow(data),
+    n_unique = get_n_unique(data),
+    vals = as.list(data)
+  )
+}
+
+
+
+
+
+
+
+
+
+
+
+
+create_overview_datagrid <- function(data) {
+  # browser()
+  gridTheme <- getOption("datagrid.theme")
+  if (length(gridTheme) < 1) {
+    datamods:::apply_grid_theme()
+  }
+  on.exit(toastui::reset_grid_theme())
+
+  col.names <- names(data)
+
+  std_names <- c(
+    "Name" = "name",
+    "Class" = "class",
+    "Missing" = "n_missing",
+    "Complete" = "p_complete",
+    "Unique" = "n_unique",
+    "Plot" = "vals"
+  )
+
+  headers <- lapply(col.names, \(.x){
+    if (.x %in% std_names) {
+      names(std_names)[match(.x, std_names)]
+    } else {
+      .x
+    }
+  }) |> unlist()
+
+  grid <- toastui::datagrid(
+    data = data,
+    theme = "default",
+    colwidths = "auto"
+  )
+
+  grid <- toastui::grid_columns(
+    grid = grid,
+    columns = col.names,
+    header = headers,
+    resizable = TRUE,
+    width = 80
+  )
+
+  grid <- add_class_icon(
+    grid = grid,
+    column = "class"
+  )
+
+  # grid <- toastui::grid_format(
+  #   grid = grid,
+  #   "p_complete",
+  #   formatter = toastui::JS("function(obj) {return (obj.value*100).toFixed(0) + '%';}")
+  # )
+
+  return(grid)
+}
+
+
+
+
+
+
+
+
+
+
+add_class_icon <- function(grid, column = "class") {
+  out <- toastui::grid_format(
+    grid = grid,
+    column = column,
+    formatter = function(value) {
+      lapply(
+        X = value,
+        FUN = function(x) {
+          if (identical(x, "numeric")) {
+            shiny::icon("chart-line")
+          } else if (identical(x, "factor")) {
+            shiny::icon("chart-column")
+          } else if (identical(x, "integer")) {
+            shiny::icon("arrow-down-1-9")
+          } else if (identical(x, "character")) {
+            shiny::icon("arrow-down-a-z")
+          } else if (any(c("Date", "POSIXct", "POSIXt") %in% x)) {
+            shiny::icon("calendar-days")
+          } else if ("hms" %in% x) {
+            shiny::icon("clock")
+          } else {
+            shiny::icon("table")
+          }
+        }
+      )
+    }
+  )
+
+  toastui::grid_columns(
+    grid = out,
+    header = NULL,
+    columns = column,
+    width = 60
+  )
+}
+
+
+########
+#### Current file: R//file-import-module.R 
 ########
 
 
@@ -687,128 +930,128 @@ plot_histogram <- function(data, column, bins = 30, breaks = NULL, color = "#112
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+m_datafileUI <- function(id) {
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    shiny::fileInput(
+      inputId = ns("file"),
+      label = "Upload a file",
+      multiple = FALSE,
+      accept = c(
+        ".csv",
+        ".xlsx",
+        ".xls",
+        ".dta",
+        ".ods",
+        ".rds"
+      )
+    ),
+    shiny::h4("Parameter specifications"),
+    shiny::helpText(shiny::em("Select the desired variables and press 'Submit'")),
+    shiny::uiOutput(ns("include_vars")),
+    DT::DTOutput(ns("data_input")),
+    shiny::actionButton(ns("submit"), "Submit")
+  )
+}
+
+m_datafileServer <- function(id, output.format = "df") {
+  shiny::moduleServer(id, function(input, output, session, ...) {
+    ns <- shiny::NS(id)
+    ds <- shiny::reactive({
+      REDCapCAST::read_input(input$file$datapath) |> REDCapCAST::parse_data()
+    })
+
+    output$include_vars <- shiny::renderUI({
+      shiny::req(input$file)
+      shiny::selectizeInput(
+        inputId = ns("include_vars"),
+        selected = NULL,
+        label = "Covariables to include",
+        choices = colnames(ds()),
+        multiple = TRUE
+      )
+    })
+
+    base_vars <- shiny::reactive({
+      if (is.null(input$include_vars)) {
+        out <- colnames(ds())
+      } else {
+        out <- input$include_vars
+      }
+      out
+    })
+
+    output$data_input <-
+      DT::renderDT({
+        shiny::req(input$file)
+        ds()[base_vars()]
+      })
+
+    shiny::eventReactive(input$submit, {
+      # shiny::req(input$file)
+
+      data <- shiny::isolate({
+        ds()[base_vars()]
+      })
+
+      file_export(data,
+        output.format = output.format,
+        tools::file_path_sans_ext(input$file$name)
+      )
+    })
+  })
+}
+
+
+
+
+
+file_app <- function() {
+  ui <- shiny::fluidPage(
+    m_datafileUI("data"),
+    # DT::DTOutput(outputId = "redcap_prev")
+    toastui::datagridOutput2(outputId = "redcap_prev")
+  )
+  server <- function(input, output, session) {
+    m_datafileServer("data", output.format = "list")
+  }
+  shiny::shinyApp(ui, server)
+}
+
+file_app()
+
+tdm_data_upload <- teal::teal_data_module(
+  ui <- function(id) {
+    shiny::fluidPage(
+      m_datafileUI(id)
+    )
+  },
+  server = function(id) {
+    m_datafileServer(id, output.format = "teal")
+  }
+)
+
+tdm_data_read <- teal::teal_data_module(
+  ui <- function(id) {
+    shiny::fluidPage(
+      m_redcap_readUI(id = "redcap")
+    )
+  },
+  server = function(id) {
+    moduleServer(
+      id,
+      function(input, output, session) {
+        ns <- session$ns
+
+        m_redcap_readServer(id = "redcap", output.format = "teal")
+      }
+    )
+  }
+)
 
 
 ########
-#### Current file: R//helpers.R
+#### Current file: R//helpers.R 
 ########
 
 
@@ -961,7 +1204,7 @@ file_export <- function(data, output.format = c("df", "teal", "list"), filename,
       teal_data(),
       {
         assign(name, value |>
-          dplyr::bind_cols() |>
+          dplyr::bind_cols(.name_repair = "unique_quiet") |>
           default_parsing())
       },
       value = data,
@@ -998,15 +1241,49 @@ file_export <- function(data, output.format = c("df", "teal", "list"), filename,
 
 
 default_parsing <- function(data) {
-  data |>
+  name_labels <- lapply(data,\(.x) REDCapCAST::get_attr(.x,attr = "label"))
+
+  out <- data |>
     REDCapCAST::parse_data() |>
     REDCapCAST::as_factor() |>
     REDCapCAST::numchar2fct()
+
+  purrr::map2(out,name_labels,\(.x,.l){
+    if (!(is.na(.l) | .l=="")) {
+      REDCapCAST::set_attr(.x, .l, attr = "label")
+    } else {
+      attr(x = .x, which = "label") <- NULL
+      .x
+    }
+    # REDCapCAST::set_attr(data = .x, label = .l,attr = "label", overwrite = FALSE)
+  }) |> dplyr::bind_cols()
+}
+
+
+
+
+
+
+
+
+
+
+
+remove_na_attr <- function(data,attr="label"){
+  out <- data |> lapply(\(.x){
+    ls <- REDCapCAST::get_attr(data = .x,attr = attr)
+    if (is.na(ls) | ls == ""){
+      attr(x = .x, which = attr) <- NULL
+    }
+    .x
+  })
+
+  dplyr::bind_cols(out)
 }
 
 
 ########
-#### Current file: R//redcap_read_shiny_module.R
+#### Current file: R//redcap_read_shiny_module.R 
 ########
 
 
@@ -1021,8 +1298,8 @@ default_parsing <- function(data) {
 m_redcap_readUI <- function(id, include_title = TRUE) {
   ns <- shiny::NS(id)
 
-  server_ui <- shiny::column(
-    width = 6,
+  server_ui <- shiny::tagList(
+    # width = 6,
     shiny::tags$h4("REDCap server information"),
     shiny::textInput(
       inputId = ns("uri"),
@@ -1038,8 +1315,8 @@ m_redcap_readUI <- function(id, include_title = TRUE) {
 
 
   params_ui <-
-    shiny::column(
-      width = 6,
+    shiny::tagList(
+      # width = 6,
       shiny::tags$h4("Data import parameters"),
       shiny::helpText("Options here will show, when API and uri are typed"),
       shiny::uiOutput(outputId = ns("fields")),
@@ -1074,9 +1351,14 @@ m_redcap_readUI <- function(id, include_title = TRUE) {
 
   shiny::fluidPage(
     if (include_title) shiny::tags$h3("Import data from REDCap"),
-    fluidRow(
+    bslib::layout_columns(
       server_ui,
-      params_ui),
+      params_ui,
+      col_widths = bslib::breakpoints(
+        sm = c(12, 12),
+        md = c(12, 12)
+      )
+    ),
     shiny::column(
       width = 12,
       # shiny::actionButton(inputId = ns("import"), label = "Import"),
@@ -1086,8 +1368,8 @@ m_redcap_readUI <- function(id, include_title = TRUE) {
         icon = shiny::icon("download", lib = "glyphicon"),
         label_busy = "Just a minute...",
         icon_busy = fontawesome::fa_i("arrows-rotate",
-                                      class = "fa-spin",
-                                      "aria-hidden" = "true"
+          class = "fa-spin",
+          "aria-hidden" = "true"
         ),
         type = "primary",
         auto_reset = TRUE
@@ -1205,7 +1487,7 @@ m_redcap_readServer <- function(id, output.format = c("df", "teal", "list")) {
         # browser()
         data.df <- dd()[, c(1, 2, 4, 5, 6, 8)]
         DT::datatable(data.df,
-                      caption = "Subset of data dictionary"
+          caption = "Subset of data dictionary"
         )
       },
       server = TRUE
@@ -1252,8 +1534,8 @@ m_redcap_readServer <- function(id, output.format = c("df", "teal", "list")) {
         REDCapCAST::suffix2label()
 
       out_object <- file_export(redcap_data,
-                                output.format = output.format,
-                                filename = name()
+        output.format = output.format,
+        filename = name()
       )
 
       if (output.format == "list") {
@@ -1281,7 +1563,6 @@ m_redcap_readServer <- function(id, output.format = c("df", "teal", "list")) {
 
 
 tdm_redcap_read <- teal::teal_data_module(
-
   ui <- function(id) {
     shiny::fluidPage(
       m_redcap_readUI(id)
@@ -1316,7 +1597,7 @@ redcap_app <- function() {
     )
   )
   server <- function(input, output, session) {
-    data_val <- shiny::reactiveValues(data=NULL)
+    data_val <- shiny::reactiveValues(data = NULL)
 
     ds <- m_redcap_readServer("data", output.format = "df")
     # output$redcap_prev <- DT::renderDT(
@@ -1339,8 +1620,9 @@ redcap_app <- function() {
     })
 
     filtered_data <- IDEAFilter::IDEAFilter("data_filter",
-                                            data = ds,
-                                            verbose = FALSE)
+      data = ds,
+      verbose = FALSE
+    )
 
     # filtered_data <- shiny::reactive({
     #   IDEAFilter::IDEAFilter("data_filter",
@@ -1376,7 +1658,7 @@ redcap_app <- function() {
 
 
 ########
-#### Current file: R//regression_model.R
+#### Current file: R//regression_model.R 
 ########
 
 
@@ -1452,7 +1734,7 @@ regression_model <- function(data,
         .x
       }
     }) |>
-    dplyr::bind_cols()
+    dplyr::bind_cols(.name_repair = "unique_quiet")
 
   if (is.null(fun)) auto.mode <- TRUE
 
@@ -1586,7 +1868,7 @@ regression_model_uv <- function(data,
 
 
 ########
-#### Current file: R//regression_table.R
+#### Current file: R//regression_table.R 
 ########
 
 
@@ -1734,7 +2016,7 @@ tbl_merge <- function(data) {
 
 
 ########
-#### Current file: R//report.R
+#### Current file: R//report.R 
 ########
 
 
@@ -1821,7 +2103,7 @@ modify_qmd <- function(file, format) {
 
 
 ########
-#### Current file: R//shiny_freesearcheR.R
+#### Current file: R//shiny_freesearcheR.R 
 ########
 
 
@@ -1852,7 +2134,47 @@ shiny_freesearcheR <- function(...) {
 
 
 ########
-#### Current file: R//theme.R
+#### Current file: R//sparkline_h_minimal.R 
+########
+
+# dependencies
+library(apexcharter)
+library(toastui)
+
+spark_data <- mtcars |>
+  (\(.x){
+    dplyr::tibble(
+      name = names(.x),
+      vals = as.list(.x)
+    )
+  })()
+
+ui <- fluidPage(
+  toastui::datagridOutput("tbl")
+)
+
+server <- function(input, output) {
+  output$tbl <- toastui::renderDatagrid(
+    spark_data |>
+      toastui::datagrid() |>
+      toastui::grid_sparkline(
+        column = "vals",
+        renderer = function(data) {
+          apex(data.frame(x = 1, y = data), aes(x, y), type = "box") |>
+            ax_chart(sparkline = list(enabled = TRUE)) |>
+            ax_plotOptions(
+              bar = bar_opts(horizontal=TRUE)
+            )
+        }
+      )
+  )
+}
+
+shinyApp(ui = ui, server = server)
+
+
+########
+#### Current file: R//theme.R 
 ########
 
 
@@ -1893,7 +2215,720 @@ custom_theme <- function(...,
 
 
 ########
-#### Current file: /Users/au301842/freesearcheR/inst/apps/data_analysis_modules/ui.R
+#### Current file: R//update-variables-ext.R 
+########
+
+library(data.table)
+library(rlang)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+update_variables_ui <- function(id, title = TRUE) {
+  ns <- NS(id)
+  if (isTRUE(title)) {
+    title <- htmltools::tags$h4(
+      i18n("Update & select variables"),
+      class = "datamods-title"
+    )
+  }
+  htmltools::tags$div(
+    class = "datamods-update",
+    shinyWidgets::html_dependency_pretty(),
+    title,
+    htmltools::tags$div(
+      style = "min-height: 25px;",
+      htmltools::tags$div(
+        shiny::uiOutput(outputId = ns("data_info"), inline = TRUE),
+        shiny::tagAppendAttributes(
+          shinyWidgets::dropMenu(
+            placement = "bottom-end",
+            shiny::actionButton(
+              inputId = ns("settings"),
+              label = phosphoricons::ph("gear"),
+              class = "pull-right float-right"
+            ),
+            shinyWidgets::textInputIcon(
+              inputId = ns("format"),
+              label = i18n("Date format:"),
+              value = "%Y-%m-%d",
+              icon = list(phosphoricons::ph("clock"))
+            ),
+            shinyWidgets::textInputIcon(
+              inputId = ns("origin"),
+              label = i18n("Date to use as origin to convert date/datetime:"),
+              value = "1970-01-01",
+              icon = list(phosphoricons::ph("calendar"))
+            ),
+            shinyWidgets::textInputIcon(
+              inputId = ns("dec"),
+              label = i18n("Decimal separator:"),
+              value = ".",
+              icon = list("0.00")
+            )
+          ),
+          style = "display: inline;"
+        )
+      ),
+      htmltools::tags$br(),
+      toastui::datagridOutput(outputId = ns("table"))
+    ),
+    htmltools::tags$br(),
+    htmltools::tags$div(
+      id = ns("update-placeholder"),
+      shinyWidgets::alert(
+        id = ns("update-result"),
+        status = "info",
+        phosphoricons::ph("info"),
+        datamods::i18n(paste(
+          "Select, rename and convert variables in table above,",
+          "then apply changes by clicking button below."
+        ))
+      )
+    ),
+    shiny::actionButton(
+      inputId = ns("validate"),
+      label = htmltools::tagList(
+        phosphoricons::ph("arrow-circle-right", title = i18n("Apply changes")),
+        datamods::i18n("Apply changes")
+      ),
+      width = "100%"
+    )
+  )
+}
+
+
+
+
+
+
+
+
+
+
+
+update_variables_server <- function(id,
+                                    data,
+                                    height = NULL,
+                                    return_data_on_init = FALSE,
+                                    try_silent = FALSE) {
+  shiny::moduleServer(
+    id = id,
+    module = function(input, output, session) {
+      ns <- session$ns
+      updated_data <- shiny::reactiveValues(x = NULL)
+
+      data_r <- shiny::reactive({
+        if (shiny::is.reactive(data)) {
+          data()
+        } else {
+          data
+        }
+      })
+
+      output$data_info <- shiny::renderUI({
+        shiny::req(data_r())
+        data <- data_r()
+        sprintf(i18n("Data has %s observations and %s variables."), nrow(data), ncol(data))
+      })
+
+      variables_r <- shiny::reactive({
+        shiny::validate(
+          shiny::need(data(), i18n("No data to display."))
+        )
+        data <- data_r()
+        if (isTRUE(return_data_on_init)) {
+          updated_data$x <- data
+        } else {
+          updated_data$x <- NULL
+        }
+        summary_vars(data)
+      })
+
+      output$table <- toastui::renderDatagrid({
+        shiny::req(variables_r())
+        # browser()
+        variables <- variables_r()
+
+        # variables <- variables |>
+        #   dplyr::mutate(vals=as.list(dplyr::as_tibble(data_r())))
+
+        # variables <- variables |>
+        #   dplyr::mutate(n_id=seq_len(nrow(variables)))
+
+        update_variables_datagrid(
+          variables,
+          height = height,
+          selectionId = ns("row_selected"),
+          buttonId = "validate"
+        )
+      })
+
+      shiny::observeEvent(input$validate,
+        {
+          updated_data$list_rename <- NULL
+          updated_data$list_select <- NULL
+          updated_data$list_mutate <- NULL
+          updated_data$list_relabel <- NULL
+          data <- data_r()
+          new_selections <- input$row_selected
+          if (length(new_selections) < 1) {
+            new_selections <- seq_along(data)
+          }
+          # browser()
+          data_inputs <- data.table::as.data.table(input$table_data)
+          data.table::setorderv(data_inputs, "rowKey")
+
+          old_names <- data_inputs$name
+          new_names <- data_inputs$name_toset
+          new_names[new_names == "New name"] <- NA
+          new_names[is.na(new_names)] <- old_names[is.na(new_names)]
+          new_names[new_names == ""] <- old_names[new_names == ""]
+
+          old_label <- data_inputs$label
+          new_label <- data_inputs$label_toset
+          new_label[new_label == "New label"] <- ""
+          new_label[is.na(new_label)] <- old_label[is.na(new_label)]
+          new_label[new_label == ""] <- old_label[new_label == ""]
+
+          new_classes <- data_inputs$class_toset
+          new_classes[new_classes == "Select"] <- NA
+
+          # browser()
+          data_sv <- variables_r()
+          vars_to_change <- get_vars_to_convert(data_sv, setNames(as.list(new_classes), old_names))
+
+          res_update <- try(
+            {
+              # convert
+              if (nrow(vars_to_change) > 0) {
+                data <- convert_to(
+                  data = data,
+                  variable = vars_to_change$name,
+                  new_class = vars_to_change$class_to_set,
+                  origin = input$origin,
+                  format = input$format,
+                  dec = input$dec
+                )
+              }
+              list_mutate <- attr(data, "code_03_convert")
+
+              # rename
+              list_rename <- setNames(
+                as.list(old_names),
+                unlist(new_names, use.names = FALSE)
+              )
+              list_rename <- list_rename[names(list_rename) != unlist(list_rename, use.names = FALSE)]
+              names(data) <- unlist(new_names, use.names = FALSE)
+
+              # relabel
+              list_relabel <- as.list(new_label)
+              data <- purrr::map2(
+                data, list_relabel,
+                \(.data, .label){
+                  if (!(is.na(.label) | .label == "")) {
+                    REDCapCAST::set_attr(.data, .label, attr = "label")
+                  } else {
+                    attr(x = .data, which = "label") <- NULL
+                    .data
+                  }
+                }
+              ) |> dplyr::bind_cols(.name_repair = "unique_quiet")
+
+              # select
+              list_select <- setdiff(names(data), names(data)[new_selections])
+              data <- data[, new_selections, drop = FALSE]
+            },
+            silent = try_silent
+          )
+
+          if (inherits(res_update, "try-error")) {
+            datamods:::insert_error(selector = "update")
+          } else {
+            datamods:::insert_alert(
+              selector = ns("update"),
+              status = "success",
+              tags$b(phosphoricons::ph("check"), datamods::i18n("Data successfully updated!"))
+            )
+            updated_data$x <- data
+            updated_data$list_rename <- list_rename
+            updated_data$list_select <- list_select
+            updated_data$list_mutate <- list_mutate
+            updated_data$list_relabel <- list_relabel
+          }
+        },
+        ignoreNULL = TRUE,
+        ignoreInit = TRUE
+      )
+
+      return(shiny::reactive({
+        data <- updated_data$x
+        code <- list()
+        if (!is.null(data) && shiny::isTruthy(updated_data$list_mutate) && length(updated_data$list_mutate) > 0) {
+          code <- c(code, list(rlang::call2("mutate", !!!updated_data$list_mutate)))
+        }
+        if (!is.null(data) && shiny::isTruthy(updated_data$list_rename) && length(updated_data$list_rename) > 0) {
+          code <- c(code, list(rlang::call2("rename", !!!updated_data$list_rename)))
+        }
+        if (!is.null(data) && shiny::isTruthy(updated_data$list_select) && length(updated_data$list_select) > 0) {
+          code <- c(code, list(rlang::expr(select(-any_of(c(!!!updated_data$list_select))))))
+        }
+        if (!is.null(data) && shiny::isTruthy(updated_data$list_relabel) && length(updated_data$list_relabel) > 0) {
+          code <- c(code, list(rlang::call2("purrr::map2(list_relabel,
+                                                       function(.data,.label){
+                                                         REDCapCAST::set_attr(.data,.label,attr = 'label')
+                                                       }) |> dplyr::bind_cols(.name_repair = 'unique_quiet')")))
+        }
+        if (length(code) > 0) {
+          attr(data, "code") <- Reduce(
+            f = function(x, y) rlang::expr(!!x %>% !!y),
+            x = code
+          )
+        }
+        return(data)
+      }))
+    }
+  )
+}
+
+
+
+
+
+
+# utils -------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+get_classes <- function(data) {
+  classes <- lapply(
+    X = data,
+    FUN = function(x) {
+      paste(class(x), collapse = ", ")
+    }
+  )
+  unlist(classes, use.names = FALSE)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+get_n_unique <- function(data) {
+  u <- lapply(data, FUN = function(x) {
+    if (is.atomic(x)) {
+      data.table::uniqueN(x)
+    } else {
+      NA_integer_
+    }
+  })
+  unlist(u, use.names = FALSE)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+pad0 <- function(x) {
+  NAs <- which(is.na(x))
+  x <- formatC(x, width = max(nchar(as.character(x)), na.rm = TRUE), flag = "0")
+  x[NAs] <- NA
+  x
+}
+
+
+
+
+
+
+
+
+
+
+
+
+summary_vars <- function(data) {
+  data <- as.data.frame(data)
+  datsum <- dplyr::tibble(
+    name = names(data),
+    label = lapply(data, \(.x) REDCapCAST::get_attr(.x, "label")) |> unlist(),
+    class = get_classes(data),
+    # n_missing = unname(colSums(is.na(data))),
+    # p_complete = 1 - n_missing / nrow(data),
+    n_unique = get_n_unique(data)
+  )
+
+  datsum
+}
+
+add_var_toset <- function(data, var_name, default = "") {
+  datanames <- names(data)
+  datanames <- append(
+    x = datanames,
+    values = paste0(var_name, "_toset"),
+    after = which(datanames == var_name)
+  )
+  data[[paste0(var_name, "_toset")]] <- default
+  data[, datanames]
+}
+
+
+
+
+
+
+
+
+update_variables_datagrid <- function(data, height = NULL, selectionId = NULL, buttonId = NULL) {
+  # browser()
+  data <- add_var_toset(data, "name", "New name")
+  data <- add_var_toset(data, "class", "Select")
+  data <- add_var_toset(data, "label", "New label")
+
+  gridTheme <- getOption("datagrid.theme")
+  if (length(gridTheme) < 1) {
+    datamods:::apply_grid_theme()
+  }
+  on.exit(toastui::reset_grid_theme())
+
+  col.names <- names(data)
+
+  std_names <- c(
+    "name", "name_toset", "label", "label_toset", "class", "class_toset", "n_missing", "p_complete", "n_unique"
+  ) |>
+    setNames(c(
+      "Name", "New name", "Label", "New label", "Class", "New class", "Missing", "Complete", "Unique"
+    ))
+
+  headers <- lapply(col.names, \(.x){
+    if (.x %in% std_names) {
+      names(std_names)[match(.x, std_names)]
+    } else {
+      .x
+    }
+  }) |> unlist()
+
+  grid <- toastui::datagrid(
+    data = data,
+    theme = "default",
+    colwidths = NULL
+  )
+  grid <- toastui::grid_columns(
+    grid = grid,
+    columns = col.names,
+    header = headers,
+    minWidth = 100
+  )
+
+  # grid <- toastui::grid_format(
+  #   grid = grid,
+  #   "p_complete",
+  #   formatter = toastui::JS("function(obj) {return (obj.value*100).toFixed(0) + '%';}")
+  # )
+  grid <- toastui::grid_style_column(
+    grid = grid,
+    column = "name_toset",
+    fontStyle = "italic"
+  )
+  grid <- toastui::grid_style_column(
+    grid = grid,
+    column = "label_toset",
+    fontStyle = "italic"
+  )
+  grid <- toastui::grid_style_column(
+    grid = grid,
+    column = "class_toset",
+    fontStyle = "italic"
+  )
+
+  # grid <- toastui::grid_columns(
+  #   grid = grid,
+  #   columns = "name_toset",
+  #   editor = list(type = "text"),
+  #   validation = toastui::validateOpts()
+  # )
+  #
+  # grid <- toastui::grid_columns(
+  #   grid = grid,
+  #   columns = "label_toset",
+  #   editor = list(type = "text"),
+  #   validation = toastui::validateOpts()
+  # )
+  #
+  # grid <- toastui::grid_columns(
+  #   grid = grid,
+  #   columns = "class_toset",
+  #   editor = list(
+  #     type = "radio",
+  #     options = list(
+  #       instantApply = TRUE,
+  #       listItems = lapply(
+  #         X = c("Select", "character", "factor", "numeric", "integer", "date", "datetime", "hms"),
+  #         FUN = function(x) {
+  #           list(text = x, value = x)
+  #         }
+  #       )
+  #     )
+  #   ),
+  #   validation = toastui::validateOpts()
+  # )
+
+  grid <- toastui::grid_editor(
+    grid = grid,
+    column = "name_toset",
+    type = "text"
+  )
+  grid <- toastui::grid_editor(
+    grid = grid,
+    column = "label_toset",
+    type = "text"
+  )
+  grid <- toastui::grid_editor(
+    grid = grid,
+    column = "class_toset",
+    type = "select",
+    choices = c("Select new class", "character", "factor", "numeric", "integer", "date", "datetime", "hms")
+  )
+  grid <- toastui::grid_editor_opts(
+    grid = grid,
+    editingEvent = "click",
+    actionButtonId = NULL,
+    session = NULL
+  )
+  grid <- toastui::grid_selection_row(
+    grid = grid,
+    inputId = selectionId,
+    type = "checkbox",
+    return = "index"
+  )
+
+  return(grid)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+convert_to <- function(data,
+                       variable,
+                       new_class = c("character", "factor", "numeric", "integer", "date", "datetime", "hms"),
+                       ...) {
+  new_class <- match.arg(new_class, several.ok = TRUE)
+  stopifnot(length(new_class) == length(variable))
+  args <- list(...)
+  if (length(variable) > 1) {
+    for (i in seq_along(variable)) {
+      data <- convert_to(data, variable[i], new_class[i], ...)
+    }
+    return(data)
+  }
+  if (identical(new_class, "character")) {
+    data[[variable]] <- as.character(x = data[[variable]], ...)
+    attr(data, "code_03_convert") <- c(
+      attr(data, "code_03_convert"),
+      setNames(list(expr(as.character(!!sym(variable)))), variable)
+    )
+  } else if (identical(new_class, "factor")) {
+    data[[variable]] <- as.factor(x = data[[variable]])
+    attr(data, "code_03_convert") <- c(
+      attr(data, "code_03_convert"),
+      setNames(list(expr(as.factor(!!sym(variable)))), variable)
+    )
+  } else if (identical(new_class, "numeric")) {
+    data[[variable]] <- as.numeric(type.convert(data[[variable]], as.is = TRUE, ...))
+    attr(data, "code_03_convert") <- c(
+      attr(data, "code_03_convert"),
+      setNames(list(expr(as.numeric(!!sym(variable)))), variable)
+    )
+  } else if (identical(new_class, "integer")) {
+    data[[variable]] <- as.integer(x = data[[variable]], ...)
+    attr(data, "code_03_convert") <- c(
+      attr(data, "code_03_convert"),
+      setNames(list(expr(as.integer(!!sym(variable)))), variable)
+    )
+  } else if (identical(new_class, "date")) {
+    data[[variable]] <- as.Date(x = data[[variable]], ...)
+    attr(data, "code_03_convert") <- c(
+      attr(data, "code_03_convert"),
+      setNames(list(expr(as.Date(!!sym(variable), origin = !!args$origin))), variable)
+    )
+  } else if (identical(new_class, "datetime")) {
+    data[[variable]] <- as.POSIXct(x = data[[variable]], ...)
+    attr(data, "code_03_convert") <- c(
+      attr(data, "code_03_convert"),
+      setNames(list(expr(as.POSIXct(!!sym(variable)))), variable)
+    )
+  } else if (identical(new_class, "hms")) {
+    data[[variable]] <- hms::as_hms(x = data[[variable]])
+    attr(data, "code_03_convert") <- c(
+      attr(data, "code_03_convert"),
+      setNames(list(expr(hms::as_hms(!!sym(variable)))), variable)
+    )
+  }
+  return(data)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+get_vars_to_convert <- function(vars, classes_input) {
+  vars <- data.table::as.data.table(vars)
+  classes_input <- data.table::data.table(
+    name = names(classes_input),
+    class_to_set = unlist(classes_input, use.names = FALSE),
+    stringsAsFactors = FALSE
+  )
+  classes_input <- classes_input[!is.na(class_to_set) & class_to_set != ""]
+  classes_df <- merge(x = vars, y = classes_input, by = "name")
+  classes_df <- classes_df[!is.na(class_to_set)]
+  classes_df[class != class_to_set]
+}
+
+
+
+
+########
+#### Current file: /Users/au301842/freesearcheR/inst/apps/data_analysis_modules/ui.R 
 ########
 
 # ns <- NS(id)
@@ -1901,75 +2936,76 @@ custom_theme <- function(...,
 ui_elements <- list(
   ##############################################################################
   #########
+  #########  Home panel
+  #########
+  ##############################################################################
+  "home" = bslib::nav_panel(
+    title = "freesearcheR",
+    shiny::markdown(readLines("www/intro.md")),
+    icon = shiny::icon("home")
+  ),
+  ##############################################################################
+  #########
   #########  Import panel
   #########
   ##############################################################################
   "import" = bslib::nav_panel(
     title = "Import",
-    shiny::fluidRow(
-      column(
-        width = 6,
-        shiny::h4("Choose your data source"),
-        # shiny::conditionalPanel(
-        #   condition = "output.has_input=='yes'",
-        #   # Input: Select a file ----
-        #   shiny::helpText("Analyses are performed on provided data")
+    shiny::tagList(
+      shiny::h4("Choose your data source"),
+      # shiny::conditionalPanel(
+      #   condition = "output.has_input=='yes'",
+      #   # Input: Select a file ----
+      #   shiny::helpText("Analyses are performed on provided data")
+      # ),
+      # shiny::conditionalPanel(
+      #   condition = "output.has_input=='no'",
+      # Input: Select a file ----
+      shinyWidgets::radioGroupButtons(
+        inputId = "source",
+        selected = "env",
+        # label = "Choice: ",
+        choices = c(
+          "File upload" = "file",
+          "REDCap server" = "redcap",
+          "Local data" = "env"
+        ),
+        # checkIcon = list(
+        #   yes = icon("square-check"),
+        #   no = icon("square")
         # ),
-        # shiny::conditionalPanel(
-        #   condition = "output.has_input=='no'",
-        # Input: Select a file ----
-        shinyWidgets::radioGroupButtons(
-          inputId = "source",
-          # label = "Choice: ",
-          choices = c(
-            "File upload" = "file",
-            "REDCap server" = "redcap",
-            "Local data" = "env"
-          ),
-          # checkIcon = list(
-          #   yes = icon("square-check"),
-          #   no = icon("square")
-          # ),
-          width = "100%"
-        ),
-        shiny::conditionalPanel(
-          condition = "input.source=='file'",
-          datamods::import_file_ui("file_import",
-            title = "Choose a datafile to upload",
-            file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat", ".sav", ".ods", ".dta")
-          )
-        ),
-        shiny::conditionalPanel(
-          condition = "input.source=='redcap'",
-          m_redcap_readUI("redcap_import")
-        ),
-        shiny::conditionalPanel(
-          condition = "input.source=='env'",
-          import_globalenv_ui(id = "env", title = NULL)
-        )
-
-
-        # )
+        width = "100%"
       ),
-      column(
-        width = 6,
-        shiny::markdown(readLines("www/intro.md"))
-      )
-    ),
-    shiny::conditionalPanel(
-      condition = "input.source=='redcap'",
-      DT::DTOutput(outputId = "redcap_prev")
-    ),
-    shiny::br(),
-    shiny::actionButton(
-      inputId = "act_start",
-      label = "Start",
-      width = "100%",
-      icon = shiny::icon("play")
-    ),
-    shiny::helpText('After importing, hit "Start" or navigate to the desired tab.'),
-    shiny::br(),
-    shiny::br()
+      shiny::conditionalPanel(
+        condition = "input.source=='file'",
+        datamods::import_file_ui("file_import",
+          title = "Choose a datafile to upload",
+          file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat", ".sav", ".ods", ".dta")
+        )
+      ),
+      shiny::conditionalPanel(
+        condition = "input.source=='redcap'",
+        m_redcap_readUI("redcap_import")
+      ),
+      shiny::conditionalPanel(
+        condition = "input.source=='env'",
+        import_globalenv_ui(id = "env", title = NULL)
+      ),
+      shiny::conditionalPanel(
+        condition = "input.source=='redcap'",
+        DT::DTOutput(outputId = "redcap_prev")
+      ),
+      shiny::br(),
+      shiny::actionButton(
+        inputId = "act_start",
+        label = "Start",
+        width = "100%",
+        icon = shiny::icon("play")
+      ),
+      shiny::helpText('After importing, hit "Start" or navigate to the desired tab.'),
+      shiny::br(),
+      shiny::br()
+    )
   ),
   ##############################################################################
   #########
@@ -1977,47 +3013,24 @@ ui_elements <- list(
   #########
   ##############################################################################
   "overview" =
-    # bslib::nav_panel_hidden(
+  # bslib::nav_panel_hidden(
     bslib::nav_panel(
       # value = "overview",
-      title = "Modifications",
+      title = "Data",
       bslib::navset_bar(
         fillable = TRUE,
-        # bslib::nav_panel(
-        #   title = "Edit",
-        #   datamods::edit_data_ui(id = "edit_data")
-        # ),
-        # bslib::nav_panel(
-        #   title = "Overview",
-        #   DT::DTOutput(outputId = "table")
-        # ),
         bslib::nav_panel(
-          title = "Rename and select",
-          tags$h3("Select, rename and convert variables"),
+          title = "Summary & filter",
+          tags$h3("Data summary and filtering"),
           fluidRow(
-            column(
-              width = 6,
-              # radioButtons(),
-              shiny::actionButton("data_reset", "Restore original data"),
-              shiny::tags$br(),
-              shiny::helpText("Reset to original imported dataset"),
-              shiny::tags$br(),
-              datamods::update_variables_ui("vars_update")
-            ),
-            column(
-              width = 6,
-              tags$b("Original data:"),
-              # verbatimTextOutput("original"),
-              verbatimTextOutput("original_str"),
-              tags$b("Modified data:"),
-              # verbatimTextOutput("modified"),
-              verbatimTextOutput("modified_str")
+            shiny::column(
+              width = 9,
+              shiny::tags$p(
+              "Below is a short summary table of the provided data.
+              On the right hand side you have the option to create filters.
+              At the bottom you'll find a raw overview of the original vs the modified data.")
             )
-          )
-        ),
-        bslib::nav_panel(
-          title = "Filter and modify",
-          shinyWidgets::html_dependency_winbox(),
+          ),
           fluidRow(
             # column(
             #   width = 3,
@@ -2034,23 +3047,117 @@ ui_elements <- list(
             #   verbatimTextOutput(outputId = "filtered_code")
             # ),
             shiny::column(
-              width = 8,
-              toastui::datagridOutput(outputId = "table_mod"),
+              width = 9,
+              toastui::datagridOutput(outputId = "tbl_overview"),
+              # data_summary_ui(id = "data_summary"),
               shiny::tags$b("Reproducible code:"),
               shiny::verbatimTextOutput(outputId = "filtered_code")
             ),
             shiny::column(
-              width = 4,
-              shiny::actionButton("modal_cut", "Create factor from a variable"),
+              width = 3,
+              IDEAFilter::IDEAFilter_ui("data_filter") # ,
+              # shiny::actionButton("save_filter", "Apply the filter")
+            )
+          ),
+          fluidRow(
+            column(
+              width = 6,
+              tags$b("Original data:"),
+              # verbatimTextOutput("original"),
+              verbatimTextOutput("original_str")
+            ),
+            column(
+              width = 6,
+              tags$b("Modified data:"),
+              # verbatimTextOutput("modified"),
+              verbatimTextOutput("modified_str")
+            )
+          )
+        ),
+        # bslib::nav_panel(
+        #   title = "Overview",
+        #   DT::DTOutput(outputId = "table")
+        # ),
+        bslib::nav_panel(
+          title = "Modify",
+          tags$h3("Subset, rename and convert variables"),
+          fluidRow(
+            shiny::column(
+              width = 9,
+              shiny::tags$p("Below, you can subset the data (by not selecting the variables to exclude on applying changes), rename variables, set new labels (for nicer tables in the analysis report) and change variable classes.
+                            Italic text can be edited/changed.
+                            On the right, you can create and modify factor/categorical variables as well as resetting the data to the originally imported data.")
+            )
+          ),
+          fluidRow(
+            shiny::column(
+              width = 9,
+              update_variables_ui("vars_update")
+            ),
+            shiny::column(
+              width = 3,
+              shiny::actionButton("modal_cut", "Create factor variable"),
+              shiny::tags$br(),
+              shiny::helpText("Create factor/categorical variable from an other value."),
               shiny::tags$br(),
               shiny::tags$br(),
               shiny::actionButton("modal_update", "Reorder factor levels"),
               shiny::tags$br(),
+              shiny::helpText("Reorder the levels of factor/categorical variables."),
               shiny::tags$br(),
-              IDEAFilter::IDEAFilter_ui("data_filter") # ,
+              shiny::tags$br(),
+              shiny::actionButton("data_reset", "Restore original data"),
+              shiny::tags$br(),
+              shiny::helpText("Reset to original imported dataset. Careful! There is no un-doing."),
+              shiny::tags$br() # ,
+              # shiny::tags$br(),
+              # shiny::tags$br(),
+              # IDEAFilter::IDEAFilter_ui("data_filter") # ,
               # shiny::actionButton("save_filter", "Apply the filter")
             )
+            # datamods::update_variables_ui("vars_update")
           )
+        ),
+        bslib::nav_panel(
+          title = "Browser",
+          tags$h3("Browse the provided data"),
+          shiny::tags$p(
+                "Below is a data table with all the modified data provided to browse and understand data."
+                ),
+          shinyWidgets::html_dependency_winbox(),
+          # fluidRow(
+          # column(
+          #   width = 3,
+          #   shiny::uiOutput("filter_vars"),
+          #   shiny::conditionalPanel(
+          #     condition = "(typeof input.filter_vars !== 'undefined' && input.filter_vars.length > 0)",
+          #     datamods::filter_data_ui("filtering", max_height = "500px")
+          #   )
+          # ),
+          # column(
+          #   width = 9,
+          #   DT::DTOutput(outputId = "filtered_table"),
+          #   tags$b("Code dplyr:"),
+          #   verbatimTextOutput(outputId = "filtered_code")
+          # ),
+          # shiny::column(
+          #   width = 8,
+          toastui::datagridOutput(outputId = "table_mod") # ,
+          # shiny::tags$b("Reproducible code:"),
+          # shiny::verbatimTextOutput(outputId = "filtered_code")
+          #   ),
+          #   shiny::column(
+          #     width = 4,
+          #     shiny::actionButton("modal_cut", "Create factor from a variable"),
+          #     shiny::tags$br(),
+          #     shiny::tags$br(),
+          #     shiny::actionButton("modal_update", "Reorder factor levels")#,
+          #     # shiny::tags$br(),
+          #     # shiny::tags$br(),
+          #     # IDEAFilter::IDEAFilter_ui("data_filter") # ,
+          #     # shiny::actionButton("save_filter", "Apply the filter")
+          #   )
+          # )
         )
 
 
@@ -2068,7 +3175,7 @@ ui_elements <- list(
   #########
   ##############################################################################
   "analyze" =
-    # bslib::nav_panel_hidden(
+  # bslib::nav_panel_hidden(
     bslib::nav_panel(
       # value = "analyze",
       title = "Analyses",
@@ -2079,6 +3186,20 @@ ui_elements <- list(
         sidebar = bslib::sidebar(
           shiny::helpText(em("Please specify relevant settings for your data, and press 'Analyse'")),
           shiny::uiOutput("outcome_var"),
+          shiny::radioButtons(
+            inputId = "all",
+            label = "Specify covariables",
+            inline = TRUE, selected = 2,
+            choiceNames = c(
+              "Yes",
+              "No"
+            ),
+            choiceValues = c(1, 2)
+          ),
+          shiny::conditionalPanel(
+            condition = "input.all==1",
+            shiny::uiOutput("include_vars")
+          ),
           shiny::uiOutput("strat_var"),
           shiny::conditionalPanel(
             condition = "input.strat_var!='none'",
@@ -2093,20 +3214,6 @@ ui_elements <- list(
               )
             ),
             shiny::helpText("Option to perform statistical comparisons between strata in baseline table.")
-          ),
-          shiny::radioButtons(
-            inputId = "all",
-            label = "Specify covariables",
-            inline = TRUE, selected = 2,
-            choiceNames = c(
-              "Yes",
-              "No"
-            ),
-            choiceValues = c(1, 2)
-          ),
-          shiny::conditionalPanel(
-            condition = "input.all==1",
-            shiny::uiOutput("include_vars")
           ),
           shiny::radioButtons(
             inputId = "specify_factors",
@@ -2128,8 +3235,8 @@ ui_elements <- list(
             icon = shiny::icon("pencil", lib = "glyphicon"),
             label_busy = "Working...",
             icon_busy = fontawesome::fa_i("arrows-rotate",
-                                          class = "fa-spin",
-                                          "aria-hidden" = "true"
+              class = "fa-spin",
+              "aria-hidden" = "true"
             ),
             type = "secondary",
             auto_reset = TRUE
@@ -2156,13 +3263,29 @@ ui_elements <- list(
           # Button
           shiny::downloadButton(
             outputId = "report",
-            label = "Download",
+            label = "Download report",
             icon = shiny::icon("download")
           ),
-          shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead.")
-          ## https://github.com/quarto-dev/quarto-cli/issues/7151
-          # )
-          # )
+          shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
+          shiny::tags$hr(),
+          shiny::h4("Download data"),
+          shiny::helpText("Choose your favourite output data format to download the modified data."),
+          shiny::selectInput(
+            inputId = "data_type",
+            label = "Data format",
+            selected = NULL,
+            choices = list(
+              "R" = "rds",
+              "stata" = "dta"
+            )
+          ),
+          shiny::br(),
+          # Button
+          shiny::downloadButton(
+            outputId = "data_modified",
+            label = "Download data",
+            icon = shiny::icon("download")
+          )
         ),
         bslib::nav_panel(
           title = "Baseline characteristics",
@@ -2201,28 +3324,39 @@ dark <- custom_theme(
 # Fonts to consider:
 # https://webdesignerdepot.com/17-open-source-fonts-youll-actually-love/
 
-ui <- bslib::page_fluid(
+ui <- bslib::page_fixed(
+  shiny::tags$style(
+    type = "text/css",
+    # add the name of the tab you want to use as title in data-value
+    shiny::HTML(
+      ".container-fluid > .nav > li >
+                        a[data-value='freesearcheR'] {font-size: 28px}"
+    )
+  ),
   title = "freesearcheR",
   theme = light,
   shiny::useBusyIndicators(),
-  bslib::page_navbar(title = "freesearcheR",
+  bslib::page_navbar(
+    # title = "freesearcheR",
     id = "main_panel",
     # header = shiny::tags$header(shiny::p("Data is only stored temporarily for analysis and deleted immediately afterwards.")),
+    ui_elements$home,
     ui_elements$import,
     ui_elements$overview,
     ui_elements$analyze,
     ui_elements$docs,
     # bslib::nav_spacer(),
     # bslib::nav_item(shinyWidgets::circleButton(inputId = "mode", icon = icon("moon"),status = "primary")),
-    fillable = TRUE,
+    fillable = FALSE,
     footer = shiny::tags$footer(
       style = "background-color: #14131326; padding: 4px; text-align: center; bottom: 0; width: 100%;",
       shiny::p(
         style = "margin: 1",
-        "Data is only stored for analyses and deleted immediately afterwards."),
+        "Data is only stored for analyses and deleted immediately afterwards."
+      ),
       shiny::p(
         style = "margin: 1; color: #888;",
-        "Andreas G Damsbo | AGPLv3 license | ", shiny::tags$a("Source on Github", href = "https://github.com/agdamsbo/freesearcheR/", target="_blank", rel="noopener noreferrer")
+        "Andreas G Damsbo | AGPLv3 license | ", shiny::tags$a("Source on Github", href = "https://github.com/agdamsbo/freesearcheR/", target = "_blank", rel = "noopener noreferrer")
       ),
     )
   )
@@ -2230,7 +3364,7 @@ ui <- bslib::page_fluid(
 
 
 ########
-#### Current file: /Users/au301842/freesearcheR/inst/apps/data_analysis_modules/server.R
+#### Current file: /Users/au301842/freesearcheR/inst/apps/data_analysis_modules/server.R 
 ########
 
 library(readr)
@@ -2253,8 +3387,10 @@ library(broom.helpers)
 library(easystats)
 library(patchwork)
 library(DHARMa)
-library(datamods)
+library(apexcharter)
 library(toastui)
+library(datamods)
+library(data.table)
 library(IDEAFilter)
 library(shinyWidgets)
 library(DT)
@@ -2274,9 +3410,9 @@ server <- function(input, output, session) {
   ## everything else.
   files.to.keep <- list.files("www/")
 
-  output$docs_file <- renderUI({
+  output$docs_file <- shiny::renderUI({
     # shiny::includeHTML("www/docs.html")
-    HTML(readLines("www/docs.html"))
+    shiny::HTML(readLines("www/docs.html"))
   })
 
   ##############################################################################
@@ -2371,16 +3507,34 @@ server <- function(input, output, session) {
     rv$data_original <- from_env$data()
   })
 
+
   ##############################################################################
   #########
   #########  Data modification section
   #########
   ##############################################################################
 
-  #########  Modifications
-
   shiny::observeEvent(rv$data_original, rv$data <- rv$data_original |> default_parsing())
   shiny::observeEvent(input$data_reset, rv$data <- rv$data_original |> default_parsing())
+
+  #########  Overview
+
+  output$tbl_overview <- toastui::renderDatagrid(
+    data_filter() |>
+      overview_vars() |>
+      create_overview_datagrid()|>
+      add_sparkline(
+        column = "vals",
+        color.main = "#2A004E",
+        color.sec = "#C62300"
+      )
+  )
+
+  # data_summary_server(id = "data_summary",
+  #                     data = data_filter())
+
+  #########  Modifications
+
 
   ## Using modified version of the datamods::cut_variable_server function
   ## Further modifications are needed to have cut/bin options based on class of variable
@@ -2422,7 +3576,8 @@ server <- function(input, output, session) {
     attr(rv$data, "code")
   })
 
-  updated_data <- datamods::update_variables_server(
+  # updated_data <- datamods::update_variables_server(
+    updated_data <- update_variables_server(
     id = "vars_update",
     data = reactive(rv$data),
     return_data_on_init = FALSE
@@ -2436,7 +3591,7 @@ server <- function(input, output, session) {
     str(rv$data)
   })
 
-  observeEvent(updated_data(), {
+  shiny::observeEvent(updated_data(), {
     rv$data <- updated_data()
   })
 
@@ -2543,10 +3698,6 @@ server <- function(input, output, session) {
   #     gt::gt()
   # })
 
-  shiny::observeEvent(input$act_start, {
-    bslib::nav_select(id = "main_panel", selected = "Modifications")
-  })
-
   shiny::observeEvent(
     {
       input$load
@@ -2561,7 +3712,8 @@ server <- function(input, output, session) {
           data <- data_filter() |>
             dplyr::mutate(dplyr::across(dplyr::where(is.character), as.factor)) |>
             REDCapCAST::fct_drop.data.frame() |>
-            factorize(vars = input$factor_vars)
+            factorize(vars = input$factor_vars) |>
+            remove_na_attr()
 
           if (input$strat_var == "none") {
             by.var <- NULL
@@ -2714,7 +3866,22 @@ server <- function(input, output, session) {
   #   )
   # })
 
+  ##############################################################################
+  #########
+  #########  Page navigation
+  #########
+  ##############################################################################
 
+  shiny::observeEvent(input$act_start, {
+    bslib::nav_select(id = "main_panel", selected = "Modifications")
+  })
+
+
+  ##############################################################################
+  #########
+  #########  Reactivity
+  #########
+  ##############################################################################
 
   output$uploaded <- shiny::reactive({
     if (is.null(rv$ds)) {
@@ -2747,6 +3914,12 @@ server <- function(input, output, session) {
 
   # shiny::outputOptions(output, "has_input", suspendWhenHidden = FALSE)
 
+  ##############################################################################
+  #########
+  #########  Downloads
+  #########
+  ##############################################################################
+
   # Could be rendered with other tables or should show progress
   # Investigate quarto render problems
   # On temp file handling: https://github.com/quarto-dev/quarto-cli/issues/3992
@@ -2768,6 +3941,26 @@ server <- function(input, output, session) {
     }
   )
 
+  output$data_modified <- downloadHandler(
+    filename = shiny::reactive({
+      paste0("modified_data.", input$data_type)
+    }),
+    content = function(file, type = input$data_type) {
+      if (type == "rds"){
+        readr::write_rds(rv$list$data,file = file)
+      } else {
+        haven::write_dta(as.data.frame(rv$list$data),path = file)
+      }
+
+    }
+  )
+
+  ##############################################################################
+  #########
+  #########  Clearing the session on end
+  #########
+  ##############################################################################
+
   session$onSessionEnded(function() {
     cat("Session Ended\n")
     files <- list.files("www/")
@@ -2780,7 +3973,7 @@ server <- function(input, output, session) {
 
 
 ########
-#### Current file: /Users/au301842/freesearcheR/inst/apps/data_analysis_modules/launch.R
+#### Current file: /Users/au301842/freesearcheR/inst/apps/data_analysis_modules/launch.R 
 ########
 
 shinyApp(ui, server)

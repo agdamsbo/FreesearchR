@@ -36,7 +36,7 @@ Contributions are very welcome. If you find anything odd, or you think of featur
 
 -   [ ] Plot regression analyses results
 
--   [ ] Export modified data
+-   [x] Export modified data. 2025-01-09
 
 -   [ ] Include reproducible code for all steps
 

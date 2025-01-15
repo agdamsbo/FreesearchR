@@ -10,8 +10,8 @@
 m_redcap_readUI <- function(id, include_title = TRUE) {
   ns <- shiny::NS(id)
 
-  server_ui <- shiny::column(
-    width = 6,
+  server_ui <- shiny::tagList(
+    # width = 6,
     shiny::tags$h4("REDCap server information"),
     shiny::textInput(
       inputId = ns("uri"),
@@ -27,8 +27,8 @@ m_redcap_readUI <- function(id, include_title = TRUE) {
 
 
   params_ui <-
-    shiny::column(
-      width = 6,
+    shiny::tagList(
+      # width = 6,
       shiny::tags$h4("Data import parameters"),
       shiny::helpText("Options here will show, when API and uri are typed"),
       shiny::uiOutput(outputId = ns("fields")),
@@ -63,9 +63,14 @@ m_redcap_readUI <- function(id, include_title = TRUE) {
 
   shiny::fluidPage(
     if (include_title) shiny::tags$h3("Import data from REDCap"),
-    fluidRow(
+    bslib::layout_columns(
       server_ui,
-      params_ui),
+      params_ui,
+      col_widths = bslib::breakpoints(
+        sm = c(12, 12),
+        md = c(12, 12)
+      )
+    ),
     shiny::column(
       width = 12,
       # shiny::actionButton(inputId = ns("import"), label = "Import"),
@@ -75,8 +80,8 @@ m_redcap_readUI <- function(id, include_title = TRUE) {
         icon = shiny::icon("download", lib = "glyphicon"),
         label_busy = "Just a minute...",
         icon_busy = fontawesome::fa_i("arrows-rotate",
-                                      class = "fa-spin",
-                                      "aria-hidden" = "true"
+          class = "fa-spin",
+          "aria-hidden" = "true"
         ),
         type = "primary",
         auto_reset = TRUE
@@ -194,7 +199,7 @@ m_redcap_readServer <- function(id, output.format = c("df", "teal", "list")) {
         # browser()
         data.df <- dd()[, c(1, 2, 4, 5, 6, 8)]
         DT::datatable(data.df,
-                      caption = "Subset of data dictionary"
+          caption = "Subset of data dictionary"
         )
       },
       server = TRUE
@@ -241,8 +246,8 @@ m_redcap_readServer <- function(id, output.format = c("df", "teal", "list")) {
         REDCapCAST::suffix2label()
 
       out_object <- file_export(redcap_data,
-                                output.format = output.format,
-                                filename = name()
+        output.format = output.format,
+        filename = name()
       )
 
       if (output.format == "list") {
@@ -270,7 +275,6 @@ m_redcap_readServer <- function(id, output.format = c("df", "teal", "list")) {
 #'
 #' @rdname redcap_read_shiny_module
 tdm_redcap_read <- teal::teal_data_module(
-
   ui <- function(id) {
     shiny::fluidPage(
       m_redcap_readUI(id)
@@ -305,7 +309,7 @@ redcap_app <- function() {
     )
   )
   server <- function(input, output, session) {
-    data_val <- shiny::reactiveValues(data=NULL)
+    data_val <- shiny::reactiveValues(data = NULL)
 
     ds <- m_redcap_readServer("data", output.format = "df")
     # output$redcap_prev <- DT::renderDT(
@@ -328,8 +332,9 @@ redcap_app <- function() {
     })
 
     filtered_data <- IDEAFilter::IDEAFilter("data_filter",
-                                            data = ds,
-                                            verbose = FALSE)
+      data = ds,
+      verbose = FALSE
+    )
 
     # filtered_data <- shiny::reactive({
     #   IDEAFilter::IDEAFilter("data_filter",

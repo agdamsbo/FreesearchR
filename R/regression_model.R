@@ -71,7 +71,7 @@ regression_model <- function(data,
         .x
       }
     }) |>
-    dplyr::bind_cols()
+    dplyr::bind_cols(.name_repair = "unique_quiet")
 
   if (is.null(fun)) auto.mode <- TRUE
 
