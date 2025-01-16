@@ -52,7 +52,8 @@ Imports:
     rlang,
     data.table,
     apexcharter,
-    teal.modules.general
+    teal.modules.general,
+    esquisse
 Suggests: 
     styler,
     devtools,
@@ -61,5 +62,5 @@ Suggests:
     roxygen2,
     pak,
     rsconnect
-URL: https://github.com/agdamsbo/freesearcheR
+URL: https://github.com/agdamsbo/freesearcheR, https://agdamsbo.github.io/freesearcheR/
 BugReports: https://github.com/agdamsbo/freesearcheR/issues

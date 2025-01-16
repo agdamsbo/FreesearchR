@@ -8,3 +8,7 @@
 ^inst/shiny-examples/casting/functions\.R$
 ^functions\.R$
 ^CODE_OF_CONDUCT\.md$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^dev$
