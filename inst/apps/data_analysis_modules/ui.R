@@ -93,9 +93,10 @@ ui_elements <- list(
             shiny::column(
               width = 9,
               shiny::tags$p(
-              "Below is a short summary table of the provided data.
+                "Below is a short summary table of the provided data.
               On the right hand side you have the option to create filters.
-              At the bottom you'll find a raw overview of the original vs the modified data.")
+              At the bottom you'll find a raw overview of the original vs the modified data."
+              )
             )
           ),
           fluidRow(
@@ -196,8 +197,8 @@ ui_elements <- list(
           title = "Browser",
           tags$h3("Browse the provided data"),
           shiny::tags$p(
-                "Below is a data table with all the modified data provided to browse and understand data."
-                ),
+            "Below is a data table with all the modified data provided to browse and understand data."
+          ),
           shinyWidgets::html_dependency_winbox(),
           # fluidRow(
           # column(
@@ -381,12 +382,21 @@ ui_elements <- list(
   #########  Documentation panel
   #########
   ##############################################################################
-  "docs" = bslib::nav_panel(
-    title = "Documentation",
-    # shiny::tags$iframe("www/docs.html", height=600, width=535),
-    shiny::htmlOutput("docs_file"),
-    shiny::br()
+  "docs" = bslib::nav_item(
+    # shiny::img(shiny::icon("book")),
+    shiny::tags$a(
+    href = "https://agdamsbo.github.io/freesearcheR/",
+    "Docs (external)",
+    target = "_blank",
+    rel = "noopener noreferrer"
   )
+  )
+  #   bslib::nav_panel(
+  #   title = "Documentation",
+  #   # shiny::tags$iframe("www/docs.html", height=600, width=535),
+  #   shiny::htmlOutput("docs_file"),
+  #   shiny::br()
+  # )
 )
 
 # Initial attempt at creating light and dark versions
@@ -419,6 +429,7 @@ ui <- bslib::page_fixed(
     ui_elements$import,
     ui_elements$overview,
     ui_elements$analyze,
+    bslib::nav_spacer(),
     ui_elements$docs,
     # bslib::nav_spacer(),
     # bslib::nav_item(shinyWidgets::circleButton(inputId = "mode", icon = icon("moon"),status = "primary")),

@@ -7,15 +7,19 @@
 [![freesearcheR](https://img.shields.io/badge/Shiny-shinyapps.io-blue?style=flat&labelColor=white&logo=RStudio&logoColor=blue)](https://agdamsbo.shinyapps.io/freesearcheR/)
 <!-- badges: end -->
 
-This package is the backbone of the free and open browser based data exploration and analysis tool with publication ready output.
+This package is the backbone of the ***freesearcheR***, a free and open-source browser based data exploration and analysis tool for clinicians and researchers with publication ready output.
 
-This package and the ***freesearcheR***-tool is part of a large project to democratize health data analysis and removing barriers for clinicians to engage in health research.
+This package and the ***freesearcheR***-tool is part of a larger initiative to democratize health data analysis and remove barriers for clinicians to engage in health research.
 
 the ***freesearcheR***-tool is online and accessible here: [link to the app freely hosted on shinyapps.io](https://agdamsbo.shinyapps.io/freesearcheR/). All feedback is welcome and can be shared as a GitHub issue.
 
 Initiatives for funding continued development of the tool and surrounding initiatives is ongoing.
 
 ## Roadmap
+
+The current state of the app is considered experimental, and a lot of things are still changing. It is, however, in a usable state, with basic functions available to the user.
+
+Below are some (the actual list is quite long and growing) of the planned features and improvements:
 
 -   [ ] Stratified analyses
 
@@ -32,6 +36,12 @@ Initiatives for funding continued development of the tool and surrounding initia
     -   [x] Add histograms for data distribution. 2025-01-16
 
     -   [x] Option to edit labels. 2025-01-16
+    
+-   More output controls
+
+    -   [ ] Theming output tables
+
+    -   [ ] Select analyses to include in report
 
 -   [ ] Plot regression analyses results
 
