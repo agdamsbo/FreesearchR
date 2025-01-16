@@ -13,7 +13,6 @@ library(rlang)
 #'
 #' @name update-variables
 #'
-#' @example examples/variables.R
 update_variables_ui <- function(id, title = TRUE) {
   ns <- NS(id)
   if (isTRUE(title)) {

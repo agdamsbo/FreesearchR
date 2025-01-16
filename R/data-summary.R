@@ -1,35 +1,54 @@
+#' Data summary module
+#'
+#' @param id Module id. (Use 'ns("id")')
+#'
+#' @name data-summary
+#' @returns Shiny ui module
+#' @export
 data_summary_ui <- function(id) {
   ns <- NS(id)
 
-  toastui::datagridOutput(outputId = "tbl_summary")
+  toastui::datagridOutput(outputId = ns("tbl_summary"))
 }
 
 
+#' @param id id
+#' @param data data
+#' @param color.main main color
+#' @param color.sec secondary color
+#'
+#' @name data-summary
+#' @returns shiny server module
+#' @export
 data_summary_server <- function(id,
-                                data) {
+                                data,
+                                color.main,
+                                color.sec) {
   shiny::moduleServer(
     id = id,
     module = function(input, output, session) {
       ns <- session$ns
 
-      data_r <- shiny::reactive({
-        if (shiny::is.reactive(data)) {
-          data()
-        } else {
-          data
-        }
-      })
+      # data_r <- shiny::reactive({
+      #   if (shiny::is.reactive(data)) {
+      #     data()
+      #   } else {
+      #     data
+      #   }
+      # })
 
-      output$tbl_summary <- shiny::reactive({
+      output$tbl_summary <-
         toastui::renderDatagrid(
-        data_r() |>
-          overview_vars() |>
-          create_overview_datagrid() |>
-          add_sparkline(
-            column = "vals"
-          )
-      )
-      })
+          data() |>
+            overview_vars() |>
+            create_overview_datagrid() |>
+            add_sparkline(
+              column = "vals",
+              color.main = color.main,
+              color.sec = color.sec
+            )
+        )
+
     }
   )
 }
@@ -61,7 +80,7 @@ add_sparkline <- function(grid, column = "vals", color.main = "#2a8484", color.s
         ds <- data.frame(x = names(s), y = s)
         horizontal <- FALSE
       } else if (any(c("numeric", "integer") %in% data_cl)) {
-        if (length(unique(data)) == length(data)) {
+        if (is_consecutive(data)) {
           type <- "line"
           ds <- data.frame(x = NA, y = NA)
           horizontal <- FALSE
@@ -101,6 +120,20 @@ add_sparkline <- function(grid, column = "vals", color.main = "#2a8484", color.s
     columns = column,
     minWidth = 200
   )
+}
+
+#' Checks if elements in vector are equally spaced as indication of ID
+#'
+#' @param data vector
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+#' 1:10 |> is_consecutive()
+#' sample(1:100,40) |> is_consecutive()
+is_consecutive <- function(data){
+  suppressWarnings(length(unique(diff(as.numeric(data))))==1)
 }
 
 #' Create a data overview data.frame ready for sparklines
@@ -182,11 +215,11 @@ create_overview_datagrid <- function(data) {
     column = "class"
   )
 
-  # grid <- toastui::grid_format(
-  #   grid = grid,
-  #   "p_complete",
-  #   formatter = toastui::JS("function(obj) {return (obj.value*100).toFixed(0) + '%';}")
-  # )
+  grid <- toastui::grid_format(
+    grid = grid,
+    "p_complete",
+    formatter = toastui::JS("function(obj) {return (obj.value*100).toFixed(0) + '%';}")
+  )
 
   return(grid)
 }
@@ -209,9 +242,9 @@ add_class_icon <- function(grid, column = "class") {
         X = value,
         FUN = function(x) {
           if (identical(x, "numeric")) {
-            shiny::icon("chart-line")
+            shiny::icon("calculator")
           } else if (identical(x, "factor")) {
-            shiny::icon("chart-column")
+            shiny::icon("chart-simple")
           } else if (identical(x, "integer")) {
             shiny::icon("arrow-down-1-9")
           } else if (identical(x, "character")) {

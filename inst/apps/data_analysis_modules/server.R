@@ -145,40 +145,58 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
-  shiny::observeEvent(rv$data_original, rv$data <- rv$data_original |> default_parsing())
-  shiny::observeEvent(input$data_reset, rv$data <- rv$data_original |> default_parsing())
+  shiny::observeEvent(rv$data_original, {
+    rv$data <- rv$data_original |> default_parsing()
+  })
+
+  shiny::observeEvent(input$data_reset, {
+    shinyWidgets::ask_confirmation(
+      inputId = "reset_confirm",
+      title = "Please confirm data reset?"
+    )
+  })
+
+  shiny::observeEvent(input$reset_confirm, {
+    rv$data <- rv$data_original |> default_parsing()
+  })
 
   #########  Overview
 
-  output$tbl_overview <- toastui::renderDatagrid(
-    data_filter() |>
-      overview_vars() |>
-      create_overview_datagrid()|>
-      add_sparkline(
-        column = "vals",
-        color.main = "#2A004E",
-        color.sec = "#C62300"
-      )
+  data_summary_server(
+    id = "data_summary",
+    data = shiny::reactive({
+      rv$data_filtered
+    }),
+    color.main = "#2A004E",
+    color.sec = "#C62300"
   )
 
-  # data_summary_server(id = "data_summary",
-  #                     data = data_filter())
-
+  #########
   #########  Modifications
-
+  #########
 
   ## Using modified version of the datamods::cut_variable_server function
   ## Further modifications are needed to have cut/bin options based on class of variable
   ## Could be defined server-side
-  shiny::observeEvent(input$modal_cut, modal_cut_variable("modal_cut"))
+
+  #########  Create factor
+
+  shiny::observeEvent(
+    input$modal_cut,
+    modal_cut_variable("modal_cut")
+  )
   data_modal_cut <- cut_variable_server(
     id = "modal_cut",
     data_r = shiny::reactive(rv$data)
   )
   shiny::observeEvent(data_modal_cut(), rv$data <- data_modal_cut())
 
+  #########  Modify factor
 
-  shiny::observeEvent(input$modal_update, datamods::modal_update_factor("modal_update"))
+  shiny::observeEvent(
+    input$modal_update,
+    datamods::modal_update_factor(id = "modal_update")
+  )
   data_modal_update <- datamods::update_factor_server(
     id = "modal_update",
     data_r = reactive(rv$data)
@@ -188,9 +206,20 @@ server <- function(input, output, session) {
     rv$data <- data_modal_update()
   })
 
+  #########  Create column
 
+  shiny::observeEvent(
+    input$modal_column,
+    datamods::modal_create_column(id = "modal_column")
+  )
+  data_modal_r <- datamods::create_column_server(
+    id = "modal_column",
+    data_r = reactive(rv$data)
+  )
+  shiny::observeEvent(data_modal_r(), rv$data <- data_modal_r())
 
-  # Show result
+  #########  Show result
+
   output$table_mod <- toastui::renderDatagrid({
     shiny::req(rv$data)
     # data <- rv$data
@@ -208,7 +237,7 @@ server <- function(input, output, session) {
   })
 
   # updated_data <- datamods::update_variables_server(
-    updated_data <- update_variables_server(
+  updated_data <- update_variables_server(
     id = "vars_update",
     data = reactive(rv$data),
     return_data_on_init = FALSE
@@ -219,7 +248,11 @@ server <- function(input, output, session) {
   })
 
   output$modified_str <- renderPrint({
-    str(rv$data)
+    str(as.data.frame(rv$data_filtered) |>
+      REDCapCAST::set_attr(
+        label = NULL,
+        attr = "code"
+      ))
   })
 
   shiny::observeEvent(updated_data(), {
@@ -229,24 +262,29 @@ server <- function(input, output, session) {
   # IDEAFilter has the least cluttered UI, but might have a License issue
   data_filter <- IDEAFilter::IDEAFilter("data_filter", data = reactive(rv$data), verbose = TRUE)
 
-  # shiny::observeEvent(data_filter(), {
-  #   rv$data_filtered <- data_filter()
-  # })
+  shiny::observeEvent(data_filter(), {
+    rv$data_filtered <- data_filter()
+  })
 
   output$filtered_code <- shiny::renderPrint({
-    cat(gsub(
-      "%>%", "|> \n ",
+    out <- gsub(
+      "filter", "dplyr::filter",
       gsub(
         "\\s{2,}", " ",
-        gsub(
-          "reactive(rv$data)", "data",
-          paste0(
-            capture.output(attr(data_filter(), "code")),
-            collapse = " "
-          )
+        paste0(
+          capture.output(attr(rv$data_filtered, "code")),
+          collapse = " "
         )
       )
-    ))
+    )
+
+    out <- strsplit(out, "%>%") |>
+      unlist() |>
+      (\(.x){
+        paste(c("data", .x[-1]), collapse = "|> \n ")
+      })()
+
+    cat(out)
   })
 
 
@@ -264,7 +302,7 @@ server <- function(input, output, session) {
       inputId = "include_vars",
       selected = NULL,
       label = "Covariables to include",
-      choices = colnames(data_filter()),
+      choices = colnames(rv$data_filtered),
       multiple = TRUE
     )
   })
@@ -274,7 +312,7 @@ server <- function(input, output, session) {
       inputId = "outcome_var",
       selected = NULL,
       label = "Select outcome variable",
-      choices = colnames(data_filter()),
+      choices = colnames(rv$data_filtered),
       multiple = FALSE
     )
   })
@@ -283,16 +321,16 @@ server <- function(input, output, session) {
   output$factor_vars <- shiny::renderUI({
     shiny::selectizeInput(
       inputId = "factor_vars",
-      selected = colnames(data_filter())[sapply(data_filter(), is.factor)],
+      selected = colnames(rv$data_filtered)[sapply(rv$data_filtered, is.factor)],
       label = "Covariables to format as categorical",
-      choices = colnames(data_filter()),
+      choices = colnames(rv$data_filtered),
       multiple = TRUE
     )
   })
 
   base_vars <- shiny::reactive({
     if (is.null(input$include_vars)) {
-      out <- colnames(data_filter())
+      out <- colnames(rv$data_filtered)
     } else {
       out <- unique(c(input$include_vars, input$outcome_var))
     }
@@ -304,7 +342,19 @@ server <- function(input, output, session) {
       inputId = "strat_var",
       selected = "none",
       label = "Select variable to stratify baseline",
-      choices = c("none", colnames(data_filter()[base_vars()])),
+      choices = c(
+        "none",
+        rv$data_filtered[base_vars()] |>
+          (\(.x){
+            lapply(.x, \(.c){
+              if (identical("factor", class(.c))) {
+                .c
+              }
+            }) |>
+              dplyr::bind_cols()
+          })() |>
+          colnames()
+      ),
       multiple = FALSE
     )
   })
@@ -340,7 +390,7 @@ server <- function(input, output, session) {
       # data <- data_filter$filtered() |>
       tryCatch(
         {
-          data <- data_filter() |>
+          data <- rv$data_filtered |>
             dplyr::mutate(dplyr::across(dplyr::where(is.character), as.factor)) |>
             REDCapCAST::fct_drop.data.frame() |>
             factorize(vars = input$factor_vars) |>
@@ -577,12 +627,11 @@ server <- function(input, output, session) {
       paste0("modified_data.", input$data_type)
     }),
     content = function(file, type = input$data_type) {
-      if (type == "rds"){
-        readr::write_rds(rv$list$data,file = file)
+      if (type == "rds") {
+        readr::write_rds(rv$list$data, file = file)
       } else {
-        haven::write_dta(as.data.frame(rv$list$data),path = file)
+        haven::write_dta(as.data.frame(rv$list$data), path = file)
       }
-
     }
   )
 

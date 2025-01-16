@@ -115,15 +115,15 @@ ui_elements <- list(
             # ),
             shiny::column(
               width = 9,
-              toastui::datagridOutput(outputId = "tbl_overview"),
-              # data_summary_ui(id = "data_summary"),
-              shiny::tags$b("Reproducible code:"),
-              shiny::verbatimTextOutput(outputId = "filtered_code")
+              data_summary_ui(id = "data_summary")
             ),
             shiny::column(
               width = 3,
-              IDEAFilter::IDEAFilter_ui("data_filter") # ,
-              # shiny::actionButton("save_filter", "Apply the filter")
+              IDEAFilter::IDEAFilter_ui("data_filter"),
+              shiny::tags$br(),
+              shiny::tags$b("Filter code:"),
+              shiny::verbatimTextOutput(outputId = "filtered_code"),
+              shiny::tags$br()
             )
           ),
           fluidRow(
@@ -163,6 +163,8 @@ ui_elements <- list(
             ),
             shiny::column(
               width = 3,
+              tags$h3("Create new variables"),
+              shiny::tags$br(),
               shiny::actionButton("modal_cut", "Create factor variable"),
               shiny::tags$br(),
               shiny::helpText("Create factor/categorical variable from an other value."),
@@ -171,6 +173,11 @@ ui_elements <- list(
               shiny::actionButton("modal_update", "Reorder factor levels"),
               shiny::tags$br(),
               shiny::helpText("Reorder the levels of factor/categorical variables."),
+              shiny::tags$br(),
+              shiny::tags$br(),
+              shiny::actionButton("modal_column", "New variable"),
+              shiny::tags$br(),
+              shiny::helpText("Create a new variable/column based on an R-expression."),
               shiny::tags$br(),
               shiny::tags$br(),
               shiny::actionButton("data_reset", "Restore original data"),
@@ -268,6 +275,7 @@ ui_elements <- list(
             shiny::uiOutput("include_vars")
           ),
           shiny::uiOutput("strat_var"),
+          shiny::helpText("Only factor/categorical variables are available for stratification. Go back to the 'Data' tab to reclass a variable if it's not on the list."),
           shiny::conditionalPanel(
             condition = "input.strat_var!='none'",
             shiny::radioButtons(
