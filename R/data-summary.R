@@ -126,7 +126,7 @@ add_sparkline <- function(grid, column = "vals", color.main = "#2a8484", color.s
 #'
 #' @param data vector
 #'
-#' @returns
+#' @returns logical
 #' @export
 #'
 #' @examples
@@ -233,6 +233,10 @@ create_overview_datagrid <- function(data) {
 #' @export
 #'
 #' @examples
+#' mtcars |>
+#'   overview_vars() |>
+#'   toastui::datagrid() |>
+#'   add_class_icon()
 add_class_icon <- function(grid, column = "class") {
   out <- toastui::grid_format(
     grid = grid,

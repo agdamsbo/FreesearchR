@@ -386,8 +386,14 @@ add_var_toset <- function(data, var_name, default = "") {
   data[, datanames]
 }
 
-#' @importFrom toastui datagrid grid_columns grid_format grid_style_column
-#'  grid_style_column grid_editor grid_editor_opts grid_selection_row
+#' Modified from the datamods pacakge
+#'
+#' @param data data
+#'
+#' @param height height
+#' @param selectionId selectionId
+#' @param buttonId buttonId
+#'
 #' @examples
 #' mtcars |>
 #'   summary_vars() |>
