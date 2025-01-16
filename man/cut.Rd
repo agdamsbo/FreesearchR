@@ -5,7 +5,7 @@
 \alias{cut.POSIXt}
 \alias{cut.POSIXct}
 \alias{cut.Date}
-\title{Title}
+\title{Extended cutting function}
 \usage{
 \method{cut}{hms}(x, breaks, ...)
 
@@ -38,7 +38,7 @@
 factor
 }
 \description{
-Title
+Extended cutting function
 }
 \examples{
 readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "08:20:20", "21:20:20", "03:02:20")) |> cut(2)

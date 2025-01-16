@@ -11,9 +11,9 @@ This package is the backbone of the free and open browser based data exploration
 
 This package and the ***freesearcheR***-tool is part of a large project to democratize health data analysis and removing barriers for clinicians to engage in health research.
 
-As of 2024-12-19 the ***freesearcheR***-tool is online and accessible here: [link to shinyapps.io free hosting](https://agdamsbo.shinyapps.io/freesearcheR/). All feedback is welcome and can be shared as a GitHub issue.
+the ***freesearcheR***-tool is online and accessible here: [link to the app freely hosted on shinyapps.io](https://agdamsbo.shinyapps.io/freesearcheR/). All feedback is welcome and can be shared as a GitHub issue.
 
-Initiatives for to start funding to continue development of the tool and surrounding initiatives will start soon.
+Initiatives for funding continued development of the tool and surrounding initiatives is ongoing.
 
 ## Roadmap
 
@@ -29,13 +29,13 @@ Initiatives for to start funding to continue development of the tool and surroun
 
 -   More detailed variable browser
 
-    -   [ ] Add histograms for data distribution
+    -   [x] Add histograms for data distribution. 2025-01-16
 
-    -   [ ] Option to edit labels
+    -   [x] Option to edit labels. 2025-01-16
 
 -   [ ] Plot regression analyses results
 
--   [ ] Export modified data
+-   [x] Export modified data. 2025-01-16
 
 -   [ ] Include reproducible code for all steps
 
@@ -57,7 +57,6 @@ library(freesearcheR)
 data(mtcars) 
 shiny_freesearcheR()
 ```
-
 
 ## Code of Conduct
 

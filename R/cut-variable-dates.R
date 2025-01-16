@@ -83,7 +83,7 @@ library(shiny)
 #   structure(match(splitter, names(labs)), levels = labs, class = "factor")
 # }
 
-#' Title
+#' Extended cutting function
 #'
 #' @param x an object inheriting from class "hms"
 #' @param ... passed on
