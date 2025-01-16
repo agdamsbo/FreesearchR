@@ -1,9 +1,9 @@
 # freesearcheR
 
 <!-- badges: start -->
-
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![rhub](https://github.com/agdamsbo/freesearcheR/actions/workflows/rhub.yaml/badge.svg)](https://github.com/agdamsbo/freesearcheR/actions/workflows/rhub.yaml)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14527429.svg)](https://doi.org/10.5281/zenodo.14527429) 
 [![freesearcheR](https://img.shields.io/badge/Shiny-shinyapps.io-blue?style=flat&labelColor=white&logo=RStudio&logoColor=blue)](https://agdamsbo.shinyapps.io/freesearcheR/)
 <!-- badges: end -->
 

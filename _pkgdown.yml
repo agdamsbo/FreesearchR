@@ -6,8 +6,12 @@ template:
     secondary: "#FF6F61"
     bootswatch: "united"
     base_font: {google: "Montserrat"}
-    heading_font: {google: "Public Sans",wght: "700"}
+    heading_font: {google: "Public Sans"}
     code_font: {google: "Open Sans"}
+  light-switch: false
 
 navbar:
   bg: primary
+
+includes:
+  in_header: umami-page.html

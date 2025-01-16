@@ -554,7 +554,7 @@ server <- function(input, output, session) {
   ##############################################################################
 
   shiny::observeEvent(input$act_start, {
-    bslib::nav_select(id = "main_panel", selected = "Modifications")
+    bslib::nav_select(id = "main_panel", selected = "Data")
   })
 
 

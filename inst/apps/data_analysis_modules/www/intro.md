@@ -20,6 +20,6 @@ There are four simple steps to go through (see corresponding tabs in the top):
 
 4.  Export the the analyses results for MS Word or [LibreOffice](https://www.libreoffice.org/) as well as the data with preserved metadata.
 
-Have a look at the [documentations page]() for further project description. If you're interested in the source code, then go on, [have a look](https://github.com/agdamsbo/freesearcheR)!
+Have a look at the [documentations page](https://agdamsbo.github.io/freesearcheR/) for further project description. If you're interested in the source code, then go on, [have a look](https://github.com/agdamsbo/freesearcheR)!
 
 If you encounter anything strange or the app doesn't act as expected. Please [report on Github](https://github.com/agdamsbo/freesearcheR/issues).

@@ -3096,28 +3096,46 @@ ui_elements <- list(
           fluidRow(
             shiny::column(
               width = 9,
-              update_variables_ui("vars_update")
+              update_variables_ui("vars_update"),
+              shiny::tags$br()
             ),
             shiny::column(
               width = 3,
-              tags$h3("Create new variables"),
+              tags$h4("Create new variables"),
               shiny::tags$br(),
-              shiny::actionButton("modal_cut", "Create factor variable"),
+              shiny::actionButton(
+                inputId = "modal_cut",
+                label = "Create factor variable",
+                width = "100%"
+              ),
               shiny::tags$br(),
               shiny::helpText("Create factor/categorical variable from an other value."),
               shiny::tags$br(),
               shiny::tags$br(),
-              shiny::actionButton("modal_update", "Reorder factor levels"),
+              shiny::actionButton(
+                inputId = "modal_update",
+                label = "Reorder factor levels",
+                width = "100%"
+              ),
               shiny::tags$br(),
               shiny::helpText("Reorder the levels of factor/categorical variables."),
               shiny::tags$br(),
               shiny::tags$br(),
-              shiny::actionButton("modal_column", "New variable"),
+              shiny::actionButton(
+                inputId = "modal_column",
+                label = "New variable",
+                width = "100%"
+              ),
               shiny::tags$br(),
               shiny::helpText("Create a new variable/column based on an R-expression."),
               shiny::tags$br(),
               shiny::tags$br(),
-              shiny::actionButton("data_reset", "Restore original data"),
+              tags$h4("Restore"),
+              shiny::actionButton(
+                inputId = "data_reset",
+                label = "Restore original data",
+                width = "100%"
+              ),
               shiny::tags$br(),
               shiny::helpText("Reset to original imported dataset. Careful! There is no un-doing."),
               shiny::tags$br() # ,
@@ -3321,11 +3339,11 @@ ui_elements <- list(
   "docs" = bslib::nav_item(
     # shiny::img(shiny::icon("book")),
     shiny::tags$a(
-    href = "https://agdamsbo.github.io/freesearcheR/",
-    "Docs (external)",
-    target = "_blank",
-    rel = "noopener noreferrer"
-  )
+      href = "https://agdamsbo.github.io/freesearcheR/",
+      "Docs (external)",
+      target = "_blank",
+      rel = "noopener noreferrer"
+    )
   )
   #   bslib::nav_panel(
   #   title = "Documentation",
@@ -3346,6 +3364,7 @@ dark <- custom_theme(
 # https://webdesignerdepot.com/17-open-source-fonts-youll-actually-love/
 
 ui <- bslib::page_fixed(
+  shiny::tags$head(includeHTML(("www/umami-app.html"))),
   shiny::tags$style(
     type = "text/css",
     # add the name of the tab you want to use as title in data-value
@@ -3945,7 +3964,7 @@ server <- function(input, output, session) {
   ##############################################################################
 
   shiny::observeEvent(input$act_start, {
-    bslib::nav_select(id = "main_panel", selected = "Modifications")
+    bslib::nav_select(id = "main_panel", selected = "Data")
   })
 
 
