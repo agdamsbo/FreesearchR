@@ -79,9 +79,7 @@ server <- function(input, output, session) {
     test = "no",
     data_original = NULL,
     data = NULL,
-    data_filtered = NULL,
-    models = NULL,
-    check = NULL
+    data_filtered = NULL
   )
 
   ##############################################################################
@@ -264,20 +262,8 @@ server <- function(input, output, session) {
   # IDEAFilter has the least cluttered UI, but might have a License issue
   data_filter <- IDEAFilter::IDEAFilter("data_filter", data = reactive(rv$data), verbose = TRUE)
 
-  shiny::observeEvent(
-    list(
-      shiny::reactive(rv$data),
-      shiny::reactive(rv$data_original),
-      data_filter(),
-      base_vars()
-      ), {
+  shiny::observeEvent(data_filter(), {
     rv$data_filtered <- data_filter()
-
-    rv$list$data <- data_filter() |>
-      REDCapCAST::fct_drop.data.frame() |>
-      (\(.x){
-        .x[base_vars()]
-      })()
   })
 
   output$filtered_code <- shiny::renderPrint({
@@ -331,16 +317,6 @@ server <- function(input, output, session) {
     )
   })
 
-  output$regression_type <- shiny::renderUI({
-    shiny::req(input$outcome_var)
-    shiny::selectizeInput(
-      inputId = "regression_type",
-      # selected = colnames(rv$data_filtered)[sapply(rv$data_filtered, is.factor)],
-      label = "Choose regression analysis",
-      choices = possible_functions(data = dplyr::select(rv$data_filtered, input$outcome_var), design = "cross-sectional"),
-      multiple = FALSE
-    )
-  })
 
   output$factor_vars <- shiny::renderUI({
     shiny::selectizeInput(
@@ -403,122 +379,10 @@ server <- function(input, output, session) {
   #     gt::gt()
   # })
 
-
-  ### Outputs
-
-  # shiny::observeEvent(data_filter(), {
-  #   rv$data_filtered <- data_filter()
-  # })
-
-  # shiny::observeEvent(
-  #   shiny::reactive(rv$data_filtered),
-  #   {
-  #     rv$list$data <- rv$data_filtered |>
-  #       # dplyr::mutate(dplyr::across(dplyr::where(is.character), as.factor)) |>
-  #       REDCapCAST::fct_drop.data.frame() |>
-  #       # factorize(vars = input$factor_vars) |>
-  #       remove_na_attr()
-  #
-  #     # rv$list$data <- data
-  #     # rv$list$data <- data[base_vars()]
-  #   }
-  # )
-
-  #   shiny::observe({
-  #     if (input$strat_var == "none") {
-  #       by.var <- NULL
-  #     } else {
-  #       by.var <- input$strat_var
-  #     }
-  #
-  #     rv$list$table1 <- rv$list$data |>
-  #       baseline_table(
-  #         fun.args =
-  #           list(
-  #             by = by.var
-  #           )
-  #       ) |>
-  #       (\(.x){
-  #         if (!is.null(by.var)) {
-  #           .x |> gtsummary::add_overall()
-  #         } else {
-  #           .x
-  #         }
-  #       })() |>
-  #       (\(.x){
-  #         if (input$add_p == "yes") {
-  #           .x |>
-  #             gtsummary::add_p() |>
-  #             gtsummary::bold_p()
-  #         } else {
-  #           .x
-  #         }
-  #       })()
-  #   })
-  #
-  #     output$table1 <- gt::render_gt(
-  #       rv$list$table1 |>
-  #         gtsummary::as_gt() |>
-  # gt::tab_header(shiny::md("**Table 1. Patient Characteristics**"))
-  #     )
-
   shiny::observeEvent(
-    # ignoreInit = TRUE,
-    list(
-      shiny::reactive(rv$list$data),
-      shiny::reactive(rv$data),
-      input$strat_var,
-      input$include_vars,
-      input$add_p
-    ),
     {
-      shiny::req(input$strat_var)
-      shiny::req(rv$list$data)
-
-      if (input$strat_var == "none") {
-        by.var <- NULL
-      } else {
-        by.var <- input$strat_var
-      }
-
-      rv$list$table1 <-
-        rv$list$data |>
-        baseline_table(
-          fun.args =
-            list(
-              by = by.var
-            )
-        ) |>
-        (\(.x){
-          if (!is.null(by.var)) {
-            .x |> gtsummary::add_overall()
-          } else {
-            .x
-          }
-        })() |>
-        (\(.x){
-          if (input$add_p == "yes") {
-            .x |>
-              gtsummary::add_p() |>
-              gtsummary::bold_p()
-          } else {
-            .x
-          }
-        })()
-    }
-  )
-
-
-  output$table1 <- gt::render_gt({
-    shiny::req(rv$list$table1)
-
-    rv$list$table1 |>
-      gtsummary::as_gt() |>
-      gt::tab_header(gt::md("**Table 1: Baseline Characteristics**"))
-  })
-
-  shiny::observeEvent(
-    input$load,
+      input$load
+    },
     {
       shiny::req(input$outcome_var)
       # browser()
@@ -526,118 +390,152 @@ server <- function(input, output, session) {
       # data <- data_filter$filtered() |>
       tryCatch(
         {
-          model_lists <- list(
-            "Univariable" = regression_model_uv_list,
-            "Multivariable" = regression_model_list
+          data <- rv$data_filtered |>
+            dplyr::mutate(dplyr::across(dplyr::where(is.character), as.factor)) |>
+            REDCapCAST::fct_drop.data.frame() |>
+            factorize(vars = input$factor_vars) |>
+            remove_na_attr()
+
+          if (input$strat_var == "none") {
+            by.var <- NULL
+          } else {
+            by.var <- input$strat_var
+          }
+
+          data <- data[base_vars()]
+
+          # model <- data |>
+          #   regression_model(
+          #     outcome.str = input$outcome_var,
+          #     auto.mode = input$regression_auto == 1,
+          #     formula.str = input$regression_formula,
+          #     fun = input$regression_fun,
+          #     args.list = eval(parse(text = paste0("list(", input$regression_args, ")")))
+          #   )
+
+          models <- list(
+            "Univariable" = regression_model_uv,
+            "Multivariable" = regression_model
           ) |>
             lapply(\(.fun){
-              ls <- do.call(
+              do.call(
                 .fun,
                 c(
-                  list(data = rv$list$data),
+                  list(data = data),
                   list(outcome.str = input$outcome_var),
-                  list(fun.descr = input$regression_type)
+                  list(formula.str = input$regression_formula),
+                  list(fun = input$regression_fun),
+                  list(args.list = eval(parse(text = paste0("list(", input$regression_args, ")"))))
                 )
               )
             })
 
-          rv$models <- model_lists
+          rv$list$data <- data
 
-          # rv$models <- lapply(model_lists, \(.x){
-          #   .x$model
-          # })
-        },
-        warning = function(warn) {
-          showNotification(paste0(warn), type = "warning")
-        },
-        error = function(err) {
-          showNotification(paste0("Creating regression models failed with the following error: ", err), type = "err")
-        }
-      )
-    }
-  )
 
-  shiny::observeEvent(
-    ignoreInit = TRUE,
-    list(
-      rv$models
-    ),
-    {
-      shiny::req(rv$models)
-      tryCatch(
-        {
-          rv$check <- lapply(rv$models, \(.x){
-            .x$model
-          }) |>
-            purrr::pluck("Multivariable") |>
+
+          rv$list$check <- purrr::pluck(models, "Multivariable") |>
             performance::check_model()
-        },
-        warning = function(warn) {
-          showNotification(paste0(warn), type = "warning")
-        },
-        error = function(err) {
-          showNotification(paste0("Running model assumptions checks failed with the following error: ", err), type = "err")
-        }
-      )
-    }
-  )
 
-  output$check <- shiny::renderPlot({
-    shiny::req(rv$check)
-    p <- plot(rv$check) +
-      patchwork::plot_annotation(title = "Multivariable regression model checks")
-    p
-    # Generate checks in one column
-    # layout <- sapply(seq_len(length(p)), \(.x){
-    #   patchwork::area(.x, 1)
-    # })
-    #
-    # p + patchwork::plot_layout(design = Reduce(c, layout))
+          rv$list$table1 <- data |>
+            baseline_table(
+              fun.args =
+                list(
+                  by = by.var
+                )
+            ) |>
+            (\(.x){
+              if (!is.null(by.var)) {
+                .x |> gtsummary::add_overall()
+              } else {
+                .x
+              }
+            })() |>
+            (\(.x){
+              if (input$add_p == "yes") {
+                .x |>
+                  gtsummary::add_p() |>
+                  gtsummary::bold_p()
+              } else {
+                .x
+              }
+            })()
 
-    # patchwork::wrap_plots(ncol=1) +
-    # patchwork::plot_annotation(title = 'Multivariable regression model checks')
-  })
-
-
-  shiny::observeEvent(
-    input$load,
-    {
-      shiny::req(rv$models)
-      # browser()
-      # Assumes all character variables can be formatted as factors
-      # data <- data_filter$filtered() |>
-      tryCatch(
-        {
-          tbl <- lapply(rv$models, \(.x){
-            .x$model
-          }) |>
+          rv$list$table2 <- models |>
             purrr::map(regression_table) |>
             tbl_merge()
 
-          rv$list$regression <- c(
-            rv$models,
-            list(Table = tbl)
-          )
 
           rv$list$input <- input
+
+
+          # rv$list <- list(
+          #   data = data,
+          #   check = check,
+          #   table1 = data |>
+          #     baseline_table(
+          #       fun.args =
+          #         list(
+          #           by = by.var
+          #         )
+          #     ) |>
+          #     (\(.x){
+          #       if (!is.null(by.var)) {
+          #         .x |> gtsummary::add_overall()
+          #       } else {
+          #         .x
+          #       }
+          #     })() |>
+          #     (\(.x){
+          #       if (input$add_p == "yes") {
+          #         .x |>
+          #           gtsummary::add_p() |>
+          #           gtsummary::bold_p()
+          #       } else {
+          #         .x
+          #       }
+          #     })(),
+          #   table2 = models |>
+          #     purrr::map(regression_table) |>
+          #     tbl_merge(),
+          #   input = input
+          # )
+
+          output$table1 <- gt::render_gt(
+            rv$list$table1 |>
+              gtsummary::as_gt()
+          )
+
+          output$table2 <- gt::render_gt(
+            rv$list$table2 |>
+              gtsummary::as_gt()
+          )
+
+          output$check <- shiny::renderPlot({
+            p <- plot(rv$list$check) +
+              patchwork::plot_annotation(title = "Multivariable regression model checks")
+            p
+            # Generate checks in one column
+            # layout <- sapply(seq_len(length(p)), \(.x){
+            #   patchwork::area(.x, 1)
+            # })
+            #
+            # p + patchwork::plot_layout(design = Reduce(c, layout))
+
+            # patchwork::wrap_plots(ncol=1) +
+            # patchwork::plot_annotation(title = 'Multivariable regression model checks')
+          })
         },
         warning = function(warn) {
           showNotification(paste0(warn), type = "warning")
         },
         error = function(err) {
-          showNotification(paste0("Creating a regression table failed with the following error: ", err), type = "err")
+          showNotification(paste0("There was the following error. Inspect your data and adjust settings. Error: ", err), type = "err")
         }
       )
       rv$ready <- "ready"
     }
   )
-
-  output$table2 <- gt::render_gt({
-    shiny::req(rv$list$regression$Table)
-    rv$list$regression$Table |>
-      gtsummary::as_gt() |>
-      gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$Multivariable$options$descr}**")))
-  })
 
 
   shiny::conditionalPanel(
@@ -711,7 +609,6 @@ server <- function(input, output, session) {
       paste0("report.", input$output_type)
     }),
     content = function(file, type = input$output_type) {
-      shiny::req(rv$list$regression)
       ## Notification is not progressing
       ## Presumably due to missing
       shiny::withProgress(message = "Generating the report. Hold on for a moment..", {

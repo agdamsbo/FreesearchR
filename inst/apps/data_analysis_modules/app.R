@@ -721,7 +721,9 @@ data_summary_server <- function(id,
 
       output$tbl_summary <-
         toastui::renderDatagrid(
-          data() |>
+          {
+            shiny::req(data())
+            data() |>
             overview_vars() |>
             create_overview_datagrid() |>
             add_sparkline(
@@ -729,7 +731,8 @@ data_summary_server <- function(id,
               color.main = color.main,
               color.sec = color.sec
             )
-        )
+          }
+            )
 
     }
   )
@@ -1731,9 +1734,20 @@ redcap_app <- function() {
 #'   fun = "stats::glm",
 #'   args.list = list(family = binomial(link = "logit"))
 #' )
+#' mtcars |>
+#'   default_parsing() |>
+#'   regression_model(
+#'     outcome.str = "mpg",
+#'     auto.mode = FALSE,
+#'     fun = "stats::lm",
+#'     formula.str = "{outcome.str}~{paste(vars,collapse='+')}",
+#'     args.list = NULL,
+#'     vars = c("mpg", "cyl")
+#'   ) |>
+#'   summary()
 regression_model <- function(data,
                              outcome.str,
-                             auto.mode = TRUE,
+                             auto.mode = FALSE,
                              formula.str = NULL,
                              args.list = NULL,
                              fun = NULL,
@@ -1745,20 +1759,22 @@ regression_model <- function(data,
     }
   }
 
+  if (is.null(vars)) {
+    vars <- names(data)[!names(data) %in% outcome.str]
+  } else {
+    if (outcome.str %in% vars) {
+      vars <- vars[!vars %in% outcome.str]
+    }
+    data <- data |> dplyr::select(dplyr::all_of(c(vars, outcome.str)))
+  }
+
   if (!is.null(formula.str)) {
-    formula.str <- glue::glue(formula.str)
+    formula.glue <- glue::glue(formula.str)
   } else {
     assertthat::assert_that(outcome.str %in% names(data),
       msg = "Outcome variable is not present in the provided dataset"
     )
-    formula.str <- glue::glue("{outcome.str}~.")
-
-    if (!is.null(vars)) {
-      if (outcome.str %in% vars) {
-        vars <- vars[vars %in% outcome.str]
-      }
-      data <- data |> dplyr::select(dplyr::all_of(c(vars, outcome.str)))
-    }
+    formula.glue <- glue::glue("{outcome.str}~{paste(vars,collapse='+')}")
   }
 
   # Formatting character variables as factor
@@ -1804,7 +1820,7 @@ regression_model <- function(data,
     getfun(fun),
     c(
       list(data = data),
-      list(formula = as.formula(formula.str)),
+      list(formula = as.formula(formula.glue)),
       args.list
     )
   )
@@ -1902,6 +1918,387 @@ regression_model_uv <- function(data,
   return(out)
 }
 
+
+### HELPERS
+
+#' Outcome data type assessment
+#'
+#' @param data data
+#'
+#' @returns outcome type
+#' @export
+#'
+#' @examples
+#' mtcars |>
+#'   default_parsing() |>
+#'   lapply(outcome_type)
+outcome_type <- function(data) {
+  cl_d <- class(data)
+  if (any(c("numeric", "integer") %in% cl_d)) {
+    out <- "continuous"
+  } else if (identical("factor", cl_d)) {
+    if (length(levels(data)) == 2) {
+      out <- "dichotomous"
+    } else if (length(levels(data)) > 2) {
+      out <- "ordinal"
+    }
+  } else {
+    out <- "unknown"
+  }
+
+  out
+}
+
+
+#' Implemented functions
+#'
+#' @description
+#' Library of supported functions. The list name and "descr" element should be
+#' unique for each element on list.
+#'
+#'
+#' @returns list
+#' @export
+#'
+#' @examples
+#' supported_functions()
+supported_functions <- function() {
+  list(
+    lm = list(
+      descr = "Linear regression model",
+      design = "cross-sectional",
+      out.type = "continuous",
+      fun = "stats::lm",
+      args.list = NULL,
+      formula.str = "{outcome.str}~{paste(vars,collapse='+')}"
+    ),
+    glm = list(
+      descr = "Logistic regression model",
+      design = "cross-sectional",
+      out.type = "dichotomous",
+      fun = "stats::glm",
+      args.list = list(family = stats::binomial(link = "logit")),
+      formula.str = "{outcome.str}~{paste(vars,collapse='+')}"
+    ),
+    polr = list(
+      descr = "Ordinal logistic regression model",
+      design = "cross-sectional",
+      out.type = "ordinal",
+      fun = "MASS::polr",
+      args.list = list(
+        Hess = TRUE,
+        method = "logistic"
+      ),
+      formula.str = "{outcome.str}~{paste(vars,collapse='+')}"
+    )
+  )
+}
+
+
+#' Get possible regression models
+#'
+#' @param data data
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+#' mtcars |>
+#'   default_parsing() |>
+#'   dplyr::pull("cyl") |>
+#'   possible_functions(design = "cross-sectional")
+#'
+#' mtcars |>
+#'   default_parsing() |>
+#'   dplyr::select("cyl") |>
+#'   possible_functions(design = "cross-sectional")
+possible_functions <- function(data, design = c("cross-sectional")) {
+  # browser()
+  if (is.data.frame(data)) {
+    data <- data[[1]]
+  }
+
+  design <- match.arg(design)
+  type <- outcome_type(data)
+
+  design_ls <- supported_functions() |>
+    lapply(\(.x){
+      if (design %in% .x$design) {
+        .x
+      }
+    })
+
+  if (type == "unknown") {
+    out <- type
+  } else {
+    out <- design_ls |>
+      lapply(\(.x){
+        if (type %in% .x$out.type) {
+          .x$descr
+        }
+      }) |>
+      unlist()
+  }
+  unname(out)
+}
+
+
+#' Get the function options based on the selected function description
+#'
+#' @param data vector
+#'
+#' @returns list
+#' @export
+#'
+#' @examples
+#' mtcars |>
+#'   default_parsing() |>
+#'   dplyr::pull(mpg) |>
+#'   possible_functions(design = "cross-sectional") |>
+#'   (\(.x){
+#'     .x[[1]]
+#'   })() |>
+#'   get_fun_options()
+get_fun_options <- function(data) {
+  descrs <- supported_functions() |>
+    lapply(\(.x){
+      .x$descr
+    }) |>
+    unlist()
+  supported_functions() |>
+    (\(.x){
+      .x[match(data, descrs)]
+    })()
+}
+
+
+#' Wrapper to create regression model based on supported models
+#'
+#' @description
+#' Output is a concatenated list of model information and model
+#'
+#'
+#' @param data data
+#' @param outcome.str name of outcome variable
+#' @param fun.descr Description of chosen function matching description in
+#' "supported_functions()"
+#' @param fun name of custom function. Default is NULL.
+#' @param formula.str custom formula glue string. Default is NULL.
+#' @param args.list custom character string to be converted using
+#' argsstring2list() or list of arguments. Default is NULL.
+#' @param ... ignored
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+#' gtsummary::trial |>
+#'   regression_model(
+#'     outcome.str = "age",
+#'     fun = "stats::lm",
+#'     formula.str = "{outcome.str}~.",
+#'     args.list = NULL
+#'   )
+#' ls <- regression_model_list(data = default_parsing(mtcars), outcome.str = "cyl", fun.descr = "Ordinal logistic regression model")
+#' summary(ls$model)
+regression_model_list <- function(data,
+                                  outcome.str,
+                                  fun.descr,
+                                  fun = NULL,
+                                  formula.str = NULL,
+                                  args.list = NULL,
+                                  vars = NULL,
+                                  ...) {
+  options <- get_fun_options(fun.descr) |>
+    (\(.x){
+      .x[[1]]
+    })()
+
+  ## Custom, specific fun, args and formula options
+
+  if (is.null(formula.str)) {
+    formula.str.c <- options$formula.str
+  } else {
+    formula.str.c <- formula.str
+  }
+
+  if (is.null(fun)) {
+    fun.c <- options$fun
+  } else {
+    fun.c <- fun
+  }
+
+  if (is.null(args.list)) {
+    args.list.c <- options$args.list
+  } else {
+    args.list.c <- args.list
+  }
+
+  if (is.character(args.list.c)) args.list.c <- argsstring2list(args.list.c)
+
+  ## Handling vars to print code
+
+  if (is.null(vars)) {
+    vars <- names(data)[!names(data) %in% outcome.str]
+  } else {
+    if (outcome.str %in% vars) {
+      vars <- vars[!vars %in% outcome.str]
+    }
+  }
+
+  model <- do.call(
+    regression_model,
+    c(
+      list(data = data),
+      list(outcome.str = outcome.str),
+      list(fun = fun.c),
+      list(formula.str = formula.str.c),
+      args.list.c
+    )
+  )
+
+  code <- glue::glue(
+    "{fun.c}({paste(Filter(length,list(glue::glue(formula.str.c),'data = data',list2str(args.list.c))),collapse=', ')})"
+  )
+
+  list(
+    options = options,
+    model = model,
+    code = code
+  )
+}
+
+list2str <- function(data) {
+  out <- purrr::imap(data, \(.x, .i){
+    if (is.logical(.x)) {
+      arg <- .x
+    } else {
+      arg <- glue::glue("'{.x}'")
+    }
+    glue::glue("{.i} = {arg}")
+  }) |>
+    unlist() |>
+    paste(collapse = (", "))
+
+  if (out==""){
+    return(NULL)
+  } else {
+    out
+  }
+}
+
+
+#' Title
+#'
+#' @param data
+#' @param outcome.str
+#' @param fun.descr
+#' @param fun
+#' @param formula.str
+#' @param args.list
+#' @param vars
+#' @param ...
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+#' gtsummary::trial |> regression_model_uv(
+#'   outcome.str = "trt",
+#'   fun = "stats::glm",
+#'   args.list = list(family = stats::binomial(link = "logit"))
+#' )
+#' ms <- regression_model_uv_list(data = default_parsing(mtcars), outcome.str = "mpg", fun.descr = "Linear regression model")
+regression_model_uv_list <- function(data,
+                                     outcome.str,
+                                     fun.descr,
+                                     fun = NULL,
+                                     formula.str = NULL,
+                                     args.list = NULL,
+                                     vars = NULL,
+                                     ...) {
+
+  options <- get_fun_options(fun.descr) |>
+    (\(.x){
+      .x[[1]]
+    })()
+
+  ## Custom, specific fun, args and formula options
+
+  if (is.null(formula.str)) {
+    formula.str.c <- options$formula.str
+  } else {
+    formula.str.c <- formula.str
+  }
+
+  if (is.null(fun)) {
+    fun.c <- options$fun
+  } else {
+    fun.c <- fun
+  }
+
+  if (is.null(args.list)) {
+    args.list.c <- options$args.list
+  } else {
+    args.list.c <- args.list
+  }
+
+  if (is.character(args.list.c)) args.list.c <- argsstring2list(args.list.c)
+
+  ## Handling vars to print code
+
+  if (is.null(vars)) {
+    vars <- names(data)[!names(data) %in% outcome.str]
+  } else {
+    if (outcome.str %in% vars) {
+      vars <- vars[!vars %in% outcome.str]
+    }
+  }
+
+  # assertthat::assert_that("character" %in% class(fun),
+  #   msg = "Please provide the function as a character vector."
+  # )
+
+  # model <- do.call(
+  #   regression_model,
+  #   c(
+  #     list(data = data),
+  #     list(outcome.str = outcome.str),
+  #     list(fun = fun.c),
+  #     list(formula.str = formula.str.c),
+  #     args.list.c
+  #   )
+  # )
+
+  model <- vars |>
+    lapply(\(.var){
+      do.call(
+        regression_model,
+        c(
+          list(data = data[c(outcome.str, .var)]),
+          list(outcome.str = outcome.str),
+          list(fun = fun.c),
+          list(formula.str = formula.str.c),
+          args.list.c
+        )
+      )
+    })
+
+
+  vars <- "."
+
+  code_raw <- glue::glue(
+    "{fun.c}({paste(Filter(length,list(glue::glue(formula.str.c),'data = .d',list2str(args.list.c))),collapse=', ')})"
+  )
+
+  code <- glue::glue("lapply(data,function(.d){code_raw})")
+
+  list(
+    options = options,
+    model = model,
+    code = code
+  )
+}
 
 
 ########
@@ -3208,13 +3605,12 @@ ui_elements <- list(
     bslib::nav_panel(
       # value = "analyze",
       title = "Analyses",
+      id = "navanalyses",
       bslib::navset_bar(
         title = "",
         # bslib::layout_sidebar(
         #   fillable = TRUE,
         sidebar = bslib::sidebar(
-          shiny::helpText(em("Please specify relevant settings for your data, and press 'Analyse'")),
-          shiny::uiOutput("outcome_var"),
           shiny::radioButtons(
             inputId = "all",
             label = "Specify covariables",
@@ -3229,93 +3625,125 @@ ui_elements <- list(
             condition = "input.all==1",
             shiny::uiOutput("include_vars")
           ),
-          shiny::uiOutput("strat_var"),
-          shiny::helpText("Only factor/categorical variables are available for stratification. Go back to the 'Data' tab to reclass a variable if it's not on the list."),
-          shiny::conditionalPanel(
-            condition = "input.strat_var!='none'",
-            shiny::radioButtons(
-              inputId = "add_p",
-              label = "Compare strata?",
-              selected = "no",
-              inline = TRUE,
+          bslib::accordion(
+            open = "acc_chars",
+            multiple = FALSE,
+          bslib::accordion_panel(
+            value = "acc_chars",
+            title = "Characteristics",
+            icon = bsicons::bs_icon("table"),
+            shiny::uiOutput("strat_var"),
+            shiny::helpText("Only factor/categorical variables are available for stratification. Go back to the 'Data' tab to reclass a variable if it's not on the list."),
+            shiny::conditionalPanel(
+              condition = "input.strat_var!='none'",
+              shiny::radioButtons(
+                inputId = "add_p",
+                label = "Compare strata?",
+                selected = "no",
+                inline = TRUE,
+                choices = list(
+                  "No" = "no",
+                  "Yes" = "yes"
+                )
+              ),
+              shiny::helpText("Option to perform statistical comparisons between strata in baseline table.")
+            )
+          ),
+          bslib::accordion_panel(
+            value = "acc_reg",
+            title = "Regression",
+            icon = bsicons::bs_icon("calculator"),
+            shiny::uiOutput("outcome_var"),
+            # shiny::selectInput(
+            #   inputId = "design",
+            #   label = "Study design",
+            #   selected = "no",
+            #   inline = TRUE,
+            #   choices = list(
+            #     "Cross-sectional" = "cross-sectional"
+            #   )
+            # ),
+            shiny::uiOutput("regression_type"),
+            bslib::input_task_button(
+              id = "load",
+              label = "Analyse",
+              # icon = shiny::icon("pencil", lib = "glyphicon"),
+              icon = bsicons::bs_icon("pencil"),
+              label_busy = "Working...",
+              icon_busy = fontawesome::fa_i("arrows-rotate",
+                class = "fa-spin",
+                "aria-hidden" = "true"
+              ),
+              type = "secondary",
+              auto_reset = TRUE
+            ),
+            shiny::helpText("If you change the parameters, press 'Analyse' again to update the tables")
+          ),
+          bslib::accordion_panel(
+            value="acc_down",
+            title = "Download",
+            icon = bsicons::bs_icon("download"),
+            shiny::h4("Report"),
+            shiny::helpText("Choose your favourite output file format for further work, and download, when the analyses are done."),
+            shiny::selectInput(
+              inputId = "output_type",
+              label = "Output format",
+              selected = NULL,
               choices = list(
-                "No" = "no",
-                "Yes" = "yes"
+                "MS Word" = "docx",
+                "LibreOffice" = "odt"
+                # ,
+                # "PDF" = "pdf",
+                # "All the above" = "all"
               )
             ),
-            shiny::helpText("Option to perform statistical comparisons between strata in baseline table.")
-          ),
-          shiny::radioButtons(
-            inputId = "specify_factors",
-            label = "Specify categorical variables?",
-            selected = "no",
-            inline = TRUE,
-            choices = list(
-              "Yes" = "yes",
-              "No" = "no"
-            )
-          ),
-          shiny::conditionalPanel(
-            condition = "input.specify_factors=='yes'",
-            shiny::uiOutput("factor_vars")
-          ),
-          bslib::input_task_button(
-            id = "load",
-            label = "Analyse",
-            icon = shiny::icon("pencil", lib = "glyphicon"),
-            label_busy = "Working...",
-            icon_busy = fontawesome::fa_i("arrows-rotate",
-              class = "fa-spin",
-              "aria-hidden" = "true"
+            shiny::br(),
+            # Button
+            shiny::downloadButton(
+              outputId = "report",
+              label = "Download report",
+              icon = shiny::icon("download")
             ),
-            type = "secondary",
-            auto_reset = TRUE
+            shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
+            shiny::tags$hr(),
+            shiny::h4("Data"),
+            shiny::helpText("Choose your favourite output data format to download the modified data."),
+            shiny::selectInput(
+              inputId = "data_type",
+              label = "Data format",
+              selected = NULL,
+              choices = list(
+                "R" = "rds",
+                "stata" = "dta"
+              )
+            ),
+            shiny::br(),
+            # Button
+            shiny::downloadButton(
+              outputId = "data_modified",
+              label = "Download data",
+              icon = shiny::icon("download")
+            )
+          )
           ),
-          shiny::helpText("If you change the parameters, press 'Analyse' again to update the tables"),
+          # shiny::helpText(em("Please specify relevant settings for your data, and press 'Analyse'")),
+          # shiny::radioButtons(
+          #   inputId = "specify_factors",
+          #   label = "Specify categorical variables?",
+          #   selected = "no",
+          #   inline = TRUE,
+          #   choices = list(
+          #     "Yes" = "yes",
+          #     "No" = "no"
+          #   )
+          # ),
+          # shiny::conditionalPanel(
+          #   condition = "input.specify_factors=='yes'",
+          #   shiny::uiOutput("factor_vars")
+          # ),
           # shiny::conditionalPanel(
           #   condition = "output.ready=='yes'",
-          shiny::tags$hr(),
-          shiny::h4("Download results"),
-          shiny::helpText("Choose your favourite output file format for further work, and download, when the analyses are done."),
-          shiny::selectInput(
-            inputId = "output_type",
-            label = "Output format",
-            selected = NULL,
-            choices = list(
-              "MS Word" = "docx",
-              "LibreOffice" = "odt"
-              # ,
-              # "PDF" = "pdf",
-              # "All the above" = "all"
-            )
-          ),
-          shiny::br(),
-          # Button
-          shiny::downloadButton(
-            outputId = "report",
-            label = "Download report",
-            icon = shiny::icon("download")
-          ),
-          shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
-          shiny::tags$hr(),
-          shiny::h4("Download data"),
-          shiny::helpText("Choose your favourite output data format to download the modified data."),
-          shiny::selectInput(
-            inputId = "data_type",
-            label = "Data format",
-            selected = NULL,
-            choices = list(
-              "R" = "rds",
-              "stata" = "dta"
-            )
-          ),
-          shiny::br(),
-          # Button
-          shiny::downloadButton(
-            outputId = "data_modified",
-            label = "Download data",
-            icon = shiny::icon("download")
-          )
+          # shiny::tags$hr(),
         ),
         bslib::nav_panel(
           title = "Baseline characteristics",
@@ -3489,7 +3917,9 @@ server <- function(input, output, session) {
     test = "no",
     data_original = NULL,
     data = NULL,
-    data_filtered = NULL
+    data_filtered = NULL,
+    models = NULL,
+    check = NULL
   )
 
   ##############################################################################
@@ -3672,8 +4102,20 @@ server <- function(input, output, session) {
   # IDEAFilter has the least cluttered UI, but might have a License issue
   data_filter <- IDEAFilter::IDEAFilter("data_filter", data = reactive(rv$data), verbose = TRUE)
 
-  shiny::observeEvent(data_filter(), {
+  shiny::observeEvent(
+    list(
+      shiny::reactive(rv$data),
+      shiny::reactive(rv$data_original),
+      data_filter(),
+      base_vars()
+      ), {
     rv$data_filtered <- data_filter()
+
+    rv$list$data <- data_filter() |>
+      REDCapCAST::fct_drop.data.frame() |>
+      (\(.x){
+        .x[base_vars()]
+      })()
   })
 
   output$filtered_code <- shiny::renderPrint({
@@ -3727,6 +4169,16 @@ server <- function(input, output, session) {
     )
   })
 
+  output$regression_type <- shiny::renderUI({
+    shiny::req(input$outcome_var)
+    shiny::selectizeInput(
+      inputId = "regression_type",
+      # selected = colnames(rv$data_filtered)[sapply(rv$data_filtered, is.factor)],
+      label = "Choose regression analysis",
+      choices = possible_functions(data = dplyr::select(rv$data_filtered, input$outcome_var), design = "cross-sectional"),
+      multiple = FALSE
+    )
+  })
 
   output$factor_vars <- shiny::renderUI({
     shiny::selectizeInput(
@@ -3789,10 +4241,122 @@ server <- function(input, output, session) {
   #     gt::gt()
   # })
 
+
+  ### Outputs
+
+  # shiny::observeEvent(data_filter(), {
+  #   rv$data_filtered <- data_filter()
+  # })
+
+  # shiny::observeEvent(
+  #   shiny::reactive(rv$data_filtered),
+  #   {
+  #     rv$list$data <- rv$data_filtered |>
+  #       # dplyr::mutate(dplyr::across(dplyr::where(is.character), as.factor)) |>
+  #       REDCapCAST::fct_drop.data.frame() |>
+  #       # factorize(vars = input$factor_vars) |>
+  #       remove_na_attr()
+  #
+  #     # rv$list$data <- data
+  #     # rv$list$data <- data[base_vars()]
+  #   }
+  # )
+
+  #   shiny::observe({
+  #     if (input$strat_var == "none") {
+  #       by.var <- NULL
+  #     } else {
+  #       by.var <- input$strat_var
+  #     }
+  #
+  #     rv$list$table1 <- rv$list$data |>
+  #       baseline_table(
+  #         fun.args =
+  #           list(
+  #             by = by.var
+  #           )
+  #       ) |>
+  #       (\(.x){
+  #         if (!is.null(by.var)) {
+  #           .x |> gtsummary::add_overall()
+  #         } else {
+  #           .x
+  #         }
+  #       })() |>
+  #       (\(.x){
+  #         if (input$add_p == "yes") {
+  #           .x |>
+  #             gtsummary::add_p() |>
+  #             gtsummary::bold_p()
+  #         } else {
+  #           .x
+  #         }
+  #       })()
+  #   })
+  #
+  #     output$table1 <- gt::render_gt(
+  #       rv$list$table1 |>
+  #         gtsummary::as_gt() |>
+  # gt::tab_header(shiny::md("**Table 1. Patient Characteristics**"))
+  #     )
+
   shiny::observeEvent(
+    # ignoreInit = TRUE,
+    list(
+      shiny::reactive(rv$list$data),
+      shiny::reactive(rv$data),
+      input$strat_var,
+      input$include_vars,
+      input$add_p
+    ),
     {
-      input$load
-    },
+      shiny::req(input$strat_var)
+      shiny::req(rv$list$data)
+
+      if (input$strat_var == "none") {
+        by.var <- NULL
+      } else {
+        by.var <- input$strat_var
+      }
+
+      rv$list$table1 <-
+        rv$list$data |>
+        baseline_table(
+          fun.args =
+            list(
+              by = by.var
+            )
+        ) |>
+        (\(.x){
+          if (!is.null(by.var)) {
+            .x |> gtsummary::add_overall()
+          } else {
+            .x
+          }
+        })() |>
+        (\(.x){
+          if (input$add_p == "yes") {
+            .x |>
+              gtsummary::add_p() |>
+              gtsummary::bold_p()
+          } else {
+            .x
+          }
+        })()
+    }
+  )
+
+
+  output$table1 <- gt::render_gt({
+    shiny::req(rv$list$table1)
+
+    rv$list$table1 |>
+      gtsummary::as_gt() |>
+      gt::tab_header(gt::md("**Table 1: Baseline Characteristics**"))
+  })
+
+  shiny::observeEvent(
+    input$load,
     {
       shiny::req(input$outcome_var)
       # browser()
@@ -3800,152 +4364,118 @@ server <- function(input, output, session) {
       # data <- data_filter$filtered() |>
       tryCatch(
         {
-          data <- rv$data_filtered |>
-            dplyr::mutate(dplyr::across(dplyr::where(is.character), as.factor)) |>
-            REDCapCAST::fct_drop.data.frame() |>
-            factorize(vars = input$factor_vars) |>
-            remove_na_attr()
-
-          if (input$strat_var == "none") {
-            by.var <- NULL
-          } else {
-            by.var <- input$strat_var
-          }
-
-          data <- data[base_vars()]
-
-          # model <- data |>
-          #   regression_model(
-          #     outcome.str = input$outcome_var,
-          #     auto.mode = input$regression_auto == 1,
-          #     formula.str = input$regression_formula,
-          #     fun = input$regression_fun,
-          #     args.list = eval(parse(text = paste0("list(", input$regression_args, ")")))
-          #   )
-
-          models <- list(
-            "Univariable" = regression_model_uv,
-            "Multivariable" = regression_model
+          model_lists <- list(
+            "Univariable" = regression_model_uv_list,
+            "Multivariable" = regression_model_list
           ) |>
             lapply(\(.fun){
-              do.call(
+              ls <- do.call(
                 .fun,
                 c(
-                  list(data = data),
+                  list(data = rv$list$data),
                   list(outcome.str = input$outcome_var),
-                  list(formula.str = input$regression_formula),
-                  list(fun = input$regression_fun),
-                  list(args.list = eval(parse(text = paste0("list(", input$regression_args, ")"))))
+                  list(fun.descr = input$regression_type)
                 )
               )
             })
 
-          rv$list$data <- data
+          rv$models <- model_lists
 
-
-
-          rv$list$check <- purrr::pluck(models, "Multivariable") |>
-            performance::check_model()
-
-          rv$list$table1 <- data |>
-            baseline_table(
-              fun.args =
-                list(
-                  by = by.var
-                )
-            ) |>
-            (\(.x){
-              if (!is.null(by.var)) {
-                .x |> gtsummary::add_overall()
-              } else {
-                .x
-              }
-            })() |>
-            (\(.x){
-              if (input$add_p == "yes") {
-                .x |>
-                  gtsummary::add_p() |>
-                  gtsummary::bold_p()
-              } else {
-                .x
-              }
-            })()
-
-          rv$list$table2 <- models |>
-            purrr::map(regression_table) |>
-            tbl_merge()
-
-
-          rv$list$input <- input
-
-
-          # rv$list <- list(
-          #   data = data,
-          #   check = check,
-          #   table1 = data |>
-          #     baseline_table(
-          #       fun.args =
-          #         list(
-          #           by = by.var
-          #         )
-          #     ) |>
-          #     (\(.x){
-          #       if (!is.null(by.var)) {
-          #         .x |> gtsummary::add_overall()
-          #       } else {
-          #         .x
-          #       }
-          #     })() |>
-          #     (\(.x){
-          #       if (input$add_p == "yes") {
-          #         .x |>
-          #           gtsummary::add_p() |>
-          #           gtsummary::bold_p()
-          #       } else {
-          #         .x
-          #       }
-          #     })(),
-          #   table2 = models |>
-          #     purrr::map(regression_table) |>
-          #     tbl_merge(),
-          #   input = input
-          # )
-
-          output$table1 <- gt::render_gt(
-            rv$list$table1 |>
-              gtsummary::as_gt()
-          )
-
-          output$table2 <- gt::render_gt(
-            rv$list$table2 |>
-              gtsummary::as_gt()
-          )
-
-          output$check <- shiny::renderPlot({
-            p <- plot(rv$list$check) +
-              patchwork::plot_annotation(title = "Multivariable regression model checks")
-            p
-            # Generate checks in one column
-            # layout <- sapply(seq_len(length(p)), \(.x){
-            #   patchwork::area(.x, 1)
-            # })
-            #
-            # p + patchwork::plot_layout(design = Reduce(c, layout))
-
-            # patchwork::wrap_plots(ncol=1) +
-            # patchwork::plot_annotation(title = 'Multivariable regression model checks')
-          })
+          # rv$models <- lapply(model_lists, \(.x){
+          #   .x$model
+          # })
         },
         warning = function(warn) {
           showNotification(paste0(warn), type = "warning")
         },
         error = function(err) {
-          showNotification(paste0("There was the following error. Inspect your data and adjust settings. Error: ", err), type = "err")
+          showNotification(paste0("Creating regression models failed with the following error: ", err), type = "err")
+        }
+      )
+    }
+  )
+
+  shiny::observeEvent(
+    ignoreInit = TRUE,
+    list(
+      rv$models
+    ),
+    {
+      shiny::req(rv$models)
+      tryCatch(
+        {
+          rv$check <- lapply(rv$models, \(.x){
+            .x$model
+          }) |>
+            purrr::pluck("Multivariable") |>
+            performance::check_model()
+        },
+        warning = function(warn) {
+          showNotification(paste0(warn), type = "warning")
+        },
+        error = function(err) {
+          showNotification(paste0("Running model assumptions checks failed with the following error: ", err), type = "err")
+        }
+      )
+    }
+  )
+
+  output$check <- shiny::renderPlot({
+    shiny::req(rv$check)
+    p <- plot(rv$check) +
+      patchwork::plot_annotation(title = "Multivariable regression model checks")
+    p
+    # Generate checks in one column
+    # layout <- sapply(seq_len(length(p)), \(.x){
+    #   patchwork::area(.x, 1)
+    # })
+    #
+    # p + patchwork::plot_layout(design = Reduce(c, layout))
+
+    # patchwork::wrap_plots(ncol=1) +
+    # patchwork::plot_annotation(title = 'Multivariable regression model checks')
+  })
+
+
+  shiny::observeEvent(
+    input$load,
+    {
+      shiny::req(rv$models)
+      # browser()
+      # Assumes all character variables can be formatted as factors
+      # data <- data_filter$filtered() |>
+      tryCatch(
+        {
+          tbl <- lapply(rv$models, \(.x){
+            .x$model
+          }) |>
+            purrr::map(regression_table) |>
+            tbl_merge()
+
+          rv$list$regression <- c(
+            rv$models,
+            list(Table = tbl)
+          )
+
+          rv$list$input <- input
+        },
+        warning = function(warn) {
+          showNotification(paste0(warn), type = "warning")
+        },
+        error = function(err) {
+          showNotification(paste0("Creating a regression table failed with the following error: ", err), type = "err")
         }
       )
       rv$ready <- "ready"
     }
   )
+
+  output$table2 <- gt::render_gt({
+    shiny::req(rv$list$regression$Table)
+    rv$list$regression$Table |>
+      gtsummary::as_gt() |>
+      gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$Multivariable$options$descr}**")))
+  })
 
 
   shiny::conditionalPanel(
@@ -4019,6 +4549,7 @@ server <- function(input, output, session) {
       paste0("report.", input$output_type)
     }),
     content = function(file, type = input$output_type) {
+      shiny::req(rv$list$regression)
       ## Notification is not progressing
       ## Presumably due to missing
       shiny::withProgress(message = "Generating the report. Hold on for a moment..", {

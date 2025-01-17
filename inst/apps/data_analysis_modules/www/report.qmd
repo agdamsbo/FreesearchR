@@ -17,8 +17,6 @@ web_data <- readr::read_rds(file = params$data.file)
 library(gtsummary)
 library(gt)
 library(flextable)
-library(easystats)
-library(patchwork)
 # library(webResearch)
 ```
 
@@ -42,33 +40,16 @@ web_data$table1 |>
   flextable::set_table_properties(width = 1, layout = "autofit")
 ```
 
-Here are the regression results.
+Here are the results from the `r web_data$regression$Multivariable$options$descr`.
 
 ```{r}
 #| label: tbl-regression
 #| tbl-cap: Regression analysis results
-web_data$table2|> 
+web_data$regression$Table|> 
   gtsummary::as_flex_table() |> 
   flextable::set_table_properties(width = 1, layout = "autofit")
 ```
 
-
 ## Discussion
 
 Good luck on your further work!
-
-## Sensitivity
-
-Here are the results from testing the regression model:
-
-
-```{r}
-#| label: tbl-checks
-#| fig-cap: Regression analysis checks
-#| fig-height: 8
-#| fig-width: 6
-#| fig-dpi: 600
-
-plot(web_data$check)
-
-```

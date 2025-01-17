@@ -6,6 +6,8 @@
 
 * NEW: summary grid with sparklines.
 
+* Speed improvements and better regression analysis handling. Preparations for extending analysis options and study designs.
+
 
 # freesearcheR 24.12.1
 

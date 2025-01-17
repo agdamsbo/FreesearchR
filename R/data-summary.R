@@ -39,7 +39,9 @@ data_summary_server <- function(id,
 
       output$tbl_summary <-
         toastui::renderDatagrid(
-          data() |>
+          {
+            shiny::req(data())
+            data() |>
             overview_vars() |>
             create_overview_datagrid() |>
             add_sparkline(
@@ -47,7 +49,8 @@ data_summary_server <- function(id,
               color.main = color.main,
               color.sec = color.sec
             )
-        )
+          }
+            )
 
     }
   )
