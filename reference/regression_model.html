@@ -169,7 +169,8 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (!qr) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         z$qr &lt;- NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     z</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> })(formula = age ~ ., data = structure(list(trt = structure(c(1L, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> })(formula = age ~ trt + marker + stage + grade + response + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     death + ttdeath, data = structure(list(trt = structure(c(1L, </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2L, 1L, 1L, 1L, 2L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 1L, </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 1L, 2L, 2L, 1L, 2L, 1L, 2L, </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1L, 1L, 1L, 2L, 1L, 2L, 2L, 2L, 2L, 1L, 2L, 1L, 2L, 1L, 2L, 2L, </span>
@@ -607,7 +608,8 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span>         data = data, offset = offset, control = control, method = method, </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         contrasts = attr(X, "contrasts"), xlevels = .getXlevels(mt, </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             mf))), class = c(fit$class, c("glm", "lm")))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> })(formula = trt ~ ., family = structure(list(family = "binomial", </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> })(formula = trt ~ age + marker + stage + grade + response + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     death + ttdeath, family = structure(list(family = "binomial", </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     link = "logit", linkfun = function (mu) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     .Call(C_logit_link, mu), linkinv = function (eta) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     .Call(C_logit_linkinv, eta), variance = function (mu) </span>
