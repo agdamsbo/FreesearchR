@@ -7,7 +7,7 @@ template:
     bootswatch: "united"
     base_font: {google: "Montserrat"}
     heading_font: {google: "Public Sans"}
-    code_font: {google: "Open Sans"}
+    # code_font: {google: "Open Sans"}
   light-switch: false
 
 navbar:
