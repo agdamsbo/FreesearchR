@@ -101,6 +101,9 @@ server <- function(input, output, session) {
       },
       dta = function(file) {
         haven::read_dta(file = file)
+      },
+      csv = function(file){
+        readr::read_csv(file)
       }
     )
   )
@@ -219,9 +222,11 @@ server <- function(input, output, session) {
     data_r = reactive(rv$data)
   )
   shiny::observeEvent(
-    data_modal_r(), {
-    rv$data <- data_modal_r()
-    })
+    data_modal_r(),
+    {
+      rv$data <- data_modal_r()
+    }
+  )
 
   #########  Show result
 
@@ -230,7 +235,7 @@ server <- function(input, output, session) {
     # data <- rv$data
     toastui::datagrid(
       # data = rv$data # ,
-      data = data_filter(),
+      data = data_filter(),pagination = 30,
       # bordered = TRUE,
       # compact = TRUE,
       # striped = TRUE
@@ -273,15 +278,17 @@ server <- function(input, output, session) {
       shiny::reactive(rv$data_original),
       data_filter(),
       base_vars()
-      ), {
-    rv$data_filtered <- data_filter()
+    ),
+    {
+      rv$data_filtered <- data_filter()
 
-    rv$list$data <- data_filter() |>
-      REDCapCAST::fct_drop.data.frame() |>
-      (\(.x){
-        .x[base_vars()]
-      })()
-  })
+      rv$list$data <- data_filter() |>
+        REDCapCAST::fct_drop.data.frame() |>
+        (\(.x){
+          .x[base_vars()]
+        })()
+    }
+  )
 
   output$filtered_code <- shiny::renderPrint({
     out <- gsub(
@@ -308,7 +315,7 @@ server <- function(input, output, session) {
 
   ##############################################################################
   #########
-  #########  Data analyses section
+  #########  Data analyses Inputs
   #########
   ##############################################################################
 
@@ -465,6 +472,12 @@ server <- function(input, output, session) {
   # gt::tab_header(shiny::md("**Table 1. Patient Characteristics**"))
   #     )
 
+  ##############################################################################
+  #########
+  #########  Data analyses results
+  #########
+  ##############################################################################
+
   shiny::observeEvent(
     # ignoreInit = TRUE,
     list(
@@ -531,6 +544,10 @@ server <- function(input, output, session) {
       # data <- data_filter$filtered() |>
       tryCatch(
         {
+          ## Which models to create should be decided by input
+          ## Could also include
+          ##   imputed or
+          ##   minimally adjusted
           model_lists <- list(
             "Univariable" = regression_model_uv_list,
             "Multivariable" = regression_model_list
@@ -546,7 +563,16 @@ server <- function(input, output, session) {
               )
             })
 
-          rv$models <- model_lists
+          # browser()
+
+          rv$list$regression$options <- get_fun_options(input$regression_type) |>
+            (\(.x){
+              .x[[1]]
+            })()
+
+          rv$list$regression$models <- model_lists
+
+          # names(rv$list$regression)
 
           # rv$models <- lapply(model_lists, \(.x){
           #   .x$model
@@ -565,13 +591,13 @@ server <- function(input, output, session) {
   shiny::observeEvent(
     ignoreInit = TRUE,
     list(
-      rv$models
+      rv$list$regression$models
     ),
     {
-      shiny::req(rv$models)
+      shiny::req(rv$list$regression$models)
       tryCatch(
         {
-          rv$check <- lapply(rv$models, \(.x){
+          rv$check <- lapply(rv$list$regression$models, \(.x){
             .x$model
           }) |>
             purrr::pluck("Multivariable") |>
@@ -607,22 +633,26 @@ server <- function(input, output, session) {
   shiny::observeEvent(
     input$load,
     {
-      shiny::req(rv$models)
-      # browser()
-      # Assumes all character variables can be formatted as factors
-      # data <- data_filter$filtered() |>
+      shiny::req(rv$list$regression$models)
       tryCatch(
         {
-          tbl <- lapply(rv$models, \(.x){
+          out <- lapply(rv$list$regression$models, \(.x){
             .x$model
           }) |>
-            purrr::map(regression_table) |>
-            tbl_merge()
+            purrr::map(regression_table)
 
-          rv$list$regression <- c(
-            rv$models,
-            list(Table = tbl)
-          )
+          if (input$add_regression_p == "no") {
+            out <- out |>
+              lapply(\(.x){
+                .x |>
+                  gtsummary::modify_column_hide(
+                    column = "p.value"
+                  )
+              })
+          }
+
+          rv$list$regression$table <- out |>
+            tbl_merge()
 
           rv$list$input <- input
         },
@@ -638,10 +668,10 @@ server <- function(input, output, session) {
   )
 
   output$table2 <- gt::render_gt({
-    shiny::req(rv$list$regression$Table)
-    rv$list$regression$Table |>
+    shiny::req(rv$list$regression$table)
+    rv$list$regression$table |>
       gtsummary::as_gt() |>
-      gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$Multivariable$options$descr}**")))
+      gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$options$descr}**")))
   })
 
 

@@ -2,9 +2,9 @@
 format: 
   html:
     embed-resources: true
-title: "webResearch analysis results"
+title: "freesearcheR analysis results"
 date: today
-author: webResearch Tool
+author: freesearcheR Tool
 toc: true
 execute: 
   echo: false
@@ -17,12 +17,12 @@ web_data <- readr::read_rds(file = params$data.file)
 library(gtsummary)
 library(gt)
 library(flextable)
-# library(webResearch)
+# library(freesearcheR)
 ```
 
 ## Introduction
 
-Research should be free and open with easy access for all. The webResearch tool attempts to help lower the bar to participate in contributing to science.
+Research should be free and open with easy access for all. The freesearcheR tool attempts to help lower the bar to participate in contributing to science by making guided data analysis easily accessible in the web-browser.
 
 ## Methods
 
@@ -40,12 +40,12 @@ web_data$table1 |>
   flextable::set_table_properties(width = 1, layout = "autofit")
 ```
 
-Here are the results from the `r web_data$regression$Multivariable$options$descr`.
+Here are the results from the `r web_data$regression$options$descr`.
 
 ```{r}
 #| label: tbl-regression
 #| tbl-cap: Regression analysis results
-web_data$regression$Table|> 
+web_data$regression$table|> 
   gtsummary::as_flex_table() |> 
   flextable::set_table_properties(width = 1, layout = "autofit")
 ```

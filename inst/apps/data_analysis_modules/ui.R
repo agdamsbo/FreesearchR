@@ -331,6 +331,16 @@ ui_elements <- list(
             #   )
             # ),
             shiny::uiOutput("regression_type"),
+            shiny::radioButtons(
+              inputId = "add_regression_p",
+              label = "Add p-value",
+              inline = TRUE,
+              selected = "no",
+              choices = list(
+                    "Yes" = "yes",
+                    "No" = "no"
+                  )
+            ),
             bslib::input_task_button(
               id = "load",
               label = "Analyse",
@@ -344,7 +354,7 @@ ui_elements <- list(
               type = "secondary",
               auto_reset = TRUE
             ),
-            shiny::helpText("If you change the parameters, press 'Analyse' again to update the tables")
+            shiny::helpText("If you change the parameters, press 'Analyse' again to update the regression analysis")
           ),
           bslib::accordion_panel(
             value="acc_down",
