@@ -90,6 +90,8 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
+  consider.na <- c("NA", "\"\"", "")
+
   data_file <- datamods::import_file_server(
     id = "file_import",
     show_data_in = "popup",
@@ -97,13 +99,22 @@ server <- function(input, output, session) {
     return_class = "data.frame",
     read_fns = list(
       ods = function(file) {
-        readODS::read_ods(path = file)
+        readODS::read_ods(path = file, na = consider.na)
       },
       dta = function(file) {
-        haven::read_dta(file = file)
+        haven::read_dta(file = file, .name_repair = "unique_quiet")
       },
-      csv = function(file){
-        readr::read_csv(file)
+      csv = function(file) {
+        readr::read_csv(file = file, na = consider.na)
+      },
+      # xls = function(file){
+      #   openxlsx2::read_xlsx(file = file, na.strings = consider.na,)
+      # },
+      # xlsx = function(file){
+      #   openxlsx2::read_xlsx(file = file, na.strings = consider.na,)
+      # },
+      rds = function(file) {
+        readr::read_rds(file = file)
       }
     )
   )
@@ -236,7 +247,7 @@ server <- function(input, output, session) {
     # data <- rv$data
     toastui::datagrid(
       # data = rv$data # ,
-      data = data_filter(),pagination = 30,
+      data = data_filter(), pagination = 30,
       # bordered = TRUE,
       # compact = TRUE,
       # striped = TRUE
@@ -291,7 +302,8 @@ server <- function(input, output, session) {
         })() |>
         janitor::remove_empty(
           which = "cols",
-          cutoff = input$complete_cutoff/100)
+          cutoff = input$complete_cutoff / 100
+        )
     }
   )
 

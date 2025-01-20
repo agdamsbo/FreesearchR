@@ -226,10 +226,13 @@ create_overview_datagrid <- function(data) {
     formatter = toastui::JS("function(obj) {return (obj.value*100).toFixed(0) + '%';}")
   )
 
+  ## This could obviously be extended, which will added even more complexity.
+
   grid <- toastui::grid_filters(
     grid = grid,
-    columns = "name",
-    showApplyBtn = TRUE,
+    column = "name",
+    # columns = unname(std_names[std_names!="vals"]),
+    showApplyBtn = FALSE,
     showClearBtn = TRUE,
     type = "text"
   )

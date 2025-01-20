@@ -694,10 +694,11 @@ data_summary_ui <- function(id) {
 }
 
 
-#' @param id id
+#'
 #' @param data data
 #' @param color.main main color
 #' @param color.sec secondary color
+#' @param ... arguments passed to toastui::datagrid
 #'
 #' @name data-summary
 #' @returns shiny server module
@@ -705,7 +706,8 @@ data_summary_ui <- function(id) {
 data_summary_server <- function(id,
                                 data,
                                 color.main,
-                                color.sec) {
+                                color.sec,
+                                ...) {
   shiny::moduleServer(
     id = id,
     module = function(input, output, session) {
@@ -906,10 +908,13 @@ create_overview_datagrid <- function(data) {
     formatter = toastui::JS("function(obj) {return (obj.value*100).toFixed(0) + '%';}")
   )
 
+  ## This could obviously be extended, which will added even more complexity.
+
   grid <- toastui::grid_filters(
     grid = grid,
-    columns = "name",
-    showApplyBtn = TRUE,
+    column = "name",
+    # columns = unname(std_names[std_names!="vals"]),
+    showApplyBtn = FALSE,
     showClearBtn = TRUE,
     type = "text"
   )
@@ -3625,7 +3630,7 @@ ui_elements <- list(
                              min = 0,
                              max = 100,
                              step = 10,
-                             value = 50,
+                             value = 70,
                              ticks = FALSE),
           shiny::helpText("To improve speed, columns are removed before analysing data, if copleteness is below above value."),
           shiny::radioButtons(
@@ -3955,6 +3960,8 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
+  consider.na <- c("NA", "\"\"", "")
+
   data_file <- datamods::import_file_server(
     id = "file_import",
     show_data_in = "popup",
@@ -3962,13 +3969,22 @@ server <- function(input, output, session) {
     return_class = "data.frame",
     read_fns = list(
       ods = function(file) {
-        readODS::read_ods(path = file)
+        readODS::read_ods(path = file, na = consider.na)
       },
       dta = function(file) {
-        haven::read_dta(file = file)
+        haven::read_dta(file = file, .name_repair = "unique_quiet")
       },
-      csv = function(file){
-        readr::read_csv(file)
+      csv = function(file) {
+        readr::read_csv(file = file, na = consider.na)
+      },
+      # xls = function(file){
+      #   openxlsx2::read_xlsx(file = file, na.strings = consider.na,)
+      # },
+      # xlsx = function(file){
+      #   openxlsx2::read_xlsx(file = file, na.strings = consider.na,)
+      # },
+      rds = function(file) {
+        readr::read_rds(file = file)
       }
     )
   )
@@ -4038,7 +4054,8 @@ server <- function(input, output, session) {
       rv$data_filtered
     }),
     color.main = "#2A004E",
-    color.sec = "#C62300"
+    color.sec = "#C62300",
+    pagination = 20
   )
 
   #########
@@ -4100,7 +4117,7 @@ server <- function(input, output, session) {
     # data <- rv$data
     toastui::datagrid(
       # data = rv$data # ,
-      data = data_filter(),pagination = 30,
+      data = data_filter(), pagination = 30,
       # bordered = TRUE,
       # compact = TRUE,
       # striped = TRUE
@@ -4155,7 +4172,8 @@ server <- function(input, output, session) {
         })() |>
         janitor::remove_empty(
           which = "cols",
-          cutoff = input$complete_cutoff/100)
+          cutoff = input$complete_cutoff / 100
+        )
     }
   )
 
