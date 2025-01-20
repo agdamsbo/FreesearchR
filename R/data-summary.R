@@ -12,10 +12,11 @@ data_summary_ui <- function(id) {
 }
 
 
-#' @param id id
+#'
 #' @param data data
 #' @param color.main main color
 #' @param color.sec secondary color
+#' @param ... arguments passed to toastui::datagrid
 #'
 #' @name data-summary
 #' @returns shiny server module
@@ -23,7 +24,8 @@ data_summary_ui <- function(id) {
 data_summary_server <- function(id,
                                 data,
                                 color.main,
-                                color.sec) {
+                                color.sec,
+                                ...) {
   shiny::moduleServer(
     id = id,
     module = function(input, output, session) {

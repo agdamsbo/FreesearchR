@@ -173,7 +173,8 @@ server <- function(input, output, session) {
       rv$data_filtered
     }),
     color.main = "#2A004E",
-    color.sec = "#C62300"
+    color.sec = "#C62300",
+    pagination = 20
   )
 
   #########
