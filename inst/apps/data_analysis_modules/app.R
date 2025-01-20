@@ -906,6 +906,15 @@ create_overview_datagrid <- function(data) {
     formatter = toastui::JS("function(obj) {return (obj.value*100).toFixed(0) + '%';}")
   )
 
+  grid <- toastui::grid_filters(
+    grid = grid,
+    columns = "name",
+    showApplyBtn = TRUE,
+    showClearBtn = TRUE,
+    type = "text"
+  )
+
+
   return(grid)
 }
 
