@@ -218,7 +218,10 @@ server <- function(input, output, session) {
     id = "modal_column",
     data_r = reactive(rv$data)
   )
-  shiny::observeEvent(data_modal_r(), rv$data <- data_modal_r())
+  shiny::observeEvent(
+    data_modal_r(), {
+    rv$data <- data_modal_r()
+    })
 
   #########  Show result
 
@@ -227,7 +230,7 @@ server <- function(input, output, session) {
     # data <- rv$data
     toastui::datagrid(
       # data = rv$data # ,
-      data = data_filter()
+      data = data_filter(),
       # bordered = TRUE,
       # compact = TRUE,
       # striped = TRUE
@@ -467,6 +470,8 @@ server <- function(input, output, session) {
     list(
       shiny::reactive(rv$list$data),
       shiny::reactive(rv$data),
+      shiny::reactive(rv$data_original),
+      data_filter(),
       input$strat_var,
       input$include_vars,
       input$add_p
