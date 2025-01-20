@@ -278,6 +278,13 @@ ui_elements <- list(
         # bslib::layout_sidebar(
         #   fillable = TRUE,
         sidebar = bslib::sidebar(
+          shiny::sliderInput(inputId = "complete_cutoff",
+                             label = "Cut-off for column completeness",
+                             min = 0,
+                             max = 1,
+                             step = 0.1,
+                             value = 0.5),
+          shiny::helpText("To improve speed, columns are removed before analysing data"),
           shiny::radioButtons(
             inputId = "all",
             label = "Specify covariables",

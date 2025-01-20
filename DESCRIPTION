@@ -53,7 +53,8 @@ Imports:
     data.table,
     apexcharter,
     teal.modules.general,
-    esquisse
+    esquisse,
+    janitor
 Suggests: 
     styler,
     devtools,

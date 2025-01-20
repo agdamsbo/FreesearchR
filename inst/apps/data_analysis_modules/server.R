@@ -277,7 +277,8 @@ server <- function(input, output, session) {
       shiny::reactive(rv$data),
       shiny::reactive(rv$data_original),
       data_filter(),
-      base_vars()
+      base_vars(),
+      input$complete_cutoff
     ),
     {
       rv$data_filtered <- data_filter()
@@ -286,7 +287,8 @@ server <- function(input, output, session) {
         REDCapCAST::fct_drop.data.frame() |>
         (\(.x){
           .x[base_vars()]
-        })()
+        })() |>
+        janitor::remove_empty(which = "cols",cutoff = input$complete_cutoff)
     }
   )
 
@@ -487,7 +489,8 @@ server <- function(input, output, session) {
       data_filter(),
       input$strat_var,
       input$include_vars,
-      input$add_p
+      input$add_p,
+      input$complete_cutoff
     ),
     {
       shiny::req(input$strat_var)

@@ -3620,6 +3620,13 @@ ui_elements <- list(
         # bslib::layout_sidebar(
         #   fillable = TRUE,
         sidebar = bslib::sidebar(
+          shiny::sliderInput(inputId = "complete_cutoff",
+                             label = "Cut-off for column completeness",
+                             min = 0,
+                             max = 1,
+                             step = 0.1,
+                             value = 0.5),
+          shiny::helpText("To improve speed, columns are removed before analysing data"),
           shiny::radioButtons(
             inputId = "all",
             label = "Specify covariables",
@@ -4134,7 +4141,8 @@ server <- function(input, output, session) {
       shiny::reactive(rv$data),
       shiny::reactive(rv$data_original),
       data_filter(),
-      base_vars()
+      base_vars(),
+      input$complete_cutoff
     ),
     {
       rv$data_filtered <- data_filter()
@@ -4143,7 +4151,8 @@ server <- function(input, output, session) {
         REDCapCAST::fct_drop.data.frame() |>
         (\(.x){
           .x[base_vars()]
-        })()
+        })() |>
+        janitor::remove_empty(which = "cols",cutoff = input$complete_cutoff)
     }
   )
 
@@ -4344,7 +4353,8 @@ server <- function(input, output, session) {
       data_filter(),
       input$strat_var,
       input$include_vars,
-      input$add_p
+      input$add_p,
+      input$complete_cutoff
     ),
     {
       shiny::req(input$strat_var)
