@@ -279,12 +279,13 @@ ui_elements <- list(
         #   fillable = TRUE,
         sidebar = bslib::sidebar(
           shiny::sliderInput(inputId = "complete_cutoff",
-                             label = "Cut-off for column completeness",
+                             label = "Cut-off for column completeness (%)",
                              min = 0,
-                             max = 1,
-                             step = 0.1,
-                             value = 0.5),
-          shiny::helpText("To improve speed, columns are removed before analysing data"),
+                             max = 100,
+                             step = 10,
+                             value = 70,
+                             ticks = FALSE),
+          shiny::helpText("To improve speed, columns are removed before analysing data, if copleteness is below above value."),
           shiny::radioButtons(
             inputId = "all",
             label = "Specify covariables",

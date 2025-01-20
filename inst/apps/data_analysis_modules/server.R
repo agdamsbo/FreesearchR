@@ -288,7 +288,9 @@ server <- function(input, output, session) {
         (\(.x){
           .x[base_vars()]
         })() |>
-        janitor::remove_empty(which = "cols",cutoff = input$complete_cutoff)
+        janitor::remove_empty(
+          which = "cols",
+          cutoff = input$complete_cutoff/100)
     }
   )
 
