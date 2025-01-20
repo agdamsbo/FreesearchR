@@ -12,6 +12,20 @@ template:
 
 navbar:
   bg: primary
+  structure:
+    left:  [intro, reference, roadmap, news]
+    right: [search, github]
+  components:
+    roadmap:
+      text: Roadmap
+      href: ROADMAP.md
 
 includes:
   in_header: umami-page.html
+
+footer:
+  structure:
+    left: built_with
+    right: [developed_by, legal]
+  components:
+    legal: Provided without **any warranty**.
