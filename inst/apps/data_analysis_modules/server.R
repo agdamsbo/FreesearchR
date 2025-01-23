@@ -29,7 +29,7 @@ library(gtsummary)
 
 # source("functions.R")
 
-
+data(mtcars)
 
 # light <- custom_theme()
 #
@@ -672,11 +672,13 @@ server <- function(input, output, session) {
               })
           }
 
-          rv$list$regression$table <- out |>
-            tbl_merge()
+          rv$list$regression$tables <- out
 
-          gtsummary::as_kable(rv$list$regression$table) |>
-            readr::write_lines(file="./www/_regression_table.md")
+          # rv$list$regression$table <- out |>
+          #   tbl_merge()
+
+          # gtsummary::as_kable(rv$list$regression$table) |>
+          #   readr::write_lines(file="./www/_regression_table.md")
 
           rv$list$input <- input
         },
@@ -692,8 +694,9 @@ server <- function(input, output, session) {
   )
 
   output$table2 <- gt::render_gt({
-    shiny::req(rv$list$regression$table)
-    rv$list$regression$table |>
+    shiny::req(rv$list$regression$tables)
+    rv$list$regression$tables |>
+      tbl_merge() |>
       gtsummary::as_gt() |>
       gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$params$descr}**")))
   })
@@ -772,12 +775,22 @@ server <- function(input, output, session) {
       # shiny::req(rv$list$regression)
       ## Notification is not progressing
       ## Presumably due to missing
+
+      #Simplified for .rmd output attempt
+      format <- ifelse(type=="docx","word_document","odt_document")
+
       shiny::withProgress(message = "Generating the report. Hold on for a moment..", {
+
         rv$list |>
-          write_quarto(
-            output_format = type,
-            input = file.path(getwd(), "www/report.qmd")
+          write_rmd(
+            output_format = format,
+            input = file.path(getwd(), "www/report.rmd")
           )
+
+          # write_quarto(
+          #   output_format = type,
+          #   input = file.path(getwd(), "www/report.qmd")
+          # )
       })
       file.rename(paste0("www/report.", type), file)
     }

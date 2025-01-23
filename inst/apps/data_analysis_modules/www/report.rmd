@@ -4,15 +4,16 @@ date: today
 format: docx
 author: freesearcheR Tool
 toc: false
-execute: 
-  echo: false
 params:
   data.file: NA
 ---
 
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
+```
+
+
 ```{r}
-#| message: false
-#| warning: false
 web_data <- readr::read_rds(file = params$data.file)
 library(gtsummary)
 library(gt)

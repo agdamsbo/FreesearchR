@@ -1160,6 +1160,27 @@ write_quarto <- function(data,...) {
   )
 }
 
+write_rmd <- function(data,...) {
+  # Exports data to temporary location
+  #
+  # I assume this is more secure than putting it in the www folder and deleting
+  # on session end
+
+  # temp <- base::tempfile(fileext = ".rds")
+  # readr::write_rds(data, file = here)
+
+  readr::write_rds(data, file = "www/web_data.rds")
+
+  ## Specifying a output path will make the rendering fail
+  ## Ref: https://github.com/quarto-dev/quarto-cli/discussions/4041
+  ## Outputs to the same as the .qmd file
+  rmarkdown::render(
+    params = list(data.file = "web_data.rds"),
+    # execute_params = list(data.file = temp),
+    ...
+  )
+}
+
 #' Flexible file import based on extension
 #'
 #' @param file file name
@@ -3874,7 +3895,7 @@ ui <- bslib::page_fixed(
       ),
       shiny::p(
         style = "margin: 1; color: #888;",
-        "AG Damsbo | v", format(Sys.Date(),format = '%y%m%d')," | AGPLv3 license | ", shiny::tags$a("Source on Github", href = "https://github.com/agdamsbo/freesearcheR/", target = "_blank", rel = "noopener noreferrer")
+        "AG Damsbo | v", format(Sys.time(),format = '%y%m%d_%H%M')," | AGPLv3 license | ", shiny::tags$a("Source on Github", href = "https://github.com/agdamsbo/freesearcheR/", target = "_blank", rel = "noopener noreferrer")
       ),
     )
   )
@@ -3916,7 +3937,7 @@ library(gtsummary)
 
 # source("functions.R")
 
-
+data(mtcars)
 
 # light <- custom_theme()
 #
@@ -4559,11 +4580,13 @@ server <- function(input, output, session) {
               })
           }
 
-          rv$list$regression$table <- out |>
-            tbl_merge()
+          rv$list$regression$tables <- out
 
-          gtsummary::as_kable(rv$list$regression$table) |>
-            readr::write_lines(file="./www/_regression_table.md")
+          # rv$list$regression$table <- out |>
+          #   tbl_merge()
+
+          # gtsummary::as_kable(rv$list$regression$table) |>
+          #   readr::write_lines(file="./www/_regression_table.md")
 
           rv$list$input <- input
         },
@@ -4579,8 +4602,9 @@ server <- function(input, output, session) {
   )
 
   output$table2 <- gt::render_gt({
-    shiny::req(rv$list$regression$table)
-    rv$list$regression$table |>
+    shiny::req(rv$list$regression$tables)
+    rv$list$regression$tables |>
+      tbl_merge() |>
       gtsummary::as_gt() |>
       gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$params$descr}**")))
   })
@@ -4659,12 +4683,22 @@ server <- function(input, output, session) {
       # shiny::req(rv$list$regression)
       ## Notification is not progressing
       ## Presumably due to missing
+
+      #Simplified for .rmd output attempt
+      format <- ifelse(type=="docx","word_document","odt_document")
+
       shiny::withProgress(message = "Generating the report. Hold on for a moment..", {
+
         rv$list |>
-          write_quarto(
-            output_format = type,
-            input = file.path(getwd(), "www/report.qmd")
+          write_rmd(
+            output_format = format,
+            input = file.path(getwd(), "www/report.rmd")
           )
+
+          # write_quarto(
+          #   output_format = type,
+          #   input = file.path(getwd(), "www/report.qmd")
+          # )
       })
       file.rename(paste0("www/report.", type), file)
     }
