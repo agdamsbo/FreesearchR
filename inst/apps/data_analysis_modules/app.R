@@ -3599,7 +3599,15 @@ ui_elements <- list(
           # ),
           # shiny::column(
           #   width = 8,
-          toastui::datagridOutput(outputId = "table_mod") # ,
+          fluidRow(
+          toastui::datagridOutput(outputId = "table_mod")
+          ),
+          shiny::tags$br(),
+          shiny::tags$br(),
+          shiny::tags$br(),
+          shiny::tags$br(),
+          shiny::tags$br()
+          # ,
           # shiny::tags$b("Reproducible code:"),
           # shiny::verbatimTextOutput(outputId = "filtered_code")
           #   ),
@@ -4134,7 +4142,8 @@ server <- function(input, output, session) {
     # data <- rv$data
     toastui::datagrid(
       # data = rv$data # ,
-      data = data_filter(), pagination = 30,
+      data = data_filter(),
+      pagination = 10
       # bordered = TRUE,
       # compact = TRUE,
       # striped = TRUE

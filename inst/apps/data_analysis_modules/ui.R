@@ -235,7 +235,15 @@ ui_elements <- list(
           # ),
           # shiny::column(
           #   width = 8,
-          toastui::datagridOutput(outputId = "table_mod") # ,
+          fluidRow(
+          toastui::datagridOutput(outputId = "table_mod")
+          ),
+          shiny::tags$br(),
+          shiny::tags$br(),
+          shiny::tags$br(),
+          shiny::tags$br(),
+          shiny::tags$br()
+          # ,
           # shiny::tags$b("Reproducible code:"),
           # shiny::verbatimTextOutput(outputId = "filtered_code")
           #   ),

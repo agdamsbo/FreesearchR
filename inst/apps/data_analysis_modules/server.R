@@ -247,7 +247,8 @@ server <- function(input, output, session) {
     # data <- rv$data
     toastui::datagrid(
       # data = rv$data # ,
-      data = data_filter(), pagination = 30,
+      data = data_filter(),
+      pagination = 10
       # bordered = TRUE,
       # compact = TRUE,
       # striped = TRUE
