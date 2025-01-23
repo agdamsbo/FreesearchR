@@ -50,6 +50,27 @@ write_quarto <- function(data,...) {
   )
 }
 
+write_rmd <- function(data,...) {
+  # Exports data to temporary location
+  #
+  # I assume this is more secure than putting it in the www folder and deleting
+  # on session end
+
+  # temp <- base::tempfile(fileext = ".rds")
+  # readr::write_rds(data, file = here)
+
+  readr::write_rds(data, file = "www/web_data.rds")
+
+  ## Specifying a output path will make the rendering fail
+  ## Ref: https://github.com/quarto-dev/quarto-cli/discussions/4041
+  ## Outputs to the same as the .qmd file
+  rmarkdown::render(
+    params = list(data.file = "web_data.rds"),
+    # execute_params = list(data.file = temp),
+    ...
+  )
+}
+
 #' Flexible file import based on extension
 #'
 #' @param file file name

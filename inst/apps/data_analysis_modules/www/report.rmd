@@ -4,15 +4,16 @@ date: today
 format: docx
 author: freesearcheR Tool
 toc: false
-execute: 
-  echo: false
 params:
   data.file: NA
 ---
 
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+
 ```{r}
-#| message: false
-#| warning: false
 web_data <- readr::read_rds(file = params$data.file)
 library(gtsummary)
 library(gt)
@@ -23,6 +24,18 @@ tbl_merge <- function(data) {
   } else {
     data |> gtsummary::tbl_merge(tab_spanner = names(data))
   }
+}
+
+vec2sentence <- function(data, sep.word = "and") {
+  sep.word <- paste0(" ", gsub(" ", "", sep.word), " ")
+  if (length(data) < 2) {
+    out <- data
+  } else if (length(data) == 2) {
+    out <- paste(data, collapse = sep.word)
+  } else {
+    out <- paste(paste(data[-length(data)], collapse = ","), data[length(data)], sep = sep.word)
+  }
+  return(out)
 }
 ```
 
@@ -43,7 +56,7 @@ tbl <- gtsummary::as_gt(web_data$table1)
 knitr::knit_print(tbl)
 ```
 
-Below are the results from the 
+Below are the results from the `r tolower(vec2sentence(names(web_data$regression$tables)))` `r web_data$regression$params$descr`.
 
 ```{r, results = 'asis'}
 reg_tbl <- web_data$regression$tables
