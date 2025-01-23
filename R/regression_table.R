@@ -11,7 +11,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' gtsummary::trial |>
+#' tbl <- gtsummary::trial |>
 #'   regression_model(
 #'     outcome.str = "stage",
 #'     fun = "MASS::polr"
@@ -140,3 +140,6 @@ tbl_merge <- function(data) {
     data |> gtsummary::tbl_merge(tab_spanner = names(data))
   }
 }
+
+# as_kable(tbl) |> write_lines(file=here::here("inst/apps/data_analysis_modules/www/_table1.md"))
+# as_kable_extra(tbl)|> write_lines(file=here::here("inst/apps/data_analysis_modules/www/table1.md"))

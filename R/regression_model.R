@@ -267,7 +267,8 @@ supported_functions <- function() {
       out.type = "continuous",
       fun = "stats::lm",
       args.list = NULL,
-      formula.str = "{outcome.str}~{paste(vars,collapse='+')}"
+      formula.str = "{outcome.str}~{paste(vars,collapse='+')}",
+      table.fun = "gtsummary::tbl_regression"
     ),
     glm = list(
       descr = "Logistic regression model",
@@ -275,7 +276,8 @@ supported_functions <- function() {
       out.type = "dichotomous",
       fun = "stats::glm",
       args.list = list(family = stats::binomial(link = "logit")),
-      formula.str = "{outcome.str}~{paste(vars,collapse='+')}"
+      formula.str = "{outcome.str}~{paste(vars,collapse='+')}",
+      table.fun = "gtsummary::tbl_regression"
     ),
     polr = list(
       descr = "Ordinal logistic regression model",
@@ -286,7 +288,8 @@ supported_functions <- function() {
         Hess = TRUE,
         method = "logistic"
       ),
-      formula.str = "{outcome.str}~{paste(vars,collapse='+')}"
+      formula.str = "{outcome.str}~{paste(vars,collapse='+')}",
+      table.fun = "gtsummary::tbl_regression"
     )
   )
 }

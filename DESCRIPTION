@@ -54,7 +54,10 @@ Imports:
     apexcharter,
     teal.modules.general,
     esquisse,
-    janitor
+    janitor,
+    flextable,
+    gt,
+    kableExtra
 Suggests: 
     styler,
     devtools,

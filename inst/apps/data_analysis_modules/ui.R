@@ -389,7 +389,7 @@ ui_elements <- list(
               label = "Download report",
               icon = shiny::icon("download")
             ),
-            shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
+            # shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
             shiny::tags$hr(),
             shiny::h4("Data"),
             shiny::helpText("Choose your favourite output data format to download the modified data."),

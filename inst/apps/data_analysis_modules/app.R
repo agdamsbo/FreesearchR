@@ -1139,19 +1139,23 @@ getfun <- function(x) {
 #' @return output file name
 #' @export
 #'
-write_quarto <- function(data, ...) {
+write_quarto <- function(data,...) {
   # Exports data to temporary location
   #
   # I assume this is more secure than putting it in the www folder and deleting
   # on session end
-  temp <- tempfile(fileext = ".rds")
-  readr::write_rds(data, file = temp)
+
+  # temp <- base::tempfile(fileext = ".rds")
+  # readr::write_rds(data, file = here)
+
+  readr::write_rds(data, file = "www/web_data.rds")
 
   ## Specifying a output path will make the rendering fail
   ## Ref: https://github.com/quarto-dev/quarto-cli/discussions/4041
   ## Outputs to the same as the .qmd file
   quarto::quarto_render(
-    execute_params = list(data.file = temp),
+    execute_params = list(data.file = "web_data.rds"),
+    # execute_params = list(data.file = temp),
     ...
   )
 }
@@ -1712,6 +1716,13 @@ redcap_app <- function() {
 
 
 ########
+#### Current file: R//redcap.R 
+########
+
+
+
+
+########
 #### Current file: R//regression_model.R 
 ########
 
@@ -1984,7 +1995,8 @@ supported_functions <- function() {
       out.type = "continuous",
       fun = "stats::lm",
       args.list = NULL,
-      formula.str = "{outcome.str}~{paste(vars,collapse='+')}"
+      formula.str = "{outcome.str}~{paste(vars,collapse='+')}",
+      table.fun = "gtsummary::tbl_regression"
     ),
     glm = list(
       descr = "Logistic regression model",
@@ -1992,7 +2004,8 @@ supported_functions <- function() {
       out.type = "dichotomous",
       fun = "stats::glm",
       args.list = list(family = stats::binomial(link = "logit")),
-      formula.str = "{outcome.str}~{paste(vars,collapse='+')}"
+      formula.str = "{outcome.str}~{paste(vars,collapse='+')}",
+      table.fun = "gtsummary::tbl_regression"
     ),
     polr = list(
       descr = "Ordinal logistic regression model",
@@ -2003,7 +2016,8 @@ supported_functions <- function() {
         Hess = TRUE,
         method = "logistic"
       ),
-      formula.str = "{outcome.str}~{paste(vars,collapse='+')}"
+      formula.str = "{outcome.str}~{paste(vars,collapse='+')}",
+      table.fun = "gtsummary::tbl_regression"
     )
   )
 }
@@ -2332,7 +2346,7 @@ regression_model_uv_list <- function(data,
 #'
 #' @examples
 #' \dontrun{
-#' gtsummary::trial |>
+#' tbl <- gtsummary::trial |>
 #'   regression_model(
 #'     outcome.str = "stage",
 #'     fun = "MASS::polr"
@@ -2461,6 +2475,9 @@ tbl_merge <- function(data) {
     data |> gtsummary::tbl_merge(tab_spanner = names(data))
   }
 }
+
+# as_kable(tbl) |> write_lines(file=here::here("inst/apps/data_analysis_modules/www/_table1.md"))
+# as_kable_extra(tbl)|> write_lines(file=here::here("inst/apps/data_analysis_modules/www/table1.md"))
 
 
 ########
@@ -3736,7 +3753,7 @@ ui_elements <- list(
               label = "Download report",
               icon = shiny::icon("download")
             ),
-            shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
+            # shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
             shiny::tags$hr(),
             shiny::h4("Data"),
             shiny::helpText("Choose your favourite output data format to download the modified data."),
@@ -3871,7 +3888,6 @@ ui <- bslib::page_fixed(
 library(readr)
 library(MASS)
 library(stats)
-library(gtsummary)
 library(gt)
 library(openxlsx2)
 library(haven)
@@ -3895,6 +3911,7 @@ library(data.table)
 library(IDEAFilter)
 library(shinyWidgets)
 library(DT)
+library(gtsummary)
 # library(freesearcheR)
 
 # source("functions.R")
@@ -4411,6 +4428,9 @@ server <- function(input, output, session) {
             .x
           }
         })()
+
+      gtsummary::as_kable(rv$list$table1) |>
+        readr::write_lines(file="./www/_table1.md")
     }
   )
 
@@ -4453,7 +4473,7 @@ server <- function(input, output, session) {
 
           # browser()
 
-          rv$list$regression$options <- get_fun_options(input$regression_type) |>
+          rv$list$regression$params <- get_fun_options(input$regression_type) |>
             (\(.x){
               .x[[1]]
             })()
@@ -4542,6 +4562,9 @@ server <- function(input, output, session) {
           rv$list$regression$table <- out |>
             tbl_merge()
 
+          gtsummary::as_kable(rv$list$regression$table) |>
+            readr::write_lines(file="./www/_regression_table.md")
+
           rv$list$input <- input
         },
         warning = function(warn) {
@@ -4559,7 +4582,7 @@ server <- function(input, output, session) {
     shiny::req(rv$list$regression$table)
     rv$list$regression$table |>
       gtsummary::as_gt() |>
-      gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$options$descr}**")))
+      gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$params$descr}**")))
   })
 
 
@@ -4581,7 +4604,6 @@ server <- function(input, output, session) {
   shiny::observeEvent(input$act_start, {
     bslib::nav_select(id = "main_panel", selected = "Data")
   })
-
 
   ##############################################################################
   #########
@@ -4634,7 +4656,7 @@ server <- function(input, output, session) {
       paste0("report.", input$output_type)
     }),
     content = function(file, type = input$output_type) {
-      shiny::req(rv$list$regression)
+      # shiny::req(rv$list$regression)
       ## Notification is not progressing
       ## Presumably due to missing
       shiny::withProgress(message = "Generating the report. Hold on for a moment..", {

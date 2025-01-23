@@ -1,22 +1,45 @@
 ---
-format: 
-  html:
-    embed-resources: true
 title: "freesearcheR analysis results"
 date: today
+format: docx
 author: freesearcheR Tool
-toc: true
+toc: false
 execute: 
   echo: false
 params:
   data.file: NA
 ---
 
-```{r setup}
+```{r}
+#| message: false
+#| warning: false
+# if (!requireNamespace("gtsummary")){
+#   install.packages("gtsummary")
+#   } else {
+#   library(gtsummary)
+#   }
+# 
+# if (!requireNamespace("gt")){
+#   install.packages("gt")
+#   } else {
+#   library(gt)
+#   }
+# 
+# if (!requireNamespace("readr")){
+#   install.packages("readr")
+#   } else {
+#   library(readr)
+#   }
+# requireNamespace("gtsummary")
+# requireNamespace("gt")
+# require(gt)
+# require(flextable)
+# if (!requireNamespace("readr")){
+#   install.packages("readr")
+# }
 web_data <- readr::read_rds(file = params$data.file)
-library(gtsummary)
-library(gt)
-library(flextable)
+# library(gt)
+# library(flextable)
 # library(freesearcheR)
 ```
 
@@ -26,29 +49,17 @@ Research should be free and open with easy access for all. The freesearcheR tool
 
 ## Methods
 
-Analyses were conducted in R version `r paste(version["major"],version["minor"],sep=".")`.
+Analyses were conducted in the *freesearcheR* data analysis web-tool based on R version 4.4.1.
 
 ## Results
 
-Below is the baseline characteristics plotted.
+Below are the baseline characteristics.
 
-```{r}
-#| label: tbl-baseline
-#| tbl-cap: Baseline characteristics of included data
-web_data$table1 |> 
-  gtsummary::as_flex_table() |> 
-  flextable::set_table_properties(width = 1, layout = "autofit")
-```
+{{< include _table1.md >}}
 
-Here are the results from the `r web_data$regression$options$descr`.
+Below are results from the univariable and multivariable regression analyses.
 
-```{r}
-#| label: tbl-regression
-#| tbl-cap: Regression analysis results
-web_data$regression$table|> 
-  gtsummary::as_flex_table() |> 
-  flextable::set_table_properties(width = 1, layout = "autofit")
-```
+{{< include _regression_table.md >}}
 
 ## Discussion
 

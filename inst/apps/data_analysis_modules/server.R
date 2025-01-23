@@ -1,7 +1,6 @@
 library(readr)
 library(MASS)
 library(stats)
-library(gtsummary)
 library(gt)
 library(openxlsx2)
 library(haven)
@@ -25,6 +24,7 @@ library(data.table)
 library(IDEAFilter)
 library(shinyWidgets)
 library(DT)
+library(gtsummary)
 # library(freesearcheR)
 
 # source("functions.R")
@@ -541,6 +541,9 @@ server <- function(input, output, session) {
             .x
           }
         })()
+
+      gtsummary::as_kable(rv$list$table1) |>
+        readr::write_lines(file="./www/_table1.md")
     }
   )
 
@@ -583,7 +586,7 @@ server <- function(input, output, session) {
 
           # browser()
 
-          rv$list$regression$options <- get_fun_options(input$regression_type) |>
+          rv$list$regression$params <- get_fun_options(input$regression_type) |>
             (\(.x){
               .x[[1]]
             })()
@@ -672,6 +675,9 @@ server <- function(input, output, session) {
           rv$list$regression$table <- out |>
             tbl_merge()
 
+          gtsummary::as_kable(rv$list$regression$table) |>
+            readr::write_lines(file="./www/_regression_table.md")
+
           rv$list$input <- input
         },
         warning = function(warn) {
@@ -689,7 +695,7 @@ server <- function(input, output, session) {
     shiny::req(rv$list$regression$table)
     rv$list$regression$table |>
       gtsummary::as_gt() |>
-      gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$options$descr}**")))
+      gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$params$descr}**")))
   })
 
 
@@ -711,7 +717,6 @@ server <- function(input, output, session) {
   shiny::observeEvent(input$act_start, {
     bslib::nav_select(id = "main_panel", selected = "Data")
   })
-
 
   ##############################################################################
   #########
@@ -764,7 +769,7 @@ server <- function(input, output, session) {
       paste0("report.", input$output_type)
     }),
     content = function(file, type = input$output_type) {
-      shiny::req(rv$list$regression)
+      # shiny::req(rv$list$regression)
       ## Notification is not progressing
       ## Presumably due to missing
       shiny::withProgress(message = "Generating the report. Hold on for a moment..", {
