@@ -59,7 +59,10 @@ Below are the baseline characteristics.
 
 Below are results from the univariable and multivariable regression analyses.
 
-{{< include _regression_table.md >}}
+
+```{r}
+gtsummary::tbl_summary(mtcars,by=cyl)
+```
 
 ## Discussion
 
