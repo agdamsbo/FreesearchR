@@ -351,7 +351,7 @@ ui_elements <- list(
               inputId = "add_regression_p",
               label = "Add p-value",
               inline = TRUE,
-              selected = "no",
+              selected = "yes",
               choices = list(
                     "Yes" = "yes",
                     "No" = "no"
