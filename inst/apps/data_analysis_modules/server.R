@@ -162,7 +162,9 @@ server <- function(input, output, session) {
   ##############################################################################
 
   shiny::observeEvent(rv$data_original, {
-    rv$data <- rv$data_original |> default_parsing()
+    rv$data <- rv$data_original |>
+      default_parsing() |>
+      janitor::clean_names()
   })
 
   shiny::observeEvent(input$data_reset, {
@@ -543,8 +545,8 @@ server <- function(input, output, session) {
           }
         })()
 
-      gtsummary::as_kable(rv$list$table1) |>
-        readr::write_lines(file="./www/_table1.md")
+      # gtsummary::as_kable(rv$list$table1) |>
+      #   readr::write_lines(file="./www/_table1.md")
     }
   )
 
