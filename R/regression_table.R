@@ -114,7 +114,7 @@ regression_table_create <- function(x, ..., args.list = NULL, fun = "gtsummary::
 
   if (any(c(length(class(x)) != 1, class(x) != "lm"))) {
     if (!"exponentiate" %in% names(args.list)) {
-      args.list <- c(args.list, list(exponentiate = TRUE))
+      args.list <- c(args.list, list(exponentiate = TRUE, p.values = TRUE))
     }
   }
 
