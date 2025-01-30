@@ -236,7 +236,7 @@ ui_elements <- list(
           # shiny::column(
           #   width = 8,
           fluidRow(
-          toastui::datagridOutput(outputId = "table_mod")
+            toastui::datagridOutput(outputId = "table_mod")
           ),
           shiny::tags$br(),
           shiny::tags$br(),
@@ -286,138 +286,146 @@ ui_elements <- list(
         # bslib::layout_sidebar(
         #   fillable = TRUE,
         sidebar = bslib::sidebar(
-          shiny::sliderInput(inputId = "complete_cutoff",
-                             label = "Cut-off for column completeness (%)",
-                             min = 0,
-                             max = 100,
-                             step = 10,
-                             value = 70,
-                             ticks = FALSE),
-          shiny::helpText("To improve speed, columns are removed before analysing data, if copleteness is below above value."),
-          shiny::radioButtons(
-            inputId = "all",
-            label = "Specify covariables",
-            inline = TRUE, selected = 2,
-            choiceNames = c(
-              "Yes",
-              "No"
-            ),
-            choiceValues = c(1, 2)
-          ),
-          shiny::conditionalPanel(
-            condition = "input.all==1",
-            shiny::uiOutput("include_vars")
-          ),
           bslib::accordion(
             open = "acc_chars",
             multiple = FALSE,
-          bslib::accordion_panel(
-            value = "acc_chars",
-            title = "Characteristics",
-            icon = bsicons::bs_icon("table"),
-            shiny::uiOutput("strat_var"),
-            shiny::helpText("Only factor/categorical variables are available for stratification. Go back to the 'Data' tab to reclass a variable if it's not on the list."),
-            shiny::conditionalPanel(
-              condition = "input.strat_var!='none'",
+            bslib::accordion_panel(
+              value = "acc_chars",
+              title = "Characteristics",
+              icon = bsicons::bs_icon("table"),
+              shiny::uiOutput("strat_var"),
+              shiny::helpText("Only factor/categorical variables are available for stratification. Go back to the 'Data' tab to reclass a variable if it's not on the list."),
+              shiny::conditionalPanel(
+                condition = "input.strat_var!='none'",
+                shiny::radioButtons(
+                  inputId = "add_p",
+                  label = "Compare strata?",
+                  selected = "no",
+                  inline = TRUE,
+                  choices = list(
+                    "No" = "no",
+                    "Yes" = "yes"
+                  )
+                ),
+                shiny::helpText("Option to perform statistical comparisons between strata in baseline table.")
+              )
+            ),
+            bslib::accordion_panel(
+              value = "acc_reg",
+              title = "Regression",
+              icon = bsicons::bs_icon("calculator"),
+              shiny::uiOutput("outcome_var"),
+              # shiny::selectInput(
+              #   inputId = "design",
+              #   label = "Study design",
+              #   selected = "no",
+              #   inline = TRUE,
+              #   choices = list(
+              #     "Cross-sectional" = "cross-sectional"
+              #   )
+              # ),
+              shiny::uiOutput("regression_type"),
               shiny::radioButtons(
-                inputId = "add_p",
-                label = "Compare strata?",
-                selected = "no",
+                inputId = "add_regression_p",
+                label = "Add p-value",
                 inline = TRUE,
+                selected = "yes",
                 choices = list(
-                  "No" = "no",
-                  "Yes" = "yes"
+                  "Yes" = "yes",
+                  "No" = "no"
                 )
               ),
-              shiny::helpText("Option to perform statistical comparisons between strata in baseline table.")
-            )
-          ),
-          bslib::accordion_panel(
-            value = "acc_reg",
-            title = "Regression",
-            icon = bsicons::bs_icon("calculator"),
-            shiny::uiOutput("outcome_var"),
-            # shiny::selectInput(
-            #   inputId = "design",
-            #   label = "Study design",
-            #   selected = "no",
-            #   inline = TRUE,
-            #   choices = list(
-            #     "Cross-sectional" = "cross-sectional"
-            #   )
-            # ),
-            shiny::uiOutput("regression_type"),
-            shiny::radioButtons(
-              inputId = "add_regression_p",
-              label = "Add p-value",
-              inline = TRUE,
-              selected = "yes",
-              choices = list(
-                    "Yes" = "yes",
-                    "No" = "no"
-                  )
-            ),
-            bslib::input_task_button(
-              id = "load",
-              label = "Analyse",
-              # icon = shiny::icon("pencil", lib = "glyphicon"),
-              icon = bsicons::bs_icon("pencil"),
-              label_busy = "Working...",
-              icon_busy = fontawesome::fa_i("arrows-rotate",
-                class = "fa-spin",
-                "aria-hidden" = "true"
+              bslib::input_task_button(
+                id = "load",
+                label = "Analyse",
+                # icon = shiny::icon("pencil", lib = "glyphicon"),
+                icon = bsicons::bs_icon("pencil"),
+                label_busy = "Working...",
+                icon_busy = fontawesome::fa_i("arrows-rotate",
+                  class = "fa-spin",
+                  "aria-hidden" = "true"
+                ),
+                type = "secondary",
+                auto_reset = TRUE
               ),
-              type = "secondary",
-              auto_reset = TRUE
+              shiny::helpText("If you change the parameters, press 'Analyse' again to update the regression analysis"),
+              shiny::uiOutput("plot_model")
             ),
-            shiny::helpText("If you change the parameters, press 'Analyse' again to update the regression analysis")
-          ),
-          bslib::accordion_panel(
-            value="acc_down",
-            title = "Download",
-            icon = bsicons::bs_icon("download"),
-            shiny::h4("Report"),
-            shiny::helpText("Choose your favourite output file format for further work, and download, when the analyses are done."),
-            shiny::selectInput(
-              inputId = "output_type",
-              label = "Output format",
-              selected = NULL,
-              choices = list(
-                "MS Word" = "docx",
-                "LibreOffice" = "odt"
-                # ,
-                # "PDF" = "pdf",
-                # "All the above" = "all"
+            bslib::accordion_panel(
+              value = "acc_advanced",
+              title = "Advanced",
+              icon = bsicons::bs_icon("gear"),
+              shiny::sliderInput(
+                inputId = "complete_cutoff",
+                label = "Cut-off for column completeness (%)",
+                min = 0,
+                max = 100,
+                step = 10,
+                value = 70,
+                ticks = FALSE
+              ),
+              shiny::helpText("To improve speed, columns are removed before analysing data, if copleteness is below above value."),
+              shiny::radioButtons(
+                inputId = "all",
+                label = "Specify covariables",
+                inline = TRUE, selected = 2,
+                choiceNames = c(
+                  "Yes",
+                  "No"
+                ),
+                choiceValues = c(1, 2)
+              ),
+              shiny::conditionalPanel(
+                condition = "input.all==1",
+                shiny::uiOutput("include_vars")
               )
             ),
-            shiny::br(),
-            # Button
-            shiny::downloadButton(
-              outputId = "report",
-              label = "Download report",
-              icon = shiny::icon("download")
-            ),
-            # shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
-            shiny::tags$hr(),
-            shiny::h4("Data"),
-            shiny::helpText("Choose your favourite output data format to download the modified data."),
-            shiny::selectInput(
-              inputId = "data_type",
-              label = "Data format",
-              selected = NULL,
-              choices = list(
-                "R" = "rds",
-                "stata" = "dta"
+            bslib::accordion_panel(
+              value = "acc_down",
+              title = "Download",
+              icon = bsicons::bs_icon("download"),
+              shiny::h4("Report"),
+              shiny::helpText("Choose your favourite output file format for further work, and download, when the analyses are done."),
+              shiny::selectInput(
+                inputId = "output_type",
+                label = "Output format",
+                selected = NULL,
+                choices = list(
+                  "MS Word" = "docx",
+                  "LibreOffice" = "odt"
+                  # ,
+                  # "PDF" = "pdf",
+                  # "All the above" = "all"
+                )
+              ),
+              shiny::br(),
+              # Button
+              shiny::downloadButton(
+                outputId = "report",
+                label = "Download report",
+                icon = shiny::icon("download")
+              ),
+              # shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
+              shiny::tags$hr(),
+              shiny::h4("Data"),
+              shiny::helpText("Choose your favourite output data format to download the modified data."),
+              shiny::selectInput(
+                inputId = "data_type",
+                label = "Data format",
+                selected = NULL,
+                choices = list(
+                  "R" = "rds",
+                  "stata" = "dta"
+                )
+              ),
+              shiny::br(),
+              # Button
+              shiny::downloadButton(
+                outputId = "data_modified",
+                label = "Download data",
+                icon = shiny::icon("download")
               )
-            ),
-            shiny::br(),
-            # Button
-            shiny::downloadButton(
-              outputId = "data_modified",
-              label = "Download data",
-              icon = shiny::icon("download")
             )
-          )
           ),
           # shiny::helpText(em("Please specify relevant settings for your data, and press 'Analyse'")),
           # shiny::radioButtons(
@@ -447,8 +455,13 @@ ui_elements <- list(
           gt::gt_output(outputId = "table2")
         ),
         bslib::nav_panel(
-          title = "Regression checks",
+          title = "Coefficient plot",
+          shiny::plotOutput(outputId = "regression_plot")
+        ),
+        bslib::nav_panel(
+          title = "Model checks",
           shiny::plotOutput(outputId = "check")
+          # shiny::uiOutput(outputId = "check_1")
         )
       )
     ),
@@ -518,7 +531,7 @@ ui <- bslib::page_fixed(
       ),
       shiny::p(
         style = "margin: 1; color: #888;",
-        "AG Damsbo | v", app_version()," | AGPLv3 license | ", shiny::tags$a("Source on Github", href = "https://github.com/agdamsbo/freesearcheR/", target = "_blank", rel = "noopener noreferrer")
+        "AG Damsbo | v", app_version(), " | AGPLv3 license | ", shiny::tags$a("Source on Github", href = "https://github.com/agdamsbo/freesearcheR/", target = "_blank", rel = "noopener noreferrer")
       ),
     )
   )

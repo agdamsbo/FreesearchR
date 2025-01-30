@@ -34,3 +34,42 @@ custom_theme <- function(...,
     code_font = code_font
   )
 }
+
+
+#' GGplot default theme for plotting in Shiny
+#'
+#' @param data ggplot object
+#'
+#' @returns ggplot object
+#' @export
+#'
+gg_theme_shiny <- function(){
+    ggplot2::theme(
+      axis.title = ggplot2::element_text(size = 18),
+      axis.text = ggplot2::element_text(size = 14),
+      strip.text = ggplot2::element_text(size = 14),
+      legend.title = ggplot2::element_text(size = 18),
+      legend.text = ggplot2::element_text(size = 14),
+      plot.title = ggplot2::element_text(size = 24),
+      plot.subtitle = ggplot2::element_text(size = 18),
+      legend.position = "none"
+    )
+}
+
+
+#' GGplot default theme for plotting export objects
+#'
+#' @param data ggplot object
+#'
+#' @returns ggplot object
+#' @export
+#'
+gg_theme_export <- function(){
+    ggplot2::theme(
+      axis.title = ggplot2::element_text(size = 18),
+      axis.text.x = ggplot2::element_text(size = 14),
+      legend.title = ggplot2::element_text(size = 18),
+      legend.text = ggplot2::element_text(size = 14),
+      plot.title = ggplot2::element_text(size = 24)
+    )
+}

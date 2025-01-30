@@ -30,6 +30,7 @@ library(gtsummary)
 # source("functions.R")
 
 data(mtcars)
+trial <- gtsummary::trial |> default_parsing()
 
 # light <- custom_theme()
 #
@@ -80,8 +81,7 @@ server <- function(input, output, session) {
     data_original = NULL,
     data = NULL,
     data_filtered = NULL,
-    models = NULL,
-    check = NULL
+    models = NULL
   )
 
   ##############################################################################
@@ -365,9 +365,17 @@ server <- function(input, output, session) {
     shiny::req(input$outcome_var)
     shiny::selectizeInput(
       inputId = "regression_type",
-      # selected = colnames(rv$data_filtered)[sapply(rv$data_filtered, is.factor)],
       label = "Choose regression analysis",
-      choices = possible_functions(data = dplyr::select(rv$data_filtered, input$outcome_var), design = "cross-sectional"),
+      ## The below ifelse statement handles the case of loading a new dataset
+      choices = possible_functions(
+        data = dplyr::select(
+          rv$data_filtered,
+          ifelse(input$outcome_var %in% names(rv$data_filtered),
+            input$outcome_var,
+            names(rv$data_filtered)[1]
+          )
+        ), design = "cross-sectional"
+      ),
       multiple = FALSE
     )
   })
@@ -412,6 +420,21 @@ server <- function(input, output, session) {
       multiple = FALSE
     )
   })
+
+
+  output$plot_model <- shiny::renderUI({
+    shiny::req(rv$list$regression$tables)
+    shiny::selectInput(
+      inputId = "plot_model",
+      selected = "none",
+      label = "Select models to plot",
+      choices = names(rv$list$regression$tables),
+      multiple = TRUE
+    )
+  })
+
+
+
 
   ## Have a look at column filters at some point
   ## There should be a way to use the filtering the filter data for further analyses
@@ -514,7 +537,7 @@ server <- function(input, output, session) {
       shiny::req(input$strat_var)
       shiny::req(rv$list$data)
 
-      if (input$strat_var == "none") {
+      if (input$strat_var == "none" | !input$strat_var %in% names(rv$list$data)) {
         by.var <- NULL
       } else {
         by.var <- input$strat_var
@@ -637,21 +660,68 @@ server <- function(input, output, session) {
     }
   )
 
-  output$check <- shiny::renderPlot({
-    shiny::req(rv$check)
-    p <- plot(rv$check) +
-      patchwork::plot_annotation(title = "Multivariable regression model checks")
-    p
-    # Generate checks in one column
-    # layout <- sapply(seq_len(length(p)), \(.x){
-    #   patchwork::area(.x, 1)
-    # })
-    #
-    # p + patchwork::plot_layout(design = Reduce(c, layout))
+  # plot_check_r <- shiny::reactive({plot(rv$check)})
+  #
+  # output$check_1 <- shiny::renderUI({
+  #   shiny::req(rv$check)
+  #   list <- lapply(seq_len(length(plot_check_r())),
+  #                                    function(i) {
+  #                                      plotname <- paste0("check_plot_", i)
+  #                                      shiny::htmlOutput(plotname)
+  #                                    })
+  #
+  #   do.call(shiny::tagList,list)
+  # })
+  #
+  # # Call renderPlot for each one. Plots are only actually generated when they
+  # # are visible on the web page.
+  #
+  # shiny::observe({
+  #   shiny::req(rv$check)
+  #   # browser()
+  #   for (i in seq_len(length(plot_check_r()))) {
+  #     local({
+  #       my_i <- i
+  #       plotname <- paste0("check_plot_", my_i)
+  #
+  #       output[[plotname]] <- shiny::renderPlot({
+  #         plot_check_r()[[my_i]] + gg_theme_shiny()
+  #       })
+  #     })
+  #   }
+  # })
 
-    # patchwork::wrap_plots(ncol=1) +
-    # patchwork::plot_annotation(title = 'Multivariable regression model checks')
-  })
+  output$check <- shiny::renderPlot(
+    {
+      shiny::req(rv$check)
+      # browser()
+      # p <- plot(rv$check) +
+      #   patchwork::plot_annotation(title = "Multivariable regression model checks")
+
+      p <- plot(rv$check) +
+        patchwork::plot_annotation(title = "Multivariable regression model checks")
+
+      for (i in seq_len(length(p))) {
+        p[[i]] <- p[[i]] + gg_theme_shiny()
+      }
+
+      p
+
+      # p + patchwork::plot_layout(ncol = 1, design = ggplot2::waiver())
+
+      # Generate checks in one column
+      # layout <- sapply(seq_len(length(p)), \(.x){
+      #   patchwork::area(.x, 1)
+      # })
+      #
+      # p + patchwork::plot_layout(design = Reduce(c, layout))
+
+      # patchwork::wrap_plots(ncol=1) +
+      # patchwork::plot_annotation(title = 'Multivariable regression model checks')
+    },
+    height = 600,
+    alt = "Assumptions testing of the multivariable regression model"
+  )
 
 
   shiny::observeEvent(
@@ -704,6 +774,56 @@ server <- function(input, output, session) {
       gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$params$descr}**")))
   })
 
+  # shiny::observe(
+  #   # list(
+  #   #   input$plot_model
+  #   # ),
+  #   {
+  #     shiny::req(rv$list$regression$tables)
+  #     shiny::req(input$plot_model)
+  #     tryCatch(
+  #       {
+  #         out <- merge_long(rv$list$regression, input$plot_model) |>
+  #           plot.tbl_regression(
+  #             colour = "variable",
+  #             facet_col = "model"
+  #           )
+  #
+  #         rv$list$regression$plot <- out
+  #       },
+  #       warning = function(warn) {
+  #         showNotification(paste0(warn), type = "warning")
+  #       },
+  #       error = function(err) {
+  #         showNotification(paste0("Plotting failed with the following error: ", err), type = "err")
+  #       }
+  #     )
+  #   }
+  # )
+
+  output$regression_plot <- shiny::renderPlot(
+    {
+      # shiny::req(rv$list$regression$plot)
+      shiny::req(input$plot_model)
+
+      out <- merge_long(rv$list$regression, input$plot_model) |>
+        plot.tbl_regression(
+          colour = "variable",
+          facet_col = "model"
+        )
+
+      out +
+        ggplot2::scale_y_discrete(labels = scales::label_wrap(15)) +
+        gg_theme_shiny()
+
+      # rv$list$regression$tables$Multivariable |>
+      #   plot(colour = "variable") +
+      #   ggplot2::scale_y_discrete(labels = scales::label_wrap(15)) +
+      #   gg_theme_shiny()
+    },
+    height = 500,
+    alt = "Regression coefficient plot"
+  )
 
   shiny::conditionalPanel(
     condition = "output.uploaded == 'yes'",
@@ -779,21 +899,20 @@ server <- function(input, output, session) {
       ## Notification is not progressing
       ## Presumably due to missing
 
-      #Simplified for .rmd output attempt
-      format <- ifelse(type=="docx","word_document","odt_document")
+      # Simplified for .rmd output attempt
+      format <- ifelse(type == "docx", "word_document", "odt_document")
 
       shiny::withProgress(message = "Generating the report. Hold on for a moment..", {
-
         rv$list |>
           write_rmd(
             output_format = format,
             input = file.path(getwd(), "www/report.rmd")
           )
 
-          # write_quarto(
-          #   output_format = type,
-          #   input = file.path(getwd(), "www/report.qmd")
-          # )
+        # write_quarto(
+        #   output_format = type,
+        #   input = file.path(getwd(), "www/report.qmd")
+        # )
       })
       file.rename(paste0("www/report.", type), file)
     }

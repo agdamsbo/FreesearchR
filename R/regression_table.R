@@ -24,7 +24,7 @@
 #'     formula.str = "{outcome.str}~.",
 #'     args.list = NULL
 #'   ) |>
-#'   regression_table()
+#'   regression_table() |> plot()
 #' gtsummary::trial |>
 #'   regression_model(
 #'     outcome.str = "trt",
