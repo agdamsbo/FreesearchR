@@ -57,7 +57,13 @@ Imports:
     janitor,
     flextable,
     gt,
-    kableExtra
+    kableExtra,
+    rankinPlot,
+    sjPlot,
+    gvlma,
+    psych,
+    jtools,
+    Hmisc
 Suggests: 
     styler,
     devtools,
