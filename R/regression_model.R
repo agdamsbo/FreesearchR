@@ -25,13 +25,15 @@
 #'     formula.str = "{outcome.str}~.",
 #'     args.list = NULL
 #'   )
-#' gtsummary::trial |> regression_model(
-#'   outcome.str = "trt",
-#'   auto.mode = FALSE,
-#'   fun = "stats::glm",
-#'   args.list = list(family = binomial(link = "logit"))
-#' )
-#' mtcars |>
+#' gtsummary::trial |>
+#'   default_parsing() |>
+#'   regression_model(
+#'     outcome.str = "trt",
+#'     auto.mode = FALSE,
+#'     fun = "stats::glm",
+#'     args.list = list(family = binomial(link = "logit"))
+#'   )
+#' m <- mtcars |>
 #'   default_parsing() |>
 #'   regression_model(
 #'     outcome.str = "mpg",
@@ -40,8 +42,8 @@
 #'     formula.str = "{outcome.str}~{paste(vars,collapse='+')}",
 #'     args.list = NULL,
 #'     vars = c("mpg", "cyl")
-#'   ) |>
-#'   summary()
+#'   )
+#'   broom::tidy(m)
 regression_model <- function(data,
                              outcome.str,
                              auto.mode = FALSE,
@@ -54,6 +56,12 @@ regression_model <- function(data,
     if (formula.str == "") {
       formula.str <- NULL
     }
+  }
+
+  ## This will handle if outcome is not in data for nicer shiny behavior
+  if (!outcome.str %in% names(data)){
+    outcome.str <- names(data)[1]
+    print("outcome is not in data, first column is used")
   }
 
   if (is.null(vars)) {
@@ -113,11 +121,14 @@ regression_model <- function(data,
     msg = "Please provide the function as a character vector."
   )
 
+  # browser()
   out <- do.call(
     getfun(fun),
     c(
-      list(data = data),
-      list(formula = as.formula(formula.glue)),
+      list(
+        data = data,
+        formula = as.formula(formula.glue)
+      ),
       args.list
     )
   )
@@ -152,11 +163,12 @@ regression_model <- function(data,
 #'     fun = "stats::lm",
 #'     args.list = NULL
 #'   )
-#' gtsummary::trial |> regression_model_uv(
+#' m <- gtsummary::trial |> regression_model_uv(
 #'   outcome.str = "trt",
 #'   fun = "stats::glm",
 #'   args.list = list(family = stats::binomial(link = "logit"))
 #' )
+#' lapply(m,broom::tidy) |> dplyr::bind_rows()
 #' }
 regression_model_uv <- function(data,
                                 outcome.str,
@@ -164,6 +176,13 @@ regression_model_uv <- function(data,
                                 fun = NULL,
                                 vars = NULL,
                                 ...) {
+
+  ## This will handle if outcome is not in data for nicer shiny behavior
+  if (!outcome.str %in% names(data)){
+    outcome.str <- names(data)[1]
+    print("outcome is not in data, first column is used")
+  }
+
   if (!is.null(vars)) {
     data <- data |>
       dplyr::select(dplyr::all_of(
@@ -205,9 +224,11 @@ regression_model_uv <- function(data,
       do.call(
         regression_model,
         c(
-          list(data = data[match(c(outcome.str, .var), names(data))]),
-          list(outcome.str = outcome.str),
-          list(args.list = args.list)
+          list(
+            data = data[match(c(outcome.str, .var), names(data))],
+            outcome.str = outcome.str
+          ),
+          args.list
         )
       )
     })
@@ -268,7 +289,8 @@ supported_functions <- function() {
       fun = "stats::lm",
       args.list = NULL,
       formula.str = "{outcome.str}~{paste(vars,collapse='+')}",
-      table.fun = "gtsummary::tbl_regression"
+      table.fun = "gtsummary::tbl_regression",
+      table.args.list = list(exponentiate = FALSE)
     ),
     glm = list(
       descr = "Logistic regression model",
@@ -277,7 +299,8 @@ supported_functions <- function() {
       fun = "stats::glm",
       args.list = list(family = stats::binomial(link = "logit")),
       formula.str = "{outcome.str}~{paste(vars,collapse='+')}",
-      table.fun = "gtsummary::tbl_regression"
+      table.fun = "gtsummary::tbl_regression",
+      table.args.list = list()
     ),
     polr = list(
       descr = "Ordinal logistic regression model",
@@ -289,7 +312,8 @@ supported_functions <- function() {
         method = "logistic"
       ),
       formula.str = "{outcome.str}~{paste(vars,collapse='+')}",
-      table.fun = "gtsummary::tbl_regression"
+      table.fun = "gtsummary::tbl_regression",
+      table.args.list = list()
     )
   )
 }
@@ -392,6 +416,7 @@ get_fun_options <- function(data) {
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' gtsummary::trial |>
 #'   regression_model(
 #'     outcome.str = "age",
@@ -401,6 +426,21 @@ get_fun_options <- function(data) {
 #'   )
 #' ls <- regression_model_list(data = default_parsing(mtcars), outcome.str = "cyl", fun.descr = "Ordinal logistic regression model")
 #' summary(ls$model)
+#'
+#' ls <- regression_model_list(data = default_parsing(gtsummary::trial), outcome.str = "trt", fun.descr = "Logistic regression model")
+#' tbl <- gtsummary::tbl_regression(ls$model, exponentiate = TRUE)
+#' m <- gtsummary::trial |>
+#'   default_parsing() |>
+#'   regression_model(
+#'     outcome.str = "trt",
+#'     fun = "stats::glm",
+#'     formula.str = "{outcome.str}~.",
+#'     args.list = list(family = stats::binomial(link = "logit"))
+#'   )
+#' tbl2 <- gtsummary::tbl_regression(m, exponentiate = TRUE)
+#' broom::tidy(ls$model)
+#' broom::tidy(m)
+#' }
 regression_model_list <- function(data,
                                   outcome.str,
                                   fun.descr,
@@ -448,12 +488,12 @@ regression_model_list <- function(data,
 
   model <- do.call(
     regression_model,
-    c(
-      list(data = data),
-      list(outcome.str = outcome.str),
-      list(fun = fun.c),
-      list(formula.str = formula.str.c),
-      args.list.c
+    list(
+      data = data,
+      outcome.str = outcome.str,
+      fun = fun.c,
+      formula.str = formula.str.c,
+      args.list = args.list.c
     )
   )
 
@@ -480,7 +520,7 @@ list2str <- function(data) {
     unlist() |>
     paste(collapse = (", "))
 
-  if (out==""){
+  if (out == "") {
     return(NULL)
   } else {
     out
@@ -499,16 +539,19 @@ list2str <- function(data) {
 #' @param vars
 #' @param ...
 #'
-#' @returns
+#' @returns list
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' gtsummary::trial |> regression_model_uv(
 #'   outcome.str = "trt",
 #'   fun = "stats::glm",
 #'   args.list = list(family = stats::binomial(link = "logit"))
-#' )
+#' ) |> lapply(broom::tidy) |> dplyr::bind_rows()
 #' ms <- regression_model_uv_list(data = default_parsing(mtcars), outcome.str = "mpg", fun.descr = "Linear regression model")
+#' lapply(ms$model,broom::tidy) |> dplyr::bind_rows()
+#' }
 regression_model_uv_list <- function(data,
                                      outcome.str,
                                      fun.descr,
@@ -517,7 +560,6 @@ regression_model_uv_list <- function(data,
                                      args.list = NULL,
                                      vars = NULL,
                                      ...) {
-
   options <- get_fun_options(fun.descr) |>
     (\(.x){
       .x[[1]]
@@ -574,12 +616,12 @@ regression_model_uv_list <- function(data,
     lapply(\(.var){
       do.call(
         regression_model,
-        c(
-          list(data = data[c(outcome.str, .var)]),
-          list(outcome.str = outcome.str),
-          list(fun = fun.c),
-          list(formula.str = formula.str.c),
-          args.list.c
+        list(
+          data = data[c(outcome.str, .var)],
+          outcome.str = outcome.str,
+          fun = fun.c,
+          formula.str = formula.str.c,
+          args.list = args.list.c
         )
       )
     })
