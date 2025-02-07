@@ -317,14 +317,19 @@ ui_elements <- list(
               )
             ),
             bslib::accordion_panel(
+              vlaue = "acc_cor",
               title = "Correlations",
+              icon = bsicons::bs_icon("table"),
+              shiny::uiOutput("outcome_var_cor"),
+              shiny::helpText("This variable will be excluded from the correlation plot."),
+              shiny::br(),
               shiny::sliderInput(
                 inputId = "cor_cutoff",
                 label = "Correlation cut-off",
                 min = 0,
                 max = 1,
                 step = .02,
-                value = .7,
+                value = .8,
                 ticks = FALSE
               )
             )

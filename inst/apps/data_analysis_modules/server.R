@@ -512,6 +512,18 @@ server <- function(input, output, session) {
     }
   )
 
+  output$outcome_var_cor <- shiny::renderUI({
+    shiny::selectInput(
+      inputId = "outcome_var_cor",
+      selected = NULL,
+      label = "Select outcome variable",
+      choices = c(
+        colnames(rv$list$data)
+        # ,"none"
+        ),
+      multiple = FALSE
+    )
+  })
 
   output$table1 <- gt::render_gt({
     shiny::req(rv$list$table1)
@@ -521,10 +533,16 @@ server <- function(input, output, session) {
       gt::tab_header(gt::md("**Table 1: Baseline Characteristics**"))
   })
 
-
   data_correlations_server(id = "correlations",
-                           data = shiny::reactive(rv$list$data),
+                           data = shiny::reactive({
+                             out <- dplyr::select(rv$list$data,-!!input$outcome_var_cor)
+                             #  input$outcome_var_cor=="none"){
+                             #   out <- rv$list$data
+                             # }
+                             out
+                           }),
                            cutoff = shiny::reactive(input$cor_cutoff))
+
 
 
   ##############################################################################

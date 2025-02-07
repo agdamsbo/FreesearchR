@@ -10,7 +10,7 @@
 #### Current file: R//app_version.R 
 ########
 
-app_version <- function()'250207_1622'
+app_version <- function()'250207_1709'
 
 
 ########
@@ -4103,14 +4103,19 @@ ui_elements <- list(
               )
             ),
             bslib::accordion_panel(
+              vlaue = "acc_cor",
               title = "Correlations",
+              icon = bsicons::bs_icon("table"),
+              shiny::uiOutput("outcome_var_cor"),
+              shiny::helpText("This variable will be excluded from the correlation plot."),
+              shiny::br(),
               shiny::sliderInput(
                 inputId = "cor_cutoff",
                 label = "Correlation cut-off",
                 min = 0,
                 max = 1,
                 step = .02,
-                value = .7,
+                value = .8,
                 ticks = FALSE
               )
             )
@@ -4887,6 +4892,18 @@ server <- function(input, output, session) {
     }
   )
 
+  output$outcome_var_cor <- shiny::renderUI({
+    shiny::selectInput(
+      inputId = "outcome_var_cor",
+      selected = NULL,
+      label = "Select outcome variable",
+      choices = c(
+        colnames(rv$list$data)
+        # ,"none"
+        ),
+      multiple = FALSE
+    )
+  })
 
   output$table1 <- gt::render_gt({
     shiny::req(rv$list$table1)
@@ -4896,10 +4913,16 @@ server <- function(input, output, session) {
       gt::tab_header(gt::md("**Table 1: Baseline Characteristics**"))
   })
 
-
   data_correlations_server(id = "correlations",
-                           data = shiny::reactive(rv$list$data),
+                           data = shiny::reactive({
+                             out <- dplyr::select(rv$list$data,-!!input$outcome_var_cor)
+                             #  input$outcome_var_cor=="none"){
+                             #   out <- rv$list$data
+                             # }
+                             out
+                           }),
                            cutoff = shiny::reactive(input$cor_cutoff))
+
 
 
   ##############################################################################
