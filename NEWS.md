@@ -1,3 +1,9 @@
+# freesearcheR 25.2.1
+
+First steps towards a more focused and simplified interface.
+
+Focus will be on ease of use, handling basic functionality for data inspection and descriptive analyses.
+
 # freesearcheR 25.1.1
 
 * UI tweaks.
