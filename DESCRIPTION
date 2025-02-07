@@ -63,7 +63,8 @@ Imports:
     gvlma,
     psych,
     jtools,
-    Hmisc
+    Hmisc,
+    ggstats
 Suggests: 
     styler,
     devtools,

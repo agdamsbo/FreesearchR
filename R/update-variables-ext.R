@@ -461,6 +461,15 @@ update_variables_datagrid <- function(data, height = NULL, selectionId = NULL, b
     fontStyle = "italic"
   )
 
+  grid <- toastui::grid_filters(
+    grid = grid,
+    column = "name",
+    # columns = unname(std_names[std_names!="vals"]),
+    showApplyBtn = FALSE,
+    showClearBtn = TRUE,
+    type = "text"
+  )
+
   # grid <- toastui::grid_columns(
   #   grid = grid,
   #   columns = "name_toset",
@@ -571,6 +580,7 @@ convert_to <- function(data,
   new_class <- match.arg(new_class, several.ok = TRUE)
   stopifnot(length(new_class) == length(variable))
   args <- list(...)
+  args$format <- clean_sep(args$format)
   if (length(variable) > 1) {
     for (i in seq_along(variable)) {
       data <- convert_to(data, variable[i], new_class[i], ...)
@@ -602,10 +612,10 @@ convert_to <- function(data,
       setNames(list(expr(as.integer(!!sym(variable)))), variable)
     )
   } else if (identical(new_class, "date")) {
-    data[[variable]] <- as.Date(x = data[[variable]], ...)
+    data[[variable]] <- as.Date(x = clean_date(data[[variable]]), ...)
     attr(data, "code_03_convert") <- c(
       attr(data, "code_03_convert"),
-      setNames(list(expr(as.Date(!!sym(variable), origin = !!args$origin))), variable)
+      setNames(list(expr(as.Date(clean_date(!!sym(variable)), origin = !!args$origin, format=clean_sep(!!args$format)))), variable)
     )
   } else if (identical(new_class, "datetime")) {
     data[[variable]] <- as.POSIXct(x = data[[variable]], ...)
@@ -710,3 +720,39 @@ get_vars_to_convert <- function(vars, classes_input) {
 }
 
 
+#' gsub wrapper for piping with default values for separator substituting
+#'
+#' @param data character vector
+#' @param old.sep old separator
+#' @param new.sep new separator
+#'
+#' @returns character vector
+#' @export
+#'
+clean_sep <- function(data,old.sep="[-.,/]",new.sep="-"){
+  gsub(old.sep,new.sep,data)
+}
+
+#' Attempts at applying uniform date format
+#'
+#' @param data character string vector of possible dates
+#'
+#' @returns character string
+#' @export
+#'
+clean_date <- function(data){
+  data |>
+    clean_sep() |>
+    sapply(\(.x){
+      if (is.na(.x)){
+        .x
+      } else {
+        strsplit(.x,"-") |>
+          unlist()|>
+          lapply(\(.y){
+            if (nchar(.y)==1) paste0("0",.y) else .y
+          }) |> paste(collapse="-")
+      }
+    }) |>
+    unname()
+}

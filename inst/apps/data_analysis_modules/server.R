@@ -90,7 +90,7 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
-  consider.na <- c("NA", "\"\"", "")
+  consider.na <- c("NA", "\"\"", "", "\'\'", "na")
 
   data_file <- datamods::import_file_server(
     id = "file_import",
@@ -105,7 +105,8 @@ server <- function(input, output, session) {
         haven::read_dta(file = file, .name_repair = "unique_quiet")
       },
       csv = function(file) {
-        readr::read_csv(file = file, na = consider.na)
+        readr::read_csv(file = file, na = consider.na, name_repair = "unique_quiet") #|>
+          # janitor::remove_empty(which = "cols", cutoff = 1, quiet = TRUE)
       },
       # xls = function(file){
       #   openxlsx2::read_xlsx(file = file, na.strings = consider.na,)
@@ -114,7 +115,7 @@ server <- function(input, output, session) {
       #   openxlsx2::read_xlsx(file = file, na.strings = consider.na,)
       # },
       rds = function(file) {
-        readr::read_rds(file = file)
+        readr::read_rds(file = file, name_repair = "unique_quiet")
       }
     )
   )
@@ -161,11 +162,22 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
-  shiny::observeEvent(rv$data_original, {
-    rv$data <- rv$data_original |>
-      default_parsing() |>
-      janitor::clean_names()
-  })
+  shiny::observeEvent(
+    eventExpr = list(
+      rv$data_original,
+      input$reset_confirm,
+      input$complete_cutoff
+    ),
+    handlerExpr = {
+      shiny::req(rv$data_original)
+      rv$data <- rv$data_original |>
+        # janitor::clean_names() |>
+        default_parsing() |>
+        remove_empty_cols(
+          cutoff = input$complete_cutoff / 100
+        )
+    }
+  )
 
   shiny::observeEvent(input$data_reset, {
     shinyWidgets::ask_confirmation(
@@ -174,9 +186,9 @@ server <- function(input, output, session) {
     )
   })
 
-  shiny::observeEvent(input$reset_confirm, {
-    rv$data <- rv$data_original |> default_parsing()
-  })
+  # shiny::observeEvent(input$reset_confirm, {
+  #   rv$data <- rv$data_original |> default_parsing()
+  # })
 
   #########  Overview
 
@@ -243,7 +255,8 @@ server <- function(input, output, session) {
   )
 
   #########  Show result
-
+  tryCatch(
+    {
   output$table_mod <- toastui::renderDatagrid({
     shiny::req(rv$data)
     # data <- rv$data
@@ -255,6 +268,13 @@ server <- function(input, output, session) {
       # compact = TRUE,
       # striped = TRUE
     )
+  })
+    },
+  warning = function(warn) {
+    showNotification(paste0(warn), type = "warning")
+  },
+  error = function(err) {
+    showNotification(paste0(err), type = "err")
   })
 
   output$code <- renderPrint({
@@ -299,14 +319,14 @@ server <- function(input, output, session) {
       rv$data_filtered <- data_filter()
 
       rv$list$data <- data_filter() |>
-        REDCapCAST::fct_drop.data.frame() |>
+        REDCapCAST::fct_drop() |>
         (\(.x){
           .x[base_vars()]
-        })() |>
-        janitor::remove_empty(
-          which = "cols",
-          cutoff = input$complete_cutoff / 100
-        )
+        })() #|>
+      # janitor::remove_empty(
+      #   which = "cols",
+      #   cutoff = input$complete_cutoff / 100
+      # )
     }
   )
 
@@ -434,90 +454,9 @@ server <- function(input, output, session) {
   })
 
 
-
-
-  ## Have a look at column filters at some point
-  ## There should be a way to use the filtering the filter data for further analyses
-  ## Disabled for now, as the JS is apparently not isolated
-  # output$data_table <-
-  #   DT::renderDT(
-  #     {
-  #       DT::datatable(ds()[base_vars()])
-  #     },
-  #     server = FALSE
-  #   )
-  #
-  # output$data.classes <- gt::render_gt({
-  #   shiny::req(input$file)
-  #   data.frame(matrix(sapply(ds(), \(.x){
-  #     class(.x)[1]
-  #   }), nrow = 1)) |>
-  #     stats::setNames(names(ds())) |>
-  #     gt::gt()
-  # })
-
-
-  ### Outputs
-
-  # shiny::observeEvent(data_filter(), {
-  #   rv$data_filtered <- data_filter()
-  # })
-
-  # shiny::observeEvent(
-  #   shiny::reactive(rv$data_filtered),
-  #   {
-  #     rv$list$data <- rv$data_filtered |>
-  #       # dplyr::mutate(dplyr::across(dplyr::where(is.character), as.factor)) |>
-  #       REDCapCAST::fct_drop.data.frame() |>
-  #       # factorize(vars = input$factor_vars) |>
-  #       remove_na_attr()
-  #
-  #     # rv$list$data <- data
-  #     # rv$list$data <- data[base_vars()]
-  #   }
-  # )
-
-  #   shiny::observe({
-  #     if (input$strat_var == "none") {
-  #       by.var <- NULL
-  #     } else {
-  #       by.var <- input$strat_var
-  #     }
-  #
-  #     rv$list$table1 <- rv$list$data |>
-  #       baseline_table(
-  #         fun.args =
-  #           list(
-  #             by = by.var
-  #           )
-  #       ) |>
-  #       (\(.x){
-  #         if (!is.null(by.var)) {
-  #           .x |> gtsummary::add_overall()
-  #         } else {
-  #           .x
-  #         }
-  #       })() |>
-  #       (\(.x){
-  #         if (input$add_p == "yes") {
-  #           .x |>
-  #             gtsummary::add_p() |>
-  #             gtsummary::bold_p()
-  #         } else {
-  #           .x
-  #         }
-  #       })()
-  #   })
-  #
-  #     output$table1 <- gt::render_gt(
-  #       rv$list$table1 |>
-  #         gtsummary::as_gt() |>
-  # gt::tab_header(shiny::md("**Table 1. Patient Characteristics**"))
-  #     )
-
   ##############################################################################
   #########
-  #########  Data analyses results
+  #########  Descriptive evaluations
   #########
   ##############################################################################
 
@@ -581,6 +520,18 @@ server <- function(input, output, session) {
       gtsummary::as_gt() |>
       gt::tab_header(gt::md("**Table 1: Baseline Characteristics**"))
   })
+
+
+  data_correlations_server(id = "correlations",
+                           data = shiny::reactive(rv$list$data),
+                           cutoff = shiny::reactive(input$cor_cutoff))
+
+
+  ##############################################################################
+  #########
+  #########  Regression model analyses
+  #########
+  ##############################################################################
 
   shiny::observeEvent(
     input$load,
@@ -659,37 +610,6 @@ server <- function(input, output, session) {
       )
     }
   )
-
-  # plot_check_r <- shiny::reactive({plot(rv$check)})
-  #
-  # output$check_1 <- shiny::renderUI({
-  #   shiny::req(rv$check)
-  #   list <- lapply(seq_len(length(plot_check_r())),
-  #                                    function(i) {
-  #                                      plotname <- paste0("check_plot_", i)
-  #                                      shiny::htmlOutput(plotname)
-  #                                    })
-  #
-  #   do.call(shiny::tagList,list)
-  # })
-  #
-  # # Call renderPlot for each one. Plots are only actually generated when they
-  # # are visible on the web page.
-  #
-  # shiny::observe({
-  #   shiny::req(rv$check)
-  #   # browser()
-  #   for (i in seq_len(length(plot_check_r()))) {
-  #     local({
-  #       my_i <- i
-  #       plotname <- paste0("check_plot_", my_i)
-  #
-  #       output[[plotname]] <- shiny::renderPlot({
-  #         plot_check_r()[[my_i]] + gg_theme_shiny()
-  #       })
-  #     })
-  #   }
-  # })
 
   output$check <- shiny::renderPlot(
     {
@@ -925,8 +845,10 @@ server <- function(input, output, session) {
     content = function(file, type = input$data_type) {
       if (type == "rds") {
         readr::write_rds(rv$list$data, file = file)
-      } else {
+      } else if (type == "dta") {
         haven::write_dta(as.data.frame(rv$list$data), path = file)
+      } else if (type == "csv"){
+        readr::write_csv(rv$list$data, file = file)
       }
     }
   )

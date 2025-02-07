@@ -10,7 +10,7 @@
 #### Current file: R//app_version.R 
 ########
 
-app_version <- function()'250130_1152'
+app_version <- function()'250207_1622'
 
 
 ########
@@ -39,6 +39,148 @@ baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, 
   return(out)
 }
 
+
+
+########
+#### Current file: R//correlations-module.R 
+########
+
+#' Data correlations evaluation module
+#'
+#' @param id Module id. (Use 'ns("id")')
+#'
+#' @name data-correlations
+#' @returns Shiny ui module
+#' @export
+data_correlations_ui <- function(id, ...) {
+  ns <- NS(id)
+
+  shiny::tagList(
+    shiny::textOutput(outputId = ns("suggest")),
+    shiny::plotOutput(outputId = ns("correlation_plot"), ...)
+  )
+}
+
+
+#'
+#' @param data data
+#' @param color.main main color
+#' @param color.sec secondary color
+#' @param ... arguments passed to toastui::datagrid
+#'
+#' @name data-correlations
+#' @returns shiny server module
+#' @export
+data_correlations_server <- function(id,
+                                     data,
+                                     include.class = NULL,
+                                     cutoff = .7,
+                                     ...) {
+  shiny::moduleServer(
+    id = id,
+    module = function(input, output, session) {
+      # ns <- session$ns
+
+      rv <- shiny::reactiveValues(
+        data = NULL
+      )
+
+      rv$data <- shiny::reactive({
+        shiny::req(data)
+        if (!is.null(include.class)) {
+          filter <- sapply(data(), class) %in% include.class
+          out <- data()[filter]
+        } else {
+          out <- data()
+        }
+        out
+      })
+
+      # rv <- list()
+      # rv$data <- mtcars
+
+      output$suggest <- shiny::renderPrint({
+        shiny::req(rv$data)
+        shiny::req(cutoff)
+        pairs <- correlation_pairs(rv$data(), threshold = cutoff())
+
+        more <- ifelse(nrow(pairs) > 1, "from each pair ", "")
+
+        if (nrow(pairs) == 0) {
+          out <- glue::glue("No variables have a correlation measure above the threshold.")
+        } else {
+          out <- pairs |>
+            apply(1, \(.x){
+              glue::glue("'{.x[1]}'x'{.x[2]}'({round(as.numeric(.x[3]),2)})")
+            }) |>
+            (\(.x){
+              glue::glue("The following variable pairs are highly correlated: {sentence_paste(.x)}.\nConsider excluding one {more}from the dataset to ensure variables are independent.")
+            })()
+        }
+        out
+      })
+
+      output$correlation_plot <- shiny::renderPlot({
+        psych::pairs.panels(rv$data())
+      })
+    }
+  )
+}
+
+correlation_pairs <- function(data, threshold = .8) {
+  data <- data[!sapply(data, is.character)]
+  data <- data |> dplyr::mutate(dplyr::across(dplyr::where(is.factor), as.numeric))
+  cor <- Hmisc::rcorr(as.matrix(data))
+  r <- cor$r %>% as.table()
+  d <- r |>
+    as.data.frame() |>
+    dplyr::filter(abs(Freq) > threshold, Freq != 1)
+
+  d[1:2] |>
+    apply(1, \(.x){
+      sort(unname(.x))
+    },
+    simplify = logical(1)
+    ) |>
+    duplicated() |>
+    (\(.x){
+      d[!.x, ]
+    })() |>
+    setNames(c("var1", "var2", "cor"))
+}
+
+sentence_paste <- function(data, and.str = "and") {
+  and.str <- gsub(" ", "", and.str)
+  if (length(data) < 2) {
+    data
+  } else if (length(data) == 2) {
+    paste(data, collapse = glue::glue(" {and.str} "))
+  } else if (length(data) > 2) {
+    paste(paste(data[-length(data)], collapse = ", "), data[length(data)], collapse = glue::glue(" {and.str} "))
+  }
+}
+
+
+cor_app <- function() {
+  ui <- shiny::fluidPage(
+    shiny::sliderInput(
+      inputId = "cor_cutoff",
+      label = "Correlation cut-off",
+      min = 0,
+      max = 1,
+      step = .1,
+      value = .7,
+      ticks = FALSE
+    ),
+    data_correlations_ui("data", height = 600)
+  )
+  server <- function(input, output, session) {
+    data_correlations_server("data", data = shiny::reactive(mtcars), cutoff = shiny::reactive(input$cor_cutoff))
+  }
+  shiny::shinyApp(ui, server)
+}
+
+cor_app()
 
 
 ########
@@ -1365,6 +1507,23 @@ remove_na_attr <- function(data,attr="label"){
   })
 
   dplyr::bind_cols(out)
+}
+
+#' Removes columns with completenes below cutoff
+#'
+#' @param data data frame
+#' @param cutoff numeric
+#'
+#' @returns data frame
+#' @export
+#'
+#' @examples
+#'data.frame(a=1:10,b=NA, c=c(2,NA)) |> remove_empty_cols(cutoff=.5)
+remove_empty_cols <- function(data,cutoff=.7){
+  filter <- apply(X = data,MARGIN = 2,FUN = \(.x){
+    sum(as.numeric(!is.na(.x)))/length(.x)
+  }) >= cutoff
+  data[filter]
 }
 
 
@@ -2743,6 +2902,7 @@ modify_qmd <- function(file, format) {
 }
 
 
+
 ########
 #### Current file: R//shiny_freesearcheR.R 
 ########
@@ -2805,6 +2965,7 @@ custom_theme <- function(...,
                          ){
   bslib::bs_theme(
     ...,
+    "navbar-bg" = primary,
     version = version,
     primary = primary,
     secondary = secondary,
@@ -3322,6 +3483,15 @@ update_variables_datagrid <- function(data, height = NULL, selectionId = NULL, b
     fontStyle = "italic"
   )
 
+  grid <- toastui::grid_filters(
+    grid = grid,
+    column = "name",
+    # columns = unname(std_names[std_names!="vals"]),
+    showApplyBtn = FALSE,
+    showClearBtn = TRUE,
+    type = "text"
+  )
+
   # grid <- toastui::grid_columns(
   #   grid = grid,
   #   columns = "name_toset",
@@ -3432,6 +3602,7 @@ convert_to <- function(data,
   new_class <- match.arg(new_class, several.ok = TRUE)
   stopifnot(length(new_class) == length(variable))
   args <- list(...)
+  args$format <- clean_sep(args$format)
   if (length(variable) > 1) {
     for (i in seq_along(variable)) {
       data <- convert_to(data, variable[i], new_class[i], ...)
@@ -3463,10 +3634,10 @@ convert_to <- function(data,
       setNames(list(expr(as.integer(!!sym(variable)))), variable)
     )
   } else if (identical(new_class, "date")) {
-    data[[variable]] <- as.Date(x = data[[variable]], ...)
+    data[[variable]] <- as.Date(x = clean_date(data[[variable]]), ...)
     attr(data, "code_03_convert") <- c(
       attr(data, "code_03_convert"),
-      setNames(list(expr(as.Date(!!sym(variable), origin = !!args$origin))), variable)
+      setNames(list(expr(as.Date(clean_date(!!sym(variable)), origin = !!args$origin, format=clean_sep(!!args$format)))), variable)
     )
   } else if (identical(new_class, "datetime")) {
     data[[variable]] <- as.POSIXct(x = data[[variable]], ...)
@@ -3571,6 +3742,42 @@ get_vars_to_convert <- function(vars, classes_input) {
 }
 
 
+#' gsub wrapper for piping with default values for separator substituting
+#'
+#' @param data character vector
+#' @param old.sep old separator
+#' @param new.sep new separator
+#'
+#' @returns character vector
+#' @export
+#'
+clean_sep <- function(data,old.sep="[-.,/]",new.sep="-"){
+  gsub(old.sep,new.sep,data)
+}
+
+#' Attempts at applying uniform date format
+#'
+#' @param data character string vector of possible dates
+#'
+#' @returns character string
+#' @export
+#'
+clean_date <- function(data){
+  data |>
+    clean_sep() |>
+    sapply(\(.x){
+      if (is.na(.x)){
+        .x
+      } else {
+        strsplit(.x,"-") |>
+          unlist()|>
+          lapply(\(.y){
+            if (nchar(.y)==1) paste0("0",.y) else .y
+          }) |> paste(collapse="-")
+      }
+    }) |>
+    unname()
+}
 
 
 ########
@@ -3597,61 +3804,69 @@ ui_elements <- list(
   ##############################################################################
   "import" = bslib::nav_panel(
     title = "Import",
-    shiny::tagList(
-      shiny::h4("Choose your data source"),
-      # shiny::conditionalPanel(
-      #   condition = "output.has_input=='yes'",
-      #   # Input: Select a file ----
-      #   shiny::helpText("Analyses are performed on provided data")
+    shiny::h4("Choose your data source"),
+    shiny::br(),
+    shinyWidgets::radioGroupButtons(
+      inputId = "source",
+      selected = "env",
+      # label = "Choice: ",
+      choices = c(
+        "File upload" = "file",
+        "REDCap server" = "redcap",
+        "Local data" = "env"
+      ),
+      # checkIcon = list(
+      #   yes = icon("square-check"),
+      #   no = icon("square")
       # ),
-      # shiny::conditionalPanel(
-      #   condition = "output.has_input=='no'",
-      # Input: Select a file ----
-      shinyWidgets::radioGroupButtons(
-        inputId = "source",
-        selected = "env",
-        # label = "Choice: ",
-        choices = c(
-          "File upload" = "file",
-          "REDCap server" = "redcap",
-          "Local data" = "env"
-        ),
-        # checkIcon = list(
-        #   yes = icon("square-check"),
-        #   no = icon("square")
-        # ),
-        width = "100%"
-      ),
-      shiny::conditionalPanel(
-        condition = "input.source=='file'",
-        datamods::import_file_ui("file_import",
-          title = "Choose a datafile to upload",
-          file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat", ".sav", ".ods", ".dta")
-        )
-      ),
-      shiny::conditionalPanel(
-        condition = "input.source=='redcap'",
-        m_redcap_readUI("redcap_import")
-      ),
-      shiny::conditionalPanel(
-        condition = "input.source=='env'",
-        import_globalenv_ui(id = "env", title = NULL)
-      ),
-      shiny::conditionalPanel(
-        condition = "input.source=='redcap'",
-        DT::DTOutput(outputId = "redcap_prev")
-      ),
-      shiny::br(),
-      shiny::actionButton(
-        inputId = "act_start",
-        label = "Start",
-        width = "100%",
-        icon = shiny::icon("play")
-      ),
-      shiny::helpText('After importing, hit "Start" or navigate to the desired tab.'),
-      shiny::br(),
-      shiny::br()
-    )
+      width = "100%"
+    ),
+    shiny::helpText("Upload a file from your device, get data directly from REDCap or select a sample data set for testing from the app."),
+    shiny::conditionalPanel(
+      condition = "input.source=='file'",
+      datamods::import_file_ui("file_import",
+        title = "Choose a datafile to upload",
+        file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat", ".sav", ".ods", ".dta")
+      )
+    ),
+    shiny::conditionalPanel(
+      condition = "input.source=='redcap'",
+      m_redcap_readUI("redcap_import")
+    ),
+    shiny::conditionalPanel(
+      condition = "input.source=='env'",
+      import_globalenv_ui(id = "env", title = NULL)
+    ),
+    shiny::conditionalPanel(
+      condition = "input.source=='redcap'",
+      DT::DTOutput(outputId = "redcap_prev")
+    ),
+    shiny::br(),
+    shiny::br(),
+    shiny::h5("Exclude in-complete variables"),
+    shiny::p("Before going further, you can exclude variables with a low degree of completeness."),
+    shiny::br(),
+    shiny::sliderInput(
+      inputId = "complete_cutoff",
+      label = "Choose completeness threshold (%)",
+      min = 0,
+      max = 100,
+      step = 10,
+      value = 70,
+      ticks = FALSE
+    ),
+    shiny::helpText("Only include variables with completeness above a specified percentage."),
+    shiny::br(),
+    shiny::br(),
+    shiny::actionButton(
+      inputId = "act_start",
+      label = "Start",
+      width = "100%",
+      icon = shiny::icon("play")
+    ),
+    shiny::helpText('After importing, hit "Start" or navigate to the desired tab.'),
+    shiny::br(),
+    shiny::br()
   ),
   ##############################################################################
   #########
@@ -3731,7 +3946,7 @@ ui_elements <- list(
           fluidRow(
             shiny::column(
               width = 9,
-              shiny::tags$p("Below, you can subset the data (by not selecting the variables to exclude on applying changes), rename variables, set new labels (for nicer tables in the analysis report) and change variable classes.
+              shiny::tags$p("Below, you can subset the data (select variables to include on clicking 'Apply changes'), rename variables, set new labels (for nicer tables in the report) and change variable classes (numeric, factor/categorical etc.).
                             Italic text can be edited/changed.
                             On the right, you can create and modify factor/categorical variables as well as resetting the data to the originally imported data.")
             )
@@ -3851,15 +4066,13 @@ ui_elements <- list(
     ),
   ##############################################################################
   #########
-  #########  Data analyses panel
+  #########  Descriptive analyses panel
   #########
   ##############################################################################
-  "analyze" =
-  # bslib::nav_panel_hidden(
+  "describe" =
     bslib::nav_panel(
-      # value = "analyze",
-      title = "Analyses",
-      id = "navanalyses",
+      title = "Evaluate",
+      id = "navdescribe",
       bslib::navset_bar(
         title = "",
         # bslib::layout_sidebar(
@@ -3889,6 +4102,47 @@ ui_elements <- list(
                 shiny::helpText("Option to perform statistical comparisons between strata in baseline table.")
               )
             ),
+            bslib::accordion_panel(
+              title = "Correlations",
+              shiny::sliderInput(
+                inputId = "cor_cutoff",
+                label = "Correlation cut-off",
+                min = 0,
+                max = 1,
+                step = .02,
+                value = .7,
+                ticks = FALSE
+              )
+            )
+          )
+        ),
+        bslib::nav_panel(
+          title = "Baseline characteristics",
+          gt::gt_output(outputId = "table1")
+        ),
+        bslib::nav_panel(
+          title = "Variable correlations",
+          data_correlations_ui(id = "correlations", height = 600)
+        )
+      )
+    ),
+  ##############################################################################
+  #########
+  #########  Regression analyses panel
+  #########
+  ##############################################################################
+  "analyze" =
+    bslib::nav_panel(
+      title = "Regression",
+      id = "navanalyses",
+      bslib::navset_bar(
+        title = "",
+        # bslib::layout_sidebar(
+        #   fillable = TRUE,
+        sidebar = bslib::sidebar(
+          bslib::accordion(
+            open = "acc_reg",
+            multiple = FALSE,
             bslib::accordion_panel(
               value = "acc_reg",
               title = "Regression",
@@ -3927,23 +4181,14 @@ ui_elements <- list(
                 type = "secondary",
                 auto_reset = TRUE
               ),
-              shiny::helpText("If you change the parameters, press 'Analyse' again to update the regression analysis"),
+              shiny::helpText("Press 'Analyse' again after changing parameters."),
+              shiny::tags$br(),
               shiny::uiOutput("plot_model")
             ),
             bslib::accordion_panel(
               value = "acc_advanced",
               title = "Advanced",
               icon = bsicons::bs_icon("gear"),
-              shiny::sliderInput(
-                inputId = "complete_cutoff",
-                label = "Cut-off for column completeness (%)",
-                min = 0,
-                max = 100,
-                step = 10,
-                value = 70,
-                ticks = FALSE
-              ),
-              shiny::helpText("To improve speed, columns are removed before analysing data, if copleteness is below above value."),
               shiny::radioButtons(
                 inputId = "all",
                 label = "Specify covariables",
@@ -3957,52 +4202,6 @@ ui_elements <- list(
               shiny::conditionalPanel(
                 condition = "input.all==1",
                 shiny::uiOutput("include_vars")
-              )
-            ),
-            bslib::accordion_panel(
-              value = "acc_down",
-              title = "Download",
-              icon = bsicons::bs_icon("download"),
-              shiny::h4("Report"),
-              shiny::helpText("Choose your favourite output file format for further work, and download, when the analyses are done."),
-              shiny::selectInput(
-                inputId = "output_type",
-                label = "Output format",
-                selected = NULL,
-                choices = list(
-                  "MS Word" = "docx",
-                  "LibreOffice" = "odt"
-                  # ,
-                  # "PDF" = "pdf",
-                  # "All the above" = "all"
-                )
-              ),
-              shiny::br(),
-              # Button
-              shiny::downloadButton(
-                outputId = "report",
-                label = "Download report",
-                icon = shiny::icon("download")
-              ),
-              # shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
-              shiny::tags$hr(),
-              shiny::h4("Data"),
-              shiny::helpText("Choose your favourite output data format to download the modified data."),
-              shiny::selectInput(
-                inputId = "data_type",
-                label = "Data format",
-                selected = NULL,
-                choices = list(
-                  "R" = "rds",
-                  "stata" = "dta"
-                )
-              ),
-              shiny::br(),
-              # Button
-              shiny::downloadButton(
-                outputId = "data_modified",
-                label = "Download data",
-                icon = shiny::icon("download")
               )
             )
           ),
@@ -4026,10 +4225,6 @@ ui_elements <- list(
           # shiny::tags$hr(),
         ),
         bslib::nav_panel(
-          title = "Baseline characteristics",
-          gt::gt_output(outputId = "table1")
-        ),
-        bslib::nav_panel(
           title = "Regression table",
           gt::gt_output(outputId = "table2")
         ),
@@ -4043,6 +4238,66 @@ ui_elements <- list(
           # shiny::uiOutput(outputId = "check_1")
         )
       )
+    ),
+  ##############################################################################
+  #########
+  #########  Download panel
+  #########
+  ##############################################################################
+  "download" =
+    bslib::nav_panel(
+      title = "Download",
+      id = "navdownload",
+      shiny::fluidRow(
+        shiny::column(
+          width = 6,
+          shiny::h4("Report"),
+          shiny::helpText("Choose your favourite output file format for further work, and download, when the analyses are done."),
+          shiny::selectInput(
+            inputId = "output_type",
+            label = "Output format",
+            selected = NULL,
+            choices = list(
+              "MS Word" = "docx",
+              "LibreOffice" = "odt"
+              # ,
+              # "PDF" = "pdf",
+              # "All the above" = "all"
+            )
+          ),
+          shiny::br(),
+          # Button
+          shiny::downloadButton(
+            outputId = "report",
+            label = "Download report",
+            icon = shiny::icon("download")
+          )
+          # shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
+        ),
+        shiny::column(
+          width = 6,
+          shiny::h4("Data"),
+          shiny::helpText("Choose your favourite output data format to download the modified data."),
+          shiny::selectInput(
+            inputId = "data_type",
+            label = "Data format",
+            selected = NULL,
+            choices = list(
+              "R" = "rds",
+              "stata" = "dta",
+              "CSV" = "csv"
+            )
+          ),
+          shiny::br(),
+          # Button
+          shiny::downloadButton(
+            outputId = "data_modified",
+            label = "Download data",
+            icon = shiny::icon("download")
+          )
+        )
+      ),
+      shiny::br()
     ),
   ##############################################################################
   #########
@@ -4065,7 +4320,6 @@ ui_elements <- list(
   #   shiny::br()
   # )
 )
-
 # Initial attempt at creating light and dark versions
 light <- custom_theme()
 dark <- custom_theme(
@@ -4090,17 +4344,15 @@ ui <- bslib::page_fixed(
   theme = light,
   shiny::useBusyIndicators(),
   bslib::page_navbar(
-    # title = "freesearcheR",
     id = "main_panel",
-    # header = shiny::tags$header(shiny::p("Data is only stored temporarily for analysis and deleted immediately afterwards.")),
     ui_elements$home,
     ui_elements$import,
     ui_elements$overview,
+    ui_elements$describe,
     ui_elements$analyze,
+    ui_elements$download,
     bslib::nav_spacer(),
     ui_elements$docs,
-    # bslib::nav_spacer(),
-    # bslib::nav_item(shinyWidgets::circleButton(inputId = "mode", icon = icon("moon"),status = "primary")),
     fillable = FALSE,
     footer = shiny::tags$footer(
       style = "background-color: #14131326; padding: 4px; text-align: center; bottom: 0; width: 100%;",
@@ -4213,7 +4465,7 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
-  consider.na <- c("NA", "\"\"", "")
+  consider.na <- c("NA", "\"\"", "", "\'\'", "na")
 
   data_file <- datamods::import_file_server(
     id = "file_import",
@@ -4228,7 +4480,8 @@ server <- function(input, output, session) {
         haven::read_dta(file = file, .name_repair = "unique_quiet")
       },
       csv = function(file) {
-        readr::read_csv(file = file, na = consider.na)
+        readr::read_csv(file = file, na = consider.na, name_repair = "unique_quiet") #|>
+          # janitor::remove_empty(which = "cols", cutoff = 1, quiet = TRUE)
       },
       # xls = function(file){
       #   openxlsx2::read_xlsx(file = file, na.strings = consider.na,)
@@ -4237,7 +4490,7 @@ server <- function(input, output, session) {
       #   openxlsx2::read_xlsx(file = file, na.strings = consider.na,)
       # },
       rds = function(file) {
-        readr::read_rds(file = file)
+        readr::read_rds(file = file, name_repair = "unique_quiet")
       }
     )
   )
@@ -4284,11 +4537,22 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
-  shiny::observeEvent(rv$data_original, {
-    rv$data <- rv$data_original |>
-      default_parsing() |>
-      janitor::clean_names()
-  })
+  shiny::observeEvent(
+    eventExpr = list(
+      rv$data_original,
+      input$reset_confirm,
+      input$complete_cutoff
+    ),
+    handlerExpr = {
+      shiny::req(rv$data_original)
+      rv$data <- rv$data_original |>
+        # janitor::clean_names() |>
+        default_parsing() |>
+        remove_empty_cols(
+          cutoff = input$complete_cutoff / 100
+        )
+    }
+  )
 
   shiny::observeEvent(input$data_reset, {
     shinyWidgets::ask_confirmation(
@@ -4297,9 +4561,9 @@ server <- function(input, output, session) {
     )
   })
 
-  shiny::observeEvent(input$reset_confirm, {
-    rv$data <- rv$data_original |> default_parsing()
-  })
+  # shiny::observeEvent(input$reset_confirm, {
+  #   rv$data <- rv$data_original |> default_parsing()
+  # })
 
   #########  Overview
 
@@ -4366,7 +4630,8 @@ server <- function(input, output, session) {
   )
 
   #########  Show result
-
+  tryCatch(
+    {
   output$table_mod <- toastui::renderDatagrid({
     shiny::req(rv$data)
     # data <- rv$data
@@ -4378,6 +4643,13 @@ server <- function(input, output, session) {
       # compact = TRUE,
       # striped = TRUE
     )
+  })
+    },
+  warning = function(warn) {
+    showNotification(paste0(warn), type = "warning")
+  },
+  error = function(err) {
+    showNotification(paste0(err), type = "err")
   })
 
   output$code <- renderPrint({
@@ -4422,14 +4694,14 @@ server <- function(input, output, session) {
       rv$data_filtered <- data_filter()
 
       rv$list$data <- data_filter() |>
-        REDCapCAST::fct_drop.data.frame() |>
+        REDCapCAST::fct_drop() |>
         (\(.x){
           .x[base_vars()]
-        })() |>
-        janitor::remove_empty(
-          which = "cols",
-          cutoff = input$complete_cutoff / 100
-        )
+        })() #|>
+      # janitor::remove_empty(
+      #   which = "cols",
+      #   cutoff = input$complete_cutoff / 100
+      # )
     }
   )
 
@@ -4488,13 +4760,17 @@ server <- function(input, output, session) {
     shiny::req(input$outcome_var)
     shiny::selectizeInput(
       inputId = "regression_type",
-      # selected = colnames(rv$data_filtered)[sapply(rv$data_filtered, is.factor)],
       label = "Choose regression analysis",
-      choices = possible_functions(data = dplyr::select(rv$data_filtered,
-                                                        ifelse(input$outcome_var %in% names(rv$data_filtered),
-                                                               input$outcome_var,
-                                                               names(rv$data_filtered)[1])
-                                                        ), design = "cross-sectional"),
+      ## The below ifelse statement handles the case of loading a new dataset
+      choices = possible_functions(
+        data = dplyr::select(
+          rv$data_filtered,
+          ifelse(input$outcome_var %in% names(rv$data_filtered),
+            input$outcome_var,
+            names(rv$data_filtered)[1]
+          )
+        ), design = "cross-sectional"
+      ),
       multiple = FALSE
     )
   })
@@ -4553,90 +4829,9 @@ server <- function(input, output, session) {
   })
 
 
-
-
-  ## Have a look at column filters at some point
-  ## There should be a way to use the filtering the filter data for further analyses
-  ## Disabled for now, as the JS is apparently not isolated
-  # output$data_table <-
-  #   DT::renderDT(
-  #     {
-  #       DT::datatable(ds()[base_vars()])
-  #     },
-  #     server = FALSE
-  #   )
-  #
-  # output$data.classes <- gt::render_gt({
-  #   shiny::req(input$file)
-  #   data.frame(matrix(sapply(ds(), \(.x){
-  #     class(.x)[1]
-  #   }), nrow = 1)) |>
-  #     stats::setNames(names(ds())) |>
-  #     gt::gt()
-  # })
-
-
-  ### Outputs
-
-  # shiny::observeEvent(data_filter(), {
-  #   rv$data_filtered <- data_filter()
-  # })
-
-  # shiny::observeEvent(
-  #   shiny::reactive(rv$data_filtered),
-  #   {
-  #     rv$list$data <- rv$data_filtered |>
-  #       # dplyr::mutate(dplyr::across(dplyr::where(is.character), as.factor)) |>
-  #       REDCapCAST::fct_drop.data.frame() |>
-  #       # factorize(vars = input$factor_vars) |>
-  #       remove_na_attr()
-  #
-  #     # rv$list$data <- data
-  #     # rv$list$data <- data[base_vars()]
-  #   }
-  # )
-
-  #   shiny::observe({
-  #     if (input$strat_var == "none") {
-  #       by.var <- NULL
-  #     } else {
-  #       by.var <- input$strat_var
-  #     }
-  #
-  #     rv$list$table1 <- rv$list$data |>
-  #       baseline_table(
-  #         fun.args =
-  #           list(
-  #             by = by.var
-  #           )
-  #       ) |>
-  #       (\(.x){
-  #         if (!is.null(by.var)) {
-  #           .x |> gtsummary::add_overall()
-  #         } else {
-  #           .x
-  #         }
-  #       })() |>
-  #       (\(.x){
-  #         if (input$add_p == "yes") {
-  #           .x |>
-  #             gtsummary::add_p() |>
-  #             gtsummary::bold_p()
-  #         } else {
-  #           .x
-  #         }
-  #       })()
-  #   })
-  #
-  #     output$table1 <- gt::render_gt(
-  #       rv$list$table1 |>
-  #         gtsummary::as_gt() |>
-  # gt::tab_header(shiny::md("**Table 1. Patient Characteristics**"))
-  #     )
-
   ##############################################################################
   #########
-  #########  Data analyses results
+  #########  Descriptive evaluations
   #########
   ##############################################################################
 
@@ -4700,6 +4895,18 @@ server <- function(input, output, session) {
       gtsummary::as_gt() |>
       gt::tab_header(gt::md("**Table 1: Baseline Characteristics**"))
   })
+
+
+  data_correlations_server(id = "correlations",
+                           data = shiny::reactive(rv$list$data),
+                           cutoff = shiny::reactive(input$cor_cutoff))
+
+
+  ##############################################################################
+  #########
+  #########  Regression model analyses
+  #########
+  ##############################################################################
 
   shiny::observeEvent(
     input$load,
@@ -4778,37 +4985,6 @@ server <- function(input, output, session) {
       )
     }
   )
-
-  # plot_check_r <- shiny::reactive({plot(rv$check)})
-  #
-  # output$check_1 <- shiny::renderUI({
-  #   shiny::req(rv$check)
-  #   list <- lapply(seq_len(length(plot_check_r())),
-  #                                    function(i) {
-  #                                      plotname <- paste0("check_plot_", i)
-  #                                      shiny::htmlOutput(plotname)
-  #                                    })
-  #
-  #   do.call(shiny::tagList,list)
-  # })
-  #
-  # # Call renderPlot for each one. Plots are only actually generated when they
-  # # are visible on the web page.
-  #
-  # shiny::observe({
-  #   shiny::req(rv$check)
-  #   # browser()
-  #   for (i in seq_len(length(plot_check_r()))) {
-  #     local({
-  #       my_i <- i
-  #       plotname <- paste0("check_plot_", my_i)
-  #
-  #       output[[plotname]] <- shiny::renderPlot({
-  #         plot_check_r()[[my_i]] + gg_theme_shiny()
-  #       })
-  #     })
-  #   }
-  # })
 
   output$check <- shiny::renderPlot(
     {
@@ -4932,7 +5108,7 @@ server <- function(input, output, session) {
         )
 
       out +
-        ggplot2::scale_y_discrete(labels = scales::label_wrap(15))+
+        ggplot2::scale_y_discrete(labels = scales::label_wrap(15)) +
         gg_theme_shiny()
 
       # rv$list$regression$tables$Multivariable |>
@@ -5044,8 +5220,10 @@ server <- function(input, output, session) {
     content = function(file, type = input$data_type) {
       if (type == "rds") {
         readr::write_rds(rv$list$data, file = file)
-      } else {
+      } else if (type == "dta") {
         haven::write_dta(as.data.frame(rv$list$data), path = file)
+      } else if (type == "csv"){
+        readr::write_csv(rv$list$data, file = file)
       }
     }
   )

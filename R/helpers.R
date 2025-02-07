@@ -249,3 +249,20 @@ remove_na_attr <- function(data,attr="label"){
 
   dplyr::bind_cols(out)
 }
+
+#' Removes columns with completenes below cutoff
+#'
+#' @param data data frame
+#' @param cutoff numeric
+#'
+#' @returns data frame
+#' @export
+#'
+#' @examples
+#'data.frame(a=1:10,b=NA, c=c(2,NA)) |> remove_empty_cols(cutoff=.5)
+remove_empty_cols <- function(data,cutoff=.7){
+  filter <- apply(X = data,MARGIN = 2,FUN = \(.x){
+    sum(as.numeric(!is.na(.x)))/length(.x)
+  }) >= cutoff
+  data[filter]
+}

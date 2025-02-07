@@ -25,6 +25,7 @@ custom_theme <- function(...,
                          ){
   bslib::bs_theme(
     ...,
+    "navbar-bg" = primary,
     version = version,
     primary = primary,
     secondary = secondary,

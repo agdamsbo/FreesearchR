@@ -18,61 +18,69 @@ ui_elements <- list(
   ##############################################################################
   "import" = bslib::nav_panel(
     title = "Import",
-    shiny::tagList(
-      shiny::h4("Choose your data source"),
-      # shiny::conditionalPanel(
-      #   condition = "output.has_input=='yes'",
-      #   # Input: Select a file ----
-      #   shiny::helpText("Analyses are performed on provided data")
+    shiny::h4("Choose your data source"),
+    shiny::br(),
+    shinyWidgets::radioGroupButtons(
+      inputId = "source",
+      selected = "env",
+      # label = "Choice: ",
+      choices = c(
+        "File upload" = "file",
+        "REDCap server" = "redcap",
+        "Local data" = "env"
+      ),
+      # checkIcon = list(
+      #   yes = icon("square-check"),
+      #   no = icon("square")
       # ),
-      # shiny::conditionalPanel(
-      #   condition = "output.has_input=='no'",
-      # Input: Select a file ----
-      shinyWidgets::radioGroupButtons(
-        inputId = "source",
-        selected = "env",
-        # label = "Choice: ",
-        choices = c(
-          "File upload" = "file",
-          "REDCap server" = "redcap",
-          "Local data" = "env"
-        ),
-        # checkIcon = list(
-        #   yes = icon("square-check"),
-        #   no = icon("square")
-        # ),
-        width = "100%"
-      ),
-      shiny::conditionalPanel(
-        condition = "input.source=='file'",
-        datamods::import_file_ui("file_import",
-          title = "Choose a datafile to upload",
-          file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat", ".sav", ".ods", ".dta")
-        )
-      ),
-      shiny::conditionalPanel(
-        condition = "input.source=='redcap'",
-        m_redcap_readUI("redcap_import")
-      ),
-      shiny::conditionalPanel(
-        condition = "input.source=='env'",
-        import_globalenv_ui(id = "env", title = NULL)
-      ),
-      shiny::conditionalPanel(
-        condition = "input.source=='redcap'",
-        DT::DTOutput(outputId = "redcap_prev")
-      ),
-      shiny::br(),
-      shiny::actionButton(
-        inputId = "act_start",
-        label = "Start",
-        width = "100%",
-        icon = shiny::icon("play")
-      ),
-      shiny::helpText('After importing, hit "Start" or navigate to the desired tab.'),
-      shiny::br(),
-      shiny::br()
-    )
+      width = "100%"
+    ),
+    shiny::helpText("Upload a file from your device, get data directly from REDCap or select a sample data set for testing from the app."),
+    shiny::conditionalPanel(
+      condition = "input.source=='file'",
+      datamods::import_file_ui("file_import",
+        title = "Choose a datafile to upload",
+        file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat", ".sav", ".ods", ".dta")
+      )
+    ),
+    shiny::conditionalPanel(
+      condition = "input.source=='redcap'",
+      m_redcap_readUI("redcap_import")
+    ),
+    shiny::conditionalPanel(
+      condition = "input.source=='env'",
+      import_globalenv_ui(id = "env", title = NULL)
+    ),
+    shiny::conditionalPanel(
+      condition = "input.source=='redcap'",
+      DT::DTOutput(outputId = "redcap_prev")
+    ),
+    shiny::br(),
+    shiny::br(),
+    shiny::h5("Exclude in-complete variables"),
+    shiny::p("Before going further, you can exclude variables with a low degree of completeness."),
+    shiny::br(),
+    shiny::sliderInput(
+      inputId = "complete_cutoff",
+      label = "Choose completeness threshold (%)",
+      min = 0,
+      max = 100,
+      step = 10,
+      value = 70,
+      ticks = FALSE
+    ),
+    shiny::helpText("Only include variables with completeness above a specified percentage."),
+    shiny::br(),
+    shiny::br(),
+    shiny::actionButton(
+      inputId = "act_start",
+      label = "Start",
+      width = "100%",
+      icon = shiny::icon("play")
+    ),
+    shiny::helpText('After importing, hit "Start" or navigate to the desired tab.'),
+    shiny::br(),
+    shiny::br()
   ),
   ##############################################################################
   #########
@@ -152,7 +160,7 @@ ui_elements <- list(
           fluidRow(
             shiny::column(
               width = 9,
-              shiny::tags$p("Below, you can subset the data (by not selecting the variables to exclude on applying changes), rename variables, set new labels (for nicer tables in the analysis report) and change variable classes.
+              shiny::tags$p("Below, you can subset the data (select variables to include on clicking 'Apply changes'), rename variables, set new labels (for nicer tables in the report) and change variable classes (numeric, factor/categorical etc.).
                             Italic text can be edited/changed.
                             On the right, you can create and modify factor/categorical variables as well as resetting the data to the originally imported data.")
             )
@@ -272,15 +280,13 @@ ui_elements <- list(
     ),
   ##############################################################################
   #########
-  #########  Data analyses panel
+  #########  Descriptive analyses panel
   #########
   ##############################################################################
-  "analyze" =
-  # bslib::nav_panel_hidden(
+  "describe" =
     bslib::nav_panel(
-      # value = "analyze",
-      title = "Analyses",
-      id = "navanalyses",
+      title = "Evaluate",
+      id = "navdescribe",
       bslib::navset_bar(
         title = "",
         # bslib::layout_sidebar(
@@ -310,6 +316,47 @@ ui_elements <- list(
                 shiny::helpText("Option to perform statistical comparisons between strata in baseline table.")
               )
             ),
+            bslib::accordion_panel(
+              title = "Correlations",
+              shiny::sliderInput(
+                inputId = "cor_cutoff",
+                label = "Correlation cut-off",
+                min = 0,
+                max = 1,
+                step = .02,
+                value = .7,
+                ticks = FALSE
+              )
+            )
+          )
+        ),
+        bslib::nav_panel(
+          title = "Baseline characteristics",
+          gt::gt_output(outputId = "table1")
+        ),
+        bslib::nav_panel(
+          title = "Variable correlations",
+          data_correlations_ui(id = "correlations", height = 600)
+        )
+      )
+    ),
+  ##############################################################################
+  #########
+  #########  Regression analyses panel
+  #########
+  ##############################################################################
+  "analyze" =
+    bslib::nav_panel(
+      title = "Regression",
+      id = "navanalyses",
+      bslib::navset_bar(
+        title = "",
+        # bslib::layout_sidebar(
+        #   fillable = TRUE,
+        sidebar = bslib::sidebar(
+          bslib::accordion(
+            open = "acc_reg",
+            multiple = FALSE,
             bslib::accordion_panel(
               value = "acc_reg",
               title = "Regression",
@@ -348,23 +395,14 @@ ui_elements <- list(
                 type = "secondary",
                 auto_reset = TRUE
               ),
-              shiny::helpText("If you change the parameters, press 'Analyse' again to update the regression analysis"),
+              shiny::helpText("Press 'Analyse' again after changing parameters."),
+              shiny::tags$br(),
               shiny::uiOutput("plot_model")
             ),
             bslib::accordion_panel(
               value = "acc_advanced",
               title = "Advanced",
               icon = bsicons::bs_icon("gear"),
-              shiny::sliderInput(
-                inputId = "complete_cutoff",
-                label = "Cut-off for column completeness (%)",
-                min = 0,
-                max = 100,
-                step = 10,
-                value = 70,
-                ticks = FALSE
-              ),
-              shiny::helpText("To improve speed, columns are removed before analysing data, if copleteness is below above value."),
               shiny::radioButtons(
                 inputId = "all",
                 label = "Specify covariables",
@@ -378,52 +416,6 @@ ui_elements <- list(
               shiny::conditionalPanel(
                 condition = "input.all==1",
                 shiny::uiOutput("include_vars")
-              )
-            ),
-            bslib::accordion_panel(
-              value = "acc_down",
-              title = "Download",
-              icon = bsicons::bs_icon("download"),
-              shiny::h4("Report"),
-              shiny::helpText("Choose your favourite output file format for further work, and download, when the analyses are done."),
-              shiny::selectInput(
-                inputId = "output_type",
-                label = "Output format",
-                selected = NULL,
-                choices = list(
-                  "MS Word" = "docx",
-                  "LibreOffice" = "odt"
-                  # ,
-                  # "PDF" = "pdf",
-                  # "All the above" = "all"
-                )
-              ),
-              shiny::br(),
-              # Button
-              shiny::downloadButton(
-                outputId = "report",
-                label = "Download report",
-                icon = shiny::icon("download")
-              ),
-              # shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
-              shiny::tags$hr(),
-              shiny::h4("Data"),
-              shiny::helpText("Choose your favourite output data format to download the modified data."),
-              shiny::selectInput(
-                inputId = "data_type",
-                label = "Data format",
-                selected = NULL,
-                choices = list(
-                  "R" = "rds",
-                  "stata" = "dta"
-                )
-              ),
-              shiny::br(),
-              # Button
-              shiny::downloadButton(
-                outputId = "data_modified",
-                label = "Download data",
-                icon = shiny::icon("download")
               )
             )
           ),
@@ -447,10 +439,6 @@ ui_elements <- list(
           # shiny::tags$hr(),
         ),
         bslib::nav_panel(
-          title = "Baseline characteristics",
-          gt::gt_output(outputId = "table1")
-        ),
-        bslib::nav_panel(
           title = "Regression table",
           gt::gt_output(outputId = "table2")
         ),
@@ -464,6 +452,66 @@ ui_elements <- list(
           # shiny::uiOutput(outputId = "check_1")
         )
       )
+    ),
+  ##############################################################################
+  #########
+  #########  Download panel
+  #########
+  ##############################################################################
+  "download" =
+    bslib::nav_panel(
+      title = "Download",
+      id = "navdownload",
+      shiny::fluidRow(
+        shiny::column(
+          width = 6,
+          shiny::h4("Report"),
+          shiny::helpText("Choose your favourite output file format for further work, and download, when the analyses are done."),
+          shiny::selectInput(
+            inputId = "output_type",
+            label = "Output format",
+            selected = NULL,
+            choices = list(
+              "MS Word" = "docx",
+              "LibreOffice" = "odt"
+              # ,
+              # "PDF" = "pdf",
+              # "All the above" = "all"
+            )
+          ),
+          shiny::br(),
+          # Button
+          shiny::downloadButton(
+            outputId = "report",
+            label = "Download report",
+            icon = shiny::icon("download")
+          )
+          # shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
+        ),
+        shiny::column(
+          width = 6,
+          shiny::h4("Data"),
+          shiny::helpText("Choose your favourite output data format to download the modified data."),
+          shiny::selectInput(
+            inputId = "data_type",
+            label = "Data format",
+            selected = NULL,
+            choices = list(
+              "R" = "rds",
+              "stata" = "dta",
+              "CSV" = "csv"
+            )
+          ),
+          shiny::br(),
+          # Button
+          shiny::downloadButton(
+            outputId = "data_modified",
+            label = "Download data",
+            icon = shiny::icon("download")
+          )
+        )
+      ),
+      shiny::br()
     ),
   ##############################################################################
   #########
@@ -486,7 +534,6 @@ ui_elements <- list(
   #   shiny::br()
   # )
 )
-
 # Initial attempt at creating light and dark versions
 light <- custom_theme()
 dark <- custom_theme(
@@ -511,17 +558,15 @@ ui <- bslib::page_fixed(
   theme = light,
   shiny::useBusyIndicators(),
   bslib::page_navbar(
-    # title = "freesearcheR",
     id = "main_panel",
-    # header = shiny::tags$header(shiny::p("Data is only stored temporarily for analysis and deleted immediately afterwards.")),
     ui_elements$home,
     ui_elements$import,
     ui_elements$overview,
+    ui_elements$describe,
     ui_elements$analyze,
+    ui_elements$download,
     bslib::nav_spacer(),
     ui_elements$docs,
-    # bslib::nav_spacer(),
-    # bslib::nav_item(shinyWidgets::circleButton(inputId = "mode", icon = icon("moon"),status = "primary")),
     fillable = FALSE,
     footer = shiny::tags$footer(
       style = "background-color: #14131326; padding: 4px; text-align: center; bottom: 0; width: 100%;",

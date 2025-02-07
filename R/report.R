@@ -79,3 +79,4 @@ modify_qmd <- function(file, format) {
     specify_qmd_format(fileformat = "all") |>
     writeLines(paste0(tools::file_path_sans_ext(file), "_format.", tools::file_ext(file)))
 }
+

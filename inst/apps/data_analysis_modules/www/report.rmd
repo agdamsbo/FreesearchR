@@ -1,8 +1,8 @@
 ---
-title: "freesearcheR analysis results"
-date: today
+title: "freesearcheR data report"
+date: "Report generated `r gsub('(\\D)0', '\\1', format(Sys.time(), '%A, %d.%m.%Y'))`"
 format: docx
-author: freesearcheR Tool
+author: freesearcheR data analysis tool
 toc: false
 params:
   data.file: NA
@@ -10,6 +10,7 @@ params:
 
 ```{r setup, echo = FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+# glue::glue("{format(lubridate::today(),'%A')}, {lubridate::day(lubridate::today())}.{lubridate::month(lubridate::today())}.{lubridate::year(lubridate::today())}")
 ```
 
 
@@ -52,15 +53,18 @@ Analyses were conducted in the *freesearcheR* data analysis web-tool based on R 
 Below are the baseline characteristics.
 
 ```{r, results = 'asis'}
+if ("table1" %in% names(web_data)){
 tbl <- gtsummary::as_gt(web_data$table1)
-knitr::knit_print(tbl)
+knitr::knit_print(tbl)}
 ```
 
-Below are the results from the `r tolower(vec2sentence(names(web_data$regression$tables)))` `r web_data$regression$params$descr`.
+`r if ("regression" %in% names(web_data)) glue::glue("Below are the results from the { tolower(vec2sentence(names(web_data$regression$tables)))} {web_data$regression$params$descr}.")`
 
 ```{r, results = 'asis'}
+if ("regression" %in% names(web_data)){
 reg_tbl <- web_data$regression$tables
 knitr::knit_print(tbl_merge(reg_tbl))
+}
 ```
 
 ## Discussion
