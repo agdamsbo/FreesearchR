@@ -498,7 +498,7 @@ server <- function(input, output, session) {
           }
         })() |>
         (\(.x){
-          if (input$add_p == "yes") {
+          if (input$add_p == "yes" & !is.null(by.var)) {
             .x |>
               gtsummary::add_p() |>
               gtsummary::bold_p()
