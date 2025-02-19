@@ -13,6 +13,7 @@
 #'
 #' @return object of standard class for fun
 #' @export
+#' @rdname regression_model
 #'
 #' @examples
 #' gtsummary::trial |>
@@ -149,6 +150,7 @@ regression_model <- function(data,
 #' @param ... ignored for now
 #'
 #' @importFrom stats as.formula
+#' @rdname regression_model
 #'
 #' @return object of standard class for fun
 #' @export
@@ -323,7 +325,7 @@ supported_functions <- function() {
 #'
 #' @param data data
 #'
-#' @returns
+#' @returns character vector
 #' @export
 #'
 #' @examples
@@ -412,8 +414,9 @@ get_fun_options <- function(data) {
 #' argsstring2list() or list of arguments. Default is NULL.
 #' @param ... ignored
 #'
-#' @returns
+#' @returns list
 #' @export
+#' @rdname regression_model
 #'
 #' @examples
 #' \dontrun{
@@ -528,19 +531,9 @@ list2str <- function(data) {
 }
 
 
-#' Title
-#'
-#' @param data
-#' @param outcome.str
-#' @param fun.descr
-#' @param fun
-#' @param formula.str
-#' @param args.list
-#' @param vars
-#' @param ...
-#'
 #' @returns list
 #' @export
+#' @rdname regression_model
 #'
 #' @examples
 #' \dontrun{

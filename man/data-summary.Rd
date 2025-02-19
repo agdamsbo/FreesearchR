@@ -8,16 +8,18 @@
 \usage{
 data_summary_ui(id)
 
-data_summary_server(id, data, color.main, color.sec)
+data_summary_server(id, data, color.main, color.sec, ...)
 }
 \arguments{
-\item{id}{id}
+\item{id}{Module id. (Use 'ns("id")')}
 
 \item{data}{data}
 
 \item{color.main}{main color}
 
 \item{color.sec}{secondary color}
+
+\item{...}{arguments passed to toastui::datagrid}
 }
 \value{
 Shiny ui module

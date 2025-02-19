@@ -23,7 +23,7 @@ Create table of regression model
 }
 \examples{
 \dontrun{
-gtsummary::trial |>
+tbl <- gtsummary::trial |>
   regression_model(
     outcome.str = "stage",
     fun = "MASS::polr"
@@ -36,7 +36,7 @@ gtsummary::trial |>
     formula.str = "{outcome.str}~.",
     args.list = NULL
   ) |>
-  regression_table()
+  regression_table() |> plot()
 gtsummary::trial |>
   regression_model(
     outcome.str = "trt",

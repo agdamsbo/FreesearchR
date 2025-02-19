@@ -2,41 +2,85 @@
 % Please edit documentation in R/regression_model.R
 \name{regression_model}
 \alias{regression_model}
+\alias{regression_model_uv}
+\alias{regression_model_list}
+\alias{regression_model_uv_list}
 \title{Create a regression model programatically}
 \usage{
 regression_model(
   data,
   outcome.str,
-  auto.mode = TRUE,
+  auto.mode = FALSE,
   formula.str = NULL,
   args.list = NULL,
   fun = NULL,
   vars = NULL,
   ...
 )
+
+regression_model_uv(
+  data,
+  outcome.str,
+  args.list = NULL,
+  fun = NULL,
+  vars = NULL,
+  ...
+)
+
+regression_model_list(
+  data,
+  outcome.str,
+  fun.descr,
+  fun = NULL,
+  formula.str = NULL,
+  args.list = NULL,
+  vars = NULL,
+  ...
+)
+
+regression_model_uv_list(
+  data,
+  outcome.str,
+  fun.descr,
+  fun = NULL,
+  formula.str = NULL,
+  args.list = NULL,
+  vars = NULL,
+  ...
+)
 }
 \arguments{
-\item{data}{data set}
+\item{data}{data}
 
-\item{outcome.str}{Name of outcome variable. Character vector.}
+\item{outcome.str}{name of outcome variable}
 
 \item{auto.mode}{Make assumptions on function dependent on outcome data format. Overwrites other arguments.}
 
-\item{formula.str}{Formula as string. Passed through 'glue::glue'. If given, 'outcome.str' and 'vars' are ignored. Optional.}
+\item{formula.str}{custom formula glue string. Default is NULL.}
 
-\item{args.list}{List of arguments passed to 'fun' with 'do.call'.}
+\item{args.list}{custom character string to be converted using
+argsstring2list() or list of arguments. Default is NULL.}
 
-\item{fun}{Name of function as character vector or function to use for model creation.}
+\item{fun}{name of custom function. Default is NULL.}
 
 \item{vars}{character vector of variables to include}
 
-\item{...}{ignored for now}
+\item{...}{ignored}
+
+\item{fun.descr}{Description of chosen function matching description in
+"supported_functions()"}
 }
 \value{
 object of standard class for fun
+
+object of standard class for fun
+
+list
+
+list
 }
 \description{
-Create a regression model programatically
+Output is a concatenated list of model information and model
 }
 \examples{
 gtsummary::trial |>
@@ -49,10 +93,73 @@ gtsummary::trial |>
     formula.str = "{outcome.str}~.",
     args.list = NULL
   )
-gtsummary::trial |> regression_model(
+gtsummary::trial |>
+  default_parsing() |>
+  regression_model(
+    outcome.str = "trt",
+    auto.mode = FALSE,
+    fun = "stats::glm",
+    args.list = list(family = binomial(link = "logit"))
+  )
+m <- mtcars |>
+  default_parsing() |>
+  regression_model(
+    outcome.str = "mpg",
+    auto.mode = FALSE,
+    fun = "stats::lm",
+    formula.str = "{outcome.str}~{paste(vars,collapse='+')}",
+    args.list = NULL,
+    vars = c("mpg", "cyl")
+  )
+  broom::tidy(m)
+\dontrun{
+gtsummary::trial |>
+  regression_model_uv(outcome.str = "age")
+gtsummary::trial |>
+  regression_model_uv(
+    outcome.str = "age",
+    fun = "stats::lm",
+    args.list = NULL
+  )
+m <- gtsummary::trial |> regression_model_uv(
   outcome.str = "trt",
-  auto.mode = FALSE,
   fun = "stats::glm",
-  args.list = list(family = binomial(link = "logit"))
+  args.list = list(family = stats::binomial(link = "logit"))
 )
+lapply(m,broom::tidy) |> dplyr::bind_rows()
+}
+\dontrun{
+gtsummary::trial |>
+  regression_model(
+    outcome.str = "age",
+    fun = "stats::lm",
+    formula.str = "{outcome.str}~.",
+    args.list = NULL
+  )
+ls <- regression_model_list(data = default_parsing(mtcars), outcome.str = "cyl", fun.descr = "Ordinal logistic regression model")
+summary(ls$model)
+
+ls <- regression_model_list(data = default_parsing(gtsummary::trial), outcome.str = "trt", fun.descr = "Logistic regression model")
+tbl <- gtsummary::tbl_regression(ls$model, exponentiate = TRUE)
+m <- gtsummary::trial |>
+  default_parsing() |>
+  regression_model(
+    outcome.str = "trt",
+    fun = "stats::glm",
+    formula.str = "{outcome.str}~.",
+    args.list = list(family = stats::binomial(link = "logit"))
+  )
+tbl2 <- gtsummary::tbl_regression(m, exponentiate = TRUE)
+broom::tidy(ls$model)
+broom::tidy(m)
+}
+\dontrun{
+gtsummary::trial |> regression_model_uv(
+  outcome.str = "trt",
+  fun = "stats::glm",
+  args.list = list(family = stats::binomial(link = "logit"))
+) |> lapply(broom::tidy) |> dplyr::bind_rows()
+ms <- regression_model_uv_list(data = default_parsing(mtcars), outcome.str = "mpg", fun.descr = "Linear regression model")
+lapply(ms$model,broom::tidy) |> dplyr::bind_rows()
+}
 }

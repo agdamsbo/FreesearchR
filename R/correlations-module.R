@@ -6,7 +6,7 @@
 #' @returns Shiny ui module
 #' @export
 data_correlations_ui <- function(id, ...) {
-  ns <- NS(id)
+  ns <- shiny::NS(id)
 
   shiny::tagList(
     shiny::textOutput(outputId = ns("suggest")),

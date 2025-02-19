@@ -23,3 +23,15 @@ shiny_freesearcheR <- function(...) {
   a <- shiny::runApp(appDir = paste0(appDir,"/app.R"), ...)
   return(invisible(a))
 }
+
+
+#' Easily launch the freesearcheR app
+#'
+#' @param ... passed on to `shiny::runApp()`
+#'
+#' @returns shiny app
+#' @export
+#'
+launch <- function(...){
+  shiny_freesearcheR(...)
+}
