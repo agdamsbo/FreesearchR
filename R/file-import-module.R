@@ -95,31 +95,31 @@ file_app <- function() {
 
 file_app()
 
-tdm_data_upload <- teal::teal_data_module(
-  ui <- function(id) {
-    shiny::fluidPage(
-      m_datafileUI(id)
-    )
-  },
-  server = function(id) {
-    m_datafileServer(id, output.format = "teal")
-  }
-)
-
-tdm_data_read <- teal::teal_data_module(
-  ui <- function(id) {
-    shiny::fluidPage(
-      m_redcap_readUI(id = "redcap")
-    )
-  },
-  server = function(id) {
-    moduleServer(
-      id,
-      function(input, output, session) {
-        ns <- session$ns
-
-        m_redcap_readServer(id = "redcap", output.format = "teal")
-      }
-    )
-  }
-)
+# tdm_data_upload <- teal::teal_data_module(
+#   ui <- function(id) {
+#     shiny::fluidPage(
+#       m_datafileUI(id)
+#     )
+#   },
+#   server = function(id) {
+#     m_datafileServer(id, output.format = "teal")
+#   }
+# )
+#
+# tdm_data_read <- teal::teal_data_module(
+#   ui <- function(id) {
+#     shiny::fluidPage(
+#       m_redcap_readUI(id = "redcap")
+#     )
+#   },
+#   server = function(id) {
+#     moduleServer(
+#       id,
+#       function(input, output, session) {
+#         ns <- session$ns
+#
+#         m_redcap_readServer(id = "redcap", output.format = "teal")
+#       }
+#     )
+#   }
+# )

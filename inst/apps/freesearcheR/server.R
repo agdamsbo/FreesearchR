@@ -15,6 +15,7 @@ library(broom)
 library(broom.helpers)
 # library(REDCapCAST)
 library(easystats)
+library(esquisse)
 library(patchwork)
 library(DHARMa)
 library(apexcharter)
@@ -81,7 +82,8 @@ server <- function(input, output, session) {
     data_original = NULL,
     data = NULL,
     data_filtered = NULL,
-    models = NULL
+    models = NULL,
+    code = list()
   )
 
   ##############################################################################
@@ -99,23 +101,48 @@ server <- function(input, output, session) {
     return_class = "data.frame",
     read_fns = list(
       ods = function(file) {
-        readODS::read_ods(path = file, na = consider.na)
+        readODS::read_ods(
+          path = file,
+          # Sheet and skip not implemented for .ods in the original implementation
+          # sheet = sheet,
+          # skip = skip,
+          na = consider.na
+        )
       },
       dta = function(file) {
-        haven::read_dta(file = file, .name_repair = "unique_quiet")
+        haven::read_dta(
+          file = file,
+          .name_repair = "unique_quiet"
+          )
       },
       csv = function(file) {
-        readr::read_csv(file = file, na = consider.na, name_repair = "unique_quiet") #|>
-          # janitor::remove_empty(which = "cols", cutoff = 1, quiet = TRUE)
+        readr::read_csv(
+          file = file,
+          na = consider.na,
+          name_repair = "unique_quiet"
+          )
       },
-      # xls = function(file){
-      #   openxlsx2::read_xlsx(file = file, na.strings = consider.na,)
-      # },
-      # xlsx = function(file){
-      #   openxlsx2::read_xlsx(file = file, na.strings = consider.na,)
-      # },
+      xls = function(file) {
+        openxlsx2::read_xlsx(
+          file = file,
+          sheet = sheet,
+          skip_empty_rows = TRUE,
+          start_row = skip - 1,
+          na.strings = consider.na
+          )
+      },
+      xlsx = function(file) {
+        openxlsx2::read_xlsx(
+          file = file,
+          sheet = sheet,
+          skip_empty_rows = TRUE,
+          start_row = skip - 1,
+          na.strings = consider.na)
+      },
       rds = function(file) {
-        readr::read_rds(file = file, name_repair = "unique_quiet")
+        readr::read_rds(
+          file = file,
+          name_repair = "unique_quiet")
       }
     )
   )
@@ -123,6 +150,7 @@ server <- function(input, output, session) {
   shiny::observeEvent(data_file$data(), {
     shiny::req(data_file$data())
     rv$data_original <- data_file$data()
+    rv$code <- append_list(data = data_file$code(), list = rv$code, index = "import")
   })
 
   data_redcap <- m_redcap_readServer(
@@ -143,7 +171,7 @@ server <- function(input, output, session) {
     server = TRUE
   )
 
-  from_env <- import_globalenv_server(
+  from_env <- datamods::import_globalenv_server(
     id = "env",
     trigger_return = "change",
     btn_show_data = FALSE,
@@ -153,6 +181,7 @@ server <- function(input, output, session) {
   shiny::observeEvent(from_env$data(), {
     shiny::req(from_env$data())
     rv$data_original <- from_env$data()
+    # rv$code <- append_list(data = from_env$code(),list = rv$code,index = "import")
   })
 
 
@@ -214,12 +243,14 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_cut,
-    modal_cut_variable("modal_cut")
+    modal_cut_variable("modal_cut",title = "Modify factor levels")
   )
+
   data_modal_cut <- cut_variable_server(
     id = "modal_cut",
     data_r = shiny::reactive(rv$data)
   )
+
   shiny::observeEvent(data_modal_cut(), rv$data <- data_modal_cut())
 
   #########  Modify factor
@@ -228,10 +259,12 @@ server <- function(input, output, session) {
     input$modal_update,
     datamods::modal_update_factor(id = "modal_update")
   )
+
   data_modal_update <- datamods::update_factor_server(
     id = "modal_update",
     data_r = reactive(rv$data)
   )
+
   shiny::observeEvent(data_modal_update(), {
     shiny::removeModal()
     rv$data <- data_modal_update()
@@ -257,25 +290,26 @@ server <- function(input, output, session) {
   #########  Show result
   tryCatch(
     {
-  output$table_mod <- toastui::renderDatagrid({
-    shiny::req(rv$data)
-    # data <- rv$data
-    toastui::datagrid(
-      # data = rv$data # ,
-      data = data_filter(),
-      pagination = 10
-      # bordered = TRUE,
-      # compact = TRUE,
-      # striped = TRUE
-    )
-  })
+      output$table_mod <- toastui::renderDatagrid({
+        shiny::req(rv$data)
+        # data <- rv$data
+        toastui::datagrid(
+          # data = rv$data # ,
+          data = data_filter(),
+          pagination = 10
+          # bordered = TRUE,
+          # compact = TRUE,
+          # striped = TRUE
+        )
+      })
     },
-  warning = function(warn) {
-    showNotification(paste0(warn), type = "warning")
-  },
-  error = function(err) {
-    showNotification(paste0(err), type = "err")
-  })
+    warning = function(warn) {
+      showNotification(paste0(warn), type = "warning")
+    },
+    error = function(err) {
+      showNotification(paste0(err), type = "err")
+    }
+  )
 
   output$code <- renderPrint({
     attr(rv$data, "code")
@@ -312,46 +346,78 @@ server <- function(input, output, session) {
       shiny::reactive(rv$data),
       shiny::reactive(rv$data_original),
       data_filter(),
-      base_vars(),
+      regression_vars(),
       input$complete_cutoff
     ),
     {
       rv$data_filtered <- data_filter()
 
       rv$list$data <- data_filter() |>
-        REDCapCAST::fct_drop() |>
-        (\(.x){
-          .x[base_vars()]
-        })() #|>
-      # janitor::remove_empty(
-      #   which = "cols",
-      #   cutoff = input$complete_cutoff / 100
-      # )
+        REDCapCAST::fct_drop()
     }
   )
 
-  output$filtered_code <- shiny::renderPrint({
-    out <- gsub(
-      "filter", "dplyr::filter",
-      gsub(
-        "\\s{2,}", " ",
-        paste0(
-          capture.output(attr(rv$data_filtered, "code")),
-          collapse = " "
+  shiny::observeEvent(
+    list(
+      shiny::reactive(rv$data),
+      shiny::reactive(rv$data_original),
+      data_filter(),
+      shiny::reactive(rv$data_filtered)
+    ),
+    {
+      out <- gsub(
+        "filter", "dplyr::filter",
+        gsub(
+          "\\s{2,}", " ",
+          paste0(
+            capture.output(attr(rv$data_filtered, "code")),
+            collapse = " "
+          )
         )
       )
-    )
 
-    out <- strsplit(out, "%>%") |>
-      unlist() |>
-      (\(.x){
-        paste(c("data", .x[-1]), collapse = "|> \n ")
-      })()
+      out <- strsplit(out, "%>%") |>
+        unlist() |>
+        (\(.x){
+          paste(c("data", .x[-1]), collapse = "|> \n ")
+        })()
 
-    cat(out)
+      rv$code <- append_list(data = out, list = rv$code, index = "filter")
+    }
+  )
+
+  # output$filtered_code <- shiny::renderPrint({
+  #   out <- gsub(
+  #     "filter", "dplyr::filter",
+  #     gsub(
+  #       "\\s{2,}", " ",
+  #       paste0(
+  #         capture.output(attr(rv$data_filtered, "code")),
+  #         collapse = " "
+  #       )
+  #     )
+  #   )
+  #
+  #   out <- strsplit(out, "%>%") |>
+  #     unlist() |>
+  #     (\(.x){
+  #       paste(c("data", .x[-1]), collapse = "|> \n ")
+  #     })()
+  #
+  #   cat(out)
+  # })
+
+  output$code_import <- shiny::renderPrint({
+    cat(rv$code$import)
+    })
+
+  output$code_data <- shiny::renderPrint({
+    attr(rv$data, "code")
   })
 
-
+  output$code_filter <- shiny::renderPrint({
+    cat(rv$code$filter)
+  })
 
   ##############################################################################
   #########
@@ -410,7 +476,8 @@ server <- function(input, output, session) {
     )
   })
 
-  base_vars <- shiny::reactive({
+  ## Collected regression variables
+  regression_vars <- shiny::reactive({
     if (is.null(input$include_vars)) {
       out <- colnames(rv$data_filtered)
     } else {
@@ -426,7 +493,7 @@ server <- function(input, output, session) {
       label = "Select variable to stratify baseline",
       choices = c(
         "none",
-        rv$data_filtered[base_vars()] |>
+        rv$data_filtered |>
           (\(.x){
             lapply(.x, \(.c){
               if (identical("factor", class(.c))) {
@@ -520,7 +587,7 @@ server <- function(input, output, session) {
       choices = c(
         colnames(rv$list$data)
         # ,"none"
-        ),
+      ),
       multiple = FALSE
     )
   })
@@ -533,17 +600,26 @@ server <- function(input, output, session) {
       gt::tab_header(gt::md("**Table 1: Baseline Characteristics**"))
   })
 
-  data_correlations_server(id = "correlations",
-                           data = shiny::reactive({
-                             out <- dplyr::select(rv$list$data,-!!input$outcome_var_cor)
-                             #  input$outcome_var_cor=="none"){
-                             #   out <- rv$list$data
-                             # }
-                             out
-                           }),
-                           cutoff = shiny::reactive(input$cor_cutoff))
+  data_correlations_server(
+    id = "correlations",
+    data = shiny::reactive({
+      shiny::req(rv$list$data)
+      out <- dplyr::select(rv$list$data, -!!input$outcome_var_cor)
+      #  input$outcome_var_cor=="none"){
+      #   out <- rv$list$data
+      # }
+      out
+    }),
+    cutoff = shiny::reactive(input$cor_cutoff)
+  )
 
+  ##############################################################################
+  #########
+  #########  Data visuals
+  #########
+  ##############################################################################
 
+  pl <- data_visuals_server("visuals", data = shiny::reactive(rv$data))
 
   ##############################################################################
   #########
@@ -572,7 +648,10 @@ server <- function(input, output, session) {
               ls <- do.call(
                 .fun,
                 c(
-                  list(data = rv$list$data),
+                  list(data = rv$list$data|>
+                         (\(.x){
+                           .x[regression_vars()]
+                         })()),
                   list(outcome.str = input$outcome_var),
                   list(fun.descr = input$regression_type)
                 )
@@ -865,7 +944,7 @@ server <- function(input, output, session) {
         readr::write_rds(rv$list$data, file = file)
       } else if (type == "dta") {
         haven::write_dta(as.data.frame(rv$list$data), path = file)
-      } else if (type == "csv"){
+      } else if (type == "csv") {
         readr::write_csv(rv$list$data, file = file)
       }
     }

@@ -271,19 +271,19 @@ m_redcap_readServer <- function(id, output.format = c("df", "teal", "list")) {
   )
 }
 
-#' REDCap import teal data module
-#'
-#' @rdname redcap_read_shiny_module
-tdm_redcap_read <- teal::teal_data_module(
-  ui <- function(id) {
-    shiny::fluidPage(
-      m_redcap_readUI(id)
-    )
-  },
-  server = function(id) {
-    m_redcap_readServer(id, output.format = "teal")
-  }
-)
+# #' REDCap import teal data module
+# #'
+# #' @rdname redcap_read_shiny_module
+# tdm_redcap_read <- teal::teal_data_module(
+#   ui <- function(id) {
+#     shiny::fluidPage(
+#       m_redcap_readUI(id)
+#     )
+#   },
+#   server = function(id) {
+#     m_redcap_readServer(id, output.format = "teal")
+#   }
+# )
 
 
 #' Test app for the redcap_read_shiny_module

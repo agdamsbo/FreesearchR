@@ -266,3 +266,29 @@ remove_empty_cols <- function(data,cutoff=.7){
   }) >= cutoff
   data[filter]
 }
+
+
+#' Append list with named index
+#'
+#' @param data data to add to list
+#' @param list list
+#' @param index index name
+#'
+#' @returns list
+#'
+#' @examples
+#' ls_d <- list(test=c(1:20))
+#' ls_d <- list()
+#' data.frame(letters[1:20],1:20) |> append_list(ls_d,"letters")
+#' letters[1:20]|> append_list(ls_d,"letters")
+append_list <- function(data,list,index){
+  ## This will overwrite and not warn
+  ## Not very safe, but convenient to append code to list
+  if (index %in% names(list)){
+    list[[index]] <- data
+    out <- list
+  } else {
+    out <- setNames(c(list,list(data)),c(names(list),index))
+  }
+  out
+}

@@ -26,11 +26,9 @@ Below are some (the actual list is quite long and growing) of the planned featur
 
     -   [ ] Select analyses to include in report
 
--   [ ] Plot regression analyses results
-
 -   [x] Export modified data. 2025-01-16
 
--   [ ] Include reproducible code for all steps
+-   [ ] Include reproducible code for all steps (maybe not all, but most steps, and the final dataset can be exported)
 
 -   [x] ~~Modify factor levels~~ Factor level modifications is possible through converting factors to numeric > cutting numeric with desired fixed values. 2024-12-12
 
@@ -38,8 +36,8 @@ Below are some (the actual list is quite long and growing) of the planned featur
 
 -   Graphs and plots
 
-    - [ ] Correlation matrix plot for data exploration
+    - [x] Correlation matrix plot for data exploration 2025-2-20
     
     - [ ] Grotta bars for ordianl outcomes
     
-    - [ ] Coefficient plotting for regression analyses (forest plot)
+    - [x] Coefficient plotting for regression analyses (forest plot) 2025-2-20

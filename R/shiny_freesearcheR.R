@@ -15,7 +15,7 @@
 #' shiny_freesearcheR(launch.browser = TRUE)
 #' }
 shiny_freesearcheR <- function(...) {
-  appDir <- system.file("apps", "data_analysis_modules", package = "freesearcheR")
+  appDir <- system.file("apps", "freesearcheR", package = "freesearcheR")
   if (appDir == "") {
     stop("Could not find the app directory. Try re-installing `freesearcheR`.", call. = FALSE)
   }

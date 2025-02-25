@@ -36,7 +36,6 @@ Imports:
     patchwork,
     easystats,
     DHARMa,
-    teal,
     IDEAFilter,
     sparkline,
     datamods,
@@ -52,7 +51,6 @@ Imports:
     rlang,
     data.table,
     apexcharter,
-    teal.modules.general,
     esquisse,
     janitor,
     flextable,
@@ -64,7 +62,9 @@ Imports:
     psych,
     jtools,
     Hmisc,
-    ggstats
+    ggstats,
+    rempsyc,
+    ggridges
 Suggests: 
     styler,
     devtools,

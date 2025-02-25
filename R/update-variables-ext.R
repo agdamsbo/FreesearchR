@@ -367,8 +367,8 @@ summary_vars <- function(data) {
     name = names(data),
     label = lapply(data, \(.x) REDCapCAST::get_attr(.x, "label")) |> unlist(),
     class = get_classes(data),
-    # n_missing = unname(colSums(is.na(data))),
-    # p_complete = 1 - n_missing / nrow(data),
+    n_missing = unname(colSums(is.na(data))),
+    p_complete = 1 - n_missing / nrow(data),
     n_unique = get_n_unique(data)
   )
 
@@ -440,11 +440,11 @@ update_variables_datagrid <- function(data, height = NULL, selectionId = NULL, b
     minWidth = 100
   )
 
-  # grid <- toastui::grid_format(
-  #   grid = grid,
-  #   "p_complete",
-  #   formatter = toastui::JS("function(obj) {return (obj.value*100).toFixed(0) + '%';}")
-  # )
+  grid <- toastui::grid_format(
+    grid = grid,
+    "p_complete",
+    formatter = toastui::JS("function(obj) {return (obj.value*100).toFixed(0) + '%';}")
+  )
   grid <- toastui::grid_style_column(
     grid = grid,
     column = "name_toset",
