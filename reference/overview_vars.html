@@ -60,20 +60,20 @@
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">overview_vars</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 11 × 6</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    class   name  n_missing p_complete n_unique vals        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;named list&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> numeric mpg           0          1       25 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> numeric cyl           0          1        3 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> numeric disp          0          1       27 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> numeric hp            0          1       22 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> numeric drat          0          1       22 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> numeric wt            0          1       29 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> numeric qsec          0          1       30 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> numeric vs            0          1        2 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> numeric am            0          1        2 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> numeric gear          0          1        3 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> numeric carb          0          1        6 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 11 × 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    class   type    name  n_missing p_complete n_unique vals        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;named list&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> numeric numeric mpg           0          1       25 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> numeric numeric cyl           0          1        3 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> numeric numeric disp          0          1       27 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> numeric numeric hp            0          1       22 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> numeric numeric drat          0          1       22 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> numeric numeric wt            0          1       29 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> numeric numeric qsec          0          1       30 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> numeric numeric vs            0          1        2 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> numeric numeric am            0          1        2 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> numeric numeric gear          0          1        3 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> numeric numeric carb          0          1        6 <span style="color: #949494;">&lt;dbl [32]&gt;</span>  </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
