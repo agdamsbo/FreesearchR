@@ -69,10 +69,11 @@ update_variables_ui <- function(id, title = TRUE) {
         id = ns("update-result"),
         status = "info",
         phosphoricons::ph("info"),
-        datamods::i18n(paste(
-          "Select, rename and convert variables in table above,",
-          "then apply changes by clicking button below."
-        ))
+        paste(
+          "Select variables to keep (if none selected, all are kept), rename",
+          "variables and labels, and convert variable type/class in the table",
+          "above. Apply changes by clicking the button below."
+        )
       )
     ),
     shiny::actionButton(
@@ -281,7 +282,24 @@ update_variables_server <- function(id,
 }
 
 
-
+modal_update_variables <- function(id,
+                                title = "Select, rename and reclass variables",
+                                easyClose = TRUE,
+                                size = "xl",
+                                footer = NULL) {
+  ns <- NS(id)
+  showModal(modalDialog(
+    title = tagList(title, datamods:::button_close_modal()),
+    update_variables_ui(id),
+    tags$div(
+      style = "display: none;",
+      textInput(inputId = ns("hidden"), label = NULL, value = datamods:::genId())
+    ),
+    easyClose = easyClose,
+    size = size,
+    footer = footer
+  ))
+}
 
 
 
@@ -516,7 +534,7 @@ update_variables_datagrid <- function(data, height = NULL, selectionId = NULL, b
     grid = grid,
     column = "class_toset",
     type = "select",
-    choices = c("Select new class", "character", "factor", "numeric", "integer", "date", "datetime", "hms")
+    choices = c("Select", "character", "factor", "numeric", "integer", "date", "datetime", "hms")
   )
   grid <- toastui::grid_editor_opts(
     grid = grid,

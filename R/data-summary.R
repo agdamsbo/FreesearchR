@@ -155,6 +155,7 @@ overview_vars <- function(data) {
 
   dplyr::tibble(
     class = get_classes(data),
+    type = get_classes(data),
     name = names(data),
     n_missing = unname(colSums(is.na(data))),
     p_complete = 1 - n_missing / nrow(data),
@@ -187,10 +188,11 @@ create_overview_datagrid <- function(data) {
   std_names <- c(
     "Name" = "name",
     "Class" = "class",
-    "Missing" = "n_missing",
+    "Type" = "type",
+    "Missings" = "n_missing",
     "Complete" = "p_complete",
     "Unique" = "n_unique",
-    "Plot" = "vals"
+    "Distribution" = "vals"
   )
 
   headers <- lapply(col.names, \(.x){
@@ -204,15 +206,28 @@ create_overview_datagrid <- function(data) {
   grid <- toastui::datagrid(
     data = data,
     theme = "default",
-    colwidths = "auto"
+    colwidths = "fit"
   )
 
   grid <- toastui::grid_columns(
     grid = grid,
     columns = col.names,
     header = headers,
-    resizable = TRUE,
-    width = 80
+    resizable = TRUE
+  )
+
+  grid <- toastui::grid_columns(
+    grid = grid,
+    columns = "vals",
+    width = 120
+  )
+
+  grid <- toastui::grid_columns(
+    grid = grid,
+    columns = "class",
+    header = " ",
+    align = "center",sortable = FALSE,
+    width = 40
   )
 
   grid <- add_class_icon(

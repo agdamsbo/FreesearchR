@@ -194,11 +194,11 @@ server <- function(input, output, session) {
   shiny::observeEvent(
     eventExpr = list(
       rv$data_original,
-      input$reset_confirm,
       input$complete_cutoff
     ),
     handlerExpr = {
       shiny::req(rv$data_original)
+
       rv$data <- rv$data_original |>
         # janitor::clean_names() |>
         default_parsing() |>
@@ -208,10 +208,25 @@ server <- function(input, output, session) {
     }
   )
 
+  ## For now this solution work, but I would prefer to solve this with the above
+  shiny::observeEvent(input$reset_confirm, {
+    if (isTRUE(input$reset_confirm)) {
+      shiny::req(rv$data_original)
+      rv$data <- rv$data_original |>
+        default_parsing() |>
+        remove_empty_cols(
+          cutoff = input$complete_cutoff / 100
+        )
+    }
+  }, ignoreNULL = TRUE)
+
+
   shiny::observeEvent(input$data_reset, {
     shinyWidgets::ask_confirmation(
+      cancelOnDismiss = TRUE,
       inputId = "reset_confirm",
-      title = "Please confirm data reset?"
+      title = "Please confirm data reset?",
+      type = "warning"
     )
   })
 
@@ -238,6 +253,12 @@ server <- function(input, output, session) {
   ## Using modified version of the datamods::cut_variable_server function
   ## Further modifications are needed to have cut/bin options based on class of variable
   ## Could be defined server-side
+
+  shiny::observeEvent(
+    input$modal_variables,
+    modal_update_variables("modal_variables",title = "Modify factor levels")
+  )
+
 
   #########  Create factor
 
@@ -317,7 +338,7 @@ server <- function(input, output, session) {
 
   # updated_data <- datamods::update_variables_server(
   updated_data <- update_variables_server(
-    id = "vars_update",
+    id = "modal_variables",
     data = reactive(rv$data),
     return_data_on_init = FALSE
   )

@@ -10,7 +10,7 @@
 #### Current file: R//app_version.R 
 ########
 
-app_version <- function()'250225_0948'
+app_version <- function()'250226_1216'
 
 
 ########
@@ -1756,6 +1756,7 @@ overview_vars <- function(data) {
 
   dplyr::tibble(
     class = get_classes(data),
+    type = get_classes(data),
     name = names(data),
     n_missing = unname(colSums(is.na(data))),
     p_complete = 1 - n_missing / nrow(data),
@@ -1788,10 +1789,11 @@ create_overview_datagrid <- function(data) {
   std_names <- c(
     "Name" = "name",
     "Class" = "class",
-    "Missing" = "n_missing",
+    "Type" = "type",
+    "Missings" = "n_missing",
     "Complete" = "p_complete",
     "Unique" = "n_unique",
-    "Plot" = "vals"
+    "Distribution" = "vals"
   )
 
   headers <- lapply(col.names, \(.x){
@@ -1805,15 +1807,28 @@ create_overview_datagrid <- function(data) {
   grid <- toastui::datagrid(
     data = data,
     theme = "default",
-    colwidths = "auto"
+    colwidths = "fit"
   )
 
   grid <- toastui::grid_columns(
     grid = grid,
     columns = col.names,
     header = headers,
-    resizable = TRUE,
-    width = 80
+    resizable = TRUE
+  )
+
+  grid <- toastui::grid_columns(
+    grid = grid,
+    columns = "vals",
+    width = 120
+  )
+
+  grid <- toastui::grid_columns(
+    grid = grid,
+    columns = "class",
+    header = " ",
+    align = "center",sortable = FALSE,
+    width = 40
   )
 
   grid <- add_class_icon(
@@ -4190,10 +4205,11 @@ update_variables_ui <- function(id, title = TRUE) {
         id = ns("update-result"),
         status = "info",
         phosphoricons::ph("info"),
-        datamods::i18n(paste(
-          "Select, rename and convert variables in table above,",
-          "then apply changes by clicking button below."
-        ))
+        paste(
+          "Select variables to keep (if none selected, all are kept), rename",
+          "variables and labels, and convert variable type/class in the table",
+          "above. Apply changes by clicking the button below."
+        )
       )
     ),
     shiny::actionButton(
@@ -4402,7 +4418,24 @@ update_variables_server <- function(id,
 }
 
 
-
+modal_update_variables <- function(id,
+                                title = "Select, rename and reclass variables",
+                                easyClose = TRUE,
+                                size = "xl",
+                                footer = NULL) {
+  ns <- NS(id)
+  showModal(modalDialog(
+    title = tagList(title, datamods:::button_close_modal()),
+    update_variables_ui(id),
+    tags$div(
+      style = "display: none;",
+      textInput(inputId = ns("hidden"), label = NULL, value = datamods:::genId())
+    ),
+    easyClose = easyClose,
+    size = size,
+    footer = footer
+  ))
+}
 
 
 
@@ -4637,7 +4670,7 @@ update_variables_datagrid <- function(data, height = NULL, selectionId = NULL, b
     grid = grid,
     column = "class_toset",
     type = "select",
-    choices = c("Select new class", "character", "factor", "numeric", "integer", "date", "datetime", "hms")
+    choices = c("Select", "character", "factor", "numeric", "integer", "date", "datetime", "hms")
   )
   grid <- toastui::grid_editor_opts(
     grid = grid,
@@ -4914,68 +4947,66 @@ ui_elements <- list(
       shiny::column(width = 2),
       shiny::column(
         width = 8,
-
-
-    shiny::h4("Choose your data source"),
-    shiny::br(),
-    shinyWidgets::radioGroupButtons(
-      inputId = "source",
-      selected = "env",
-      choices = c(
-        "File upload" = "file",
-        "REDCap server" = "redcap",
-        "Local data" = "env"
-      ),
-      width = "100%"
-    ),
-    shiny::helpText("Upload a file from your device, get data directly from REDCap or select a sample data set for testing from the app."),
-    shiny::conditionalPanel(
-      condition = "input.source=='file'",
-      datamods::import_file_ui("file_import",
-        title = "Choose a datafile to upload",
-        file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat", ".sav", ".ods", ".dta")
-      )
-    ),
-    shiny::conditionalPanel(
-      condition = "input.source=='redcap'",
-      m_redcap_readUI("redcap_import")
-    ),
-    shiny::conditionalPanel(
-      condition = "input.source=='env'",
-      import_globalenv_ui(id = "env", title = NULL)
-    ),
-    shiny::conditionalPanel(
-      condition = "input.source=='redcap'",
-      DT::DTOutput(outputId = "redcap_prev")
-    ),
-    shiny::br(),
-    shiny::br(),
-    shiny::h5("Exclude in-complete variables"),
-    shiny::p("Before going further, you can exclude variables with a low degree of completeness."),
-    shiny::br(),
-    shinyWidgets::noUiSliderInput(
-      inputId = "complete_cutoff",
-      label = "Choose completeness threshold (%)",
-      min = 0,
-      max = 100,
-      step = 10,
-      value = 70,
-      format = shinyWidgets::wNumbFormat(decimals = 0),
-      color = datamods:::get_primary_color()
-    ),
-    shiny::helpText("Only include variables with completeness above a specified percentage."),
-    shiny::br(),
-    shiny::br(),
-    shiny::actionButton(
-      inputId = "act_start",
-      label = "Start",
-      width = "100%",
-      icon = shiny::icon("play")
-    ),
-    shiny::helpText('After importing, hit "Start" or navigate to the desired tab.'),
-    shiny::br(),
-    shiny::br(),
-    shiny::column(width = 2)
+        shiny::h4("Choose your data source"),
+        shiny::br(),
+        shinyWidgets::radioGroupButtons(
+          inputId = "source",
+          selected = "env",
+          choices = c(
+            "File upload" = "file",
+            "REDCap server" = "redcap",
+            "Local data" = "env"
+          ),
+          width = "100%"
+        ),
+        shiny::helpText("Upload a file from your device, get data directly from REDCap or select a sample data set for testing from the app."),
+        shiny::conditionalPanel(
+          condition = "input.source=='file'",
+          datamods::import_file_ui("file_import",
+            title = "Choose a datafile to upload",
+            file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat", ".sav", ".ods", ".dta")
+          )
+        ),
+        shiny::conditionalPanel(
+          condition = "input.source=='redcap'",
+          m_redcap_readUI("redcap_import")
+        ),
+        shiny::conditionalPanel(
+          condition = "input.source=='env'",
+          import_globalenv_ui(id = "env", title = NULL)
+        ),
+        shiny::conditionalPanel(
+          condition = "input.source=='redcap'",
+          DT::DTOutput(outputId = "redcap_prev")
+        ),
+        shiny::br(),
+        shiny::br(),
+        shiny::h5("Exclude in-complete variables"),
+        shiny::p("Before going further, you can exclude variables with a low degree of completeness."),
+        shiny::br(),
+        shinyWidgets::noUiSliderInput(
+          inputId = "complete_cutoff",
+          label = "Choose completeness threshold (%)",
+          min = 0,
+          max = 100,
+          step = 10,
+          value = 70,
+          format = shinyWidgets::wNumbFormat(decimals = 0),
+          color = datamods:::get_primary_color()
+        ),
+        shiny::helpText("Only include variables with completeness above a specified percentage."),
+        shiny::br(),
+        shiny::br(),
+        shiny::actionButton(
+          inputId = "act_start",
+          label = "Start",
+          width = "100%",
+          icon = shiny::icon("play")
+        ),
+        shiny::helpText('After importing, hit "Start" or navigate to the desired tab.'),
+        shiny::br(),
+        shiny::br(),
+        shiny::column(width = 2)
       )
     )
   ),
@@ -4992,6 +5023,47 @@ ui_elements <- list(
       bslib::navset_bar(
         fillable = TRUE,
         bslib::nav_panel(
+          title = "Overview",
+          tags$h3("Overview and filtering"),
+          fluidRow(
+            shiny::column(
+              width = 9,
+              shiny::tags$p(
+                "Below is a short summary table of the provided data.
+              On the right hand side you have the option to create filters.
+              At the bottom you'll find a raw overview of the original vs the modified data."
+              )
+            )
+          ),
+          fluidRow(
+            shiny::column(
+              width = 9,
+              data_summary_ui(id = "data_summary")
+            ),
+            shiny::column(
+              width = 3,
+              IDEAFilter::IDEAFilter_ui("data_filter"),
+              shiny::tags$br()
+            )
+          )
+        ),
+        bslib::nav_panel(
+          title = "Browse",
+          tags$h3("Browse the provided data"),
+          shiny::tags$p(
+            "Below is a table with all the modified data provided to browse and understand data."
+          ),
+          shinyWidgets::html_dependency_winbox(),
+          fluidRow(
+            toastui::datagridOutput(outputId = "table_mod")
+          ),
+          shiny::tags$br(),
+          shiny::tags$br(),
+          shiny::tags$br(),
+          shiny::tags$br(),
+          shiny::tags$br()
+        ),
+        bslib::nav_panel(
           title = "Modify",
           tags$h3("Subset, rename and convert variables"),
           fluidRow(
@@ -5004,112 +5076,80 @@ ui_elements <- list(
           ),
           fluidRow(
             shiny::column(
-              width = 9,
-              update_variables_ui("vars_update"),
-              shiny::tags$br()
+              width = 2
             ),
             shiny::column(
-              width = 3,
-              tags$h4("Create new variables"),
-              shiny::tags$br(),
+              width = 8,
+              fluidRow(
+                shiny::column(
+                  width = 6,
+                  tags$h4("Update variables"),
+                  shiny::tags$br(),
+                  shiny::actionButton(
+                    inputId = "modal_variables",
+                    label = "Subset, rename and change class/type",
+                    width = "100%"
+                  ),
+                  shiny::tags$br(),
+                  shiny::helpText("Subset variables, rename variables and labels, and apply new class to variables"),
+                  shiny::tags$br(),
+                  shiny::tags$br(),
+                  shiny::actionButton(
+                    inputId = "modal_update",
+                    label = "Reorder factor levels",
+                    width = "100%"
+                  ),
+                  shiny::tags$br(),
+                  shiny::helpText("Reorder the levels of factor/categorical variables."),
+                  shiny::tags$br(),
+                  shiny::tags$br()
+                ),
+                shiny::column(
+                  width = 6,
+                  tags$h4("Create new variables"),
+                  shiny::tags$br(),
+                  shiny::actionButton(
+                    inputId = "modal_cut",
+                    label = "Create factor variable",
+                    width = "100%"
+                  ),
+                  shiny::tags$br(),
+                  shiny::helpText("Create factor/categorical variable from an other value."),
+                  shiny::tags$br(),
+                  shiny::tags$br(),
+                  shiny::actionButton(
+                    inputId = "modal_column",
+                    label = "New variable",
+                    width = "100%"
+                  ),
+                  shiny::tags$br(),
+                  shiny::helpText(shiny::markdown("Create a new variable/column based on an *R*-expression.")),
+                  shiny::tags$br(),
+                  shiny::tags$br()
+                )
+              ),
+              tags$h4("Restore"),
               shiny::actionButton(
-                inputId = "modal_cut",
-                label = "Create factor variable",
+                inputId = "data_reset",
+                label = "Restore original data",
                 width = "100%"
               ),
               shiny::tags$br(),
-              shiny::helpText("Create factor/categorical variable from an other value."),
-              shiny::tags$br(),
-              shiny::tags$br(),
-              shiny::actionButton(
-                inputId = "modal_update",
-                label = "Reorder factor levels",
-                width = "100%"
-              ),
-              shiny::tags$br(),
-              shiny::helpText("Reorder the levels of factor/categorical variables."),
-              shiny::tags$br(),
-              shiny::tags$br(),
-              shiny::actionButton(
-                inputId = "modal_column",
-                label = "New variable",
-                width = "100%"
-              ),
-              shiny::tags$br(),
-              shiny::helpText(shiny::markdown("Create a new variable/column based on an *R*-expression.")),
-              shiny::tags$br(),
-              shiny::tags$br() # ,
-              # shiny::tags$br(),
-              # shiny::tags$br(),
-              # IDEAFilter::IDEAFilter_ui("data_filter") # ,
-              # shiny::actionButton("save_filter", "Apply the filter")
-            )
-            # datamods::update_variables_ui("vars_update")
-          )
-        ),
-        bslib::nav_panel(
-          title = "Filter",
-          tags$h3("Data filtering"),
-          fluidRow(
+              shiny::helpText("Reset to original imported dataset. Careful! There is no un-doing.")
+            ),
             shiny::column(
-              width = 9,
-              shiny::tags$p(
-                "Below is a short summary table of the provided data.
-              On the right hand side you have the option to create filters.
-              At the bottom you'll find a raw overview of the original vs the modified data."
-              )
+              width = 2
             )
           ),
-          fluidRow(
-            # column(
-            #   width = 3,
-            #   shiny::uiOutput("filter_vars"),
-            #   shiny::conditionalPanel(
-            #     condition = "(typeof input.filter_vars !== 'undefined' && input.filter_vars.length > 0)",
-            #     datamods::filter_data_ui("filtering", max_height = "500px")
-            #   )
-            # ),
-            # column(
-            #   width = 9,
-            #   DT::DTOutput(outputId = "filtered_table"),
-            #   tags$b("Code dplyr:"),
-            #   verbatimTextOutput(outputId = "filtered_code")
-            # ),
-            shiny::column(
-              width = 9,
-              data_summary_ui(id = "data_summary")
-            ),
-            shiny::column(
-              width = 3,
-              IDEAFilter::IDEAFilter_ui("data_filter"),
-              # shiny::tags$br(),
-              # shiny::tags$b("Filter code:"),
-              # shiny::verbatimTextOutput(outputId = "filtered_code"),
-              shiny::tags$br()
-            )
-          )
-        ),
-        bslib::nav_panel(
-          title = "Restore",
-          tags$h3("Compare to original and restore"),
-          fluidRow(
-            shiny::column(
-              width = 9,
-              shiny::tags$p(
-                "Right below, you have the option to restore to the originally imported data.
-                At the bottom you'll find a raw overview of the original vs the modified data."
-              )
-            ),
-            shiny::tags$br(),
-            tags$h4("Restore"),
-            shiny::actionButton(
-              inputId = "data_reset",
-              label = "Restore original data",
-              width = "100%"
-            ),
-            shiny::tags$br(),
-            shiny::helpText("Reset to original imported dataset. Careful! There is no un-doing.")
+          shiny::tags$br(),
+          shiny::tags$br(),
+          tags$h4("Restore"),
+          shiny::tags$br(),
+          shiny::tags$p(
+            "Below, you'll find a raw overview of the original vs the modified data."
           ),
+          shiny::tags$br(),
+          shiny::tags$br(),
           fluidRow(
             column(
               width = 6,
@@ -5124,64 +5164,7 @@ ui_elements <- list(
               verbatimTextOutput("modified_str")
             )
           )
-        ),
-        bslib::nav_panel(
-          title = "Browse",
-          tags$h3("Browse the provided data"),
-          shiny::tags$p(
-            "Below is a table with all the modified data provided to browse and understand data."
-          ),
-          shinyWidgets::html_dependency_winbox(),
-          # fluidRow(
-          # column(
-          #   width = 3,
-          #   shiny::uiOutput("filter_vars"),
-          #   shiny::conditionalPanel(
-          #     condition = "(typeof input.filter_vars !== 'undefined' && input.filter_vars.length > 0)",
-          #     datamods::filter_data_ui("filtering", max_height = "500px")
-          #   )
-          # ),
-          # column(
-          #   width = 9,
-          #   DT::DTOutput(outputId = "filtered_table"),
-          #   tags$b("Code dplyr:"),
-          #   verbatimTextOutput(outputId = "filtered_code")
-          # ),
-          # shiny::column(
-          #   width = 8,
-          fluidRow(
-            toastui::datagridOutput(outputId = "table_mod")
-          ),
-          shiny::tags$br(),
-          shiny::tags$br(),
-          shiny::tags$br(),
-          shiny::tags$br(),
-          shiny::tags$br()
-          # ,
-          # shiny::tags$b("Reproducible code:"),
-          # shiny::verbatimTextOutput(outputId = "filtered_code")
-          #   ),
-          #   shiny::column(
-          #     width = 4,
-          #     shiny::actionButton("modal_cut", "Create factor from a variable"),
-          #     shiny::tags$br(),
-          #     shiny::tags$br(),
-          #     shiny::actionButton("modal_update", "Reorder factor levels")#,
-          #     # shiny::tags$br(),
-          #     # shiny::tags$br(),
-          #     # IDEAFilter::IDEAFilter_ui("data_filter") # ,
-          #     # shiny::actionButton("save_filter", "Apply the filter")
-          #   )
-          # )
         )
-
-
-        # column(
-        #   8,
-        #   shiny::verbatimTextOutput("filtered_code"),
-        #   DT::DTOutput("filtered_table")
-        # ),
-        # column(4, IDEAFilter::IDEAFilter_ui("data_filter"))
       )
     ),
   ##############################################################################
@@ -5195,8 +5178,6 @@ ui_elements <- list(
       id = "navdescribe",
       bslib::navset_bar(
         title = "",
-        # bslib::layout_sidebar(
-        #   fillable = TRUE,
         sidebar = bslib::sidebar(
           bslib::accordion(
             open = "acc_chars",
@@ -5407,70 +5388,70 @@ ui_elements <- list(
         shiny::column(width = 2),
         shiny::column(
           width = 8,
-      shiny::fluidRow(
-        shiny::column(
-          width = 6,
-          shiny::h4("Report"),
-          shiny::helpText("Choose your favourite output file format for further work, and download, when the analyses are done."),
-          shiny::br(),
-          shiny::br(),
-          shiny::selectInput(
-            inputId = "output_type",
-            label = "Output format",
-            selected = NULL,
-            choices = list(
-              "MS Word" = "docx",
-              "LibreOffice" = "odt"
-              # ,
-              # "PDF" = "pdf",
-              # "All the above" = "all"
+          shiny::fluidRow(
+            shiny::column(
+              width = 6,
+              shiny::h4("Report"),
+              shiny::helpText("Choose your favourite output file format for further work, and download, when the analyses are done."),
+              shiny::br(),
+              shiny::br(),
+              shiny::selectInput(
+                inputId = "output_type",
+                label = "Output format",
+                selected = NULL,
+                choices = list(
+                  "MS Word" = "docx",
+                  "LibreOffice" = "odt"
+                  # ,
+                  # "PDF" = "pdf",
+                  # "All the above" = "all"
+                )
+              ),
+              shiny::br(),
+              # Button
+              shiny::downloadButton(
+                outputId = "report",
+                label = "Download report",
+                icon = shiny::icon("download")
+              )
+              # shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
+            ),
+            shiny::column(
+              width = 6,
+              shiny::h4("Data"),
+              shiny::helpText("Choose your favourite output data format to download the modified data."),
+              shiny::br(),
+              shiny::br(),
+              shiny::selectInput(
+                inputId = "data_type",
+                label = "Data format",
+                selected = NULL,
+                choices = list(
+                  "R" = "rds",
+                  "stata" = "dta",
+                  "CSV" = "csv"
+                )
+              ),
+              shiny::helpText("No metadata is saved when exporting to csv."),
+              shiny::br(),
+              shiny::br(),
+              # Button
+              shiny::downloadButton(
+                outputId = "data_modified",
+                label = "Download data",
+                icon = shiny::icon("download")
+              )
             )
           ),
           shiny::br(),
-          # Button
-          shiny::downloadButton(
-            outputId = "report",
-            label = "Download report",
-            icon = shiny::icon("download")
-          )
-          # shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
-        ),
-        shiny::column(
-          width = 6,
-          shiny::h4("Data"),
-          shiny::helpText("Choose your favourite output data format to download the modified data."),
           shiny::br(),
+          shiny::tags$b("Code snippets:"),
+          shiny::verbatimTextOutput(outputId = "code_import"),
+          shiny::verbatimTextOutput(outputId = "code_data"),
+          shiny::verbatimTextOutput(outputId = "code_filter"),
+          shiny::tags$br(),
           shiny::br(),
-          shiny::selectInput(
-            inputId = "data_type",
-            label = "Data format",
-            selected = NULL,
-            choices = list(
-              "R" = "rds",
-              "stata" = "dta",
-              "CSV" = "csv"
-            )
-          ),
-          shiny::helpText("No metadata is saved when exporting to csv."),
-          shiny::br(),
-          shiny::br(),
-          # Button
-          shiny::downloadButton(
-            outputId = "data_modified",
-            label = "Download data",
-            icon = shiny::icon("download")
-          )
-        )
-      ),
-      shiny::br(),
-      shiny::br(),
-      shiny::tags$b("Code snippets:"),
-      shiny::verbatimTextOutput(outputId = "code_import"),
-      shiny::verbatimTextOutput(outputId = "code_data"),
-      shiny::verbatimTextOutput(outputId = "code_filter"),
-      shiny::tags$br(),
-      shiny::br(),
-      shiny::column(width = 2)
+          shiny::column(width = 2)
         )
       )
     ),
@@ -5745,11 +5726,11 @@ server <- function(input, output, session) {
   shiny::observeEvent(
     eventExpr = list(
       rv$data_original,
-      input$reset_confirm,
       input$complete_cutoff
     ),
     handlerExpr = {
       shiny::req(rv$data_original)
+
       rv$data <- rv$data_original |>
         # janitor::clean_names() |>
         default_parsing() |>
@@ -5759,10 +5740,25 @@ server <- function(input, output, session) {
     }
   )
 
+  ## For now this solution work, but I would prefer to solve this with the above
+  shiny::observeEvent(input$reset_confirm, {
+    if (isTRUE(input$reset_confirm)) {
+      shiny::req(rv$data_original)
+      rv$data <- rv$data_original |>
+        default_parsing() |>
+        remove_empty_cols(
+          cutoff = input$complete_cutoff / 100
+        )
+    }
+  }, ignoreNULL = TRUE)
+
+
   shiny::observeEvent(input$data_reset, {
     shinyWidgets::ask_confirmation(
+      cancelOnDismiss = TRUE,
       inputId = "reset_confirm",
-      title = "Please confirm data reset?"
+      title = "Please confirm data reset?",
+      type = "warning"
     )
   })
 
@@ -5789,6 +5785,12 @@ server <- function(input, output, session) {
   ## Using modified version of the datamods::cut_variable_server function
   ## Further modifications are needed to have cut/bin options based on class of variable
   ## Could be defined server-side
+
+  shiny::observeEvent(
+    input$modal_variables,
+    modal_update_variables("modal_variables",title = "Modify factor levels")
+  )
+
 
   #########  Create factor
 
@@ -5868,7 +5870,7 @@ server <- function(input, output, session) {
 
   # updated_data <- datamods::update_variables_server(
   updated_data <- update_variables_server(
-    id = "vars_update",
+    id = "modal_variables",
     data = reactive(rv$data),
     return_data_on_init = FALSE
   )
