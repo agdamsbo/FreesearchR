@@ -36,12 +36,14 @@ ui_elements <- list(
           selected = "env",
           choices = c(
             "File upload" = "file",
-            "REDCap server" = "redcap",
-            "Local data" = "env"
+            "REDCap server export" = "redcap",
+            "Local or sample data" = "env"
           ),
           width = "100%"
         ),
         shiny::helpText("Upload a file from your device, get data directly from REDCap or select a sample data set for testing from the app."),
+        shiny::br(),
+        shiny::br(),
         shiny::conditionalPanel(
           condition = "input.source=='file'",
           datamods::import_file_ui("file_import",

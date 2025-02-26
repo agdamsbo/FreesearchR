@@ -22,6 +22,15 @@ m_redcap_readUI <- function(id, include_title = TRUE) {
       inputId = ns("api"),
       label = "API token",
       value = ""
+    ),
+    tags$div(
+      id = ns("connect-placeholder"),
+      shinyWidgets::alert(
+        id = ns("connect-result"),
+        status = "info",
+        tags$p(phosphoricons::ph("info", weight = "bold"),"Please fill in server address (URI) and API token.")
+      ),
+      dismissible = TRUE
     )
   )
 
@@ -40,16 +49,6 @@ m_redcap_readUI <- function(id, include_title = TRUE) {
         onLabel = "YES",
         offLabel = "NO"
       ),
-      # shiny::radioButtons(
-      #   inputId = "do_filter",
-      #   label = "Filter export?",
-      #   selected = "no",
-      #   inline = TRUE,
-      #   choices = list(
-      #     "No" = "no",
-      #     "Yes" = "yes"
-      #   )
-      # ),
       shiny::conditionalPanel(
         condition = "input.do_filter",
         shiny::uiOutput(outputId = ns("arms")),
@@ -74,8 +73,9 @@ m_redcap_readUI <- function(id, include_title = TRUE) {
     shiny::column(
       width = 12,
       # shiny::actionButton(inputId = ns("import"), label = "Import"),
+      ## TODO: Use busy indicator like on download to have button activate/deactivate
       bslib::input_task_button(
-        id = ns("import"),
+        id = ns("data_import"),
         label = "Import",
         icon = shiny::icon("download", lib = "glyphicon"),
         label_busy = "Just a minute...",
@@ -84,69 +84,102 @@ m_redcap_readUI <- function(id, include_title = TRUE) {
           "aria-hidden" = "true"
         ),
         type = "primary",
-        auto_reset = TRUE
+        auto_reset = TRUE#,state="busy"
       ),
+      shiny::br(),
+      shiny::br(),
       shiny::helpText("Press 'Import' after having specified API token and URI to export data from the REDCap server. A preview will show below the DataDictionary."),
       shiny::br(),
-      shiny::br(),
-      shiny::br(),
-      DT::DTOutput(outputId = ns("table"))
-      # toastui::datagridOutput2(outputId = ns("table"))
+      shiny::br()
     )
-    # toastui::datagridOutput2(outputId = ns("table")),
-    # toastui::datagridOutput2(outputId = ns("data")),
-    # shiny::actionButton(inputId = ns("submit"), label = "Submit"),
-    # DT::DTOutput(outputId = ns("data_prev"))
   )
 }
 
-#' @param output.format data.frame ("df") or teal data object ("teal")
 #' @rdname redcap_read_shiny_module
 #'
 #' @return shiny server module
 #' @export
 #'
-m_redcap_readServer <- function(id, output.format = c("df", "teal", "list")) {
-  output.format <- match.arg(output.format)
-
+m_redcap_readServer <- function(id) {
   module <- function(input, output, session) {
-    # ns <- shiny::NS(id)
     ns <- session$ns
 
-    # data_list <- shiny::reactiveValues(
-    #   dict = NULL,
-    #   stat = NULL,
-    #   arms = NULL,
-    #   data = NULL,
-    #   name = NULL
+    data_rv <- shiny::reactiveValues(
+      dd_status = NULL,
+      data_status = NULL,
+      info = NULL,
+      arms = NULL,
+      dd_list = NULL,
+      data = NULL
+    )
+
+    # tryCatch(
+    #   {
+        shiny::observeEvent(
+          list(
+            input$api,
+            input$uri
+          ),
+          {
+            shiny::req(input$api)
+            shiny::req(input$uri)
+
+            parameters <- list(
+              redcap_uri = input$uri,
+              token = input$api
+            )
+
+            # browser()
+            imported <- try(rlang::exec(REDCapR::redcap_metadata_read, !!!parameters), silent = TRUE)
+
+            ## TODO: Simplify error messages
+            if (inherits(imported, "try-error") || NROW(imported) < 1 || ifelse(is.list(imported), !isTRUE(imported$success), FALSE)) {
+
+              if (ifelse(is.list(imported), !isTRUE(imported$success), FALSE)) {
+                mssg <- imported$raw_text
+              } else {
+                mssg <- attr(imported, "condition")$message
+              }
+
+              datamods:::insert_error(mssg = mssg,selector = "connect")
+              data_rv$dd_status <- "error"
+              data_rv$dd_list <- NULL
+            } else if (isTRUE(imported$success)) {
+
+              datamods:::insert_alert(
+                selector = ns("connect"),
+                status = "success",
+                make_success_alert(
+                  dataIdName = "see_data",
+                  extra = tags$b(phosphoricons::ph("check", weight = "bold"),"Connected to server! Project data loaded."),
+                  btn_show_data = TRUE
+                )
+              )
+
+              data_rv$dd_status <- "success"
+              data_rv$dd_list <- imported
+            }
+          },
+          ignoreInit = TRUE
+        )
+    #   },
+    #   warning = function(warn) {
+    #     showNotification(paste0(warn), type = "warning")
+    #   },
+    #   error = function(err) {
+    #     showNotification(paste0(err), type = "err")
+    #   }
     # )
 
-    dd <- shiny::reactive({
-      shiny::req(input$api)
-      shiny::req(input$uri)
-
-
-      REDCapR::redcap_metadata_read(
-        redcap_uri = input$uri,
-        token = input$api
-      )$data
+    shiny::observeEvent(input$see_data, {
+      datamods::show_data(
+        purrr::pluck(data_rv$dd_list, "data"),
+        title = "Data dictionary",
+        type = "modal",
+        show_classes = FALSE,
+        tags$b("Preview:")
+        )
     })
-
-    # dd <- shiny::reactive({
-    #   shiny::req(input$api)
-    #   shiny::req(input$uri)
-    #
-    #
-    #   out <- REDCapR::redcap_metadata_read(
-    #     redcap_uri = input$uri,
-    #     token = input$api
-    #   )
-    #
-    #   data_list$dict <- out$data
-    #   data_list$stat <- out$success
-    #
-    #   out$data
-    # })
 
     arms <- shiny::reactive({
       shiny::req(input$api)
@@ -156,21 +189,18 @@ m_redcap_readServer <- function(id, output.format = c("df", "teal", "list")) {
         redcap_uri = input$uri,
         token = input$api
       )$data
-
-      # data_list$arms <- out
-      # out
     })
 
     output$fields <- shiny::renderUI({
+      shiny::req(data_rv$dd_list)
       shinyWidgets::virtualSelectInput(
         inputId = ns("fields"),
         label = "Select fields/variables to import:",
-        choices = dd() |>
+        choices = purrr::pluck(data_rv$dd_list, "data") |>
           dplyr::select(field_name, form_name) |>
           (\(.x){
             split(.x$field_name, .x$form_name)
-          })() # |>
-        # stats::setNames(instr()[["data"]][[2]])
+          })()
         ,
         updateOn = "close",
         multiple = TRUE,
@@ -179,9 +209,20 @@ m_redcap_readServer <- function(id, output.format = c("df", "teal", "list")) {
       )
     })
 
+    ## TODO: Get activate/inactivate action button to work
+    # shiny::observeEvent(input$fields,
+    #                     {
+    #   if (is.null(input$fields) | length(input$fields)==1){
+    #     bslib::update_task_button(id= "data_import", state = "busy")
+    #     # datamods:::toggle_widget(inputId = "data_import", enable = FALSE)
+    #   } else {
+    #     bslib::update_task_button(id= "data_import", state = "ready")
+    #     # datamods:::toggle_widget(inputId = "data_import", enable = TRUE)
+    #   }
+    # })
+
     output$arms <- shiny::renderUI({
       shiny::selectizeInput(
-        # inputId = "arms",
         inputId = ns("arms"),
         selected = NULL,
         label = "Filter by events/arms",
@@ -190,85 +231,76 @@ m_redcap_readServer <- function(id, output.format = c("df", "teal", "list")) {
       )
     })
 
-    output$table <- DT::renderDT(
-      {
-        shiny::req(input$api)
-        shiny::req(input$uri)
-        # shiny::req(data_list$dict)
-        # dd()[["data"]][c(1,2,4,5,6,8)]
-        # browser()
-        data.df <- dd()[, c(1, 2, 4, 5, 6, 8)]
-        DT::datatable(data.df,
-          caption = "Subset of data dictionary"
-        )
-      },
-      server = TRUE
-    )
-
-    # Messes up the overlay of other objects. JS thing?
-    # output$table <- toastui::renderDatagrid2(
-    #   {
-    #     shiny::req(input$api)
-    #     shiny::req(input$uri)
-    #     # shiny::req(data_list$dict)
-    #     # dd()[["data"]][c(1,2,4,5,6,8)]
-    #     # browser()
-    #     toastui::datagrid(dd()[,c(1, 2, 4, 5, 6, 8)]
-    #     )
-    #   }
-    # )
-
+    ## Merge project name in success meassage
+    ## Generate Codebook link
     name <- shiny::reactive({
-      shiny::req(input$api)
+      if (data_rv$dd_status=="success"){
+      # browser()
       REDCapR::redcap_project_info_read(
         redcap_uri = input$uri,
         token = input$api
-      )$data$project_title
+      )$data$project_title}
     })
 
-    shiny::eventReactive(input$import, {
-      shiny::req(input$api)
-      shiny::req(input$fields)
-      record_id <- dd()[[1]][1]
 
-      redcap_data <- REDCapCAST::read_redcap_tables(
+    shiny::observeEvent(input$data_import, {
+      shiny::req(input$fields)
+      record_id <- purrr::pluck(data_rv$dd_list, "data")[[1]][1]
+
+      parameters <- list(
         uri = input$uri,
         token = input$api,
         fields = unique(c(record_id, input$fields)),
-        # forms = input$instruments,
         events = input$arms,
         raw_or_label = "both",
         filter_logic = input$filter
-      ) |>
-        REDCapCAST::redcap_wider() |>
-        dplyr::select(-dplyr::ends_with("_complete")) |>
-        dplyr::select(-dplyr::any_of(record_id)) |>
-        REDCapCAST::suffix2label()
-
-      out_object <- file_export(redcap_data,
-        output.format = output.format,
-        filename = name()
       )
 
-      if (output.format == "list") {
-        out <- list(
-          data = shiny::reactive(redcap_data),
-          meta = dd(),
-          name = name(),
-          filter = input$filter
-        )
-      } else {
-        out <- out_object
-      }
+      imported <- try(rlang::exec(REDCapCAST::read_redcap_tables, !!!parameters), silent = TRUE)
+      code <- rlang::call2(REDCapCAST::read_redcap_tables, !!!parameters)
 
-      return(out)
+
+      if (inherits(imported, "try-error") || NROW(imported) < 1) {
+
+        data_rv$data_status <- "error"
+        data_rv$data_list <- NULL
+      } else {
+        data_rv$data_status <- "success"
+        data_rv$data <- imported |>
+          REDCapCAST::redcap_wider() |>
+          dplyr::select(-dplyr::ends_with("_complete")) |>
+          dplyr::select(-dplyr::any_of(record_id)) |>
+          REDCapCAST::suffix2label()
+      }
     })
+
+    return(shiny::reactive(data_rv$data))
   }
 
   shiny::moduleServer(
     id = id,
     module = module
   )
+}
+
+#' @importFrom htmltools tagList tags
+#' @importFrom shiny icon getDefaultReactiveDomain
+make_success_alert <- function(dataIdName = "see_data",
+                               btn_show_data,
+                               see_data_text="Click to see data",
+                               extra = NULL,
+                               session = shiny::getDefaultReactiveDomain()) {
+  if (isTRUE(btn_show_data)) {
+    success_message <- tagList(
+      extra,
+      tags$br(),
+      shiny::actionLink(
+        inputId = session$ns(dataIdName),
+        label = tagList(phosphoricons::ph("table"), see_data_text)
+      )
+    )
+  }
+  return(success_message)
 }
 
 # #' REDCap import teal data module
@@ -292,77 +324,29 @@ m_redcap_readServer <- function(id, output.format = c("df", "teal", "list")) {
 #'
 #' @examples
 #' \dontrun{
-#' redcap_app()
+#' redcap_demo_app()
 #' }
-redcap_app <- function() {
+redcap_demo_app <- function() {
   ui <- shiny::fluidPage(
     m_redcap_readUI("data"),
-    # DT::DTOutput(outputId = "redcap_prev")
     toastui::datagridOutput2(outputId = "redcap_prev"),
-    shiny::fluidRow(
-      shiny::column(
-        8,
-        # verbatimTextOutput("data_filter_code"),
-        DT::DTOutput("data_summary")
-      ),
-      shiny::column(4, IDEAFilter::IDEAFilter_ui("data_filter"))
-    )
+    DT::DTOutput("data_summary")
   )
   server <- function(input, output, session) {
     data_val <- shiny::reactiveValues(data = NULL)
 
-    ds <- m_redcap_readServer("data", output.format = "df")
-    # output$redcap_prev <- DT::renderDT(
-    #   {
-    #     DT::datatable(purrr::pluck(ds(), "data")(),
-    #       caption = "Observations"
-    #     )
-    #   },
-    #   server = TRUE
-    # )
 
-    # shiny::reactive({
-    #   data_val$data <- purrr::pluck(ds(), "data")()
-    # })
-
-    output$redcap_prev <- toastui::renderDatagrid2({
-      # toastui::datagrid(purrr::pluck(ds(), "data")())
-      # toastui::datagrid(data_val$data)
-      toastui::datagrid(ds())
-    })
-
-    filtered_data <- IDEAFilter::IDEAFilter("data_filter",
-      data = ds,
-      verbose = FALSE
-    )
-
-    # filtered_data <- shiny::reactive({
-    #   IDEAFilter::IDEAFilter("data_filter",
-    #                          data = purrr::pluck(ds(), "data")(),
-    #                          verbose = FALSE)
-    # })
-
-    # output$data_filter_code <- renderPrint({
-    #   cat(gsub(
-    #     "%>%", "%>% \n ",
-    #     gsub(
-    #       "\\s{2,}", " ",
-    #       paste0(
-    #         capture.output(attr(filtered_data(), "code")),
-    #         collapse = " "
-    #       )
-    #     )
-    #   ))
-    # })
+    data_val$data <- m_redcap_readServer(id = "data")
 
     output$data_summary <- DT::renderDataTable(
       {
-        filtered_data()
+        shiny::req(data_val$data)
+        data_val$data()
       },
       options = list(
         scrollX = TRUE,
         pageLength = 5
-      )
+      ),
     )
   }
   shiny::shinyApp(ui, server)

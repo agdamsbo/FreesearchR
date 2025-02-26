@@ -154,17 +154,19 @@ server <- function(input, output, session) {
   })
 
   data_redcap <- m_redcap_readServer(
-    id = "redcap_import",
-    output.format = "list"
+    id = "redcap_import"#,
+    # output.format = "list"
   )
 
   shiny::observeEvent(data_redcap(), {
-    rv$data_original <- purrr::pluck(data_redcap(), "data")()
+    # rv$data_original <- purrr::pluck(data_redcap(), "data")()
+    rv$data_original <- data_redcap()
   })
 
   output$redcap_prev <- DT::renderDT(
     {
-      DT::datatable(head(purrr::pluck(data_redcap(), "data")(), 5),
+      DT::datatable(head(data_redcap(), 5),
+      # DT::datatable(head(purrr::pluck(data_redcap(), "data")(), 5),
         caption = "First 5 observations"
       )
     },
