@@ -66,26 +66,35 @@ ui_elements <- list(
         shiny::br(),
         shiny::br(),
         shiny::h5("Exclude in-complete variables"),
-        shiny::p("Before going further, you can exclude variables with a low degree of completeness."),
-        shiny::br(),
-        shinyWidgets::noUiSliderInput(
-          inputId = "complete_cutoff",
-          label = "Choose completeness threshold (%)",
-          min = 0,
-          max = 100,
-          step = 10,
-          value = 70,
-          format = shinyWidgets::wNumbFormat(decimals = 0),
-          color = datamods:::get_primary_color()
+        shiny::fluidRow(
+          shiny::column(width=6,
+                        shiny::br(),
+                        shiny::br(),
+                        shiny::p("Filter incomplete variables, by setting a completeness threshold:"),
+                        shiny::br()
+                        ),
+          shiny::column(width=6,
+                        shinyWidgets::noUiSliderInput(
+                          inputId = "complete_cutoff",
+                          label = NULL,
+                          min = 0,
+                          max = 100,
+                          step = 5,
+                          value = 70,
+                          format = shinyWidgets::wNumbFormat(decimals = 0),
+                          color = datamods:::get_primary_color()
+                        ),
+                        shiny::helpText("Include variables with completeness above the specified percentage.")
+                        )
         ),
-        shiny::helpText("Only include variables with completeness above a specified percentage."),
         shiny::br(),
         shiny::br(),
         shiny::actionButton(
           inputId = "act_start",
           label = "Start",
           width = "100%",
-          icon = shiny::icon("play")
+          icon = shiny::icon("play"),
+          disabled = TRUE
         ),
         shiny::helpText('After importing, hit "Start" or navigate to the desired tab.'),
         shiny::br(),

@@ -186,6 +186,13 @@ server <- function(input, output, session) {
     # rv$code <- append_list(data = from_env$code(),list = rv$code,index = "import")
   })
 
+  shiny::observeEvent(rv$data_original, {
+    if (is.null(rv$data_original) | NROW(rv$data_original) == 0) {
+      shiny::updateActionButton(inputId = "act_start", disabled = TRUE)
+    } else {
+      shiny::updateActionButton(inputId = "act_start", disabled = FALSE)
+    }
+  })
 
   ##############################################################################
   #########
@@ -868,11 +875,6 @@ server <- function(input, output, session) {
   shiny::conditionalPanel(
     condition = "output.uploaded == 'yes'",
   )
-
-  # observeEvent(input$act_start, {
-  #   nav_show(id = "overview",target = "Import"
-  #   )
-  # })
 
   ##############################################################################
   #########
