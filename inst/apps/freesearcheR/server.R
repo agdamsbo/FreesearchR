@@ -821,33 +821,6 @@ server <- function(input, output, session) {
       gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$params$descr}**")))
   })
 
-  # shiny::observe(
-  #   # list(
-  #   #   input$plot_model
-  #   # ),
-  #   {
-  #     shiny::req(rv$list$regression$tables)
-  #     shiny::req(input$plot_model)
-  #     tryCatch(
-  #       {
-  #         out <- merge_long(rv$list$regression, input$plot_model) |>
-  #           plot.tbl_regression(
-  #             colour = "variable",
-  #             facet_col = "model"
-  #           )
-  #
-  #         rv$list$regression$plot <- out
-  #       },
-  #       warning = function(warn) {
-  #         showNotification(paste0(warn), type = "warning")
-  #       },
-  #       error = function(err) {
-  #         showNotification(paste0("Plotting failed with the following error: ", err), type = "err")
-  #       }
-  #     )
-  #   }
-  # )
-
   output$regression_plot <- shiny::renderPlot(
     {
       # shiny::req(rv$list$regression$plot)

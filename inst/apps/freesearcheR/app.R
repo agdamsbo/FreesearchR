@@ -10,7 +10,7 @@
 #### Current file: R//app_version.R 
 ########
 
-app_version <- function()'250227_1333'
+app_version <- function()'250227_1342'
 
 
 ########
@@ -2531,7 +2531,7 @@ m_redcap_readServer <- function(id) {
               datamods:::insert_alert(
                 selector = ns("connect"),
                 status = "success",
-                make_success_alert(
+                include_data_alert(
                   dataIdName = "see_data",
                   extra = tags$p(tags$b(phosphoricons::ph("check", weight = "bold"), "Connected to server!"), tags$p(paste0(data_rv$project_name, " loaded."))),
                   btn_show_data = TRUE
@@ -2650,7 +2650,7 @@ m_redcap_readServer <- function(id) {
 
 #' @importFrom htmltools tagList tags
 #' @importFrom shiny icon getDefaultReactiveDomain
-make_success_alert <- function(dataIdName = "see_data",
+include_data_alert <- function(dataIdName = "see_data",
                                btn_show_data,
                                see_data_text = "Click to see data",
                                extra = NULL,
@@ -5063,7 +5063,7 @@ ui_elements <- list(
                           label = NULL,
                           min = 0,
                           max = 100,
-                          step = 10,
+                          step = 5,
                           value = 70,
                           format = shinyWidgets::wNumbFormat(decimals = 0),
                           color = datamods:::get_primary_color()
