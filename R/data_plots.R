@@ -754,6 +754,7 @@ default_theme <- function() {
 #'
 #' @param color.group
 #' @param colors
+#' @param ... passed to sankey_ready()
 #'
 #' @returns ggplot2 object
 #' @export
@@ -762,8 +763,8 @@ default_theme <- function() {
 #' ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)))
 #' ds |> plot_sankey_single("first", "last")
 #' ds |> plot_sankey_single("first", "last", color.group = "y")
-plot_sankey_single <- function(data,x,y, color.group = "x", colors = NULL){
-  data <- data |> sankey_ready(x = x, y = y)
+plot_sankey_single <- function(data,x,y, color.group = "x", colors = NULL,...){
+  data <- data |> sankey_ready(x = x, y = y,...)
 # browser()
   library(ggalluvial)
 
