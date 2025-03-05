@@ -22,7 +22,6 @@
 #'
 #' @name update-factor
 #'
-#' @example examples/update_factor.R
 update_factor_ui <- function(id) {
   ns <- NS(id)
   tagList(

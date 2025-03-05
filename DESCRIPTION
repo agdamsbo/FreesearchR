@@ -64,7 +64,8 @@ Imports:
     Hmisc,
     ggstats,
     rempsyc,
-    ggridges
+    ggridges,
+    ggalluvial
 Suggests: 
     styler,
     devtools,

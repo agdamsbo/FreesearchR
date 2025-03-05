@@ -32,6 +32,6 @@ shiny_freesearcheR <- function(...) {
 #' @returns shiny app
 #' @export
 #'
-launch <- function(...){
+launch_freesearcheR <- function(...){
   shiny_freesearcheR(...)
 }
