@@ -10,7 +10,7 @@
 #### Current file: R//app_version.R 
 ########
 
-app_version <- function()'250305_1101'
+app_version <- function()'250306_0759'
 
 
 ########
@@ -1650,7 +1650,6 @@ sankey_ready <- function(data, x, y, z = NULL, numbers = "count") {
     dplyr::mutate(gy.sum = sum(n)) |>
     dplyr::ungroup()
 
-
   if (numbers == "count") {
     out <- out |> dplyr::mutate(
       lx = factor(paste0(!!dplyr::sym(x), "\n(n=", gx.sum, ")")),
@@ -1662,7 +1661,24 @@ sankey_ready <- function(data, x, y, z = NULL, numbers = "count") {
       ly = factor(paste0(!!dplyr::sym(y), "\n(", round((gy.sum / sum(n)) * 100, 1), "%)"))
     )
   }
+
+  if (is.factor(data[[x]])){
+    index <- match(levels(data[[x]]),str_remove_last(levels(out$lx),"\n"))
+    out$lx <- factor(out$lx,levels=levels(out$lx)[index])
+  }
+
+  if (is.factor(data[[y]])){
+    index <- match(levels(data[[y]]),str_remove_last(levels(out$ly),"\n"))
+    out$ly <- factor(out$ly,levels=levels(out$ly)[index])
+  }
+
   out
+}
+
+str_remove_last <- function(data,pattern="\n"){
+  strsplit(data,split = pattern) |>
+    lapply(\(.x)paste(unlist(.x[[-length(.x)]]),collapse=pattern)) |>
+    unlist()
 }
 
 #' Line breaking at given number of characters for nicely plotting labels
@@ -1714,6 +1730,7 @@ default_theme <- function() {
 #'
 #' @param color.group
 #' @param colors
+#' @param ... passed to sankey_ready()
 #'
 #' @returns ggplot2 object
 #' @export
@@ -1722,9 +1739,9 @@ default_theme <- function() {
 #' ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)))
 #' ds |> plot_sankey_single("first", "last")
 #' ds |> plot_sankey_single("first", "last", color.group = "y")
-plot_sankey_single <- function(data,x,y, color.group = "x", colors = NULL){
-  data <- data |> sankey_ready(x = x, y = y)
-
+plot_sankey_single <- function(data,x,y, color.group = "x", colors = NULL,...){
+  data <- data |> sankey_ready(x = x, y = y,...)
+# browser()
   library(ggalluvial)
 
   na.color <- "#2986cc"
@@ -1744,8 +1761,6 @@ plot_sankey_single <- function(data,x,y, color.group = "x", colors = NULL){
   } else {
     label.colors <- contrast_text(colors)
   }
-
-
 
   group_labels <- c(get_label(data, x), get_label(data, y)) |>
     sapply(line_break) |>

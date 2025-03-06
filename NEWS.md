@@ -1,4 +1,4 @@
-# freesearcheR 25.2.1
+# freesearcheR 25.3.1
 
 First steps towards a more focused and simplified interface.
 
@@ -8,13 +8,25 @@ Inspired by the Stroke Center implementation guidelines of the WSO, we will appl
 
 Teal dependencies removed. The teal framework really seems very powerful and promising, but it will also mean less control and more clutter. May come up again later.
 
-All main components have been implemented.
+All main components have been implemented:
+
+-   Data import from different sources
+
+-   Data management (variable creation, re-classing, naming, labelling and more)
+
+-   Basic data comparisons and descriptive analyses
+
+-   Basic data visualisations with a select set of plot types great for publication purposes
+
+-   Regression analysis of basic clinical cross-sectional data (mixed models of repeated measures and survival analyses is on the table)
+
+-   Export of outputs (descriptive analyses and regression) as well as modified dataset (code is also showed, but not working as it should)
 
 Next steps are:
 
 -   Polished code export
 
--   Improved workflow and thorough step-wise guide/documentation
+-   Improved workflow and descriptive text as well as thorough step-wise guide/documentation (possibly with small videos)
 
 -   Implement in clinical projects
 
