@@ -17,7 +17,7 @@
 #' @return a \code{\link[shiny]{selectizeInput}} dropdown element
 #'
 #' @importFrom shiny selectizeInput
-#' @keywords internal
+#' @export
 #'
 columnSelectInput <- function(inputId, label, data, selected = "", ...,
                               col_subset = NULL, placeholder = "", onInitialize, none_label="No variable selected") {
@@ -80,3 +80,100 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
     )
   )
 }
+
+
+
+#' A selectizeInput customized for named vectors
+#'
+#' @param inputId passed to \code{\link[shiny]{selectizeInput}}
+#' @param label passed to \code{\link[shiny]{selectizeInput}}
+#' @param data A named \code{vector} object from which fields should be populated
+#' @param selected default selection
+#' @param ... passed to \code{\link[shiny]{selectizeInput}}
+#' @param placeholder passed to \code{\link[shiny]{selectizeInput}} options
+#' @param onInitialize passed to \code{\link[shiny]{selectizeInput}} options
+#'
+#' @returns a \code{\link[shiny]{selectizeInput}} dropdown element
+#' @export
+#'
+#' @examples
+#' if (shiny::interactive()) {
+#' shinyApp(
+#'   ui = fluidPage(
+#'     shiny::uiOutput("select"),
+#'     tableOutput("data")
+#'   ),
+#'   server = function(input, output) {
+#'     output$select <- shiny::renderUI({
+#'       vectorSelectInput(
+#'         inputId = "variable", label = "Variable:",
+#'         data = c(
+#'           "Cylinders" = "cyl",
+#'           "Transmission" = "am",
+#'           "Gears" = "gear"
+#'         )
+#'       )
+#'     })
+#'
+#'     output$data <- renderTable(
+#'       {
+#'         mtcars[, c("mpg", input$variable), drop = FALSE]
+#'       },
+#'       rownames = TRUE
+#'     )
+#'   }
+#' )
+#' }
+vectorSelectInput <- function(inputId,
+                              label,
+                              data,
+                              selected = "",
+                              ...,
+                              placeholder = "",
+                              onInitialize) {
+  datar <- if (shiny::is.reactive(data)) data else shiny::reactive(data)
+
+  labels <- sprintf(
+    IDEAFilter:::strip_leading_ws('
+    {
+      "name": "%s",
+      "label": "%s"
+    }'),
+    datar(),
+    names(datar()) %||% ""
+  )
+
+  choices <- stats::setNames(datar(), labels)
+
+  shiny::selectizeInput(
+    inputId = inputId,
+    label = label,
+    choices = choices,
+    selected = selected,
+    ...,
+    options = c(
+      list(render = I("{
+        // format the way that options are rendered
+        option: function(item, escape) {
+          item.data = JSON.parse(item.label);
+          return '<div style=\"padding: 3px 12px\">' +
+                   '<div><strong>' +
+                      escape(item.data.name) + ' ' +
+                   '</strong></div>' +
+                   (item.data.label != '' ? '<div style=\"line-height: 1em;\"><small>' + escape(item.data.label) + '</small></div>' : '') +
+                 '</div>';
+        },
+
+        // avoid data vomit splashing on screen when an option is selected
+        item: function(item, escape) {
+        item.data = JSON.parse(item.label);
+        return '<div>' +
+                 escape(item.data.name) +
+               '</div>';
+        }
+      }"))
+    )
+  )
+}
+
+

@@ -254,11 +254,11 @@ m_redcap_readServer <- function(id) {
     })
 
     output$arms <- shiny::renderUI({
-      shiny::selectizeInput(
+      vectorSelectInput(
         inputId = ns("arms"),
         selected = NULL,
         label = "Filter by events/arms",
-        choices = arms()[[3]],
+        data = stats::setNames(arms()[[3]],arms()[[1]]),
         multiple = TRUE
       )
     })
