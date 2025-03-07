@@ -1,3 +1,8 @@
+# freesearcheR 25.3.2
+
+Focus is on polish and improved ui/ux.
+
+
 # freesearcheR 25.3.1
 
 First steps towards a more focused and simplified interface.

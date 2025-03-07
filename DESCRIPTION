@@ -1,6 +1,6 @@
 Package: freesearcheR
 Title: Browser Based Data Analysis
-Version: 25.3.1
+Version: 25.3.2
 Authors@R: 
     person("Andreas Gammelgaard", "Damsbo", , "agdamsbo@clin.au.dk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7559-1154"))
