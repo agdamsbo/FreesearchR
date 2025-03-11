@@ -4,11 +4,13 @@ Wrapper to create plot based on provided type
 Nice horizontal stacked bars (Grotta bars)
 Beatiful violin plot
 Beautiful violin plot
+Readying data for sankey plot
 Beautiful sankey plot with option to split by a tertiary group"><meta property="og:description" content="Title
 Wrapper to create plot based on provided type
 Nice horizontal stacked bars (Grotta bars)
 Beatiful violin plot
 Beautiful violin plot
+Readying data for sankey plot
 Beautiful sankey plot with option to split by a tertiary group"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
@@ -51,6 +53,7 @@ Beautiful sankey plot with option to split by a tertiary group"></head><body>
 <p>Nice horizontal stacked bars (Grotta bars)</p>
 <p>Beatiful violin plot</p>
 <p>Beautiful violin plot</p>
+<p>Readying data for sankey plot</p>
 <p>Beautiful sankey plot with option to split by a tertiary group</p>
     </div>
 
@@ -66,6 +69,8 @@ Beautiful sankey plot with option to split by a tertiary group"></head><body>
 <span></span>
 <span><span class="fu">plot_scatter</span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, <span class="va">y</span>, z <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">sankey_ready</span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, <span class="va">y</span>, z <span class="op">=</span> <span class="cn">NULL</span>, numbers <span class="op">=</span> <span class="st">"count"</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">plot_sankey</span><span class="op">(</span><span class="va">data</span>, <span class="va">x</span>, <span class="va">y</span>, z <span class="op">=</span> <span class="cn">NULL</span>, color.group <span class="op">=</span> <span class="st">"x"</span>, colors <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -73,7 +78,23 @@ Beautiful sankey plot with option to split by a tertiary group"></head><body>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
+<dd><p>data.frame</p></dd>
+
+
+<dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
+<dd><p>primary variable</p></dd>
+
+
+<dt id="arg-y">y<a class="anchor" aria-label="anchor" href="#arg-y"></a></dt>
+<dd><p>secondary variable</p></dd>
+
+
+<dt id="arg-z">z<a class="anchor" aria-label="anchor" href="#arg-z"></a></dt>
+<dd><p>tertiary variable</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>ignored for now</p></dd>
 
 
@@ -88,6 +109,7 @@ Beautiful sankey plot with option to split by a tertiary group"></head><body>
 <p>ggplot2 object</p>
 <p>ggplot2 object</p>
 <p>ggplot2 object</p>
+<p>data.frame</p>
 <p>ggplot2 object</p>
     </div>
 
@@ -148,6 +170,53 @@ Beautiful sankey plot with option to split by a tertiary group"></head><body>
 <span class="r-plt img"><img src="data-plots-4.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_scatter</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"mpg"</span>, y <span class="op">=</span> <span class="st">"wt"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="data-plots-5.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>g <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>, <span class="fl">100</span>, <span class="cn">TRUE</span><span class="op">)</span>, first <span class="op">=</span> <span class="fu">REDCapCAST</span><span class="fu">::</span><span class="fu">as_factor</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="fl">100</span>, <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>, last <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="cn">NA</span><span class="op">)</span>, <span class="fl">100</span>, <span class="cn">TRUE</span>, prob <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">.23</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fl">.08</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ds</span> <span class="op">|&gt;</span> <span class="fu">sankey_ready</span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"last"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 19 × 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    first last      n gx.sum gy.sum lx          ly          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> c     a         7     28     32 <span style="color: #949494;">"</span>c\n(n=28)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>a\n(n=32)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> c     b         6     28     26 <span style="color: #949494;">"</span>c\n(n=28)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>b\n(n=26)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> c     c         5     28     15 <span style="color: #949494;">"</span>c\n(n=28)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>c\n(n=15)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> c     d         6     28     17 <span style="color: #949494;">"</span>c\n(n=28)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>d\n(n=17)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> c     <span style="color: #BB0000;">NA</span>        4     28     10 <span style="color: #949494;">"</span>c\n(n=28)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>NA\n(n=10)<span style="color: #949494;">"</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> a     a         9     24     32 <span style="color: #949494;">"</span>a\n(n=24)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>a\n(n=32)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> a     b         6     24     26 <span style="color: #949494;">"</span>a\n(n=24)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>b\n(n=26)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> a     c         6     24     15 <span style="color: #949494;">"</span>a\n(n=24)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>c\n(n=15)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> a     d         1     24     17 <span style="color: #949494;">"</span>a\n(n=24)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>d\n(n=17)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> a     <span style="color: #BB0000;">NA</span>        2     24     10 <span style="color: #949494;">"</span>a\n(n=24)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>NA\n(n=10)<span style="color: #949494;">"</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> b     a         8     20     32 <span style="color: #949494;">"</span>b\n(n=20)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>a\n(n=32)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> b     b         5     20     26 <span style="color: #949494;">"</span>b\n(n=20)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>b\n(n=26)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">13</span> b     c         4     20     15 <span style="color: #949494;">"</span>b\n(n=20)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>c\n(n=15)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">14</span> b     d         2     20     17 <span style="color: #949494;">"</span>b\n(n=20)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>d\n(n=17)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">15</span> b     <span style="color: #BB0000;">NA</span>        1     20     10 <span style="color: #949494;">"</span>b\n(n=20)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>NA\n(n=10)<span style="color: #949494;">"</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">16</span> d     a         8     28     32 <span style="color: #949494;">"</span>d\n(n=28)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>a\n(n=32)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">17</span> d     b         9     28     26 <span style="color: #949494;">"</span>d\n(n=28)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>b\n(n=26)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">18</span> d     d         8     28     17 <span style="color: #949494;">"</span>d\n(n=28)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>d\n(n=17)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">19</span> d     <span style="color: #BB0000;">NA</span>        3     28     10 <span style="color: #949494;">"</span>d\n(n=28)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>NA\n(n=10)<span style="color: #949494;">"</span></span>
+<span class="r-in"><span><span class="va">ds</span> <span class="op">|&gt;</span> <span class="fu">sankey_ready</span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"last"</span>, numbers <span class="op">=</span> <span class="st">"percentage"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 19 × 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    first last      n gx.sum gy.sum lx         ly         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> c     a         7     28     32 <span style="color: #949494;">"</span>c\n(28%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>a\n(32%)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> c     b         6     28     26 <span style="color: #949494;">"</span>c\n(28%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>b\n(26%)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> c     c         5     28     15 <span style="color: #949494;">"</span>c\n(28%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>c\n(15%)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> c     d         6     28     17 <span style="color: #949494;">"</span>c\n(28%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>d\n(17%)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> c     <span style="color: #BB0000;">NA</span>        4     28     10 <span style="color: #949494;">"</span>c\n(28%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>NA\n(10%)<span style="color: #949494;">"</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> a     a         9     24     32 <span style="color: #949494;">"</span>a\n(24%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>a\n(32%)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> a     b         6     24     26 <span style="color: #949494;">"</span>a\n(24%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>b\n(26%)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> a     c         6     24     15 <span style="color: #949494;">"</span>a\n(24%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>c\n(15%)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> a     d         1     24     17 <span style="color: #949494;">"</span>a\n(24%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>d\n(17%)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> a     <span style="color: #BB0000;">NA</span>        2     24     10 <span style="color: #949494;">"</span>a\n(24%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>NA\n(10%)<span style="color: #949494;">"</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> b     a         8     20     32 <span style="color: #949494;">"</span>b\n(20%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>a\n(32%)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> b     b         5     20     26 <span style="color: #949494;">"</span>b\n(20%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>b\n(26%)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">13</span> b     c         4     20     15 <span style="color: #949494;">"</span>b\n(20%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>c\n(15%)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">14</span> b     d         2     20     17 <span style="color: #949494;">"</span>b\n(20%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>d\n(17%)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">15</span> b     <span style="color: #BB0000;">NA</span>        1     20     10 <span style="color: #949494;">"</span>b\n(20%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>NA\n(10%)<span style="color: #949494;">"</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">16</span> d     a         8     28     32 <span style="color: #949494;">"</span>d\n(28%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>a\n(32%)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">17</span> d     b         9     28     26 <span style="color: #949494;">"</span>d\n(28%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>b\n(26%)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">18</span> d     d         8     28     17 <span style="color: #949494;">"</span>d\n(28%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>d\n(17%)<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">19</span> d     <span style="color: #BB0000;">NA</span>        3     28     10 <span style="color: #949494;">"</span>d\n(28%)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>NA\n(10%)<span style="color: #949494;">"</span></span>
 <span class="r-in"><span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>g <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>, <span class="fl">100</span>, <span class="cn">TRUE</span><span class="op">)</span>, first <span class="op">=</span> <span class="fu">REDCapCAST</span><span class="fu">::</span><span class="fu">as_factor</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="fl">100</span>, <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>, last <span class="op">=</span> <span class="fu">REDCapCAST</span><span class="fu">::</span><span class="fu">as_factor</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="fl">100</span>, <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ds</span> <span class="op">|&gt;</span> <span class="fu">plot_sankey</span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"last"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: ggplot2</span>

@@ -26,6 +26,7 @@
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/data-summary.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/default_format_arguments.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/default_parsing.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/reference/drop_empty_event.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/factorize.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/file_export.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/format_writer.html</loc></url>
@@ -35,6 +36,9 @@
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/getfun.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/gg_theme_export.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/gg_theme_shiny.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/reference/grepl_fix.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/reference/import-file.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/reference/import_delim.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/index.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/index_embed.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/is_any_class.html</loc></url>
@@ -59,7 +63,8 @@
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/regression_table.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/remove_empty_cols.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/remove_na_attr.html</loc></url>
-<url><loc>https://agdamsbo.github.io/freesearcheR/reference/sankey_ready.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/reference/repeated_instruments.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/reference/selectInputIcon.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/shiny_freesearcheR.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/specify_qmd_format.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/subset_types.html</loc></url>
@@ -69,7 +74,9 @@
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/update-factor.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/update-variables.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/update_variables_datagrid.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/reference/vectorSelectInput.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/vertical_stacked_bars.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/reference/wide2long.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/write_quarto.html</loc></url>
 </urlset>
 
