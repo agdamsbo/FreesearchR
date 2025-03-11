@@ -94,19 +94,19 @@ server <- function(input, output, session) {
 
   consider.na <- c("NA", "\"\"", "", "\'\'", "na")
 
-  data_file <- datamods::import_file_server(
+  data_file <- import_file_server(
     id = "file_import",
     show_data_in = "popup",
     trigger_return = "change",
     return_class = "data.frame",
     read_fns = list(
-      ods = function(file) {
+      ods = function(file, which, skip, na) {
         readODS::read_ods(
           path = file,
           # Sheet and skip not implemented for .ods in the original implementation
-          # sheet = sheet,
-          # skip = skip,
-          na = consider.na
+          sheet = which,
+          skip = skip,
+          na = na
         )
       },
       dta = function(file) {
@@ -115,29 +115,32 @@ server <- function(input, output, session) {
           .name_repair = "unique_quiet"
           )
       },
-      csv = function(file) {
-        readr::read_csv(
+      # csv = function(file) {
+      #   readr::read_csv(
+      #     file = file,
+      #     na = consider.na,
+      #     name_repair = "unique_quiet"
+      #     )
+      # },
+      csv = import_delim,
+      tsv = import_delim,
+      txt = import_delim,
+      xls = function(file, which, skip, na) {
+        openxlsx2::read_xlsx(
           file = file,
-          na = consider.na,
-          name_repair = "unique_quiet"
+          sheet = which,
+          skip_empty_rows = TRUE,
+          start_row = skip - 1,
+          na.strings = na
           )
       },
-      xls = function(file) {
+      xlsx = function(file, which, skip, na) {
         openxlsx2::read_xlsx(
           file = file,
           sheet = sheet,
           skip_empty_rows = TRUE,
           start_row = skip - 1,
-          na.strings = consider.na
-          )
-      },
-      xlsx = function(file) {
-        openxlsx2::read_xlsx(
-          file = file,
-          sheet = sheet,
-          skip_empty_rows = TRUE,
-          start_row = skip - 1,
-          na.strings = consider.na)
+          na.strings = na)
       },
       rds = function(file) {
         readr::read_rds(
@@ -304,7 +307,7 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_column,
-    datamods::modal_create_column(id = "modal_column")
+    datamods::modal_create_column(id = "modal_column",footer = "This is only for advanced users!")
   )
   data_modal_r <- datamods::create_column_server(
     id = "modal_column",

@@ -4,10 +4,15 @@
 \alias{plot_sankey_single}
 \title{Beautiful sankey plot}
 \usage{
-plot_sankey_single(data, x, y, color.group = "x", colors = NULL)
+plot_sankey_single(data, x, y, color.group = c("x", "y"), colors = NULL, ...)
 }
 \arguments{
-\item{colors}{}
+\item{color.group}{set group to colour by. "x" or "y".}
+
+\item{colors}{optinally specify colors. Give NA color, color for each level
+in primary group and color for each level in secondary group.}
+
+\item{...}{passed to sankey_ready()}
 }
 \value{
 ggplot2 object

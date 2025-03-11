@@ -345,10 +345,10 @@
     },
     "Matrix": {
       "Package": "Matrix",
-      "Version": "1.7-2",
+      "Version": "1.7-3",
       "Source": "Repository",
       "VersionNote": "do also bump src/version.h, inst/include/Matrix/version.h",
-      "Date": "2025-01-20",
+      "Date": "2025-03-05",
       "Priority": "recommended",
       "Title": "Sparse and Dense Matrix Classes and Methods",
       "Description": "A rich hierarchy of sparse and dense matrix classes, including general, symmetric, triangular, and diagonal matrices with numeric, logical, or pattern entries.  Efficient methods for operating on such matrices, often wrapping the 'BLAS', 'LAPACK', and 'SuiteSparse' libraries.",
@@ -515,7 +515,7 @@
     },
     "REDCapCAST": {
       "Package": "REDCapCAST",
-      "Version": "25.3.1",
+      "Version": "25.3.2",
       "Source": "Repository",
       "Title": "REDCap Metadata Casting and Castellated Data Handling",
       "Authors@R": "c( person(\"Andreas Gammelgaard\", \"Damsbo\", email = \"agdamsbo@clin.au.dk\",  role = c(\"aut\", \"cre\"),comment = c(ORCID = \"0000-0002-7559-1154\")),  person(\"Paul\", \"Egeler\", email = \"paulegeler@gmail.com\", role = c(\"aut\"),  comment = c(ORCID = \"0000-0001-6948-9498\")))",
@@ -2373,7 +2373,7 @@
     },
     "datawizard": {
       "Package": "datawizard",
-      "Version": "1.0.0",
+      "Version": "1.0.1",
       "Source": "Repository",
       "Type": "Package",
       "Title": "Easy Data Wrangling and Statistical Transformations",
@@ -2387,7 +2387,7 @@
         "R (>= 4.0)"
       ],
       "Imports": [
-        "insight (>= 1.0.0)",
+        "insight (>= 1.0.2)",
         "stats",
         "utils"
       ],
@@ -2973,7 +2973,7 @@
       "NeedsCompilation": "yes",
       "Author": "Gábor Csárdi [aut, cre], Posit Software, PBC [cph, fnd]",
       "Maintainer": "Gábor Csárdi <csardi.gabor@gmail.com>",
-      "Repository": "CRAN"
+      "Repository": "RSPM"
     },
     "flextable": {
       "Package": "flextable",
@@ -3852,11 +3852,11 @@
     },
     "ggstats": {
       "Package": "ggstats",
-      "Version": "0.8.0",
+      "Version": "0.9.0",
       "Source": "Repository",
       "Type": "Package",
       "Title": "Extension to 'ggplot2' for Plotting Stats",
-      "Authors@R": "c( person(\"Joseph\", \"Larmarange\", , \"joseph@larmarange.net\", role = c(\"aut\", \"cre\"), comment = c(ORCID = \"0000-0001-7097-700X\")) )",
+      "Authors@R": "c( person( \"Joseph\", \"Larmarange\", , \"joseph@larmarange.net\", role = c(\"aut\", \"cre\"), comment = c(ORCID = \"0000-0001-7097-700X\") ) )",
       "Description": "Provides new statistics, new geometries and new positions for  'ggplot2' and a suite of functions to facilitate the creation of  statistical plots.",
       "License": "GPL (>= 3)",
       "URL": "https://larmarange.github.io/ggstats/, https://github.com/larmarange/ggstats",
@@ -3882,7 +3882,7 @@
       "Suggests": [
         "betareg",
         "broom",
-        "broom.helpers (>= 1.17.0)",
+        "broom.helpers (>= 1.20.0)",
         "emmeans",
         "glue",
         "gtsummary",
@@ -5714,11 +5714,11 @@
     },
     "modelbased": {
       "Package": "modelbased",
-      "Version": "0.9.0",
+      "Version": "0.10.0",
       "Source": "Repository",
       "Type": "Package",
       "Title": "Estimation of Model-Based Predictions, Contrasts and Means",
-      "Authors@R": "c(person(given = \"Dominique\", family = \"Makowski\", role = c(\"aut\", \"cre\"), email = \"dom.makowski@gmail.com\", comment = c(ORCID = \"0000-0001-5375-9967\")), person(given = \"Daniel\", family = \"Lüdecke\", role = \"aut\", email = \"d.luedecke@uke.de\", comment = c(ORCID = \"0000-0002-8895-3206\")), person(given = \"Mattan S.\", family = \"Ben-Shachar\", role = \"aut\", email = \"matanshm@post.bgu.ac.il\", comment = c(ORCID = \"0000-0002-4287-4801\")), person(given = \"Indrajeet\", family = \"Patil\", role = \"aut\", email = \"patilindrajeet.science@gmail.com\", comment = c(ORCID = \"0000-0003-1995-6531\")))",
+      "Authors@R": "c(person(given = \"Dominique\", family = \"Makowski\", role = c(\"aut\", \"cre\"), email = \"dom.makowski@gmail.com\", comment = c(ORCID = \"0000-0001-5375-9967\")), person(given = \"Daniel\", family = \"Lüdecke\", role = \"aut\", email = \"d.luedecke@uke.de\", comment = c(ORCID = \"0000-0002-8895-3206\")), person(given = \"Mattan S.\", family = \"Ben-Shachar\", role = \"aut\", email = \"matanshm@post.bgu.ac.il\", comment = c(ORCID = \"0000-0002-4287-4801\")), person(given = \"Indrajeet\", family = \"Patil\", role = \"aut\", email = \"patilindrajeet.science@gmail.com\", comment = c(ORCID = \"0000-0003-1995-6531\")), person(given = \"Rémi\", family = \"Thériault\", role = \"aut\", email = \"remi.theriault@mail.mcgill.ca\", comment = c(ORCID = \"0000-0003-4315-6788\")))",
       "Maintainer": "Dominique Makowski <dom.makowski@gmail.com>",
       "Description": "Implements a general interface for model-based estimations for a wide variety of models, used in the computation of marginal means, contrast analysis and predictions. For a list of supported models, see 'insight::supported_models()'.",
       "License": "GPL-3",
@@ -5739,6 +5739,8 @@
       ],
       "Suggests": [
         "BH",
+        "betareg",
+        "bootES",
         "brms",
         "coda",
         "collapse",
@@ -5758,18 +5760,23 @@
         "lmerTest",
         "logspline",
         "MASS",
+        "Matrix",
         "marginaleffects (>= 0.25.0)",
+        "mice",
         "mgcv",
         "nanoparquet",
+        "ordinal",
         "performance (>= 0.13.0)",
         "patchwork",
         "pbkrtest",
         "poorman",
+        "pscl",
         "RcppEigen",
         "report",
         "rmarkdown",
         "rstanarm",
         "rtdists",
+        "sandwich",
         "see (>= 0.9.0)",
         "testthat (>= 3.2.1)",
         "vdiffr",
@@ -5785,7 +5792,7 @@
       "Config/Needs/website": "easystats/easystatstemplate",
       "LazyData": "true",
       "NeedsCompilation": "no",
-      "Author": "Dominique Makowski [aut, cre] (<https://orcid.org/0000-0001-5375-9967>), Daniel Lüdecke [aut] (<https://orcid.org/0000-0002-8895-3206>), Mattan S. Ben-Shachar [aut] (<https://orcid.org/0000-0002-4287-4801>), Indrajeet Patil [aut] (<https://orcid.org/0000-0003-1995-6531>)",
+      "Author": "Dominique Makowski [aut, cre] (<https://orcid.org/0000-0001-5375-9967>), Daniel Lüdecke [aut] (<https://orcid.org/0000-0002-8895-3206>), Mattan S. Ben-Shachar [aut] (<https://orcid.org/0000-0002-4287-4801>), Indrajeet Patil [aut] (<https://orcid.org/0000-0003-1995-6531>), Rémi Thériault [aut] (<https://orcid.org/0000-0003-4315-6788>)",
       "Repository": "CRAN"
     },
     "munsell": {
@@ -7478,7 +7485,7 @@
     },
     "readxl": {
       "Package": "readxl",
-      "Version": "1.4.4",
+      "Version": "1.4.5",
       "Source": "Repository",
       "Title": "Read Excel Files",
       "Authors@R": "c( person(\"Hadley\", \"Wickham\", , \"hadley@posit.co\", role = \"aut\", comment = c(ORCID = \"0000-0003-4757-117X\")), person(\"Jennifer\", \"Bryan\", , \"jenny@posit.co\", role = c(\"aut\", \"cre\"), comment = c(ORCID = \"0000-0002-6983-2759\")), person(\"Posit, PBC\", role = c(\"cph\", \"fnd\"), comment = \"Copyright holder of all R code and all C/C++ code without explicit copyright attribution\"), person(\"Marcin\", \"Kalicinski\", role = c(\"ctb\", \"cph\"), comment = \"Author of included RapidXML code\"), person(\"Komarov Valery\", role = c(\"ctb\", \"cph\"), comment = \"Author of included libxls code\"), person(\"Christophe Leitienne\", role = c(\"ctb\", \"cph\"), comment = \"Author of included libxls code\"), person(\"Bob Colbert\", role = c(\"ctb\", \"cph\"), comment = \"Author of included libxls code\"), person(\"David Hoerl\", role = c(\"ctb\", \"cph\"), comment = \"Author of included libxls code\"), person(\"Evan Miller\", role = c(\"ctb\", \"cph\"), comment = \"Author of included libxls code\") )",

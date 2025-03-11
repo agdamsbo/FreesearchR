@@ -7,6 +7,7 @@
 \alias{plot_hbars}
 \alias{plot_violin}
 \alias{plot_scatter}
+\alias{sankey_ready}
 \alias{plot_sankey}
 \title{Title}
 \usage{
@@ -20,9 +21,19 @@ plot_violin(data, x, y, z = NULL)
 
 plot_scatter(data, x, y, z = NULL)
 
+sankey_ready(data, x, y, z = NULL, numbers = "count")
+
 plot_sankey(data, x, y, z = NULL, color.group = "x", colors = NULL)
 }
 \arguments{
+\item{data}{data.frame}
+
+\item{x}{primary variable}
+
+\item{y}{secondary variable}
+
+\item{z}{tertiary variable}
+
 \item{...}{ignored for now}
 
 \item{type}{plot type (derived from possible_plots() and matches custom function)}
@@ -38,6 +49,8 @@ ggplot2 object
 
 ggplot2 object
 
+data.frame
+
 ggplot2 object
 }
 \description{
@@ -51,6 +64,8 @@ Beatiful violin plot
 
 Beautiful violin plot
 
+Readying data for sankey plot
+
 Beautiful sankey plot with option to split by a tertiary group
 }
 \examples{
@@ -63,6 +78,9 @@ mtcars |> plot_hbars(x = "carb", y = "cyl")
 mtcars |> plot_hbars(x = "carb", y = NULL)
 mtcars |> plot_violin(x = "mpg", y = "cyl", z = "gear")
 mtcars |> plot_scatter(x = "mpg", y = "wt")
+ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = sample(c(letters[1:4], NA), 100, TRUE, prob = c(rep(.23, 4), .08)))
+ds |> sankey_ready("first", "last")
+ds |> sankey_ready("first", "last", numbers = "percentage")
 ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)))
 ds |> plot_sankey("first", "last")
 ds |> plot_sankey("first", "last", color.group = "y")

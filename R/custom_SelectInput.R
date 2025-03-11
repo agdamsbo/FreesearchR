@@ -87,7 +87,7 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
 #'
 #' @param inputId passed to \code{\link[shiny]{selectizeInput}}
 #' @param label passed to \code{\link[shiny]{selectizeInput}}
-#' @param data A named \code{vector} object from which fields should be populated
+#' @param choices A named \code{vector} from which fields should be populated
 #' @param selected default selection
 #' @param ... passed to \code{\link[shiny]{selectizeInput}}
 #' @param placeholder passed to \code{\link[shiny]{selectizeInput}} options
@@ -126,12 +126,12 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
 #' }
 vectorSelectInput <- function(inputId,
                               label,
-                              data,
+                              choices,
                               selected = "",
                               ...,
                               placeholder = "",
                               onInitialize) {
-  datar <- if (shiny::is.reactive(data)) data else shiny::reactive(data)
+  datar <- if (shiny::is.reactive(choices)) data else shiny::reactive(choices)
 
   labels <- sprintf(
     IDEAFilter:::strip_leading_ws('
@@ -143,12 +143,12 @@ vectorSelectInput <- function(inputId,
     names(datar()) %||% ""
   )
 
-  choices <- stats::setNames(datar(), labels)
+  choices_new <- stats::setNames(datar(), labels)
 
   shiny::selectizeInput(
     inputId = inputId,
     label = label,
-    choices = choices,
+    choices = choices_new,
     selected = selected,
     ...,
     options = c(

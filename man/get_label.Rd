@@ -8,6 +8,8 @@ get_label(data, var = NULL)
 }
 \arguments{
 \item{data}{vector or data frame}
+
+\item{var}{variable name. Optional.}
 }
 \value{
 character string

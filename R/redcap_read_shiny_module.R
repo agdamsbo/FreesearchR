@@ -53,6 +53,8 @@ m_redcap_readUI <- function(id, include_title = TRUE) {
       shiny::tags$h4("Data import parameters"),
       shiny::helpText("Options here will show, when API and uri are typed"),
       shiny::uiOutput(outputId = ns("fields")),
+      shiny::uiOutput(outputId = ns("data_type")),
+      shiny::uiOutput(outputId = ns("fill")),
       shinyWidgets::switchInput(
         inputId = "do_filter",
         label = "Apply filter?",
@@ -132,7 +134,9 @@ m_redcap_readServer <- function(id) {
       info = NULL,
       arms = NULL,
       dd_list = NULL,
-      data = NULL
+      data = NULL,
+      rep_fields = NULL,
+      imported = NULL
     )
 
     shiny::observeEvent(list(input$api, input$uri), {
@@ -179,17 +183,17 @@ m_redcap_readServer <- function(id) {
             } else if (isTRUE(imported$success)) {
               data_rv$dd_status <- "success"
 
-              data_rv$project_name <- REDCapR::redcap_project_info_read(
+              data_rv$info <- REDCapR::redcap_project_info_read(
                 redcap_uri = data_rv$uri,
                 token = input$api
-              )$data$project_title
+              )$data
 
               datamods:::insert_alert(
                 selector = ns("connect"),
                 status = "success",
-                include_data_alert(
+                include_data_alert(see_data_text = "Click to see data dictionary",
                   dataIdName = "see_data",
-                  extra = tags$p(tags$b(phosphoricons::ph("check", weight = "bold"), "Connected to server!"), tags$p(paste0(data_rv$project_name, " loaded."))),
+                  extra = tags$p(tags$b(phosphoricons::ph("check", weight = "bold"), "Connected to server!"), tags$p(paste0(data_rv$info$project_title, " loaded."))),
                   btn_show_data = TRUE
                 )
               )
@@ -236,13 +240,55 @@ m_redcap_readServer <- function(id) {
         choices = purrr::pluck(data_rv$dd_list, "data") |>
           dplyr::select(field_name, form_name) |>
           (\(.x){
-            split(.x$field_name, .x$form_name)
+            split(.x$field_name, REDCapCAST::as_factor(.x$form_name))
           })(),
         updateOn = "change",
         multiple = TRUE,
         search = TRUE,
         showValueAsTags = TRUE
       )
+    })
+
+    output$data_type <- shiny::renderUI({
+      shiny::req(data_rv$info)
+      if (isTRUE(data_rv$info$has_repeating_instruments_or_events)) {
+        vectorSelectInput(
+          inputId = ns("data_type"),
+          label = "Select the data format to import",
+          choices = c(
+            "Wide data (One row for each subject)" = "wide",
+            "Long data for project with repeating instruments (default REDCap)" = "long"
+          ),
+          selected = "wide",
+          multiple = FALSE
+        )
+      }
+    })
+
+    output$fill <- shiny::renderUI({
+      shiny::req(data_rv$info)
+      shiny::req(input$data_type)
+
+      ## Get repeated field
+      data_rv$rep_fields <- data_rv$dd_list$data$field_name[
+        data_rv$dd_list$data$form_name %in% repeated_instruments(
+          uri = data_rv$uri,
+          token = input$api
+        )
+      ]
+
+      if (input$data_type == "long" && isTRUE(any(input$fields %in% data_rv$rep_fields))) {
+        vectorSelectInput(
+          inputId = ns("fill"),
+          label = "Fill missing values?",
+          choices = c(
+            "Yes, fill missing, non-repeated values" = "yes",
+            "No, leave the data as is" = "no"
+          ),
+          selected = "yes",
+          multiple = FALSE
+        )
+      }
     })
 
     shiny::observeEvent(input$fields, {
@@ -258,7 +304,7 @@ m_redcap_readServer <- function(id) {
         inputId = ns("arms"),
         selected = NULL,
         label = "Filter by events/arms",
-        data = stats::setNames(arms()[[3]],arms()[[1]]),
+        choices = stats::setNames(arms()[[3]], arms()[[1]]),
         multiple = TRUE
       )
     })
@@ -267,13 +313,15 @@ m_redcap_readServer <- function(id) {
       shiny::req(input$fields)
       record_id <- purrr::pluck(data_rv$dd_list, "data")[[1]][1]
 
+
       parameters <- list(
         uri = data_rv$uri,
         token = input$api,
         fields = unique(c(record_id, input$fields)),
         events = input$arms,
         raw_or_label = "both",
-        filter_logic = input$filter
+        filter_logic = input$filter,
+        split_forms = if (input$data_type == "long") "none" else "all"
       )
 
       shiny::withProgress(message = "Downloading REDCap data. Hold on for a moment..", {
@@ -287,13 +335,47 @@ m_redcap_readServer <- function(id) {
         data_rv$data_list <- NULL
       } else {
         data_rv$data_status <- "success"
-        data_rv$data <- imported |>
-          REDCapCAST::redcap_wider() |>
+
+        ## The data management below should be separated to allow for changing
+        ## "wide"/"long" without re-importing data
+        if (input$data_type != "long") {
+          # browser()
+          out <- imported |>
+            # redcap_wider()
+            REDCapCAST::redcap_wider()
+        } else {
+          if (input$fill == "yes") {
+            ## Repeated fields
+
+
+            ## Non-repeated fields in current dataset
+            inc_non_rep <- names(imported)[!names(imported) %in% data_rv$rep_fields]
+
+            out <- imported |>
+              drop_empty_event() |>
+              dplyr::group_by(!!dplyr::sym(names(imported)[1])) |>
+              tidyr::fill(inc_non_rep) |>
+              dplyr::ungroup()
+          } else {
+            out <- imported |>
+              drop_empty_event()
+          }
+        }
+
+        data_rv$data <- out |>
           dplyr::select(-dplyr::ends_with("_complete")) |>
-          dplyr::select(-dplyr::any_of(record_id)) |>
+          # dplyr::select(-dplyr::any_of(record_id)) |>
           REDCapCAST::suffix2label()
       }
     })
+
+    # shiny::observe({
+    #   shiny::req(data_rv$imported)
+    #
+    #   imported <- data_rv$imported
+    #
+    #
+    # })
 
     return(shiny::reactive(data_rv$data))
   }
@@ -317,7 +399,7 @@ include_data_alert <- function(dataIdName = "see_data",
       tags$br(),
       shiny::actionLink(
         inputId = session$ns(dataIdName),
-        label = tagList(phosphoricons::ph("table"), see_data_text)
+        label = tagList(phosphoricons::ph("book-open-text"), see_data_text)
       )
     )
   }
@@ -339,18 +421,20 @@ include_data_alert <- function(dataIdName = "see_data",
 # )
 
 
-#' Title
+#' Test if url is valid format for REDCap API
 #'
-#' @param url
+#' @param url url
 #'
-#' @returns
+#' @returns logical
 #' @export
 #'
 #' @examples
 #' url <- c(
 #'   "www.example.com",
-#'   "http://example.com",
-#'   "https://redcap.your.inst/api/"
+#'   "redcap.your.inst/api/",
+#'   "https://redcap.your.inst/api/",
+#'   "https://your.inst/redcap/api/",
+#'   "https://www.your.inst/redcap/api/"
 #' )
 #' is_valid_redcap_url(url)
 is_valid_redcap_url <- function(url) {
@@ -363,7 +447,7 @@ is_valid_redcap_url <- function(url) {
 #' @param token token
 #' @param pattern_env pattern
 #'
-#' @returns
+#' @returns logical
 #' @export
 #'
 #' @examples
@@ -399,6 +483,41 @@ is_valid_token <- function(token, pattern_env = NULL, nchar = 32) {
   out
 }
 
+#' Get names of repeated instruments
+#'
+#' @param uri REDCap database uri
+#' @param token database token
+#'
+#' @returns vector
+#' @export
+#'
+repeated_instruments <- function(uri, token) {
+  instruments <- REDCapR::redcap_event_instruments(redcap_uri = uri, token = token)
+  unique(instruments$data$form[duplicated(instruments$data$form)])
+}
+
+#' Drop empty events from REDCap export
+#'
+#' @param data data
+#' @param event "redcap_event_name", "redcap_repeat_instrument" or
+#' "redcap_repeat_instance"
+#'
+#' @returns data.frame
+#' @export
+#'
+drop_empty_event <- function(data, event = "redcap_event_name") {
+  generics <- c(names(data)[1], "redcap_event_name", "redcap_repeat_instrument", "redcap_repeat_instance")
+
+  filt <- split(data, data[[event]]) |>
+    lapply(\(.x){
+      dplyr::select(.x, -tidyselect::all_of(generics)) |>
+        REDCapCAST::all_na()
+    }) |>
+    unlist()
+
+  data[data[[event]] %in% names(filt)[!filt], ]
+}
+
 
 #' Test app for the redcap_read_shiny_module
 #'
@@ -411,7 +530,6 @@ is_valid_token <- function(token, pattern_env = NULL, nchar = 32) {
 redcap_demo_app <- function() {
   ui <- shiny::fluidPage(
     m_redcap_readUI("data"),
-    toastui::datagridOutput2(outputId = "redcap_prev"),
     DT::DTOutput("data_summary")
   )
   server <- function(input, output, session) {

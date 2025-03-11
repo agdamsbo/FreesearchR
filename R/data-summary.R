@@ -84,6 +84,11 @@ add_sparkline <- function(grid, column = "vals", color.main = "#2a8484", color.s
         s <- summary(data)
         ds <- data.frame(x = names(s), y = s)
         horizontal <- FALSE
+      } else if (identical(data_cl, "logical")) {
+        type <- "column"
+        s <- table(data)
+        ds <- data.frame(x = names(s), y = as.vector(s))
+        horizontal <- FALSE
       } else if (any(c("numeric", "integer") %in% data_cl)) {
         if (is_consecutive(data)) {
           type <- "line"

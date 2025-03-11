@@ -16,7 +16,18 @@ vertical_stacked_bars(
 )
 }
 \arguments{
-\item{t.size}{}
+\item{data}{data.frame}
+
+\item{score}{outcome variable}
+
+\item{group}{grouping variable}
+
+\item{strata}{stratifying variable}
+
+\item{t.size}{text size}
+}
+\value{
+ggplot2 object
 }
 \description{
 Vertical stacked bar plot wrapper

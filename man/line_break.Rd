@@ -4,11 +4,23 @@
 \alias{line_break}
 \title{Line breaking at given number of characters for nicely plotting labels}
 \usage{
-line_break(data, lineLength = 20)
+line_break(data, lineLength = 20, fixed = FALSE)
 }
 \arguments{
-\item{lineLength}{}
+\item{data}{string}
+
+\item{lineLength}{maximum line length}
+
+\item{fixed}{flag to force split at exactly the value given in lineLength.
+Default is FALSE, only splitting at spaces.}
+}
+\value{
+character string
 }
 \description{
 Line breaking at given number of characters for nicely plotting labels
+}
+\examples{
+"Lorem ipsum... you know the routine" |> line_break()
+paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(fixed=TRUE)
 }

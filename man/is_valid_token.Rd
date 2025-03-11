@@ -11,6 +11,9 @@ is_valid_token(token, pattern_env = NULL, nchar = 32)
 
 \item{pattern_env}{pattern}
 }
+\value{
+logical
+}
 \description{
 Validate REDCap token
 }

@@ -306,14 +306,14 @@ supported_plots <- function() {
       tertiary.type = c("dichotomous", "ordinal"),
       secondary.extra = "none"
     ),
-    plot_ridge = list(
-      descr = "Ridge plot",
-      note = "An alternative option to visualise data distribution",
-      primary.type = "continuous",
-      secondary.type = c("dichotomous", "ordinal"),
-      tertiary.type = c("dichotomous", "ordinal"),
-      secondary.extra = NULL
-    ),
+    # plot_ridge = list(
+    #   descr = "Ridge plot",
+    #   note = "An alternative option to visualise data distribution",
+    #   primary.type = "continuous",
+    #   secondary.type = c("dichotomous", "ordinal"),
+    #   tertiary.type = c("dichotomous", "ordinal"),
+    #   secondary.extra = NULL
+    # ),
     plot_sankey = list(
       descr = "Sankey plot",
       note = "A way of visualising change between groups",
@@ -434,6 +434,10 @@ get_plot_options <- function(data) {
 
 #' Wrapper to create plot based on provided type
 #'
+#' @param data data.frame
+#' @param x primary variable
+#' @param y secondary variable
+#' @param z tertiary variable
 #' @param type plot type (derived from possible_plots() and matches custom function)
 #' @param ... ignored for now
 #'
@@ -479,13 +483,13 @@ plot_hbars <- function(data, x, y, z = NULL) {
 
 #' Vertical stacked bar plot wrapper
 #'
-#' @param data
-#' @param score
-#' @param group
-#' @param strata
-#' @param t.size
+#' @param data data.frame
+#' @param score outcome variable
+#' @param group grouping variable
+#' @param strata stratifying variable
+#' @param t.size text size
 #'
-#' @return
+#' @return ggplot2 object
 #' @export
 #'
 vertical_stacked_bars <- function(data,
@@ -560,6 +564,7 @@ vertical_stacked_bars <- function(data,
 #' Print label, and if missing print variable name
 #'
 #' @param data vector or data frame
+#' @param var variable name. Optional.
 #'
 #' @returns character string
 #' @export
@@ -571,7 +576,7 @@ vertical_stacked_bars <- function(data,
 #' gtsummary::trial |> get_label(var = "trt")
 #' 1:10 |> get_label()
 get_label <- function(data, var = NULL) {
-  if (!is.null(var)) {
+  if (!is.null(var) & is.data.frame(data)) {
     data <- data[[var]]
   }
   out <- REDCapCAST::get_attr(data = data, attr = "label")
@@ -610,7 +615,7 @@ plot_violin <- function(data, x, y, z = NULL) {
     rempsyc::nice_violin(
       data = .ds,
       group = y,
-      response = x, xtitle = get_label(data, var = x), ytitle = get_label(data, var = y)
+      response = x, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
     )
   })
 
@@ -632,26 +637,23 @@ plot_scatter <- function(data, x, y, z = NULL) {
     rempsyc::nice_scatter(
       data = data,
       predictor = y,
-      response = x, xtitle = get_label(data, var = x), ytitle = get_label(data, var = y)
+      response = x, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
     )
   } else {
     rempsyc::nice_scatter(
       data = data,
       predictor = y,
       response = x,
-      group = z
+      group = z, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
     )
   }
 }
 
 #' Readying data for sankey plot
 #'
-#' @param data
-#' @param x
-#' @param y
-#' @param z
+#' @name data-plots
 #'
-#' @returns
+#' @returns data.frame
 #' @export
 #'
 #' @examples
@@ -686,37 +688,44 @@ sankey_ready <- function(data, x, y, z = NULL, numbers = "count") {
     )
   }
 
-  if (is.factor(data[[x]])){
-    index <- match(levels(data[[x]]),str_remove_last(levels(out$lx),"\n"))
-    out$lx <- factor(out$lx,levels=levels(out$lx)[index])
+  if (is.factor(data[[x]])) {
+    index <- match(levels(data[[x]]), str_remove_last(levels(out$lx), "\n"))
+    out$lx <- factor(out$lx, levels = levels(out$lx)[index])
   }
 
-  if (is.factor(data[[y]])){
-    index <- match(levels(data[[y]]),str_remove_last(levels(out$ly),"\n"))
-    out$ly <- factor(out$ly,levels=levels(out$ly)[index])
+  if (is.factor(data[[y]])) {
+    index <- match(levels(data[[y]]), str_remove_last(levels(out$ly), "\n"))
+    out$ly <- factor(out$ly, levels = levels(out$ly)[index])
   }
 
   out
 }
 
-str_remove_last <- function(data,pattern="\n"){
-  strsplit(data,split = pattern) |>
-    lapply(\(.x)paste(unlist(.x[[-length(.x)]]),collapse=pattern)) |>
+str_remove_last <- function(data, pattern = "\n") {
+  strsplit(data, split = pattern) |>
+    lapply(\(.x)paste(unlist(.x[[-length(.x)]]), collapse = pattern)) |>
     unlist()
 }
 
 #' Line breaking at given number of characters for nicely plotting labels
 #'
-#' @param data
-#' @param lineLength
+#' @param data string
+#' @param lineLength maximum line length
+#' @param fixed flag to force split at exactly the value given in lineLength.
+#' Default is FALSE, only splitting at spaces.
 #'
-#' @returns
+#' @returns character string
 #' @export
 #'
 #' @examples
-line_break <- function(data, lineLength = 20) {
-  # gsub(paste0('(.{1,',lineLength,'})(\\s)'), '\\1\n', data)
-  paste(strwrap(data, lineLength), collapse = "\n")
+#' "Lorem ipsum... you know the routine" |> line_break()
+#' paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(fixed=TRUE)
+line_break <- function(data, lineLength = 20, fixed = FALSE) {
+  if (isTRUE(force)) {
+    gsub(paste0("(.{1,", lineLength, "})(\\s|[[:alnum:]])"), "\\1\n", data)
+  } else {
+    paste(strwrap(data, lineLength), collapse = "\n")
+  }
   ## https://stackoverflow.com/a/29847221
 }
 
@@ -740,7 +749,7 @@ plot_sankey <- function(data, x, y, z = NULL, color.group = "x", colors = NULL) 
   }
 
   out <- lapply(ds, \(.ds){
-    plot_sankey_single(.ds,x = x, y = y,color.group = color.group, colors = colors)
+    plot_sankey_single(.ds, x = x, y = y, color.group = color.group, colors = colors)
   })
 
   patchwork::wrap_plots(out)
@@ -752,8 +761,9 @@ default_theme <- function() {
 
 #' Beautiful sankey plot
 #'
-#' @param color.group
-#' @param colors
+#' @param color.group set group to colour by. "x" or "y".
+#' @param colors optinally specify colors. Give NA color, color for each level
+#' in primary group and color for each level in secondary group.
 #' @param ... passed to sankey_ready()
 #'
 #' @returns ggplot2 object
@@ -763,9 +773,10 @@ default_theme <- function() {
 #' ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)))
 #' ds |> plot_sankey_single("first", "last")
 #' ds |> plot_sankey_single("first", "last", color.group = "y")
-plot_sankey_single <- function(data,x,y, color.group = "x", colors = NULL,...){
-  data <- data |> sankey_ready(x = x, y = y,...)
-# browser()
+plot_sankey_single <- function(data, x, y, color.group = c("x","y"), colors = NULL, ...) {
+  color.group <- match.arg(color.group)
+  data <- data |> sankey_ready(x = x, y = y, ...)
+  # browser()
   library(ggalluvial)
 
   na.color <- "#2986cc"
@@ -781,7 +792,7 @@ plot_sankey_single <- function(data,x,y, color.group = "x", colors = NULL,...){
       secondary.colors <- rep(na.color, length(levels(data[[y]])))
       label.colors <- Reduce(c, lapply(list(rev(main.colors), secondary.colors), contrast_text))
     }
-  colors <- c(na.color, main.colors, secondary.colors)
+    colors <- c(na.color, main.colors, secondary.colors)
   } else {
     label.colors <- contrast_text(colors)
   }
@@ -801,8 +812,8 @@ plot_sankey_single <- function(data,x,y, color.group = "x", colors = NULL,...){
         knot.pos = 0.4,
         curve_type = "sigmoid"
       ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(y)),
-                                   size = 2,
-                                   width = 1 / 3.4
+        size = 2,
+        width = 1 / 3.4
       )
   } else {
     p <- p +
@@ -813,8 +824,8 @@ plot_sankey_single <- function(data,x,y, color.group = "x", colors = NULL,...){
         knot.pos = 0.4,
         curve_type = "sigmoid"
       ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(x)),
-                                   size = 2,
-                                   width = 1 / 3.4
+        size = 2,
+        width = 1 / 3.4
       )
   }
 

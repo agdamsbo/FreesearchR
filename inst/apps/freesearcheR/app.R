@@ -10,7 +10,7 @@
 #### Current file: R//app_version.R 
 ########
 
-app_version <- function()'250307_1453'
+app_version <- function()'250311_1338'
 
 
 ########
@@ -333,7 +333,7 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
 #'
 #' @param inputId passed to \code{\link[shiny]{selectizeInput}}
 #' @param label passed to \code{\link[shiny]{selectizeInput}}
-#' @param data A named \code{vector} object from which fields should be populated
+#' @param choices A named \code{vector} from which fields should be populated
 #' @param selected default selection
 #' @param ... passed to \code{\link[shiny]{selectizeInput}}
 #' @param placeholder passed to \code{\link[shiny]{selectizeInput}} options
@@ -372,12 +372,12 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
 #' }
 vectorSelectInput <- function(inputId,
                               label,
-                              data,
+                              choices,
                               selected = "",
                               ...,
                               placeholder = "",
                               onInitialize) {
-  datar <- if (shiny::is.reactive(data)) data else shiny::reactive(data)
+  datar <- if (shiny::is.reactive(choices)) data else shiny::reactive(choices)
 
   labels <- sprintf(
     IDEAFilter:::strip_leading_ws('
@@ -389,12 +389,12 @@ vectorSelectInput <- function(inputId,
     names(datar()) %||% ""
   )
 
-  choices <- stats::setNames(datar(), labels)
+  choices_new <- stats::setNames(datar(), labels)
 
   shiny::selectizeInput(
     inputId = inputId,
     label = label,
-    choices = choices,
+    choices = choices_new,
     selected = selected,
     ...,
     options = c(
@@ -1379,14 +1379,14 @@ supported_plots <- function() {
       tertiary.type = c("dichotomous", "ordinal"),
       secondary.extra = "none"
     ),
-    plot_ridge = list(
-      descr = "Ridge plot",
-      note = "An alternative option to visualise data distribution",
-      primary.type = "continuous",
-      secondary.type = c("dichotomous", "ordinal"),
-      tertiary.type = c("dichotomous", "ordinal"),
-      secondary.extra = NULL
-    ),
+    # plot_ridge = list(
+    #   descr = "Ridge plot",
+    #   note = "An alternative option to visualise data distribution",
+    #   primary.type = "continuous",
+    #   secondary.type = c("dichotomous", "ordinal"),
+    #   tertiary.type = c("dichotomous", "ordinal"),
+    #   secondary.extra = NULL
+    # ),
     plot_sankey = list(
       descr = "Sankey plot",
       note = "A way of visualising change between groups",
@@ -1507,6 +1507,10 @@ get_plot_options <- function(data) {
 
 #' Wrapper to create plot based on provided type
 #'
+#' @param data data.frame
+#' @param x primary variable
+#' @param y secondary variable
+#' @param z tertiary variable
 #' @param type plot type (derived from possible_plots() and matches custom function)
 #' @param ... ignored for now
 #'
@@ -1552,13 +1556,13 @@ plot_hbars <- function(data, x, y, z = NULL) {
 
 #' Vertical stacked bar plot wrapper
 #'
-#' @param data
-#' @param score
-#' @param group
-#' @param strata
-#' @param t.size
+#' @param data data.frame
+#' @param score outcome variable
+#' @param group grouping variable
+#' @param strata stratifying variable
+#' @param t.size text size
 #'
-#' @return
+#' @return ggplot2 object
 #' @export
 #'
 vertical_stacked_bars <- function(data,
@@ -1633,6 +1637,7 @@ vertical_stacked_bars <- function(data,
 #' Print label, and if missing print variable name
 #'
 #' @param data vector or data frame
+#' @param var variable name. Optional.
 #'
 #' @returns character string
 #' @export
@@ -1644,7 +1649,7 @@ vertical_stacked_bars <- function(data,
 #' gtsummary::trial |> get_label(var = "trt")
 #' 1:10 |> get_label()
 get_label <- function(data, var = NULL) {
-  if (!is.null(var)) {
+  if (!is.null(var) & is.data.frame(data)) {
     data <- data[[var]]
   }
   out <- REDCapCAST::get_attr(data = data, attr = "label")
@@ -1683,7 +1688,7 @@ plot_violin <- function(data, x, y, z = NULL) {
     rempsyc::nice_violin(
       data = .ds,
       group = y,
-      response = x, xtitle = get_label(data, var = x), ytitle = get_label(data, var = y)
+      response = x, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
     )
   })
 
@@ -1705,26 +1710,23 @@ plot_scatter <- function(data, x, y, z = NULL) {
     rempsyc::nice_scatter(
       data = data,
       predictor = y,
-      response = x, xtitle = get_label(data, var = x), ytitle = get_label(data, var = y)
+      response = x, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
     )
   } else {
     rempsyc::nice_scatter(
       data = data,
       predictor = y,
       response = x,
-      group = z
+      group = z, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
     )
   }
 }
 
 #' Readying data for sankey plot
 #'
-#' @param data
-#' @param x
-#' @param y
-#' @param z
+#' @name data-plots
 #'
-#' @returns
+#' @returns data.frame
 #' @export
 #'
 #' @examples
@@ -1759,37 +1761,44 @@ sankey_ready <- function(data, x, y, z = NULL, numbers = "count") {
     )
   }
 
-  if (is.factor(data[[x]])){
-    index <- match(levels(data[[x]]),str_remove_last(levels(out$lx),"\n"))
-    out$lx <- factor(out$lx,levels=levels(out$lx)[index])
+  if (is.factor(data[[x]])) {
+    index <- match(levels(data[[x]]), str_remove_last(levels(out$lx), "\n"))
+    out$lx <- factor(out$lx, levels = levels(out$lx)[index])
   }
 
-  if (is.factor(data[[y]])){
-    index <- match(levels(data[[y]]),str_remove_last(levels(out$ly),"\n"))
-    out$ly <- factor(out$ly,levels=levels(out$ly)[index])
+  if (is.factor(data[[y]])) {
+    index <- match(levels(data[[y]]), str_remove_last(levels(out$ly), "\n"))
+    out$ly <- factor(out$ly, levels = levels(out$ly)[index])
   }
 
   out
 }
 
-str_remove_last <- function(data,pattern="\n"){
-  strsplit(data,split = pattern) |>
-    lapply(\(.x)paste(unlist(.x[[-length(.x)]]),collapse=pattern)) |>
+str_remove_last <- function(data, pattern = "\n") {
+  strsplit(data, split = pattern) |>
+    lapply(\(.x)paste(unlist(.x[[-length(.x)]]), collapse = pattern)) |>
     unlist()
 }
 
 #' Line breaking at given number of characters for nicely plotting labels
 #'
-#' @param data
-#' @param lineLength
+#' @param data string
+#' @param lineLength maximum line length
+#' @param fixed flag to force split at exactly the value given in lineLength.
+#' Default is FALSE, only splitting at spaces.
 #'
-#' @returns
+#' @returns character string
 #' @export
 #'
 #' @examples
-line_break <- function(data, lineLength = 20) {
-  # gsub(paste0('(.{1,',lineLength,'})(\\s)'), '\\1\n', data)
-  paste(strwrap(data, lineLength), collapse = "\n")
+#' "Lorem ipsum... you know the routine" |> line_break()
+#' paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(fixed=TRUE)
+line_break <- function(data, lineLength = 20, fixed = FALSE) {
+  if (isTRUE(force)) {
+    gsub(paste0("(.{1,", lineLength, "})(\\s|[[:alnum:]])"), "\\1\n", data)
+  } else {
+    paste(strwrap(data, lineLength), collapse = "\n")
+  }
   ## https://stackoverflow.com/a/29847221
 }
 
@@ -1813,7 +1822,7 @@ plot_sankey <- function(data, x, y, z = NULL, color.group = "x", colors = NULL) 
   }
 
   out <- lapply(ds, \(.ds){
-    plot_sankey_single(.ds,x = x, y = y,color.group = color.group, colors = colors)
+    plot_sankey_single(.ds, x = x, y = y, color.group = color.group, colors = colors)
   })
 
   patchwork::wrap_plots(out)
@@ -1825,8 +1834,9 @@ default_theme <- function() {
 
 #' Beautiful sankey plot
 #'
-#' @param color.group
-#' @param colors
+#' @param color.group set group to colour by. "x" or "y".
+#' @param colors optinally specify colors. Give NA color, color for each level
+#' in primary group and color for each level in secondary group.
 #' @param ... passed to sankey_ready()
 #'
 #' @returns ggplot2 object
@@ -1836,9 +1846,10 @@ default_theme <- function() {
 #' ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)))
 #' ds |> plot_sankey_single("first", "last")
 #' ds |> plot_sankey_single("first", "last", color.group = "y")
-plot_sankey_single <- function(data,x,y, color.group = "x", colors = NULL,...){
-  data <- data |> sankey_ready(x = x, y = y,...)
-# browser()
+plot_sankey_single <- function(data, x, y, color.group = c("x","y"), colors = NULL, ...) {
+  color.group <- match.arg(color.group)
+  data <- data |> sankey_ready(x = x, y = y, ...)
+  # browser()
   library(ggalluvial)
 
   na.color <- "#2986cc"
@@ -1854,7 +1865,7 @@ plot_sankey_single <- function(data,x,y, color.group = "x", colors = NULL,...){
       secondary.colors <- rep(na.color, length(levels(data[[y]])))
       label.colors <- Reduce(c, lapply(list(rev(main.colors), secondary.colors), contrast_text))
     }
-  colors <- c(na.color, main.colors, secondary.colors)
+    colors <- c(na.color, main.colors, secondary.colors)
   } else {
     label.colors <- contrast_text(colors)
   }
@@ -1874,8 +1885,8 @@ plot_sankey_single <- function(data,x,y, color.group = "x", colors = NULL,...){
         knot.pos = 0.4,
         curve_type = "sigmoid"
       ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(y)),
-                                   size = 2,
-                                   width = 1 / 3.4
+        size = 2,
+        width = 1 / 3.4
       )
   } else {
     p <- p +
@@ -1886,8 +1897,8 @@ plot_sankey_single <- function(data,x,y, color.group = "x", colors = NULL,...){
         knot.pos = 0.4,
         curve_type = "sigmoid"
       ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(x)),
-                                   size = 2,
-                                   width = 1 / 3.4
+        size = 2,
+        width = 1 / 3.4
       )
   }
 
@@ -2011,6 +2022,11 @@ add_sparkline <- function(grid, column = "vals", color.main = "#2a8484", color.s
         type <- "column"
         s <- summary(data)
         ds <- data.frame(x = names(s), y = s)
+        horizontal <- FALSE
+      } else if (identical(data_cl, "logical")) {
+        type <- "column"
+        s <- table(data)
+        ds <- data.frame(x = names(s), y = as.vector(s))
         horizontal <- FALSE
       } else if (any(c("numeric", "integer") %in% data_cl)) {
         if (is_consecutive(data)) {
@@ -2666,6 +2682,502 @@ append_list <- function(data,list,index){
 
 
 ########
+#### Current file: R//import-file-ext.R 
+########
+
+
+#' @title Import data from a file
+#'
+#' @description Let user upload a file and import data
+#'
+#' @inheritParams import-globalenv
+#' @param preview_data Show or not a preview of the data under the file input.
+#' @param file_extensions File extensions accepted by [shiny::fileInput()], can also be MIME type.
+#' @param layout_params How to display import parameters : in a dropdown button or inline below file input.
+#'
+#' @template module-import
+#'
+#' @export
+#'
+#' @name import-file
+#'
+#' @importFrom shiny NS fileInput actionButton icon
+#' @importFrom htmltools tags tagAppendAttributes css tagAppendChild
+#' @importFrom shinyWidgets pickerInput numericInputIcon textInputIcon dropMenu
+#' @importFrom phosphoricons ph
+#' @importFrom toastui datagridOutput2
+#'
+#' @example examples/from-file.R
+import_file_ui <- function(id,
+                           title = TRUE,
+                           preview_data = TRUE,
+                           file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat", ".sav"),
+                           layout_params = c("dropdown", "inline")) {
+
+  ns <- NS(id)
+
+  if (!is.null(layout_params)) {
+    layout_params <- match.arg(layout_params)
+  }
+
+  if (isTRUE(title)) {
+    title <- tags$h4(
+      datamods:::i18n("Import a file"),
+      class = "datamods-title"
+    )
+  }
+
+
+  params_ui <- shiny::fluidRow(
+    shiny::column(
+      width = 6,
+      shinyWidgets::numericInputIcon(
+        inputId = ns("skip_rows"),
+        label = datamods:::i18n("Rows to skip before reading data:"),
+        value = 0,
+        min = 0,
+        icon = list("n ="),
+        size = "sm",
+        width = "100%"
+      ),
+      shiny::tagAppendChild(
+        shinyWidgets::textInputIcon(
+          inputId = ns("na_label"),
+          label = datamods:::i18n("Missing values character(s):"),
+          value = "NA,,'',na",
+          icon = list("NA"),
+          size = "sm",
+          width = "100%"
+        ),
+        shiny::helpText(ph("info"), datamods:::i18n("if several use a comma (',') to separate them"))
+      )
+    ),
+    shiny::column(
+      width = 6,
+      shinyWidgets::textInputIcon(
+        inputId = ns("dec"),
+        label = datamods:::i18n("Decimal separator:"),
+        value = ".",
+        icon = list("0.00"),
+        size = "sm",
+        width = "100%"
+      ),
+      selectInputIcon(
+        inputId = ns("encoding"),
+        label = datamods:::i18n("Encoding:"),
+        choices = c("UTF-8"="UTF-8",
+                    "Latin1"="latin1"),
+        icon = phosphoricons::ph("text-aa"),
+        size = "sm",
+        width = "100%"
+      )
+    )
+  )
+
+  file_ui <- shiny::tagAppendAttributes(
+    shiny::fileInput(
+      inputId = ns("file"),
+      label = datamods:::i18n("Upload a file:"),
+      buttonLabel = datamods:::i18n("Browse..."),
+      placeholder = datamods:::i18n("No file selected"),
+      accept = file_extensions,
+      width = "100%"
+    ),
+    class = "mb-0"
+  )
+  if (identical(layout_params, "dropdown")) {
+    file_ui <- shiny::tags$div(
+      style = htmltools::css(
+        display = "grid",
+        gridTemplateColumns = "1fr 50px",
+        gridColumnGap = "10px"
+      ),
+      file_ui,
+      shiny::tags$div(
+        class = "shiny-input-container",
+        shiny::tags$label(
+          class = "control-label",
+          `for` = ns("dropdown_params"),
+          "...",
+          style = htmltools::css(visibility = "hidden")
+        ),
+        shinyWidgets::dropMenu(
+          shiny::actionButton(
+            inputId = ns("dropdown_params"),
+            label = ph("gear", title = "Parameters"),
+            width = "50px",
+            class = "px-1"
+          ),
+          params_ui
+        )
+      )
+    )
+  }
+  tags$div(
+    class = "datamods-import",
+    datamods:::html_dependency_datamods(),
+    title,
+    file_ui,
+    if (identical(layout_params, "inline")) params_ui,
+    tags$div(
+      class = "hidden",
+      id = ns("sheet-container"),
+      shinyWidgets::pickerInput(
+        inputId = ns("sheet"),
+        label = datamods:::i18n("Select sheet to import:"),
+        choices = NULL,
+        width = "100%"
+      )
+    ),
+    tags$div(
+      id = ns("import-placeholder"),
+      shinyWidgets::alert(
+        id = ns("import-result"),
+        status = "info",
+        shiny::tags$b(datamods:::i18n("No file selected:")),
+        sprintf(datamods:::i18n("You can import %s files"), paste(file_extensions, collapse = ", ")),
+        dismissible = TRUE
+      )
+    ),
+    if (isTRUE(preview_data)) {
+      toastui::datagridOutput2(outputId = ns("table"))
+    },
+    uiOutput(
+      outputId = ns("container_confirm_btn"),
+      style = "margin-top: 20px;"
+    ),
+    tags$div(
+      style = htmltools::css(display = "none"),
+      shiny::checkboxInput(
+        inputId = ns("preview_data"),
+        label = NULL,
+        value = isTRUE(preview_data)
+      )
+    )
+  )
+}
+
+
+#' @inheritParams import_globalenv_server
+#' @param read_fns Named list with custom function(s) to read data:
+#'  * the name must be the extension of the files to which the function will be applied
+#'  * the value must be a function that can have 5 arguments (you can ignore some of them, but you have to use the same names),
+#'    passed by user through the interface:
+#'    + `file`: path to the file
+#'    + `sheet`: for Excel files, sheet to read
+#'    + `skip`: number of row to skip
+#'    + `dec`: decimal separator
+#'    + `encoding`: file encoding
+#'    + `na.strings`: character(s) to interpret as missing values.
+#'
+#' @export
+#'
+#' @importFrom shiny moduleServer
+#' @importFrom htmltools tags tagList
+#' @importFrom shiny reactiveValues reactive observeEvent removeUI req
+#' @importFrom shinyWidgets updatePickerInput
+#' @importFrom readxl excel_sheets
+#' @importFrom rio import
+#' @importFrom rlang exec fn_fmls_names is_named is_function
+#' @importFrom tools file_ext
+#' @importFrom utils head
+#' @importFrom toastui renderDatagrid2 datagrid
+#' @importFrom datamods split_char
+#'
+#' @rdname import-file
+import_file_server <- function(id,
+                               btn_show_data = TRUE,
+                               show_data_in = c("popup", "modal"),
+                               trigger_return = c("button", "change"),
+                               return_class = c("data.frame", "data.table", "tbl_df", "raw"),
+                               reset = reactive(NULL),
+                               read_fns = list()) {
+
+  if (length(read_fns) > 0) {
+    if (!is_named(read_fns))
+      stop("import_file_server: `read_fns` must be a named list.", call. = FALSE)
+    if (!all(vapply(read_fns, is_function, logical(1))))
+      stop("import_file_server: `read_fns` must be list of function(s).", call. = FALSE)
+  }
+
+  trigger_return <- match.arg(trigger_return)
+  return_class <- match.arg(return_class)
+
+  module <- function(input, output, session) {
+
+    ns <- session$ns
+    imported_rv <- reactiveValues(data = NULL, name = NULL)
+    temporary_rv <- reactiveValues(data = NULL, name = NULL, status = NULL)
+
+    observeEvent(reset(), {
+      temporary_rv$data <- NULL
+      temporary_rv$name <- NULL
+      temporary_rv$status <- NULL
+    })
+
+    output$container_confirm_btn <- renderUI({
+      if (identical(trigger_return, "button")) {
+        datamods:::button_import()
+      }
+    })
+
+    observeEvent(input$file, {
+      if (isTRUE(is_excel(input$file$datapath))) {
+        shinyWidgets::updatePickerInput(
+          session = session,
+          inputId = "sheet",
+          choices = readxl::excel_sheets(input$file$datapath)
+        )
+        datamods:::showUI(paste0("#", ns("sheet-container")))
+      } else if (isTRUE(is_ods(input$file$datapath))) {
+        shinyWidgets::updatePickerInput(
+          session = session,
+          inputId = "sheet",
+          choices = readODS::ods_sheets(input$file$datapath)
+        )
+        datamods:::showUI(paste0("#", ns("sheet-container")))
+      } else {
+        datamods:::hideUI(paste0("#", ns("sheet-container")))
+      }
+    })
+
+    observeEvent(list(
+      input$file,
+      input$sheet,
+      input$skip_rows,
+      input$dec,
+      input$encoding,
+      input$na_label
+    ), {
+      req(input$file)
+      # req(input$skip_rows)
+      extension <- tools::file_ext(input$file$datapath)
+      if (isTRUE(extension %in% names(read_fns))) {
+        parameters <- list(
+          file = input$file$datapath,
+          sheet = input$sheet,
+          skip = input$skip_rows,
+          dec = input$dec,
+          encoding = input$encoding,
+          na.strings = datamods:::split_char(input$na_label)
+        )
+        parameters <- parameters[which(names(parameters) %in% rlang::fn_fmls_names(read_fns[[extension]]))]
+        imported <- try(rlang::exec(read_fns[[extension]], !!!parameters), silent = TRUE)
+        code <- call2(read_fns[[extension]], !!!modifyList(parameters, list(file = input$file$name)))
+      } else {
+        if (is_excel(input$file$datapath) || is_ods(input$file$datapath)) {
+          req(input$sheet)
+          parameters <- list(
+            file = input$file$datapath,
+            which = input$sheet,
+            skip = input$skip_rows,
+            na = datamods:::split_char(input$na_label)
+          )
+        } else if (is_sas(input$file$datapath)) {
+          parameters <- list(
+            file = input$file$datapath,
+            skip = input$skip_rows,
+            encoding = input$encoding
+          )
+        } else {
+          parameters <- list(
+            file = input$file$datapath,
+            skip = input$skip_rows,
+            dec = input$dec,
+            encoding = input$encoding,
+            na.strings = datamods:::split_char(input$na_label)
+          )
+        }
+        imported <- try(rlang::exec(rio::import, !!!parameters), silent = TRUE)
+        code <- rlang::call2("import", !!!utils::modifyList(parameters, list(file = input$file$name)), .ns = "rio")
+      }
+
+      if (inherits(imported, "try-error")) {
+        imported <- try(rlang::exec(rio::import, !!!parameters[1]), silent = TRUE)
+        code <- rlang::call2("import", !!!list(file = input$file$name), .ns = "rio")
+      }
+
+      if (inherits(imported, "try-error") || NROW(imported) < 1) {
+
+        datamods:::toggle_widget(inputId = "confirm", enable = FALSE)
+        datamods:::insert_error(mssg = datamods:::i18n(attr(imported, "condition")$message))
+        temporary_rv$status <- "error"
+        temporary_rv$data <- NULL
+        temporary_rv$name <- NULL
+        temporary_rv$code <- NULL
+
+      } else {
+
+        datamods:::toggle_widget(inputId = "confirm", enable = TRUE)
+
+        datamods:::insert_alert(
+          selector = ns("import"),
+          status = "success",
+          datamods:::make_success_alert(
+            imported,
+            trigger_return = trigger_return,
+            btn_show_data = btn_show_data,
+            extra = if (isTRUE(input$preview_data)) datamods:::i18n("First five rows are shown below:")
+          )
+        )
+        temporary_rv$status <- "success"
+        temporary_rv$data <- imported
+        temporary_rv$name <- input$file$name
+        temporary_rv$code <- code
+      }
+    }, ignoreInit = TRUE)
+
+    observeEvent(input$see_data, {
+      datamods:::show_data(temporary_rv$data, title = datamods:::i18n("Imported data"), type = show_data_in)
+    })
+
+    output$table <- toastui::renderDatagrid2({
+      req(temporary_rv$data)
+      toastui::datagrid(
+        data = head(temporary_rv$data, 5),
+        theme = "striped",
+        colwidths = "guess",
+        minBodyHeight = 250
+      )
+    })
+
+    observeEvent(input$confirm, {
+      imported_rv$data <- temporary_rv$data
+      imported_rv$name <- temporary_rv$name
+      imported_rv$code <- temporary_rv$code
+    })
+
+    if (identical(trigger_return, "button")) {
+      return(list(
+        status = reactive(temporary_rv$status),
+        name = reactive(imported_rv$name),
+        code = reactive(imported_rv$code),
+        data = reactive(datamods:::as_out(imported_rv$data, return_class))
+      ))
+    } else {
+      return(list(
+        status = reactive(temporary_rv$status),
+        name = reactive(temporary_rv$name),
+        code = reactive(temporary_rv$code),
+        data = reactive(datamods:::as_out(temporary_rv$data, return_class))
+      ))
+    }
+  }
+
+  moduleServer(
+    id = id,
+    module = module
+  )
+}
+
+# utils -------------------------------------------------------------------
+
+is_excel <- function(path) {
+  isTRUE(tools::file_ext(path) %in% c("xls", "xlsx"))
+}
+
+is_ods <- function(path) {
+  isTRUE(tools::file_ext(path) %in% c("ods"))
+}
+
+is_sas <- function(path) {
+  isTRUE(tools::file_ext(path) %in% c("sas7bdat"))
+}
+
+#' Wrapper of data.table::fread to import delim files with few presets
+#'
+#' @param file file
+#' @param encoding encoding
+#' @param na.strings na.strings
+#'
+#' @returns data.frame
+#' @export
+#'
+import_delim <- function(file, skip, encoding, na.strings) {
+  data.table::fread(
+    file = file,
+    na.strings = na.strings,
+    skip = skip,
+    check.names	= TRUE,
+    encoding = encoding,
+    data.table = FALSE,
+    logical01 = TRUE,
+    logicalYN = TRUE,
+    keepLeadingZeros = TRUE
+  )
+}
+
+
+
+
+
+
+# library(shiny)
+# library(datamods)
+
+ui <- fluidPage(
+  # theme = bslib::bs_theme(version = 5L),
+  # theme = bslib::bs_theme(version = 5L, preset = "bootstrap"),
+  tags$h3("Import data from a file"),
+  fluidRow(
+    column(
+      width = 4,
+      import_file_ui(
+        id = "myid",
+        file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".json"),
+        layout_params = "dropdown" #"inline" # or "dropdown"
+      )
+    ),
+    column(
+      width = 8,
+      tags$b("Import status:"),
+      verbatimTextOutput(outputId = "status"),
+      tags$b("Name:"),
+      verbatimTextOutput(outputId = "name"),
+      tags$b("Code:"),
+      verbatimTextOutput(outputId = "code"),
+      tags$b("Data:"),
+      verbatimTextOutput(outputId = "data")
+    )
+  )
+)
+
+server <- function(input, output, session) {
+
+  imported <- import_file_server(
+    id = "myid",
+    # Custom functions to read data
+    read_fns = list(
+      xls = function(file, sheet, skip, encoding) {
+        readxl::read_xls(path = file, sheet = sheet, skip = skip)
+      },
+      json = function(file) {
+        jsonlite::read_json(file, simplifyVector = TRUE)
+      }
+    ),
+    show_data_in = "modal"
+  )
+
+  output$status <- renderPrint({
+    imported$status()
+  })
+  output$name <- renderPrint({
+    imported$name()
+  })
+  output$code <- renderPrint({
+    imported$code()
+  })
+  output$data <- renderPrint({
+    imported$data()
+  })
+
+}
+
+if (interactive())
+  shinyApp(ui, server)
+
+
+########
 #### Current file: R//redcap_read_shiny_module.R 
 ########
 
@@ -2724,6 +3236,8 @@ m_redcap_readUI <- function(id, include_title = TRUE) {
       shiny::tags$h4("Data import parameters"),
       shiny::helpText("Options here will show, when API and uri are typed"),
       shiny::uiOutput(outputId = ns("fields")),
+      shiny::uiOutput(outputId = ns("data_type")),
+      shiny::uiOutput(outputId = ns("fill")),
       shinyWidgets::switchInput(
         inputId = "do_filter",
         label = "Apply filter?",
@@ -2803,7 +3317,9 @@ m_redcap_readServer <- function(id) {
       info = NULL,
       arms = NULL,
       dd_list = NULL,
-      data = NULL
+      data = NULL,
+      rep_fields = NULL,
+      imported = NULL
     )
 
     shiny::observeEvent(list(input$api, input$uri), {
@@ -2850,17 +3366,17 @@ m_redcap_readServer <- function(id) {
             } else if (isTRUE(imported$success)) {
               data_rv$dd_status <- "success"
 
-              data_rv$project_name <- REDCapR::redcap_project_info_read(
+              data_rv$info <- REDCapR::redcap_project_info_read(
                 redcap_uri = data_rv$uri,
                 token = input$api
-              )$data$project_title
+              )$data
 
               datamods:::insert_alert(
                 selector = ns("connect"),
                 status = "success",
-                include_data_alert(
+                include_data_alert(see_data_text = "Click to see data dictionary",
                   dataIdName = "see_data",
-                  extra = tags$p(tags$b(phosphoricons::ph("check", weight = "bold"), "Connected to server!"), tags$p(paste0(data_rv$project_name, " loaded."))),
+                  extra = tags$p(tags$b(phosphoricons::ph("check", weight = "bold"), "Connected to server!"), tags$p(paste0(data_rv$info$project_title, " loaded."))),
                   btn_show_data = TRUE
                 )
               )
@@ -2907,13 +3423,55 @@ m_redcap_readServer <- function(id) {
         choices = purrr::pluck(data_rv$dd_list, "data") |>
           dplyr::select(field_name, form_name) |>
           (\(.x){
-            split(.x$field_name, .x$form_name)
+            split(.x$field_name, REDCapCAST::as_factor(.x$form_name))
           })(),
         updateOn = "change",
         multiple = TRUE,
         search = TRUE,
         showValueAsTags = TRUE
       )
+    })
+
+    output$data_type <- shiny::renderUI({
+      shiny::req(data_rv$info)
+      if (isTRUE(data_rv$info$has_repeating_instruments_or_events)) {
+        vectorSelectInput(
+          inputId = ns("data_type"),
+          label = "Select the data format to import",
+          choices = c(
+            "Wide data (One row for each subject)" = "wide",
+            "Long data for project with repeating instruments (default REDCap)" = "long"
+          ),
+          selected = "wide",
+          multiple = FALSE
+        )
+      }
+    })
+
+    output$fill <- shiny::renderUI({
+      shiny::req(data_rv$info)
+      shiny::req(input$data_type)
+
+      ## Get repeated field
+      data_rv$rep_fields <- data_rv$dd_list$data$field_name[
+        data_rv$dd_list$data$form_name %in% repeated_instruments(
+          uri = data_rv$uri,
+          token = input$api
+        )
+      ]
+
+      if (input$data_type == "long" && isTRUE(any(input$fields %in% data_rv$rep_fields))) {
+        vectorSelectInput(
+          inputId = ns("fill"),
+          label = "Fill missing values?",
+          choices = c(
+            "Yes, fill missing, non-repeated values" = "yes",
+            "No, leave the data as is" = "no"
+          ),
+          selected = "yes",
+          multiple = FALSE
+        )
+      }
     })
 
     shiny::observeEvent(input$fields, {
@@ -2929,7 +3487,7 @@ m_redcap_readServer <- function(id) {
         inputId = ns("arms"),
         selected = NULL,
         label = "Filter by events/arms",
-        data = stats::setNames(arms()[[3]],arms()[[1]]),
+        choices = stats::setNames(arms()[[3]], arms()[[1]]),
         multiple = TRUE
       )
     })
@@ -2938,13 +3496,15 @@ m_redcap_readServer <- function(id) {
       shiny::req(input$fields)
       record_id <- purrr::pluck(data_rv$dd_list, "data")[[1]][1]
 
+
       parameters <- list(
         uri = data_rv$uri,
         token = input$api,
         fields = unique(c(record_id, input$fields)),
         events = input$arms,
         raw_or_label = "both",
-        filter_logic = input$filter
+        filter_logic = input$filter,
+        split_forms = if (input$data_type == "long") "none" else "all"
       )
 
       shiny::withProgress(message = "Downloading REDCap data. Hold on for a moment..", {
@@ -2958,13 +3518,47 @@ m_redcap_readServer <- function(id) {
         data_rv$data_list <- NULL
       } else {
         data_rv$data_status <- "success"
-        data_rv$data <- imported |>
-          REDCapCAST::redcap_wider() |>
+
+        ## The data management below should be separated to allow for changing
+        ## "wide"/"long" without re-importing data
+        if (input$data_type != "long") {
+          # browser()
+          out <- imported |>
+            # redcap_wider()
+            REDCapCAST::redcap_wider()
+        } else {
+          if (input$fill == "yes") {
+            ## Repeated fields
+
+
+            ## Non-repeated fields in current dataset
+            inc_non_rep <- names(imported)[!names(imported) %in% data_rv$rep_fields]
+
+            out <- imported |>
+              drop_empty_event() |>
+              dplyr::group_by(!!dplyr::sym(names(imported)[1])) |>
+              tidyr::fill(inc_non_rep) |>
+              dplyr::ungroup()
+          } else {
+            out <- imported |>
+              drop_empty_event()
+          }
+        }
+
+        data_rv$data <- out |>
           dplyr::select(-dplyr::ends_with("_complete")) |>
-          dplyr::select(-dplyr::any_of(record_id)) |>
+          # dplyr::select(-dplyr::any_of(record_id)) |>
           REDCapCAST::suffix2label()
       }
     })
+
+    # shiny::observe({
+    #   shiny::req(data_rv$imported)
+    #
+    #   imported <- data_rv$imported
+    #
+    #
+    # })
 
     return(shiny::reactive(data_rv$data))
   }
@@ -2988,7 +3582,7 @@ include_data_alert <- function(dataIdName = "see_data",
       tags$br(),
       shiny::actionLink(
         inputId = session$ns(dataIdName),
-        label = tagList(phosphoricons::ph("table"), see_data_text)
+        label = tagList(phosphoricons::ph("book-open-text"), see_data_text)
       )
     )
   }
@@ -3010,18 +3604,20 @@ include_data_alert <- function(dataIdName = "see_data",
 # )
 
 
-#' Title
+#' Test if url is valid format for REDCap API
 #'
-#' @param url
+#' @param url url
 #'
-#' @returns
+#' @returns logical
 #' @export
 #'
 #' @examples
 #' url <- c(
 #'   "www.example.com",
-#'   "http://example.com",
-#'   "https://redcap.your.inst/api/"
+#'   "redcap.your.inst/api/",
+#'   "https://redcap.your.inst/api/",
+#'   "https://your.inst/redcap/api/",
+#'   "https://www.your.inst/redcap/api/"
 #' )
 #' is_valid_redcap_url(url)
 is_valid_redcap_url <- function(url) {
@@ -3034,7 +3630,7 @@ is_valid_redcap_url <- function(url) {
 #' @param token token
 #' @param pattern_env pattern
 #'
-#' @returns
+#' @returns logical
 #' @export
 #'
 #' @examples
@@ -3070,6 +3666,41 @@ is_valid_token <- function(token, pattern_env = NULL, nchar = 32) {
   out
 }
 
+#' Get names of repeated instruments
+#'
+#' @param uri REDCap database uri
+#' @param token database token
+#'
+#' @returns vector
+#' @export
+#'
+repeated_instruments <- function(uri, token) {
+  instruments <- REDCapR::redcap_event_instruments(redcap_uri = uri, token = token)
+  unique(instruments$data$form[duplicated(instruments$data$form)])
+}
+
+#' Drop empty events from REDCap export
+#'
+#' @param data data
+#' @param event "redcap_event_name", "redcap_repeat_instrument" or
+#' "redcap_repeat_instance"
+#'
+#' @returns data.frame
+#' @export
+#'
+drop_empty_event <- function(data, event = "redcap_event_name") {
+  generics <- c(names(data)[1], "redcap_event_name", "redcap_repeat_instrument", "redcap_repeat_instance")
+
+  filt <- split(data, data[[event]]) |>
+    lapply(\(.x){
+      dplyr::select(.x, -tidyselect::all_of(generics)) |>
+        REDCapCAST::all_na()
+    }) |>
+    unlist()
+
+  data[data[[event]] %in% names(filt)[!filt], ]
+}
+
 
 #' Test app for the redcap_read_shiny_module
 #'
@@ -3082,7 +3713,6 @@ is_valid_token <- function(token, pattern_env = NULL, nchar = 32) {
 redcap_demo_app <- function() {
   ui <- shiny::fluidPage(
     m_redcap_readUI("data"),
-    toastui::datagridOutput2(outputId = "redcap_prev"),
     DT::DTOutput("data_summary")
   )
   server <- function(input, output, session) {
@@ -4098,6 +4728,56 @@ modify_qmd <- function(file, format) {
     writeLines(paste0(tools::file_path_sans_ext(file), "_format.", tools::file_ext(file)))
 }
 
+
+
+########
+#### Current file: R//selectInputIcon.R 
+########
+
+#' @title Create a select input control with icon(s)
+#'
+#' @description Extend form controls by adding text or icons before,
+#'  after, or on both sides of a classic `selectInput`.
+#'
+#' @inheritParams shiny::selectInput
+#' @inheritParams textInputIcon
+#'
+#' @return A numeric input control that can be added to a UI definition.
+#' @seealso See [updateNumericInputIcon()] to update server-side, and [textInputIcon()] for using text value.
+#' @export
+#'
+#' @importFrom shiny restoreInput
+#' @importFrom htmltools tags validateCssUnit css
+#'
+#' @example examples/numericInputIcon.R
+selectInputIcon <- function(inputId,
+                            label,
+                            choices,
+                            selected = NULL,
+                            multiple = FALSE,
+                            selectize = TRUE,
+                            size = NULL,
+                            width = NULL,
+                            icon = NULL) {
+  selected <- shiny::restoreInput(id = inputId, default = selected)
+  tags$div(
+    class = "form-group shiny-input-container",
+    shinyWidgets:::label_input(inputId, label),
+    style = htmltools:::css(width = htmltools:::validateCssUnit(width)),
+    tags$div(
+      class = "input-group",
+      class = shinyWidgets:::validate_size(size),
+      shinyWidgets:::markup_input_group(icon, "left", theme_func = shiny::getCurrentTheme),
+      shiny::tags$select(
+        id = inputId,
+        class = "form-control numeric-input-icon",
+        shiny:::selectOptions(choices, selected, inputId, selectize)
+      ),
+      shinyWidgets:::markup_input_group(icon, "right", theme_func = shiny::getCurrentTheme)
+    ),
+    shinyWidgets:::html_dependency_input_icons()
+  )
+}
 
 
 ########
@@ -5305,6 +5985,165 @@ clean_date <- function(data){
 
 
 ########
+#### Current file: R//wide2long.R 
+########
+
+#' Alternative pivoting method for easily pivoting based on name pattern
+#'
+#' @description
+#' This function requires and assumes a systematic naming of variables.
+#' For now only supports one level pivoting. Adding more levels would require
+#' an added "ignore" string pattern or similarly. Example 2.
+#'
+#'
+#' @param data data
+#' @param pattern pattern(s) to match. Character vector of length 1 or more.
+#' @param type type of match. can be one of "prefix","infix" or "suffix".
+#' @param id.col ID column. Will fill ID for all. Column name or numeric index.
+#' Default is "1", first column.
+#' @param instance.name
+#'
+#' @returns data.frame
+#' @export
+#'
+#' @examples
+#' data.frame(
+#'   1:20, sample(70:80, 20, TRUE),
+#'   sample(70:100, 20, TRUE),
+#'   sample(70:100, 20, TRUE),
+#'   sample(170:200, 20, TRUE)
+#' ) |>
+#'   setNames(c("id", "age", "weight_0", "weight_1", "height_1")) |>
+#'   wide2long(pattern = c("_0", "_1"), type = "suffix")
+#' data.frame(
+#'   1:20, sample(70:80, 20, TRUE),
+#'   sample(70:100, 20, TRUE),
+#'   sample(70:100, 20, TRUE),
+#'   sample(170:200, 20, TRUE)
+#' ) |>
+#'   setNames(c("id", "age", "weight_0", "weight_a_1", "height_b_1")) |>
+#'   wide2long(pattern = c("_0", "_1"), type = "suffix")
+#' # Optional filling of missing values by last observation carried forward
+#' # Needed for mmrm analyses
+#' long_missings |>
+#'   # Fills record ID assuming none are missing
+#'   tidyr::fill(record_id) |>
+#'   # Grouping by ID for the last step
+#'   dplyr::group_by(record_id) |>
+#'   # Filling missing data by ID
+#'   tidyr::fill(names(long_missings)[!names(long_missings) %in% new_names]) |>
+#'   # Remove grouping
+#'   dplyr::ungroup()
+wide2long <- function(
+    data,
+    pattern,
+    type = c("prefix", "infix", "suffix"),
+    id.col = 1,
+    instance.name = "instance") {
+  type <- match.arg(type)
+
+  ## Give the unique suffix names to use for identifying repeated measures
+  # suffixes <- c("_0", "_1")
+
+  ## If no ID column is present, one is added
+  if (id.col == "none" | is.null(id.col)) {
+    data <- stats::setNames(
+      data.frame(seq_len(nrow(data)), data),
+      make.names(c("id", names(data)), unique = TRUE)
+    )
+    id.col <- 1
+  }
+# browser()
+  ## Relevant columns are determined based on suffixes
+  cols <- names(data)[grepl_fix(names(data), pattern = pattern, type = type)]
+
+  ## New colnames are created by removing suffixes
+  new_names <- unique(gsub(paste(pattern, collapse = "|"), "", cols))
+
+  out <- split(data, seq_len(nrow(data))) |> # Splits dataset by row
+    # Starts data modifications for each subject
+    lapply(\(.x){
+      ## Pivots data with repeated measures as determined by the defined suffixes
+      long_ls <- split.default(
+        # Subset only repeated data
+        .x[cols],
+        # ... and split by meassure
+        gsub(paste(new_names, collapse = "|"), "", cols)
+      ) |>
+        # Sort data by order of given suffixes to ensure chronology
+        sort_by(pattern) |>
+        # New colnames are applied
+        lapply(\(.y){
+          setNames(
+            .y,
+            gsub(paste(pattern, collapse = "|"), "", names(.y))
+          )
+        })
+
+      # Subsets non-pivotted data (this is assumed to belong to same )
+      single <- .x[-match(cols, names(.x))]
+
+      # Extends with empty rows to get same dimensions as long data
+      single[(nrow(single) + 1):length(long_ls), ] <- NA
+
+      # Fills ID col
+      single[id.col] <- single[1, id.col]
+
+      # Everything is merged together
+      merged <- dplyr::bind_cols(
+        single,
+        # Instance names are defined as suffixes without leading non-characters
+        REDCapCAST::as_factor(data.frame(gsub(
+          "^[^[:alnum:]]+", "",
+          names(long_ls)
+        ))),
+        dplyr::bind_rows(long_ls)
+      )
+
+      # Ensure unique new names based on supplied
+      colnames(merged) <- make.names(
+        c(
+          names(single),
+          instance.name,
+          names(merged)[(NCOL(single) + 2):NCOL(merged)]
+        ),
+        unique = TRUE
+      )
+
+      merged
+    }) |> dplyr::bind_rows()
+
+  rownames(out) <- NULL
+
+  out
+}
+
+
+#' Matches pattern to vector based on match type
+#'
+#' @param data vector
+#' @param pattern pattern(s) to match. Character vector of length 1 or more.
+#' @param type type of match. can be one of "prefix","infix" or "suffix".
+#'
+#' @returns logical vector
+#' @export
+#'
+#' @examples
+#' c("id", "age", "weight_0", "weight_1") |> grepl_fix(pattern = c("_0", "_1"), type = "suffix")
+grepl_fix <- function(data, pattern, type = c("prefix", "infix", "suffix")) {
+  type <- match.arg(type)
+
+  if (type == "prefix") {
+    grepl(paste0("^(", paste(pattern, collapse = "|"), ")*"), data)
+  } else if (type == "suffix") {
+    grepl(paste0("*(", paste(pattern, collapse = "|"), ")$"), data)
+  } else if (type == "infix") {
+    grepl(paste0("*(", paste(pattern, collapse = "|"), ")*"), data)
+  }
+}
+
+
+########
 #### Current file: /Users/au301842/freesearcheR/inst/apps/freesearcheR/ui.R 
 ########
 
@@ -5356,9 +6195,11 @@ ui_elements <- list(
         shiny::br(),
         shiny::conditionalPanel(
           condition = "input.source=='file'",
-          datamods::import_file_ui("file_import",
+          import_file_ui(
+            id = "file_import",
+            layout_params = "dropdown",
             title = "Choose a datafile to upload",
-            file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat", ".sav", ".ods", ".dta")
+            file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".sas7bdat", ".ods", ".dta")
           )
         ),
         shiny::conditionalPanel(
@@ -5377,25 +6218,27 @@ ui_elements <- list(
         shiny::br(),
         shiny::h5("Exclude in-complete variables"),
         shiny::fluidRow(
-          shiny::column(width=6,
-                        shiny::br(),
-                        shiny::br(),
-                        shiny::p("Filter incomplete variables, by setting a completeness threshold:"),
-                        shiny::br()
-                        ),
-          shiny::column(width=6,
-                        shinyWidgets::noUiSliderInput(
-                          inputId = "complete_cutoff",
-                          label = NULL,
-                          min = 0,
-                          max = 100,
-                          step = 5,
-                          value = 70,
-                          format = shinyWidgets::wNumbFormat(decimals = 0),
-                          color = datamods:::get_primary_color()
-                        ),
-                        shiny::helpText("Include variables with completeness above the specified percentage.")
-                        )
+          shiny::column(
+            width = 6,
+            shiny::br(),
+            shiny::br(),
+            shiny::p("Filter incomplete variables, by setting a completeness threshold:"),
+            shiny::br()
+          ),
+          shiny::column(
+            width = 6,
+            shinyWidgets::noUiSliderInput(
+              inputId = "complete_cutoff",
+              label = NULL,
+              min = 0,
+              max = 100,
+              step = 5,
+              value = 70,
+              format = shinyWidgets::wNumbFormat(decimals = 0),
+              color = datamods:::get_primary_color()
+            ),
+            shiny::helpText("Include variables with completeness above the specified percentage.")
+          )
         ),
         shiny::br(),
         shiny::br(),
@@ -5477,6 +6320,8 @@ ui_elements <- list(
                             On the right, you can create and modify factor/categorical variables as well as create new variables with *R* code."))
             )
           ),
+          shiny::tags$br(),
+          shiny::tags$br(),
           fluidRow(
             shiny::column(
               width = 2
@@ -6029,19 +6874,19 @@ server <- function(input, output, session) {
 
   consider.na <- c("NA", "\"\"", "", "\'\'", "na")
 
-  data_file <- datamods::import_file_server(
+  data_file <- import_file_server(
     id = "file_import",
     show_data_in = "popup",
     trigger_return = "change",
     return_class = "data.frame",
     read_fns = list(
-      ods = function(file) {
+      ods = function(file, which, skip, na) {
         readODS::read_ods(
           path = file,
           # Sheet and skip not implemented for .ods in the original implementation
-          # sheet = sheet,
-          # skip = skip,
-          na = consider.na
+          sheet = which,
+          skip = skip,
+          na = na
         )
       },
       dta = function(file) {
@@ -6050,29 +6895,32 @@ server <- function(input, output, session) {
           .name_repair = "unique_quiet"
           )
       },
-      csv = function(file) {
-        readr::read_csv(
+      # csv = function(file) {
+      #   readr::read_csv(
+      #     file = file,
+      #     na = consider.na,
+      #     name_repair = "unique_quiet"
+      #     )
+      # },
+      csv = import_delim,
+      tsv = import_delim,
+      txt = import_delim,
+      xls = function(file, which, skip, na) {
+        openxlsx2::read_xlsx(
           file = file,
-          na = consider.na,
-          name_repair = "unique_quiet"
+          sheet = which,
+          skip_empty_rows = TRUE,
+          start_row = skip - 1,
+          na.strings = na
           )
       },
-      xls = function(file) {
+      xlsx = function(file, which, skip, na) {
         openxlsx2::read_xlsx(
           file = file,
           sheet = sheet,
           skip_empty_rows = TRUE,
           start_row = skip - 1,
-          na.strings = consider.na
-          )
-      },
-      xlsx = function(file) {
-        openxlsx2::read_xlsx(
-          file = file,
-          sheet = sheet,
-          skip_empty_rows = TRUE,
-          start_row = skip - 1,
-          na.strings = consider.na)
+          na.strings = na)
       },
       rds = function(file) {
         readr::read_rds(
@@ -6239,7 +7087,7 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_column,
-    datamods::modal_create_column(id = "modal_column")
+    datamods::modal_create_column(id = "modal_column",footer = "This is only for advanced users!")
   )
   data_modal_r <- datamods::create_column_server(
     id = "modal_column",

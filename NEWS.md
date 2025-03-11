@@ -2,6 +2,9 @@
 
 Focus is on polish and improved ui/ux.
 
+First steps towards an updated name (will be FreesearchR), with renamed repository. Also, the repo will move to an organisation (named FreesearchR).
+
+Testing file upload conducted and improved.
 
 # freesearcheR 25.3.1
 

@@ -2,21 +2,26 @@
 % Please edit documentation in R/redcap_read_shiny_module.R
 \name{is_valid_redcap_url}
 \alias{is_valid_redcap_url}
-\title{Title}
+\title{Test if url is valid format for REDCap API}
 \usage{
 is_valid_redcap_url(url)
 }
 \arguments{
-\item{url}{}
+\item{url}{url}
+}
+\value{
+logical
 }
 \description{
-Title
+Test if url is valid format for REDCap API
 }
 \examples{
 url <- c(
   "www.example.com",
-  "http://example.com",
-  "https://redcap.your.inst/api/"
+  "redcap.your.inst/api/",
+  "https://redcap.your.inst/api/",
+  "https://your.inst/redcap/api/",
+  "https://www.your.inst/redcap/api/"
 )
 is_valid_redcap_url(url)
 }

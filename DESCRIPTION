@@ -22,7 +22,6 @@ Imports:
     readr,
     shiny,
     MASS,
-    REDCapCAST,
     purrr,
     broom,
     broom.helpers,
@@ -65,7 +64,8 @@ Imports:
     ggstats,
     rempsyc,
     ggridges,
-    ggalluvial
+    ggalluvial,
+    REDCapCAST
 Suggests: 
     styler,
     devtools,

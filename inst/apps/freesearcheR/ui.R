@@ -46,9 +46,11 @@ ui_elements <- list(
         shiny::br(),
         shiny::conditionalPanel(
           condition = "input.source=='file'",
-          datamods::import_file_ui("file_import",
+          import_file_ui(
+            id = "file_import",
+            layout_params = "dropdown",
             title = "Choose a datafile to upload",
-            file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat", ".sav", ".ods", ".dta")
+            file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".sas7bdat", ".ods", ".dta")
           )
         ),
         shiny::conditionalPanel(
@@ -67,25 +69,27 @@ ui_elements <- list(
         shiny::br(),
         shiny::h5("Exclude in-complete variables"),
         shiny::fluidRow(
-          shiny::column(width=6,
-                        shiny::br(),
-                        shiny::br(),
-                        shiny::p("Filter incomplete variables, by setting a completeness threshold:"),
-                        shiny::br()
-                        ),
-          shiny::column(width=6,
-                        shinyWidgets::noUiSliderInput(
-                          inputId = "complete_cutoff",
-                          label = NULL,
-                          min = 0,
-                          max = 100,
-                          step = 5,
-                          value = 70,
-                          format = shinyWidgets::wNumbFormat(decimals = 0),
-                          color = datamods:::get_primary_color()
-                        ),
-                        shiny::helpText("Include variables with completeness above the specified percentage.")
-                        )
+          shiny::column(
+            width = 6,
+            shiny::br(),
+            shiny::br(),
+            shiny::p("Filter incomplete variables, by setting a completeness threshold:"),
+            shiny::br()
+          ),
+          shiny::column(
+            width = 6,
+            shinyWidgets::noUiSliderInput(
+              inputId = "complete_cutoff",
+              label = NULL,
+              min = 0,
+              max = 100,
+              step = 5,
+              value = 70,
+              format = shinyWidgets::wNumbFormat(decimals = 0),
+              color = datamods:::get_primary_color()
+            ),
+            shiny::helpText("Include variables with completeness above the specified percentage.")
+          )
         ),
         shiny::br(),
         shiny::br(),
@@ -167,6 +171,8 @@ ui_elements <- list(
                             On the right, you can create and modify factor/categorical variables as well as create new variables with *R* code."))
             )
           ),
+          shiny::tags$br(),
+          shiny::tags$br(),
           fluidRow(
             shiny::column(
               width = 2
