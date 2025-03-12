@@ -80,6 +80,7 @@ server <- function(input, output, session) {
     ready = NULL,
     test = "no",
     data_original = NULL,
+    data_temp = NULL,
     data = NULL,
     data_filtered = NULL,
     models = NULL,
@@ -113,7 +114,7 @@ server <- function(input, output, session) {
         haven::read_dta(
           file = file,
           .name_repair = "unique_quiet"
-          )
+        )
       },
       # csv = function(file) {
       #   readr::read_csv(
@@ -132,7 +133,7 @@ server <- function(input, output, session) {
           skip_empty_rows = TRUE,
           start_row = skip - 1,
           na.strings = na
-          )
+        )
       },
       xlsx = function(file, which, skip, na) {
         openxlsx2::read_xlsx(
@@ -140,36 +141,38 @@ server <- function(input, output, session) {
           sheet = sheet,
           skip_empty_rows = TRUE,
           start_row = skip - 1,
-          na.strings = na)
+          na.strings = na
+        )
       },
       rds = function(file) {
         readr::read_rds(
           file = file,
-          name_repair = "unique_quiet")
+          name_repair = "unique_quiet"
+        )
       }
     )
   )
 
   shiny::observeEvent(data_file$data(), {
     shiny::req(data_file$data())
-    rv$data_original <- data_file$data()
+    rv$data_temp <- data_file$data()
     rv$code <- append_list(data = data_file$code(), list = rv$code, index = "import")
   })
 
   data_redcap <- m_redcap_readServer(
-    id = "redcap_import"#,
+    id = "redcap_import" # ,
     # output.format = "list"
   )
 
   shiny::observeEvent(data_redcap(), {
     # rv$data_original <- purrr::pluck(data_redcap(), "data")()
-    rv$data_original <- data_redcap()
+    rv$data_temp <- data_redcap()
   })
 
   output$redcap_prev <- DT::renderDT(
     {
       DT::datatable(head(data_redcap(), 5),
-      # DT::datatable(head(purrr::pluck(data_redcap(), "data")(), 5),
+        # DT::datatable(head(purrr::pluck(data_redcap(), "data")(), 5),
         caption = "First 5 observations"
       )
     },
@@ -185,9 +188,43 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(from_env$data(), {
     shiny::req(from_env$data())
-    rv$data_original <- from_env$data()
+
+    rv$data_temp <- from_env$data()
     # rv$code <- append_list(data = from_env$code(),list = rv$code,index = "import")
   })
+
+  output$import_var <- shiny::renderUI({
+    shiny::req(rv$data_temp)
+
+    preselect <- names(rv$data_temp)[sapply(rv$data_temp, missing_fraction) <= input$complete_cutoff / 100]
+
+    shinyWidgets::virtualSelectInput(
+      inputId = "import_var",
+      label = "Select variables to include",
+      selected = preselect,
+      choices = names(rv$data_temp),
+      updateOn = "close",
+      multiple = TRUE,
+      search = TRUE,
+      showValueAsTags = TRUE
+    )
+  })
+
+
+  shiny::observeEvent(
+    eventExpr = list(
+      input$import_var
+    ),
+    handlerExpr = {
+      shiny::req(rv$data_temp)
+
+      rv$data_original <- rv$data_temp |>
+        dplyr::select(input$import_var) |>
+        # janitor::clean_names() |>
+        default_parsing()
+    }
+  )
+
 
   shiny::observeEvent(rv$data_original, {
     if (is.null(rv$data_original) | NROW(rv$data_original) == 0) {
@@ -211,26 +248,20 @@ server <- function(input, output, session) {
     handlerExpr = {
       shiny::req(rv$data_original)
 
-      rv$data <- rv$data_original |>
-        # janitor::clean_names() |>
-        default_parsing() |>
-        remove_empty_cols(
-          cutoff = input$complete_cutoff / 100
-        )
+      rv$data <- rv$data_original
     }
   )
 
   ## For now this solution work, but I would prefer to solve this with the above
-  shiny::observeEvent(input$reset_confirm, {
-    if (isTRUE(input$reset_confirm)) {
-      shiny::req(rv$data_original)
-      rv$data <- rv$data_original |>
-        default_parsing() |>
-        remove_empty_cols(
-          cutoff = input$complete_cutoff / 100
-        )
-    }
-  }, ignoreNULL = TRUE)
+  shiny::observeEvent(input$reset_confirm,
+    {
+      if (isTRUE(input$reset_confirm)) {
+        shiny::req(rv$data_original)
+        rv$data <- rv$data_original
+      }
+    },
+    ignoreNULL = TRUE
+  )
 
 
   shiny::observeEvent(input$data_reset, {
@@ -268,7 +299,7 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_variables,
-    modal_update_variables("modal_variables",title = "Modify factor levels")
+    modal_update_variables("modal_variables", title = "Modify factor levels")
   )
 
 
@@ -276,7 +307,7 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_cut,
-    modal_cut_variable("modal_cut",title = "Modify factor levels")
+    modal_cut_variable("modal_cut", title = "Modify factor levels")
   )
 
   data_modal_cut <- cut_variable_server(
@@ -307,7 +338,7 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_column,
-    datamods::modal_create_column(id = "modal_column",footer = "This is only for advanced users!")
+    datamods::modal_create_column(id = "modal_column", footer = "This is only for advanced users!")
   )
   data_modal_r <- datamods::create_column_server(
     id = "modal_column",
@@ -442,7 +473,7 @@ server <- function(input, output, session) {
 
   output$code_import <- shiny::renderPrint({
     cat(rv$code$import)
-    })
+  })
 
   output$code_data <- shiny::renderPrint({
     attr(rv$data, "code")
@@ -681,10 +712,10 @@ server <- function(input, output, session) {
               ls <- do.call(
                 .fun,
                 c(
-                  list(data = rv$list$data|>
-                         (\(.x){
-                           .x[regression_vars()]
-                         })()),
+                  list(data = rv$list$data |>
+                    (\(.x){
+                      .x[regression_vars()]
+                    })()),
                   list(outcome.str = input$outcome_var),
                   list(fun.descr = input$regression_type)
                 )

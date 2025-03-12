@@ -65,7 +65,10 @@ Imports:
     rempsyc,
     ggridges,
     ggalluvial,
-    REDCapCAST
+    REDCapCAST,
+    eulerr,
+    ggforce,
+    RcppArmadillo
 Suggests: 
     styler,
     devtools,

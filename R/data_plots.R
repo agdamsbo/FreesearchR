@@ -128,39 +128,48 @@ data_visuals_server <- function(id,
           data = plot_data
         )
 
-        shiny::selectizeInput(
+        plots_named <- get_plot_options(plots) |>
+          lapply(\(.x){
+            stats::setNames(.x$descr,.x$note)
+          })
+
+        vectorSelectInput(
           inputId = ns("type"),
           selected = NULL,
           label = shiny::h4("Plot type"),
-          choices = plots,
+          choices = Reduce(c,plots_named),
           multiple = FALSE
         )
       })
 
       rv$plot.params <- shiny::reactive({
-        get_plot_options(input$type)
+        get_plot_options(input$type) |> purrr::pluck(1)
       })
 
       output$secondary <- shiny::renderUI({
         shiny::req(input$type)
         # browser()
 
+        cols <- c(
+          rv$plot.params()[["secondary.extra"]],
+          all_but(
+            colnames(subset_types(
+              data(),
+              rv$plot.params()[["secondary.type"]]
+            )),
+            input$primary
+          )
+        )
+
         columnSelectInput(
           inputId = ns("secondary"),
           data = data,
+          selected = 1,
           placeholder = "Select variable",
           label = "Secondary/group variable",
-          multiple = FALSE,
-          col_subset = c(
-            purrr::pluck(rv$plot.params(), 1)[["secondary.extra"]],
-            all_but(
-              colnames(subset_types(
-                data(),
-                purrr::pluck(rv$plot.params(), 1)[["secondary.type"]]
-              )),
-              input$primary
-            )
-          ),
+          multiple = rv$plot.params()[["secondary.multi"]],
+          maxItems = rv$plot.params()[["secondary.max"]],
+          col_subset = cols,
           none_label = "No variable"
         )
       })
@@ -178,7 +187,7 @@ data_visuals_server <- function(id,
             all_but(
               colnames(subset_types(
                 data(),
-                purrr::pluck(rv$plot.params(), 1)[["tertiary.type"]]
+                rv$plot.params()[["tertiary.type"]]
               )),
               input$primary,
               input$secondary
@@ -193,9 +202,12 @@ data_visuals_server <- function(id,
         shiny::req(input$type)
         shiny::req(input$secondary)
         shiny::req(input$tertiary)
+        # if (length(input$secondary)>1){
+        #   browser()
+        # }
         create_plot(
           data = data(),
-          type = names(rv$plot.params()),
+          type = rv$plot.params()[["fun"]],
           x = input$primary,
           y = input$secondary,
           z = input$tertiary
@@ -291,20 +303,24 @@ subset_types <- function(data, types, type.fun = outcome_type) {
 supported_plots <- function() {
   list(
     plot_hbars = list(
+      fun = "plot_hbars",
       descr = "Stacked horizontal bars",
       note = "A classical way of visualising the distribution of an ordinal scale like the modified Ranking Scale and known as Grotta bars",
       primary.type = c("dichotomous", "ordinal"),
       secondary.type = c("dichotomous", "ordinal"),
+      secondary.multi = FALSE,
       tertiary.type = c("dichotomous", "ordinal"),
       secondary.extra = "none"
     ),
     plot_violin = list(
+      fun = "plot_violin",
       descr = "Violin plot",
       note = "A modern alternative to the classic boxplot to visualise data distribution",
       primary.type = c("continuous", "dichotomous", "ordinal"),
       secondary.type = c("dichotomous", "ordinal"),
-      tertiary.type = c("dichotomous", "ordinal"),
-      secondary.extra = "none"
+      secondary.multi = FALSE,
+      secondary.extra = "none",
+      tertiary.type = c("dichotomous", "ordinal")
     ),
     # plot_ridge = list(
     #   descr = "Ridge plot",
@@ -315,25 +331,40 @@ supported_plots <- function() {
     #   secondary.extra = NULL
     # ),
     plot_sankey = list(
+      fun = "plot_sankey",
       descr = "Sankey plot",
       note = "A way of visualising change between groups",
       primary.type = c("dichotomous", "ordinal"),
       secondary.type = c("dichotomous", "ordinal"),
-      tertiary.type = c("dichotomous", "ordinal"),
-      secondary.extra = NULL
+      secondary.multi = FALSE,
+      secondary.extra = NULL,
+      tertiary.type = c("dichotomous", "ordinal")
     ),
     plot_scatter = list(
+      fun = "plot_scatter",
       descr = "Scatter plot",
       note = "A classic way of showing the association between to variables",
       primary.type = "continuous",
       secondary.type = c("continuous", "ordinal"),
+      secondary.multi = FALSE,
+      tertiary.type = c("dichotomous", "ordinal"),
+      secondary.extra = NULL
+    ),
+    plot_euler = list(
+      fun = "plot_euler",
+      descr = "Euler diagram",
+      note = "Generate area-proportional Euler diagrams to display set relationships",
+      primary.type = "dichotomous",
+      secondary.type = "dichotomous",
+      secondary.multi = TRUE,
+      secondary.max = 4,
       tertiary.type = c("dichotomous", "ordinal"),
       secondary.extra = NULL
     )
   )
 }
 
-#' Title
+#' Plot nice ridge plot
 #'
 #' @returns ggplot2 object
 #' @export
@@ -449,7 +480,7 @@ get_plot_options <- function(data) {
 #' @examples
 #' create_plot(mtcars, "plot_violin", "mpg", "cyl")
 create_plot <- function(data, type, x, y, z = NULL, ...) {
-  if (!y %in% names(data)) {
+  if (!any(y %in% names(data))) {
     y <- NULL
   }
 
@@ -649,63 +680,7 @@ plot_scatter <- function(data, x, y, z = NULL) {
   }
 }
 
-#' Readying data for sankey plot
-#'
-#' @name data-plots
-#'
-#' @returns data.frame
-#' @export
-#'
-#' @examples
-#' ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = sample(c(letters[1:4], NA), 100, TRUE, prob = c(rep(.23, 4), .08)))
-#' ds |> sankey_ready("first", "last")
-#' ds |> sankey_ready("first", "last", numbers = "percentage")
-sankey_ready <- function(data, x, y, z = NULL, numbers = "count") {
-  ## TODO: Ensure ordering x and y
 
-  if (is.null(z)) {
-    out <- dplyr::count(data, !!dplyr::sym(x), !!dplyr::sym(y))
-  } else {
-    out <- dplyr::count(data, !!dplyr::sym(x), !!dplyr::sym(y), !!dplyr::sym(z))
-  }
-  out <- out |>
-    dplyr::group_by(!!dplyr::sym(x)) |>
-    dplyr::mutate(gx.sum = sum(n)) |>
-    dplyr::ungroup() |>
-    dplyr::group_by(!!dplyr::sym(y)) |>
-    dplyr::mutate(gy.sum = sum(n)) |>
-    dplyr::ungroup()
-
-  if (numbers == "count") {
-    out <- out |> dplyr::mutate(
-      lx = factor(paste0(!!dplyr::sym(x), "\n(n=", gx.sum, ")")),
-      ly = factor(paste0(!!dplyr::sym(y), "\n(n=", gy.sum, ")"))
-    )
-  } else if (numbers == "percentage") {
-    out <- out |> dplyr::mutate(
-      lx = factor(paste0(!!dplyr::sym(x), "\n(", round((gx.sum / sum(n)) * 100, 1), "%)")),
-      ly = factor(paste0(!!dplyr::sym(y), "\n(", round((gy.sum / sum(n)) * 100, 1), "%)"))
-    )
-  }
-
-  if (is.factor(data[[x]])) {
-    index <- match(levels(data[[x]]), str_remove_last(levels(out$lx), "\n"))
-    out$lx <- factor(out$lx, levels = levels(out$lx)[index])
-  }
-
-  if (is.factor(data[[y]])) {
-    index <- match(levels(data[[y]]), str_remove_last(levels(out$ly), "\n"))
-    out$ly <- factor(out$ly, levels = levels(out$ly)[index])
-  }
-
-  out
-}
-
-str_remove_last <- function(data, pattern = "\n") {
-  strsplit(data, split = pattern) |>
-    lapply(\(.x)paste(unlist(.x[[-length(.x)]]), collapse = pattern)) |>
-    unlist()
-}
 
 #' Line breaking at given number of characters for nicely plotting labels
 #'
@@ -719,7 +694,7 @@ str_remove_last <- function(data, pattern = "\n") {
 #'
 #' @examples
 #' "Lorem ipsum... you know the routine" |> line_break()
-#' paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(fixed=TRUE)
+#' paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(fixed = TRUE)
 line_break <- function(data, lineLength = 20, fixed = FALSE) {
   if (isTRUE(force)) {
     gsub(paste0("(.{1,", lineLength, "})(\\s|[[:alnum:]])"), "\\1\n", data)
@@ -729,132 +704,4 @@ line_break <- function(data, lineLength = 20, fixed = FALSE) {
   ## https://stackoverflow.com/a/29847221
 }
 
-#' Beautiful sankey plot with option to split by a tertiary group
-#'
-#' @returns ggplot2 object
-#' @export
-#'
-#' @name data-plots
-#'
-#' @examples
-#' ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)))
-#' ds |> plot_sankey("first", "last")
-#' ds |> plot_sankey("first", "last", color.group = "y")
-#' ds |> plot_sankey("first", "last", z = "g", color.group = "y")
-plot_sankey <- function(data, x, y, z = NULL, color.group = "x", colors = NULL) {
-  if (!is.null(z)) {
-    ds <- split(data, data[z])
-  } else {
-    ds <- list(data)
-  }
 
-  out <- lapply(ds, \(.ds){
-    plot_sankey_single(.ds, x = x, y = y, color.group = color.group, colors = colors)
-  })
-
-  patchwork::wrap_plots(out)
-}
-
-default_theme <- function() {
-  theme_void()
-}
-
-#' Beautiful sankey plot
-#'
-#' @param color.group set group to colour by. "x" or "y".
-#' @param colors optinally specify colors. Give NA color, color for each level
-#' in primary group and color for each level in secondary group.
-#' @param ... passed to sankey_ready()
-#'
-#' @returns ggplot2 object
-#' @export
-#'
-#' @examples
-#' ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)))
-#' ds |> plot_sankey_single("first", "last")
-#' ds |> plot_sankey_single("first", "last", color.group = "y")
-plot_sankey_single <- function(data, x, y, color.group = c("x","y"), colors = NULL, ...) {
-  color.group <- match.arg(color.group)
-  data <- data |> sankey_ready(x = x, y = y, ...)
-  # browser()
-  library(ggalluvial)
-
-  na.color <- "#2986cc"
-  box.color <- "#1E4B66"
-
-  if (is.null(colors)) {
-    if (color.group == "y") {
-      main.colors <- viridisLite::viridis(n = length(levels(data[[y]])))
-      secondary.colors <- rep(na.color, length(levels(data[[x]])))
-      label.colors <- Reduce(c, lapply(list(secondary.colors, rev(main.colors)), contrast_text))
-    } else {
-      main.colors <- viridisLite::viridis(n = length(levels(data[[x]])))
-      secondary.colors <- rep(na.color, length(levels(data[[y]])))
-      label.colors <- Reduce(c, lapply(list(rev(main.colors), secondary.colors), contrast_text))
-    }
-    colors <- c(na.color, main.colors, secondary.colors)
-  } else {
-    label.colors <- contrast_text(colors)
-  }
-
-  group_labels <- c(get_label(data, x), get_label(data, y)) |>
-    sapply(line_break) |>
-    unname()
-
-  p <- ggplot2::ggplot(data, ggplot2::aes(y = n, axis1 = lx, axis2 = ly))
-
-  if (color.group == "y") {
-    p <- p +
-      ggalluvial::geom_alluvium(
-        ggplot2::aes(fill = !!dplyr::sym(y), color = !!dplyr::sym(y)),
-        width = 1 / 16,
-        alpha = .8,
-        knot.pos = 0.4,
-        curve_type = "sigmoid"
-      ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(y)),
-        size = 2,
-        width = 1 / 3.4
-      )
-  } else {
-    p <- p +
-      ggalluvial::geom_alluvium(
-        ggplot2::aes(fill = !!dplyr::sym(x), color = !!dplyr::sym(x)),
-        width = 1 / 16,
-        alpha = .8,
-        knot.pos = 0.4,
-        curve_type = "sigmoid"
-      ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(x)),
-        size = 2,
-        width = 1 / 3.4
-      )
-  }
-
-  p +
-    ggplot2::geom_text(
-      stat = "stratum",
-      ggplot2::aes(label = after_stat(stratum)),
-      colour = label.colors,
-      size = 8,
-      lineheight = 1
-    ) +
-    ggplot2::scale_x_continuous(
-      breaks = 1:2,
-      labels = group_labels
-    ) +
-    ggplot2::scale_fill_manual(values = colors[-1], na.value = colors[1]) +
-    ggplot2::scale_color_manual(values = main.colors) +
-    ggplot2::theme_void() +
-    ggplot2::theme(
-      legend.position = "none",
-      # panel.grid.major = element_blank(),
-      # panel.grid.minor = element_blank(),
-      # axis.text.y = element_blank(),
-      # axis.title.y = element_blank(),
-      axis.text.x = ggplot2::element_text(size = 20),
-      # text = element_text(size = 5),
-      # plot.title = element_blank(),
-      # panel.background = ggplot2::element_rect(fill = "white"),
-      plot.background = ggplot2::element_rect(fill = "white"),
-      panel.border = ggplot2::element_blank()
-    )
-}

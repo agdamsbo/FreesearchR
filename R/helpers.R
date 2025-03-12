@@ -292,3 +292,17 @@ append_list <- function(data,list,index){
   }
   out
 }
+
+
+#' Get missingsness fraction
+#'
+#' @param data data
+#'
+#' @returns numeric vector
+#' @export
+#'
+#' @examples
+#' c(NA,1:10,rep(NA,3)) |> missing_fraction()
+missing_fraction <- function(data){
+  NROW(data[is.na(data)])/NROW(data)
+}

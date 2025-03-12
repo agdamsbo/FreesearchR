@@ -256,8 +256,8 @@ outcome_type <- function(data) {
   cl_d <- class(data)
   if (any(c("numeric", "integer") %in% cl_d)) {
     out <- "continuous"
-  } else if (identical("factor", cl_d)) {
-    if (length(levels(data)) == 2) {
+  } else if (any(c("factor", "logical") %in% cl_d)) {
+    if (length(levels(data)) == 2 | identical("logical",cl_d)) {
       out <- "dichotomous"
     } else if (length(levels(data)) > 2) {
       out <- "ordinal"

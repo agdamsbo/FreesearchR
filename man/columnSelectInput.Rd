@@ -13,7 +13,8 @@ columnSelectInput(
   col_subset = NULL,
   placeholder = "",
   onInitialize,
-  none_label = "No variable selected"
+  none_label = "No variable selected",
+  maxItems = NULL
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ columnSelectInput(
 \item{onInitialize}{passed to \code{\link[shiny]{selectizeInput}} options}
 
 \item{none_label}{label for "none" item}
+
+\item{maxItems}{max number of items}
 }
 \value{
 a \code{\link[shiny]{selectizeInput}} dropdown element

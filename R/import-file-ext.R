@@ -17,7 +17,6 @@
 #' @importFrom phosphoricons ph
 #' @importFrom toastui datagridOutput2
 #'
-#' @example examples/from-file.R
 import_file_ui <- function(id,
                            title = TRUE,
                            preview_data = TRUE,

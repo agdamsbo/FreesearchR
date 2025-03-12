@@ -13,6 +13,7 @@
 #' @param placeholder passed to \code{\link[shiny]{selectizeInput}} options
 #' @param onInitialize passed to \code{\link[shiny]{selectizeInput}} options
 #' @param none_label label for "none" item
+#' @param maxItems max number of items
 #'
 #' @return a \code{\link[shiny]{selectizeInput}} dropdown element
 #'
@@ -20,7 +21,7 @@
 #' @export
 #'
 columnSelectInput <- function(inputId, label, data, selected = "", ...,
-                              col_subset = NULL, placeholder = "", onInitialize, none_label="No variable selected") {
+                              col_subset = NULL, placeholder = "", onInitialize, none_label="No variable selected",maxItems=NULL) {
   datar <- if (is.reactive(data)) data else reactive(data)
   col_subsetr <- if (is.reactive(col_subset)) col_subset else reactive(col_subset)
 
@@ -76,7 +77,8 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
                  escape(item.data.name) +
                '</div>';
         }
-      }"))
+      }")),
+      if (!is.null(maxItems)) list(maxItems=maxItems)
     )
   )
 }

@@ -67,13 +67,13 @@ ui_elements <- list(
         ),
         shiny::br(),
         shiny::br(),
-        shiny::h5("Exclude in-complete variables"),
+        shiny::h5("Specify variables to include"),
         shiny::fluidRow(
           shiny::column(
             width = 6,
             shiny::br(),
+            shiny::p("Filter by completeness threshold and manual selection:"),
             shiny::br(),
-            shiny::p("Filter incomplete variables, by setting a completeness threshold:"),
             shiny::br()
           ),
           shiny::column(
@@ -88,7 +88,10 @@ ui_elements <- list(
               format = shinyWidgets::wNumbFormat(decimals = 0),
               color = datamods:::get_primary_color()
             ),
-            shiny::helpText("Include variables with completeness above the specified percentage.")
+            shiny::helpText("Filter variables with completeness above the specified percentage."),
+            shiny::br(),
+            shiny::br(),
+            shiny::uiOutput(outputId = "import_var")
           )
         ),
         shiny::br(),

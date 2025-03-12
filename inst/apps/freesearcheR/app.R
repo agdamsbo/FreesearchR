@@ -10,7 +10,7 @@
 #### Current file: R//app_version.R 
 ########
 
-app_version <- function()'250311_1338'
+app_version <- function()'250312_1817'
 
 
 ########
@@ -259,6 +259,7 @@ cor_app()
 #' @param placeholder passed to \code{\link[shiny]{selectizeInput}} options
 #' @param onInitialize passed to \code{\link[shiny]{selectizeInput}} options
 #' @param none_label label for "none" item
+#' @param maxItems max number of items
 #'
 #' @return a \code{\link[shiny]{selectizeInput}} dropdown element
 #'
@@ -266,7 +267,7 @@ cor_app()
 #' @export
 #'
 columnSelectInput <- function(inputId, label, data, selected = "", ...,
-                              col_subset = NULL, placeholder = "", onInitialize, none_label="No variable selected") {
+                              col_subset = NULL, placeholder = "", onInitialize, none_label="No variable selected",maxItems=NULL) {
   datar <- if (is.reactive(data)) data else reactive(data)
   col_subsetr <- if (is.reactive(col_subset)) col_subset else reactive(col_subset)
 
@@ -322,7 +323,8 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
                  escape(item.data.name) +
                '</div>';
         }
-      }"))
+      }")),
+      if (!is.null(maxItems)) list(maxItems=maxItems)
     )
   )
 }
@@ -1201,39 +1203,48 @@ data_visuals_server <- function(id,
           data = plot_data
         )
 
-        shiny::selectizeInput(
+        plots_named <- get_plot_options(plots) |>
+          lapply(\(.x){
+            stats::setNames(.x$descr,.x$note)
+          })
+
+        vectorSelectInput(
           inputId = ns("type"),
           selected = NULL,
           label = shiny::h4("Plot type"),
-          choices = plots,
+          choices = Reduce(c,plots_named),
           multiple = FALSE
         )
       })
 
       rv$plot.params <- shiny::reactive({
-        get_plot_options(input$type)
+        get_plot_options(input$type) |> purrr::pluck(1)
       })
 
       output$secondary <- shiny::renderUI({
         shiny::req(input$type)
         # browser()
 
+        cols <- c(
+          rv$plot.params()[["secondary.extra"]],
+          all_but(
+            colnames(subset_types(
+              data(),
+              rv$plot.params()[["secondary.type"]]
+            )),
+            input$primary
+          )
+        )
+
         columnSelectInput(
           inputId = ns("secondary"),
           data = data,
+          selected = 1,
           placeholder = "Select variable",
           label = "Secondary/group variable",
-          multiple = FALSE,
-          col_subset = c(
-            purrr::pluck(rv$plot.params(), 1)[["secondary.extra"]],
-            all_but(
-              colnames(subset_types(
-                data(),
-                purrr::pluck(rv$plot.params(), 1)[["secondary.type"]]
-              )),
-              input$primary
-            )
-          ),
+          multiple = rv$plot.params()[["secondary.multi"]],
+          maxItems = rv$plot.params()[["secondary.max"]],
+          col_subset = cols,
           none_label = "No variable"
         )
       })
@@ -1251,7 +1262,7 @@ data_visuals_server <- function(id,
             all_but(
               colnames(subset_types(
                 data(),
-                purrr::pluck(rv$plot.params(), 1)[["tertiary.type"]]
+                rv$plot.params()[["tertiary.type"]]
               )),
               input$primary,
               input$secondary
@@ -1266,9 +1277,12 @@ data_visuals_server <- function(id,
         shiny::req(input$type)
         shiny::req(input$secondary)
         shiny::req(input$tertiary)
+        # if (length(input$secondary)>1){
+        #   browser()
+        # }
         create_plot(
           data = data(),
-          type = names(rv$plot.params()),
+          type = rv$plot.params()[["fun"]],
           x = input$primary,
           y = input$secondary,
           z = input$tertiary
@@ -1364,20 +1378,24 @@ subset_types <- function(data, types, type.fun = outcome_type) {
 supported_plots <- function() {
   list(
     plot_hbars = list(
+      fun = "plot_hbars",
       descr = "Stacked horizontal bars",
       note = "A classical way of visualising the distribution of an ordinal scale like the modified Ranking Scale and known as Grotta bars",
       primary.type = c("dichotomous", "ordinal"),
       secondary.type = c("dichotomous", "ordinal"),
+      secondary.multi = FALSE,
       tertiary.type = c("dichotomous", "ordinal"),
       secondary.extra = "none"
     ),
     plot_violin = list(
+      fun = "plot_violin",
       descr = "Violin plot",
       note = "A modern alternative to the classic boxplot to visualise data distribution",
       primary.type = c("continuous", "dichotomous", "ordinal"),
       secondary.type = c("dichotomous", "ordinal"),
-      tertiary.type = c("dichotomous", "ordinal"),
-      secondary.extra = "none"
+      secondary.multi = FALSE,
+      secondary.extra = "none",
+      tertiary.type = c("dichotomous", "ordinal")
     ),
     # plot_ridge = list(
     #   descr = "Ridge plot",
@@ -1388,25 +1406,40 @@ supported_plots <- function() {
     #   secondary.extra = NULL
     # ),
     plot_sankey = list(
+      fun = "plot_sankey",
       descr = "Sankey plot",
       note = "A way of visualising change between groups",
       primary.type = c("dichotomous", "ordinal"),
       secondary.type = c("dichotomous", "ordinal"),
-      tertiary.type = c("dichotomous", "ordinal"),
-      secondary.extra = NULL
+      secondary.multi = FALSE,
+      secondary.extra = NULL,
+      tertiary.type = c("dichotomous", "ordinal")
     ),
     plot_scatter = list(
+      fun = "plot_scatter",
       descr = "Scatter plot",
       note = "A classic way of showing the association between to variables",
       primary.type = "continuous",
       secondary.type = c("continuous", "ordinal"),
+      secondary.multi = FALSE,
+      tertiary.type = c("dichotomous", "ordinal"),
+      secondary.extra = NULL
+    ),
+    plot_euler = list(
+      fun = "plot_euler",
+      descr = "Euler diagram",
+      note = "Generate area-proportional Euler diagrams to display set relationships",
+      primary.type = "dichotomous",
+      secondary.type = "dichotomous",
+      secondary.multi = TRUE,
+      secondary.max = 4,
       tertiary.type = c("dichotomous", "ordinal"),
       secondary.extra = NULL
     )
   )
 }
 
-#' Title
+#' Plot nice ridge plot
 #'
 #' @returns ggplot2 object
 #' @export
@@ -1522,7 +1555,7 @@ get_plot_options <- function(data) {
 #' @examples
 #' create_plot(mtcars, "plot_violin", "mpg", "cyl")
 create_plot <- function(data, type, x, y, z = NULL, ...) {
-  if (!y %in% names(data)) {
+  if (!any(y %in% names(data))) {
     y <- NULL
   }
 
@@ -1722,63 +1755,7 @@ plot_scatter <- function(data, x, y, z = NULL) {
   }
 }
 
-#' Readying data for sankey plot
-#'
-#' @name data-plots
-#'
-#' @returns data.frame
-#' @export
-#'
-#' @examples
-#' ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = sample(c(letters[1:4], NA), 100, TRUE, prob = c(rep(.23, 4), .08)))
-#' ds |> sankey_ready("first", "last")
-#' ds |> sankey_ready("first", "last", numbers = "percentage")
-sankey_ready <- function(data, x, y, z = NULL, numbers = "count") {
-  ## TODO: Ensure ordering x and y
 
-  if (is.null(z)) {
-    out <- dplyr::count(data, !!dplyr::sym(x), !!dplyr::sym(y))
-  } else {
-    out <- dplyr::count(data, !!dplyr::sym(x), !!dplyr::sym(y), !!dplyr::sym(z))
-  }
-  out <- out |>
-    dplyr::group_by(!!dplyr::sym(x)) |>
-    dplyr::mutate(gx.sum = sum(n)) |>
-    dplyr::ungroup() |>
-    dplyr::group_by(!!dplyr::sym(y)) |>
-    dplyr::mutate(gy.sum = sum(n)) |>
-    dplyr::ungroup()
-
-  if (numbers == "count") {
-    out <- out |> dplyr::mutate(
-      lx = factor(paste0(!!dplyr::sym(x), "\n(n=", gx.sum, ")")),
-      ly = factor(paste0(!!dplyr::sym(y), "\n(n=", gy.sum, ")"))
-    )
-  } else if (numbers == "percentage") {
-    out <- out |> dplyr::mutate(
-      lx = factor(paste0(!!dplyr::sym(x), "\n(", round((gx.sum / sum(n)) * 100, 1), "%)")),
-      ly = factor(paste0(!!dplyr::sym(y), "\n(", round((gy.sum / sum(n)) * 100, 1), "%)"))
-    )
-  }
-
-  if (is.factor(data[[x]])) {
-    index <- match(levels(data[[x]]), str_remove_last(levels(out$lx), "\n"))
-    out$lx <- factor(out$lx, levels = levels(out$lx)[index])
-  }
-
-  if (is.factor(data[[y]])) {
-    index <- match(levels(data[[y]]), str_remove_last(levels(out$ly), "\n"))
-    out$ly <- factor(out$ly, levels = levels(out$ly)[index])
-  }
-
-  out
-}
-
-str_remove_last <- function(data, pattern = "\n") {
-  strsplit(data, split = pattern) |>
-    lapply(\(.x)paste(unlist(.x[[-length(.x)]]), collapse = pattern)) |>
-    unlist()
-}
 
 #' Line breaking at given number of characters for nicely plotting labels
 #'
@@ -1792,7 +1769,7 @@ str_remove_last <- function(data, pattern = "\n") {
 #'
 #' @examples
 #' "Lorem ipsum... you know the routine" |> line_break()
-#' paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(fixed=TRUE)
+#' paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(fixed = TRUE)
 line_break <- function(data, lineLength = 20, fixed = FALSE) {
   if (isTRUE(force)) {
     gsub(paste0("(.{1,", lineLength, "})(\\s|[[:alnum:]])"), "\\1\n", data)
@@ -1802,135 +1779,7 @@ line_break <- function(data, lineLength = 20, fixed = FALSE) {
   ## https://stackoverflow.com/a/29847221
 }
 
-#' Beautiful sankey plot with option to split by a tertiary group
-#'
-#' @returns ggplot2 object
-#' @export
-#'
-#' @name data-plots
-#'
-#' @examples
-#' ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)))
-#' ds |> plot_sankey("first", "last")
-#' ds |> plot_sankey("first", "last", color.group = "y")
-#' ds |> plot_sankey("first", "last", z = "g", color.group = "y")
-plot_sankey <- function(data, x, y, z = NULL, color.group = "x", colors = NULL) {
-  if (!is.null(z)) {
-    ds <- split(data, data[z])
-  } else {
-    ds <- list(data)
-  }
 
-  out <- lapply(ds, \(.ds){
-    plot_sankey_single(.ds, x = x, y = y, color.group = color.group, colors = colors)
-  })
-
-  patchwork::wrap_plots(out)
-}
-
-default_theme <- function() {
-  theme_void()
-}
-
-#' Beautiful sankey plot
-#'
-#' @param color.group set group to colour by. "x" or "y".
-#' @param colors optinally specify colors. Give NA color, color for each level
-#' in primary group and color for each level in secondary group.
-#' @param ... passed to sankey_ready()
-#'
-#' @returns ggplot2 object
-#' @export
-#'
-#' @examples
-#' ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)))
-#' ds |> plot_sankey_single("first", "last")
-#' ds |> plot_sankey_single("first", "last", color.group = "y")
-plot_sankey_single <- function(data, x, y, color.group = c("x","y"), colors = NULL, ...) {
-  color.group <- match.arg(color.group)
-  data <- data |> sankey_ready(x = x, y = y, ...)
-  # browser()
-  library(ggalluvial)
-
-  na.color <- "#2986cc"
-  box.color <- "#1E4B66"
-
-  if (is.null(colors)) {
-    if (color.group == "y") {
-      main.colors <- viridisLite::viridis(n = length(levels(data[[y]])))
-      secondary.colors <- rep(na.color, length(levels(data[[x]])))
-      label.colors <- Reduce(c, lapply(list(secondary.colors, rev(main.colors)), contrast_text))
-    } else {
-      main.colors <- viridisLite::viridis(n = length(levels(data[[x]])))
-      secondary.colors <- rep(na.color, length(levels(data[[y]])))
-      label.colors <- Reduce(c, lapply(list(rev(main.colors), secondary.colors), contrast_text))
-    }
-    colors <- c(na.color, main.colors, secondary.colors)
-  } else {
-    label.colors <- contrast_text(colors)
-  }
-
-  group_labels <- c(get_label(data, x), get_label(data, y)) |>
-    sapply(line_break) |>
-    unname()
-
-  p <- ggplot2::ggplot(data, ggplot2::aes(y = n, axis1 = lx, axis2 = ly))
-
-  if (color.group == "y") {
-    p <- p +
-      ggalluvial::geom_alluvium(
-        ggplot2::aes(fill = !!dplyr::sym(y), color = !!dplyr::sym(y)),
-        width = 1 / 16,
-        alpha = .8,
-        knot.pos = 0.4,
-        curve_type = "sigmoid"
-      ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(y)),
-        size = 2,
-        width = 1 / 3.4
-      )
-  } else {
-    p <- p +
-      ggalluvial::geom_alluvium(
-        ggplot2::aes(fill = !!dplyr::sym(x), color = !!dplyr::sym(x)),
-        width = 1 / 16,
-        alpha = .8,
-        knot.pos = 0.4,
-        curve_type = "sigmoid"
-      ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(x)),
-        size = 2,
-        width = 1 / 3.4
-      )
-  }
-
-  p +
-    ggplot2::geom_text(
-      stat = "stratum",
-      ggplot2::aes(label = after_stat(stratum)),
-      colour = label.colors,
-      size = 8,
-      lineheight = 1
-    ) +
-    ggplot2::scale_x_continuous(
-      breaks = 1:2,
-      labels = group_labels
-    ) +
-    ggplot2::scale_fill_manual(values = colors[-1], na.value = colors[1]) +
-    ggplot2::scale_color_manual(values = main.colors) +
-    ggplot2::theme_void() +
-    ggplot2::theme(
-      legend.position = "none",
-      # panel.grid.major = element_blank(),
-      # panel.grid.minor = element_blank(),
-      # axis.text.y = element_blank(),
-      # axis.title.y = element_blank(),
-      axis.text.x = ggplot2::element_text(size = 20),
-      # text = element_text(size = 5),
-      # plot.title = element_blank(),
-      # panel.background = ggplot2::element_rect(fill = "white"),
-      plot.background = ggplot2::element_rect(fill = "white"),
-      panel.border = ggplot2::element_blank()
-    )
-}
 
 
 ########
@@ -2681,6 +2530,20 @@ append_list <- function(data,list,index){
 }
 
 
+#' Get missingsness fraction
+#'
+#' @param data data
+#'
+#' @returns numeric vector
+#' @export
+#'
+#' @examples
+#' c(NA,1:10,rep(NA,3)) |> missing_fraction()
+missing_fraction <- function(data){
+  NROW(data[is.na(data)])/NROW(data)
+}
+
+
 ########
 #### Current file: R//import-file-ext.R 
 ########
@@ -2690,12 +2553,9 @@ append_list <- function(data,list,index){
 #'
 #' @description Let user upload a file and import data
 #'
-#' @inheritParams import-globalenv
 #' @param preview_data Show or not a preview of the data under the file input.
 #' @param file_extensions File extensions accepted by [shiny::fileInput()], can also be MIME type.
 #' @param layout_params How to display import parameters : in a dropdown button or inline below file input.
-#'
-#' @template module-import
 #'
 #' @export
 #'
@@ -2707,7 +2567,6 @@ append_list <- function(data,list,index){
 #' @importFrom phosphoricons ph
 #' @importFrom toastui datagridOutput2
 #'
-#' @example examples/from-file.R
 import_file_ui <- function(id,
                            title = TRUE,
                            preview_data = TRUE,
@@ -2858,7 +2717,6 @@ import_file_ui <- function(id,
 }
 
 
-#' @inheritParams import_globalenv_server
 #' @param read_fns Named list with custom function(s) to read data:
 #'  * the name must be the extension of the files to which the function will be applied
 #'  * the value must be a function that can have 5 arguments (you can ignore some of them, but you have to use the same names),
@@ -2882,7 +2740,6 @@ import_file_ui <- function(id,
 #' @importFrom tools file_ext
 #' @importFrom utils head
 #' @importFrom toastui renderDatagrid2 datagrid
-#' @importFrom datamods split_char
 #'
 #' @rdname import-file
 import_file_server <- function(id,
@@ -3107,6 +2964,47 @@ import_delim <- function(file, skip, encoding, na.strings) {
   )
 }
 
+#' @title Create a select input control with icon(s)
+#'
+#' @description Extend form controls by adding text or icons before,
+#'  after, or on both sides of a classic `selectInput`.
+#'
+#' @inheritParams shiny::selectInput
+#'
+#' @return A numeric input control that can be added to a UI definition.
+#' @export
+#'
+#' @importFrom shiny restoreInput
+#' @importFrom htmltools tags validateCssUnit css
+#'
+selectInputIcon <- function(inputId,
+                            label,
+                            choices,
+                            selected = NULL,
+                            multiple = FALSE,
+                            selectize = TRUE,
+                            size = NULL,
+                            width = NULL,
+                            icon = NULL) {
+  selected <- shiny::restoreInput(id = inputId, default = selected)
+  tags$div(
+    class = "form-group shiny-input-container",
+    shinyWidgets:::label_input(inputId, label),
+    style = htmltools:::css(width = htmltools:::validateCssUnit(width)),
+    tags$div(
+      class = "input-group",
+      class = shinyWidgets:::validate_size(size),
+      shinyWidgets:::markup_input_group(icon, "left", theme_func = shiny::getCurrentTheme),
+      shiny::tags$select(
+        id = inputId,
+        class = "form-control select-input-icon",
+        shiny:::selectOptions(choices, selected, inputId, selectize)
+      ),
+      shinyWidgets:::markup_input_group(icon, "right", theme_func = shiny::getCurrentTheme)
+    ),
+    shinyWidgets:::html_dependency_input_icons()
+  )
+}
 
 
 
@@ -3175,6 +3073,350 @@ server <- function(input, output, session) {
 
 if (interactive())
   shinyApp(ui, server)
+
+
+
+
+########
+#### Current file: R//plot_euler.R 
+########
+
+#' Area proportional venn diagrams
+#'
+#' @description
+#' THis is slightly modified from https://gist.github.com/danlooo/d23d8bcf8856c7dd8e86266097404ded
+#'
+#' This functions uses eulerr::euler to plot area proportional venn diagramms
+#' but plots it using ggplot2
+#'
+#' @param combinations set relationships as a named numeric vector, matrix, or
+#' data.frame(See `eulerr::euler`)
+#' @param show_quantities whether to show number of intersecting elements
+#' @param show_labels whether to show set names
+#' @param ... further arguments passed to eulerr::euler
+ggeulerr <- function(
+    combinations,
+    show_quantities = TRUE,
+    show_labels = TRUE,
+    ...) {
+  # browser()
+  data <-
+    eulerr::euler(combinations = combinations, ...) |>
+    plot(quantities = show_quantities) |>
+    purrr::pluck("data")
+
+
+  tibble::as_tibble(data$ellipses, rownames = "Variables") |>
+    ggplot2::ggplot() +
+    ggforce::geom_ellipse(
+      mapping = ggplot2::aes(
+        x0 = h, y0 = k, a = a, b = b, angle = 0, fill = Variables
+      ),
+      alpha = 0.5,
+      linewidth = 1.5
+    ) +
+    ggplot2::geom_text(
+      data = {
+        data$centers |>
+          dplyr::mutate(
+            label = labels |> purrr::map2(quantities, ~ {
+              if (!is.na(.x) && !is.na(.y) && show_labels) {
+                paste0(.x, "\n", sprintf(.y, fmt = "%.2g"))
+              } else if (!is.na(.x) && show_labels) {
+                .x
+              } else if (!is.na(.y)) {
+                .y
+              } else {
+                ""
+              }
+            })
+          )
+      },
+      mapping = ggplot2::aes(x = x, y = y, label = label),
+      size = 8
+    ) +
+    ggplot2::theme(panel.grid = ggplot2::element_blank()) +
+    ggplot2::coord_fixed() +
+    ggplot2::scale_fill_hue()
+}
+
+#' Easily plot euler diagrams
+#'
+#' @param data data
+#' @param x name of main variable
+#' @param y name of secondary variables
+#' @param z grouping variable
+#' @param seed seed
+#'
+#' @returns patchwork object
+#' @export
+#'
+#' @examples
+#' data.frame(
+#'   A = sample(c(TRUE, TRUE, FALSE), 50, TRUE),
+#'   B = sample(c("A", "C"), 50, TRUE),
+#'   C = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE),
+#'   D = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE)
+#' ) |> plot_euler("A", c("B", "C"), "D", seed = 4)
+#' mtcars |> plot_euler("vs", "am", seed = 1)
+plot_euler <- function(data, x, y, z = NULL, seed = 2103) {
+  set.seed(seed = seed)
+
+  # data <- data[c(...,z)]
+
+  if (!is.null(z)) {
+    ds <- split(data, data[z])
+  } else {
+    ds <- list(data)
+  }
+
+  out <- lapply(ds, \(.x){
+    .x[c(x, y)] |>
+      as.data.frame() |>
+      plot_euler_single()
+  })
+
+  patchwork::wrap_plots(out, guides = "collect")
+}
+
+
+#' Easily plot single euler diagrams
+#'
+#' @returns ggplot2 object
+#' @export
+#'
+#' @examples
+#' data.frame(
+#'   A = sample(c(TRUE, TRUE, FALSE), 50, TRUE),
+#'   B = sample(c("A", "C"), 50, TRUE),
+#'   C = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE),
+#'   D = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE)
+#' ) |> plot_euler_single()
+#' mtcars[c("vs", "am")] |> plot_euler_single()
+plot_euler_single <- function(data) {
+  data |>
+    ggeulerr(shape = "circle") +
+    ggplot2::theme_void() +
+    ggplot2::theme(
+      legend.position = "right",
+      # panel.grid.major = element_blank(),
+      # panel.grid.minor = element_blank(),
+      # axis.text.y = element_blank(),
+      # axis.title.y = element_blank(),
+      text = ggplot2::element_text(size = 20),
+      axis.text = ggplot2::element_blank(),
+      # plot.title = element_blank(),
+      # panel.background = ggplot2::element_rect(fill = "white"),
+      plot.background = ggplot2::element_rect(fill = "white"),
+      panel.border = ggplot2::element_blank()
+    )
+}
+
+
+########
+#### Current file: R//plot_sankey.R 
+########
+
+#' Readying data for sankey plot
+#'
+#' @name data-plots
+#'
+#' @returns data.frame
+#' @export
+#'
+#' @examples
+#' ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = sample(c(letters[1:4], NA), 100, TRUE, prob = c(rep(.23, 4), .08)))
+#' ds |> sankey_ready("first", "last")
+#' ds |> sankey_ready("first", "last", numbers = "percentage")
+#' data.frame(
+#'   g = sample(LETTERS[1:2], 100, TRUE),
+#'   first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)),
+#'   last = sample(c(TRUE, FALSE, FALSE), 100, TRUE)
+#' ) |>
+#'   sankey_ready("first", "last")
+sankey_ready <- function(data, x, y, numbers = "count", ...) {
+  ## TODO: Ensure ordering x and y
+
+  ## Ensure all are factors
+  data[c(x, y)] <- data[c(x, y)] |>
+    dplyr::mutate(dplyr::across(!dplyr::where(is.factor), forcats::as_factor))
+
+  out <- dplyr::count(data, !!dplyr::sym(x), !!dplyr::sym(y))
+
+  out <- out |>
+    dplyr::group_by(!!dplyr::sym(x)) |>
+    dplyr::mutate(gx.sum = sum(n)) |>
+    dplyr::ungroup() |>
+    dplyr::group_by(!!dplyr::sym(y)) |>
+    dplyr::mutate(gy.sum = sum(n)) |>
+    dplyr::ungroup()
+
+  if (numbers == "count") {
+    out <- out |> dplyr::mutate(
+      lx = factor(paste0(!!dplyr::sym(x), "\n(n=", gx.sum, ")")),
+      ly = factor(paste0(!!dplyr::sym(y), "\n(n=", gy.sum, ")"))
+    )
+  } else if (numbers == "percentage") {
+    out <- out |> dplyr::mutate(
+      lx = factor(paste0(!!dplyr::sym(x), "\n(", round((gx.sum / sum(n)) * 100, 1), "%)")),
+      ly = factor(paste0(!!dplyr::sym(y), "\n(", round((gy.sum / sum(n)) * 100, 1), "%)"))
+    )
+  }
+
+  if (is.factor(data[[x]])) {
+    index <- match(levels(data[[x]]), str_remove_last(levels(out$lx), "\n"))
+    out$lx <- factor(out$lx, levels = levels(out$lx)[index])
+  }
+
+  if (is.factor(data[[y]])) {
+    index <- match(levels(data[[y]]), str_remove_last(levels(out$ly), "\n"))
+    out$ly <- factor(out$ly, levels = levels(out$ly)[index])
+  }
+
+  out
+}
+
+str_remove_last <- function(data, pattern = "\n") {
+  strsplit(data, split = pattern) |>
+    lapply(\(.x)paste(unlist(.x[[-length(.x)]]), collapse = pattern)) |>
+    unlist()
+}
+
+#' Beautiful sankey plot with option to split by a tertiary group
+#'
+#' @returns ggplot2 object
+#' @export
+#'
+#' @name data-plots
+#'
+#' @examples
+#' ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)))
+#' ds |> plot_sankey("first", "last")
+#' ds |> plot_sankey("first", "last", color.group = "y")
+#' ds |> plot_sankey("first", "last", z = "g", color.group = "y")
+plot_sankey <- function(data, x, y, z = NULL, color.group = "x", colors = NULL) {
+  if (!is.null(z)) {
+    ds <- split(data, data[z])
+  } else {
+    ds <- list(data)
+  }
+
+  out <- lapply(ds, \(.ds){
+    plot_sankey_single(.ds, x = x, y = y, color.group = color.group, colors = colors)
+  })
+
+  patchwork::wrap_plots(out)
+}
+
+default_theme <- function() {
+  theme_void()
+}
+
+#' Beautiful sankey plot
+#'
+#' @param color.group set group to colour by. "x" or "y".
+#' @param colors optinally specify colors. Give NA color, color for each level
+#' in primary group and color for each level in secondary group.
+#' @param ... passed to sankey_ready()
+#'
+#' @returns ggplot2 object
+#' @export
+#'
+#' @examples
+#' ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)))
+#' ds |> plot_sankey_single("first", "last")
+#' ds |> plot_sankey_single("first", "last", color.group = "y")
+#' data.frame(
+#'   g = sample(LETTERS[1:2], 100, TRUE),
+#'   first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)),
+#'   last = sample(c(TRUE, FALSE, FALSE), 100, TRUE)
+#' ) |>
+#'   plot_sankey_single("first", "last", color.group = "x")
+plot_sankey_single <- function(data, x, y, color.group = c("x", "y"), colors = NULL, ...) {
+  color.group <- match.arg(color.group)
+  data <- data |> sankey_ready(x = x, y = y, ...)
+
+  library(ggalluvial)
+
+  na.color <- "#2986cc"
+  box.color <- "#1E4B66"
+
+  if (is.null(colors)) {
+    if (color.group == "y") {
+      main.colors <- viridisLite::viridis(n = length(levels(data[[y]])))
+      secondary.colors <- rep(na.color, length(levels(data[[x]])))
+      label.colors <- Reduce(c, lapply(list(secondary.colors, rev(main.colors)), contrast_text))
+    } else {
+      main.colors <- viridisLite::viridis(n = length(levels(data[[x]])))
+      secondary.colors <- rep(na.color, length(levels(data[[y]])))
+      label.colors <- Reduce(c, lapply(list(rev(main.colors), secondary.colors), contrast_text))
+    }
+    colors <- c(na.color, main.colors, secondary.colors)
+  } else {
+    label.colors <- contrast_text(colors)
+  }
+
+  group_labels <- c(get_label(data, x), get_label(data, y)) |>
+    sapply(line_break) |>
+    unname()
+
+  p <- ggplot2::ggplot(data, ggplot2::aes(y = n, axis1 = lx, axis2 = ly))
+
+  if (color.group == "y") {
+    p <- p +
+      ggalluvial::geom_alluvium(
+        ggplot2::aes(fill = !!dplyr::sym(y), color = !!dplyr::sym(y)),
+        width = 1 / 16,
+        alpha = .8,
+        knot.pos = 0.4,
+        curve_type = "sigmoid"
+      ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(y)),
+        size = 2,
+        width = 1 / 3.4
+      )
+  } else {
+    p <- p +
+      ggalluvial::geom_alluvium(
+        ggplot2::aes(fill = !!dplyr::sym(x), color = !!dplyr::sym(x)),
+        width = 1 / 16,
+        alpha = .8,
+        knot.pos = 0.4,
+        curve_type = "sigmoid"
+      ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(x)),
+        size = 2,
+        width = 1 / 3.4
+      )
+  }
+
+  p +
+    ggplot2::geom_text(
+      stat = "stratum",
+      ggplot2::aes(label = after_stat(stratum)),
+      colour = label.colors,
+      size = 8,
+      lineheight = 1
+    ) +
+    ggplot2::scale_x_continuous(
+      breaks = 1:2,
+      labels = group_labels
+    ) +
+    ggplot2::scale_fill_manual(values = colors[-1], na.value = colors[1]) +
+    ggplot2::scale_color_manual(values = main.colors) +
+    ggplot2::theme_void() +
+    ggplot2::theme(
+      legend.position = "none",
+      # panel.grid.major = element_blank(),
+      # panel.grid.minor = element_blank(),
+      # axis.text.y = element_blank(),
+      # axis.title.y = element_blank(),
+      axis.text.x = ggplot2::element_text(size = 20),
+      # text = element_text(size = 5),
+      # plot.title = element_blank(),
+      # panel.background = ggplot2::element_rect(fill = "white"),
+      plot.background = ggplot2::element_rect(fill = "white"),
+      panel.border = ggplot2::element_blank()
+    )
+}
 
 
 ########
@@ -4005,8 +4247,8 @@ outcome_type <- function(data) {
   cl_d <- class(data)
   if (any(c("numeric", "integer") %in% cl_d)) {
     out <- "continuous"
-  } else if (identical("factor", cl_d)) {
-    if (length(levels(data)) == 2) {
+  } else if (any(c("factor", "logical") %in% cl_d)) {
+    if (length(levels(data)) == 2 | identical("logical",cl_d)) {
       out <- "dichotomous"
     } else if (length(levels(data)) > 2) {
       out <- "ordinal"
@@ -4728,56 +4970,6 @@ modify_qmd <- function(file, format) {
     writeLines(paste0(tools::file_path_sans_ext(file), "_format.", tools::file_ext(file)))
 }
 
-
-
-########
-#### Current file: R//selectInputIcon.R 
-########
-
-#' @title Create a select input control with icon(s)
-#'
-#' @description Extend form controls by adding text or icons before,
-#'  after, or on both sides of a classic `selectInput`.
-#'
-#' @inheritParams shiny::selectInput
-#' @inheritParams textInputIcon
-#'
-#' @return A numeric input control that can be added to a UI definition.
-#' @seealso See [updateNumericInputIcon()] to update server-side, and [textInputIcon()] for using text value.
-#' @export
-#'
-#' @importFrom shiny restoreInput
-#' @importFrom htmltools tags validateCssUnit css
-#'
-#' @example examples/numericInputIcon.R
-selectInputIcon <- function(inputId,
-                            label,
-                            choices,
-                            selected = NULL,
-                            multiple = FALSE,
-                            selectize = TRUE,
-                            size = NULL,
-                            width = NULL,
-                            icon = NULL) {
-  selected <- shiny::restoreInput(id = inputId, default = selected)
-  tags$div(
-    class = "form-group shiny-input-container",
-    shinyWidgets:::label_input(inputId, label),
-    style = htmltools:::css(width = htmltools:::validateCssUnit(width)),
-    tags$div(
-      class = "input-group",
-      class = shinyWidgets:::validate_size(size),
-      shinyWidgets:::markup_input_group(icon, "left", theme_func = shiny::getCurrentTheme),
-      shiny::tags$select(
-        id = inputId,
-        class = "form-control numeric-input-icon",
-        shiny:::selectOptions(choices, selected, inputId, selectize)
-      ),
-      shinyWidgets:::markup_input_group(icon, "right", theme_func = shiny::getCurrentTheme)
-    ),
-    shinyWidgets:::html_dependency_input_icons()
-  )
-}
 
 
 ########
@@ -6216,13 +6408,13 @@ ui_elements <- list(
         ),
         shiny::br(),
         shiny::br(),
-        shiny::h5("Exclude in-complete variables"),
+        shiny::h5("Specify variables to include"),
         shiny::fluidRow(
           shiny::column(
             width = 6,
             shiny::br(),
+            shiny::p("Filter by completeness threshold and manual selection:"),
             shiny::br(),
-            shiny::p("Filter incomplete variables, by setting a completeness threshold:"),
             shiny::br()
           ),
           shiny::column(
@@ -6237,7 +6429,10 @@ ui_elements <- list(
               format = shinyWidgets::wNumbFormat(decimals = 0),
               color = datamods:::get_primary_color()
             ),
-            shiny::helpText("Include variables with completeness above the specified percentage.")
+            shiny::helpText("Filter variables with completeness above the specified percentage."),
+            shiny::br(),
+            shiny::br(),
+            shiny::uiOutput(outputId = "import_var")
           )
         ),
         shiny::br(),
@@ -6860,6 +7055,7 @@ server <- function(input, output, session) {
     ready = NULL,
     test = "no",
     data_original = NULL,
+    data_temp = NULL,
     data = NULL,
     data_filtered = NULL,
     models = NULL,
@@ -6893,7 +7089,7 @@ server <- function(input, output, session) {
         haven::read_dta(
           file = file,
           .name_repair = "unique_quiet"
-          )
+        )
       },
       # csv = function(file) {
       #   readr::read_csv(
@@ -6912,7 +7108,7 @@ server <- function(input, output, session) {
           skip_empty_rows = TRUE,
           start_row = skip - 1,
           na.strings = na
-          )
+        )
       },
       xlsx = function(file, which, skip, na) {
         openxlsx2::read_xlsx(
@@ -6920,36 +7116,38 @@ server <- function(input, output, session) {
           sheet = sheet,
           skip_empty_rows = TRUE,
           start_row = skip - 1,
-          na.strings = na)
+          na.strings = na
+        )
       },
       rds = function(file) {
         readr::read_rds(
           file = file,
-          name_repair = "unique_quiet")
+          name_repair = "unique_quiet"
+        )
       }
     )
   )
 
   shiny::observeEvent(data_file$data(), {
     shiny::req(data_file$data())
-    rv$data_original <- data_file$data()
+    rv$data_temp <- data_file$data()
     rv$code <- append_list(data = data_file$code(), list = rv$code, index = "import")
   })
 
   data_redcap <- m_redcap_readServer(
-    id = "redcap_import"#,
+    id = "redcap_import" # ,
     # output.format = "list"
   )
 
   shiny::observeEvent(data_redcap(), {
     # rv$data_original <- purrr::pluck(data_redcap(), "data")()
-    rv$data_original <- data_redcap()
+    rv$data_temp <- data_redcap()
   })
 
   output$redcap_prev <- DT::renderDT(
     {
       DT::datatable(head(data_redcap(), 5),
-      # DT::datatable(head(purrr::pluck(data_redcap(), "data")(), 5),
+        # DT::datatable(head(purrr::pluck(data_redcap(), "data")(), 5),
         caption = "First 5 observations"
       )
     },
@@ -6965,9 +7163,43 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(from_env$data(), {
     shiny::req(from_env$data())
-    rv$data_original <- from_env$data()
+
+    rv$data_temp <- from_env$data()
     # rv$code <- append_list(data = from_env$code(),list = rv$code,index = "import")
   })
+
+  output$import_var <- shiny::renderUI({
+    shiny::req(rv$data_temp)
+
+    preselect <- names(rv$data_temp)[sapply(rv$data_temp, missing_fraction) <= input$complete_cutoff / 100]
+
+    shinyWidgets::virtualSelectInput(
+      inputId = "import_var",
+      label = "Select variables to include",
+      selected = preselect,
+      choices = names(rv$data_temp),
+      updateOn = "close",
+      multiple = TRUE,
+      search = TRUE,
+      showValueAsTags = TRUE
+    )
+  })
+
+
+  shiny::observeEvent(
+    eventExpr = list(
+      input$import_var
+    ),
+    handlerExpr = {
+      shiny::req(rv$data_temp)
+
+      rv$data_original <- rv$data_temp |>
+        dplyr::select(input$import_var) |>
+        # janitor::clean_names() |>
+        default_parsing()
+    }
+  )
+
 
   shiny::observeEvent(rv$data_original, {
     if (is.null(rv$data_original) | NROW(rv$data_original) == 0) {
@@ -6991,26 +7223,20 @@ server <- function(input, output, session) {
     handlerExpr = {
       shiny::req(rv$data_original)
 
-      rv$data <- rv$data_original |>
-        # janitor::clean_names() |>
-        default_parsing() |>
-        remove_empty_cols(
-          cutoff = input$complete_cutoff / 100
-        )
+      rv$data <- rv$data_original
     }
   )
 
   ## For now this solution work, but I would prefer to solve this with the above
-  shiny::observeEvent(input$reset_confirm, {
-    if (isTRUE(input$reset_confirm)) {
-      shiny::req(rv$data_original)
-      rv$data <- rv$data_original |>
-        default_parsing() |>
-        remove_empty_cols(
-          cutoff = input$complete_cutoff / 100
-        )
-    }
-  }, ignoreNULL = TRUE)
+  shiny::observeEvent(input$reset_confirm,
+    {
+      if (isTRUE(input$reset_confirm)) {
+        shiny::req(rv$data_original)
+        rv$data <- rv$data_original
+      }
+    },
+    ignoreNULL = TRUE
+  )
 
 
   shiny::observeEvent(input$data_reset, {
@@ -7048,7 +7274,7 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_variables,
-    modal_update_variables("modal_variables",title = "Modify factor levels")
+    modal_update_variables("modal_variables", title = "Modify factor levels")
   )
 
 
@@ -7056,7 +7282,7 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_cut,
-    modal_cut_variable("modal_cut",title = "Modify factor levels")
+    modal_cut_variable("modal_cut", title = "Modify factor levels")
   )
 
   data_modal_cut <- cut_variable_server(
@@ -7087,7 +7313,7 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_column,
-    datamods::modal_create_column(id = "modal_column",footer = "This is only for advanced users!")
+    datamods::modal_create_column(id = "modal_column", footer = "This is only for advanced users!")
   )
   data_modal_r <- datamods::create_column_server(
     id = "modal_column",
@@ -7222,7 +7448,7 @@ server <- function(input, output, session) {
 
   output$code_import <- shiny::renderPrint({
     cat(rv$code$import)
-    })
+  })
 
   output$code_data <- shiny::renderPrint({
     attr(rv$data, "code")
@@ -7461,10 +7687,10 @@ server <- function(input, output, session) {
               ls <- do.call(
                 .fun,
                 c(
-                  list(data = rv$list$data|>
-                         (\(.x){
-                           .x[regression_vars()]
-                         })()),
+                  list(data = rv$list$data |>
+                    (\(.x){
+                      .x[regression_vars()]
+                    })()),
                   list(outcome.str = input$outcome_var),
                   list(fun.descr = input$regression_type)
                 )
