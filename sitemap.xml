@@ -36,6 +36,7 @@
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/getfun.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/gg_theme_export.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/gg_theme_shiny.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/reference/ggeulerr.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/grepl_fix.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/import-file.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/import_delim.html</loc></url>
@@ -50,10 +51,13 @@
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/line_break.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/m_datafileUI.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/merge_long.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/reference/missing_fraction.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/modify_qmd.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/outcome_type.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/overview_vars.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/plot.tbl_regression.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/reference/plot_euler.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/reference/plot_euler_single.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/plot_sankey_single.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/possible_functions.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/possible_plots.html</loc></url>
