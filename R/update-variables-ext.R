@@ -13,7 +13,7 @@ library(rlang)
 #'
 #' @name update-variables
 #'
-update_variables_ui <- function(id, title = TRUE) {
+update_variables_ui <- function(id, title = "") {
   ns <- NS(id)
   if (isTRUE(title)) {
     title <- htmltools::tags$h4(

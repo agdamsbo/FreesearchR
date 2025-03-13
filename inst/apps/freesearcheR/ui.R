@@ -172,9 +172,7 @@ ui_elements <- list(
           fluidRow(
             shiny::column(
               width = 9,
-              shiny::tags$p(shiny::markdown("Below, you can subset the data (select variables to include on clicking 'Apply changes'), rename variables, set new labels (for nicer tables in the report) and change variable classes (numeric, factor/categorical etc.).
-                            Italic text can be edited/changed.
-                            On the right, you can create and modify factor/categorical variables as well as create new variables with *R* code."))
+              shiny::tags$p(shiny::markdown("Below, are several options to update variables (rename, set new labels (for nicer tables in the report) and change variable classes (numeric, factor/categorical etc.).), modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code."))
             )
           ),
           shiny::tags$br(),
@@ -188,7 +186,7 @@ ui_elements <- list(
               fluidRow(
                 shiny::column(
                   width = 6,
-                  tags$h4("Update variables"),
+                  tags$h4("Update or modify variables"),
                   shiny::tags$br(),
                   shiny::actionButton(
                     inputId = "modal_variables",
@@ -215,11 +213,11 @@ ui_elements <- list(
                   shiny::tags$br(),
                   shiny::actionButton(
                     inputId = "modal_cut",
-                    label = "Create factor variable",
+                    label = "New factor",
                     width = "100%"
                   ),
                   shiny::tags$br(),
-                  shiny::helpText("Create factor/categorical variable from an other value."),
+                  shiny::helpText("Create factor/categorical variable from a continous variable (number/date/time)."),
                   shiny::tags$br(),
                   shiny::tags$br(),
                   shiny::actionButton(

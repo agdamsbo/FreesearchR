@@ -176,7 +176,7 @@ server <- function(input, output, session) {
       label = "Select variables to include",
       selected = preselect,
       choices = names(rv$data_temp),
-      updateOn = "close",
+      updateOn = "change",
       multiple = TRUE,
       search = TRUE,
       showValueAsTags = TRUE
@@ -272,7 +272,7 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_variables,
-    modal_update_variables("modal_variables", title = "Modify factor levels")
+    modal_update_variables("modal_variables", title = "Update and select variables")
   )
 
 
@@ -280,7 +280,7 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_cut,
-    modal_cut_variable("modal_cut", title = "Modify factor levels")
+    modal_cut_variable("modal_cut", title = "Create new factor")
   )
 
   data_modal_cut <- cut_variable_server(
@@ -294,7 +294,7 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_update,
-    datamods::modal_update_factor(id = "modal_update")
+    datamods::modal_update_factor(id = "modal_update", title = "Reorder factor levels")
   )
 
   data_modal_update <- datamods::update_factor_server(
@@ -311,7 +311,11 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_column,
-    datamods::modal_create_column(id = "modal_column", footer = "This is only for advanced users!")
+    datamods::modal_create_column(
+      id = "modal_column",
+      footer = "This window is aimed at advanced users and require some R-experience!",
+      title = "Create new variables"
+    )
   )
   data_modal_r <- datamods::create_column_server(
     id = "modal_column",
@@ -573,8 +577,8 @@ server <- function(input, output, session) {
       data_filter(),
       input$strat_var,
       input$include_vars,
-      input$add_p,
-      input$complete_cutoff
+      input$complete_cutoff,
+      input$add_p
     ),
     {
       shiny::req(input$strat_var)
@@ -643,7 +647,7 @@ server <- function(input, output, session) {
     data = shiny::reactive({
       shiny::req(rv$list$data)
       out <- rv$list$data
-      if (!is.null(input$outcome_var_cor) && input$outcome_var_cor!="none"){
+      if (!is.null(input$outcome_var_cor) && input$outcome_var_cor != "none") {
         out <- out[!names(out) %in% input$outcome_var_cor]
       }
       out

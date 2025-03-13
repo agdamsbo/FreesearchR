@@ -10,7 +10,7 @@
 #### Current file: R//app_version.R 
 ########
 
-app_version <- function()'250313_1343'
+app_version <- function()'250313_1502'
 
 
 ########
@@ -5795,7 +5795,7 @@ library(rlang)
 #'
 #' @name update-variables
 #'
-update_variables_ui <- function(id, title = TRUE) {
+update_variables_ui <- function(id, title = "") {
   ns <- NS(id)
   if (isTRUE(title)) {
     title <- htmltools::tags$h4(
@@ -6895,9 +6895,7 @@ ui_elements <- list(
           fluidRow(
             shiny::column(
               width = 9,
-              shiny::tags$p(shiny::markdown("Below, you can subset the data (select variables to include on clicking 'Apply changes'), rename variables, set new labels (for nicer tables in the report) and change variable classes (numeric, factor/categorical etc.).
-                            Italic text can be edited/changed.
-                            On the right, you can create and modify factor/categorical variables as well as create new variables with *R* code."))
+              shiny::tags$p(shiny::markdown("Below, are several options to update variables (rename, set new labels (for nicer tables in the report) and change variable classes (numeric, factor/categorical etc.).), modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code."))
             )
           ),
           shiny::tags$br(),
@@ -6911,7 +6909,7 @@ ui_elements <- list(
               fluidRow(
                 shiny::column(
                   width = 6,
-                  tags$h4("Update variables"),
+                  tags$h4("Update or modify variables"),
                   shiny::tags$br(),
                   shiny::actionButton(
                     inputId = "modal_variables",
@@ -6938,11 +6936,11 @@ ui_elements <- list(
                   shiny::tags$br(),
                   shiny::actionButton(
                     inputId = "modal_cut",
-                    label = "Create factor variable",
+                    label = "New factor",
                     width = "100%"
                   ),
                   shiny::tags$br(),
-                  shiny::helpText("Create factor/categorical variable from an other value."),
+                  shiny::helpText("Create factor/categorical variable from a continous variable (number/date/time)."),
                   shiny::tags$br(),
                   shiny::tags$br(),
                   shiny::actionButton(
@@ -7537,7 +7535,7 @@ server <- function(input, output, session) {
       label = "Select variables to include",
       selected = preselect,
       choices = names(rv$data_temp),
-      updateOn = "close",
+      updateOn = "change",
       multiple = TRUE,
       search = TRUE,
       showValueAsTags = TRUE
@@ -7633,7 +7631,7 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_variables,
-    modal_update_variables("modal_variables", title = "Modify factor levels")
+    modal_update_variables("modal_variables", title = "Update and select variables")
   )
 
 
@@ -7641,7 +7639,7 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_cut,
-    modal_cut_variable("modal_cut", title = "Modify factor levels")
+    modal_cut_variable("modal_cut", title = "Create new factor")
   )
 
   data_modal_cut <- cut_variable_server(
@@ -7655,7 +7653,7 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_update,
-    datamods::modal_update_factor(id = "modal_update")
+    datamods::modal_update_factor(id = "modal_update", title = "Reorder factor levels")
   )
 
   data_modal_update <- datamods::update_factor_server(
@@ -7672,7 +7670,11 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_column,
-    datamods::modal_create_column(id = "modal_column", footer = "This is only for advanced users!")
+    datamods::modal_create_column(
+      id = "modal_column",
+      footer = "This window is aimed at advanced users and require some R-experience!",
+      title = "Create new variables"
+    )
   )
   data_modal_r <- datamods::create_column_server(
     id = "modal_column",
@@ -7934,8 +7936,8 @@ server <- function(input, output, session) {
       data_filter(),
       input$strat_var,
       input$include_vars,
-      input$add_p,
-      input$complete_cutoff
+      input$complete_cutoff,
+      input$add_p
     ),
     {
       shiny::req(input$strat_var)
@@ -8004,7 +8006,7 @@ server <- function(input, output, session) {
     data = shiny::reactive({
       shiny::req(rv$list$data)
       out <- rv$list$data
-      if (!is.null(input$outcome_var_cor) && input$outcome_var_cor!="none"){
+      if (!is.null(input$outcome_var_cor) && input$outcome_var_cor != "none") {
         out <- out[!names(out) %in% input$outcome_var_cor]
       }
       out
