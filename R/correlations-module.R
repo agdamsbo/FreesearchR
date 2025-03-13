@@ -46,7 +46,8 @@ data_correlations_server <- function(id,
         } else {
           out <- data()
         }
-        out
+        out |> dplyr::mutate(dplyr::across(tidyselect::everything(),as.numeric))
+        # as.numeric()
       })
 
       # rv <- list()
@@ -74,7 +75,25 @@ data_correlations_server <- function(id,
       })
 
       output$correlation_plot <- shiny::renderPlot({
-        psych::pairs.panels(rv$data())
+        ggcorrplot::ggcorrplot(cor(rv$data())) +
+          # ggplot2::theme_void() +
+          ggplot2::theme(
+            # legend.position = "none",
+            legend.title = ggplot2::element_text(size = 20),
+            legend.text = ggplot2::element_text(size = 14),
+            # panel.grid.major = element_blank(),
+            # panel.grid.minor = element_blank(),
+            # axis.text.y = element_blank(),
+            # axis.title.y = element_blank(),
+            axis.text.x = ggplot2::element_text(size = 20),
+            axis.text.y = ggplot2::element_text(size = 20),
+            # text = element_text(size = 5),
+            # plot.title = element_blank(),
+            # panel.background = ggplot2::element_rect(fill = "white"),
+            # plot.background = ggplot2::element_rect(fill = "white"),
+            panel.border = ggplot2::element_blank()
+          )
+        # psych::pairs.panels(rv$data())
       })
     }
   )
@@ -114,7 +133,7 @@ sentence_paste <- function(data, and.str = "and") {
 }
 
 
-cor_app <- function() {
+cor_demo_app <- function() {
   ui <- shiny::fluidPage(
     shiny::sliderInput(
       inputId = "cor_cutoff",
@@ -128,9 +147,9 @@ cor_app <- function() {
     data_correlations_ui("data", height = 600)
   )
   server <- function(input, output, session) {
-    data_correlations_server("data", data = shiny::reactive(mtcars), cutoff = shiny::reactive(input$cor_cutoff))
+    data_correlations_server("data", data = shiny::reactive(default_parsing(mtcars)), cutoff = shiny::reactive(input$cor_cutoff))
   }
   shiny::shinyApp(ui, server)
 }
 
-cor_app()
+cor_demo_app()

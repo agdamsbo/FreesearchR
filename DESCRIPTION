@@ -68,7 +68,8 @@ Imports:
     REDCapCAST,
     eulerr,
     ggforce,
-    RcppArmadillo
+    RcppArmadillo,
+    ggcorrplot
 Suggests: 
     styler,
     devtools,

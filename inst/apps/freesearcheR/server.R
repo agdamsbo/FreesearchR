@@ -617,13 +617,14 @@ server <- function(input, output, session) {
   )
 
   output$outcome_var_cor <- shiny::renderUI({
-    shiny::selectInput(
+    columnSelectInput(
       inputId = "outcome_var_cor",
-      selected = NULL,
+      selected = "none",
+      data = rv$list$data,
       label = "Select outcome variable",
-      choices = c(
+      col_subset = c(
+        "none",
         colnames(rv$list$data)
-        # ,"none"
       ),
       multiple = FALSE
     )
@@ -641,10 +642,10 @@ server <- function(input, output, session) {
     id = "correlations",
     data = shiny::reactive({
       shiny::req(rv$list$data)
-      out <- dplyr::select(rv$list$data, -!!input$outcome_var_cor)
-      #  input$outcome_var_cor=="none"){
-      #   out <- rv$list$data
-      # }
+      out <- rv$list$data
+      if (!is.null(input$outcome_var_cor) && input$outcome_var_cor!="none"){
+        out <- out[!names(out) %in% input$outcome_var_cor]
+      }
       out
     }),
     cutoff = shiny::reactive(input$cor_cutoff)

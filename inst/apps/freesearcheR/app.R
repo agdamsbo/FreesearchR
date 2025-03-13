@@ -10,7 +10,7 @@
 #### Current file: R//app_version.R 
 ########
 
-app_version <- function()'250313_1240'
+app_version <- function()'250313_1343'
 
 
 ########
@@ -150,7 +150,8 @@ data_correlations_server <- function(id,
         } else {
           out <- data()
         }
-        out
+        out |> dplyr::mutate(dplyr::across(tidyselect::everything(),as.numeric))
+        # as.numeric()
       })
 
       # rv <- list()
@@ -178,7 +179,25 @@ data_correlations_server <- function(id,
       })
 
       output$correlation_plot <- shiny::renderPlot({
-        psych::pairs.panels(rv$data())
+        ggcorrplot::ggcorrplot(cor(rv$data())) +
+          # ggplot2::theme_void() +
+          ggplot2::theme(
+            # legend.position = "none",
+            legend.title = ggplot2::element_text(size = 20),
+            legend.text = ggplot2::element_text(size = 14),
+            # panel.grid.major = element_blank(),
+            # panel.grid.minor = element_blank(),
+            # axis.text.y = element_blank(),
+            # axis.title.y = element_blank(),
+            axis.text.x = ggplot2::element_text(size = 20),
+            axis.text.y = ggplot2::element_text(size = 20),
+            # text = element_text(size = 5),
+            # plot.title = element_blank(),
+            # panel.background = ggplot2::element_rect(fill = "white"),
+            # plot.background = ggplot2::element_rect(fill = "white"),
+            panel.border = ggplot2::element_blank()
+          )
+        # psych::pairs.panels(rv$data())
       })
     }
   )
@@ -218,7 +237,7 @@ sentence_paste <- function(data, and.str = "and") {
 }
 
 
-cor_app <- function() {
+cor_demo_app <- function() {
   ui <- shiny::fluidPage(
     shiny::sliderInput(
       inputId = "cor_cutoff",
@@ -232,12 +251,12 @@ cor_app <- function() {
     data_correlations_ui("data", height = 600)
   )
   server <- function(input, output, session) {
-    data_correlations_server("data", data = shiny::reactive(mtcars), cutoff = shiny::reactive(input$cor_cutoff))
+    data_correlations_server("data", data = shiny::reactive(default_parsing(mtcars)), cutoff = shiny::reactive(input$cor_cutoff))
   }
   shiny::shinyApp(ui, server)
 }
 
-cor_app()
+cor_demo_app()
 
 
 ########
@@ -2662,12 +2681,6 @@ missing_fraction <- function(data){
 #### Current file: R//import-file-ext.R 
 ########
 
-# library(htmltools)
-# library(shiny)
-# library(shinyWidgets)
-# library(rlang)
-# library(readxl)
-
 #' @title Import data from a file
 #'
 #' @description Let user upload a file and import data
@@ -2906,46 +2919,6 @@ import_file_server <- function(id,
       }
     })
 
-
-
-    # output$sheet <- shiny::renderUI({
-    #   if (is_workbook(input$file$datapath)) {
-    #     if (isTRUE(is_excel(input$file$datapath))) {
-    #       choices <- readxl::excel_sheets(input$file$datapath)
-    #     } else if (isTRUE(is_ods(input$file$datapath))) {
-    #       choices <- readODS::ods_sheets(input$file$datapath)
-    #     }
-    #     selected <- choices[1]
-    #
-    #     shiny::selectInput(
-    #       inputId = ns("sheet"),
-    #       label = datamods:::i18n("Select sheet(s) to import:"),
-    #       choices = choices,
-    #       selected = selected,
-    #       width = "100%",
-    #       multiple = TRUE
-    #     )
-    #     # shinyWidgets::pickerInput(
-    #     #   inputId = ns("sheet"),
-    #     #   label = datamods:::i18n("Select sheet(s) to import:"),
-    #     #   choices = choices,
-    #     #   selected = selected,
-    #     #   width = "100%",
-    #     #   multiple = TRUE
-    #     # )
-    #   }
-    # })
-
-    # observeEvent(
-    #   input$sheet,
-    #   {
-    #     req(input$file)
-    #     if (is_workbook(input$file$datapath) && is.null(shiny::req(input$sheet))) {
-    #       temporary_rv$data <- NULL
-    #     }
-    #   }
-    # )
-
     observeEvent(
       list(
         input$file,
@@ -3120,17 +3093,27 @@ import_xls <- function(file, sheet, skip, na.strings) {
 }
 
 import_ods <- function(file, sheet, skip, na.strings) {
-  readODS::read_ods(
-    path = file,
-    sheet = sheet,
-    skip = skip,
-    na = na.strings
+  tryCatch(
+    {
+      sheet |>
+        purrr::map(\(.x){
+          readODS::read_ods(
+            path = file,
+            sheet = .x,
+            skip = skip,
+            na = na.strings
+          )
+        }) |>
+        purrr::reduce(dplyr::full_join)
+    },
+    warning = function(warn) {
+      showNotification(paste0(warn), type = "warning")
+    },
+    error = function(err) {
+      showNotification(paste0(err), type = "err")
+    }
   )
 }
-
-# import_xls(openxlsx2::read_xlsx("~/freesearcheR/dev/Test data/trials_redcap_sheets.xlsx"),)
-# list()
-
 
 #' @title Create a select input control with icon(s)
 #'
@@ -3175,90 +3158,90 @@ selectInputIcon <- function(inputId,
 }
 
 
-
-
-
-# library(shiny)
-# library(datamods)
-
-ui <- shiny::fluidPage(
-  # theme = bslib::bs_theme(version = 5L),
-  # theme = bslib::bs_theme(version = 5L, preset = "bootstrap"),
-  shiny::tags$h3("Import data from a file"),
-  shiny::fluidRow(
-    shiny::column(
-      width = 4,
-      import_file_ui(
-        id = "myid",
-        file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".sas7bdat", ".ods", ".dta"),
-        layout_params = "dropdown" # "inline" # or "dropdown"
+#' Test app for the import_file module
+#'
+#' @rdname import-file_module
+#'
+#' @examples
+#' \dontrun{
+#' import_file_demo_app()
+#' }
+import_file_demo_app <- function() {
+  ui <- shiny::fluidPage(
+    # theme = bslib::bs_theme(version = 5L),
+    # theme = bslib::bs_theme(version = 5L, preset = "bootstrap"),
+    shiny::tags$h3("Import data from a file"),
+    shiny::fluidRow(
+      shiny::column(
+        width = 4,
+        import_file_ui(
+          id = "myid",
+          file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".sas7bdat", ".ods", ".dta"),
+          layout_params = "dropdown" # "inline" # or "dropdown"
+        )
+      ),
+      shiny::column(
+        width = 8,
+        shiny::tags$b("Import status:"),
+        shiny::verbatimTextOutput(outputId = "status"),
+        shiny::tags$b("Name:"),
+        shiny::verbatimTextOutput(outputId = "name"),
+        shiny::tags$b("Code:"),
+        shiny::verbatimTextOutput(outputId = "code"),
+        shiny::tags$b("Data:"),
+        shiny::verbatimTextOutput(outputId = "data")
       )
-    ),
-    shiny::column(
-      width = 8,
-      shiny::tags$b("Import status:"),
-      shiny::verbatimTextOutput(outputId = "status"),
-      shiny::tags$b("Name:"),
-      shiny::verbatimTextOutput(outputId = "name"),
-      shiny::tags$b("Code:"),
-      shiny::verbatimTextOutput(outputId = "code"),
-      shiny::tags$b("Data:"),
-      shiny::verbatimTextOutput(outputId = "data")
     )
   )
-)
-
-server <- function(input, output, session) {
-  imported <- import_file_server(
-    id = "myid",
-    show_data_in = "popup",
-    trigger_return = "change",
-    return_class = "data.frame",
-    # Custom functions to read data
-    read_fns = list(
-      ods = import_ods,
-      dta = function(file) {
-        haven::read_dta(
-          file = file,
-          .name_repair = "unique_quiet"
-        )
-      },
-      # csv = function(file) {
-      #   readr::read_csv(
-      #     file = file,
-      #     na = consider.na,
-      #     name_repair = "unique_quiet"
-      #     )
-      # },
-      csv = import_delim,
-      tsv = import_delim,
-      txt = import_delim,
-      xls = import_xls,
-      xlsx = import_xls,
-      rds = function(file) {
-        readr::read_rds(
-          file = file,
-          name_repair = "unique_quiet"
-        )
-      }
+  server <- function(input, output, session) {
+    imported <- import_file_server(
+      id = "myid",
+      show_data_in = "popup",
+      trigger_return = "change",
+      return_class = "data.frame",
+      # Custom functions to read data
+      read_fns = list(
+        ods = import_ods,
+        dta = function(file) {
+          haven::read_dta(
+            file = file,
+            .name_repair = "unique_quiet"
+          )
+        },
+        # csv = function(file) {
+        #   readr::read_csv(
+        #     file = file,
+        #     na = consider.na,
+        #     name_repair = "unique_quiet"
+        #     )
+        # },
+        csv = import_delim,
+        tsv = import_delim,
+        txt = import_delim,
+        xls = import_xls,
+        xlsx = import_xls,
+        rds = function(file) {
+          readr::read_rds(
+            file = file,
+            name_repair = "unique_quiet"
+          )
+        }
+      )
     )
-  )
 
-  output$status <- shiny::renderPrint({
-    imported$status()
-  })
-  output$name <- shiny::renderPrint({
-    imported$name()
-  })
-  output$code <- shiny::renderPrint({
-    imported$code()
-  })
-  output$data <- shiny::renderPrint({
-    imported$data()
-  })
-}
-
-if (FALSE) {
+    output$status <- shiny::renderPrint({
+      imported$status()
+    })
+    output$name <- shiny::renderPrint({
+      imported$name()
+    })
+    output$code <- shiny::renderPrint({
+      imported$code()
+    })
+    output$data <- shiny::renderPrint({
+      imported$data()
+    })
+  }
   shiny::shinyApp(ui, server)
 }
 
@@ -7051,9 +7034,9 @@ ui_elements <- list(
             bslib::accordion_panel(
               vlaue = "acc_cor",
               title = "Correlations",
-              icon = bsicons::bs_icon("table"),
+              icon = bsicons::bs_icon("bounding-box"),
               shiny::uiOutput("outcome_var_cor"),
-              shiny::helpText("This variable will be excluded from the correlation plot."),
+              shiny::helpText("To avoid evaluating the correlation of the outcome variable, this can be excluded from the plot or select 'none'."),
               shiny::br(),
               shinyWidgets::noUiSliderInput(
                 inputId = "cor_cutoff",
@@ -7064,7 +7047,8 @@ ui_elements <- list(
                 value = .8,
                 format = shinyWidgets::wNumbFormat(decimals = 2),
                 color = datamods:::get_primary_color()
-              )
+              ),
+              shiny::helpText("Set the cut-off for considered 'highly correlated'.")
             )
           )
         ),
@@ -7994,13 +7978,14 @@ server <- function(input, output, session) {
   )
 
   output$outcome_var_cor <- shiny::renderUI({
-    shiny::selectInput(
+    columnSelectInput(
       inputId = "outcome_var_cor",
-      selected = NULL,
+      selected = "none",
+      data = rv$list$data,
       label = "Select outcome variable",
-      choices = c(
+      col_subset = c(
+        "none",
         colnames(rv$list$data)
-        # ,"none"
       ),
       multiple = FALSE
     )
@@ -8018,10 +8003,10 @@ server <- function(input, output, session) {
     id = "correlations",
     data = shiny::reactive({
       shiny::req(rv$list$data)
-      out <- dplyr::select(rv$list$data, -!!input$outcome_var_cor)
-      #  input$outcome_var_cor=="none"){
-      #   out <- rv$list$data
-      # }
+      out <- rv$list$data
+      if (!is.null(input$outcome_var_cor) && input$outcome_var_cor!="none"){
+        out <- out[!names(out) %in% input$outcome_var_cor]
+      }
       out
     }),
     cutoff = shiny::reactive(input$cor_cutoff)

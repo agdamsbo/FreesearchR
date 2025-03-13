@@ -311,9 +311,9 @@ ui_elements <- list(
             bslib::accordion_panel(
               vlaue = "acc_cor",
               title = "Correlations",
-              icon = bsicons::bs_icon("table"),
+              icon = bsicons::bs_icon("bounding-box"),
               shiny::uiOutput("outcome_var_cor"),
-              shiny::helpText("This variable will be excluded from the correlation plot."),
+              shiny::helpText("To avoid evaluating the correlation of the outcome variable, this can be excluded from the plot or select 'none'."),
               shiny::br(),
               shinyWidgets::noUiSliderInput(
                 inputId = "cor_cutoff",
@@ -324,7 +324,8 @@ ui_elements <- list(
                 value = .8,
                 format = shinyWidgets::wNumbFormat(decimals = 2),
                 color = datamods:::get_primary_color()
-              )
+              ),
+              shiny::helpText("Set the cut-off for considered 'highly correlated'.")
             )
           )
         ),
