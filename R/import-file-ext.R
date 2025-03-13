@@ -1,9 +1,3 @@
-# library(htmltools)
-# library(shiny)
-# library(shinyWidgets)
-# library(rlang)
-# library(readxl)
-
 #' @title Import data from a file
 #'
 #' @description Let user upload a file and import data
@@ -242,46 +236,6 @@ import_file_server <- function(id,
       }
     })
 
-
-
-    # output$sheet <- shiny::renderUI({
-    #   if (is_workbook(input$file$datapath)) {
-    #     if (isTRUE(is_excel(input$file$datapath))) {
-    #       choices <- readxl::excel_sheets(input$file$datapath)
-    #     } else if (isTRUE(is_ods(input$file$datapath))) {
-    #       choices <- readODS::ods_sheets(input$file$datapath)
-    #     }
-    #     selected <- choices[1]
-    #
-    #     shiny::selectInput(
-    #       inputId = ns("sheet"),
-    #       label = datamods:::i18n("Select sheet(s) to import:"),
-    #       choices = choices,
-    #       selected = selected,
-    #       width = "100%",
-    #       multiple = TRUE
-    #     )
-    #     # shinyWidgets::pickerInput(
-    #     #   inputId = ns("sheet"),
-    #     #   label = datamods:::i18n("Select sheet(s) to import:"),
-    #     #   choices = choices,
-    #     #   selected = selected,
-    #     #   width = "100%",
-    #     #   multiple = TRUE
-    #     # )
-    #   }
-    # })
-
-    # observeEvent(
-    #   input$sheet,
-    #   {
-    #     req(input$file)
-    #     if (is_workbook(input$file$datapath) && is.null(shiny::req(input$sheet))) {
-    #       temporary_rv$data <- NULL
-    #     }
-    #   }
-    # )
-
     observeEvent(
       list(
         input$file,
@@ -456,17 +410,27 @@ import_xls <- function(file, sheet, skip, na.strings) {
 }
 
 import_ods <- function(file, sheet, skip, na.strings) {
-  readODS::read_ods(
-    path = file,
-    sheet = sheet,
-    skip = skip,
-    na = na.strings
+  tryCatch(
+    {
+      sheet |>
+        purrr::map(\(.x){
+          readODS::read_ods(
+            path = file,
+            sheet = .x,
+            skip = skip,
+            na = na.strings
+          )
+        }) |>
+        purrr::reduce(dplyr::full_join)
+    },
+    warning = function(warn) {
+      showNotification(paste0(warn), type = "warning")
+    },
+    error = function(err) {
+      showNotification(paste0(err), type = "err")
+    }
   )
 }
-
-# import_xls(openxlsx2::read_xlsx("~/freesearcheR/dev/Test data/trials_redcap_sheets.xlsx"),)
-# list()
-
 
 #' @title Create a select input control with icon(s)
 #'
@@ -511,89 +475,89 @@ selectInputIcon <- function(inputId,
 }
 
 
-
-
-
-# library(shiny)
-# library(datamods)
-
-ui <- shiny::fluidPage(
-  # theme = bslib::bs_theme(version = 5L),
-  # theme = bslib::bs_theme(version = 5L, preset = "bootstrap"),
-  shiny::tags$h3("Import data from a file"),
-  shiny::fluidRow(
-    shiny::column(
-      width = 4,
-      import_file_ui(
-        id = "myid",
-        file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".sas7bdat", ".ods", ".dta"),
-        layout_params = "dropdown" # "inline" # or "dropdown"
+#' Test app for the import_file module
+#'
+#' @rdname import-file_module
+#'
+#' @examples
+#' \dontrun{
+#' import_file_demo_app()
+#' }
+import_file_demo_app <- function() {
+  ui <- shiny::fluidPage(
+    # theme = bslib::bs_theme(version = 5L),
+    # theme = bslib::bs_theme(version = 5L, preset = "bootstrap"),
+    shiny::tags$h3("Import data from a file"),
+    shiny::fluidRow(
+      shiny::column(
+        width = 4,
+        import_file_ui(
+          id = "myid",
+          file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".sas7bdat", ".ods", ".dta"),
+          layout_params = "dropdown" # "inline" # or "dropdown"
+        )
+      ),
+      shiny::column(
+        width = 8,
+        shiny::tags$b("Import status:"),
+        shiny::verbatimTextOutput(outputId = "status"),
+        shiny::tags$b("Name:"),
+        shiny::verbatimTextOutput(outputId = "name"),
+        shiny::tags$b("Code:"),
+        shiny::verbatimTextOutput(outputId = "code"),
+        shiny::tags$b("Data:"),
+        shiny::verbatimTextOutput(outputId = "data")
       )
-    ),
-    shiny::column(
-      width = 8,
-      shiny::tags$b("Import status:"),
-      shiny::verbatimTextOutput(outputId = "status"),
-      shiny::tags$b("Name:"),
-      shiny::verbatimTextOutput(outputId = "name"),
-      shiny::tags$b("Code:"),
-      shiny::verbatimTextOutput(outputId = "code"),
-      shiny::tags$b("Data:"),
-      shiny::verbatimTextOutput(outputId = "data")
     )
   )
-)
-
-server <- function(input, output, session) {
-  imported <- import_file_server(
-    id = "myid",
-    show_data_in = "popup",
-    trigger_return = "change",
-    return_class = "data.frame",
-    # Custom functions to read data
-    read_fns = list(
-      ods = import_ods,
-      dta = function(file) {
-        haven::read_dta(
-          file = file,
-          .name_repair = "unique_quiet"
-        )
-      },
-      # csv = function(file) {
-      #   readr::read_csv(
-      #     file = file,
-      #     na = consider.na,
-      #     name_repair = "unique_quiet"
-      #     )
-      # },
-      csv = import_delim,
-      tsv = import_delim,
-      txt = import_delim,
-      xls = import_xls,
-      xlsx = import_xls,
-      rds = function(file) {
-        readr::read_rds(
-          file = file,
-          name_repair = "unique_quiet"
-        )
-      }
+  server <- function(input, output, session) {
+    imported <- import_file_server(
+      id = "myid",
+      show_data_in = "popup",
+      trigger_return = "change",
+      return_class = "data.frame",
+      # Custom functions to read data
+      read_fns = list(
+        ods = import_ods,
+        dta = function(file) {
+          haven::read_dta(
+            file = file,
+            .name_repair = "unique_quiet"
+          )
+        },
+        # csv = function(file) {
+        #   readr::read_csv(
+        #     file = file,
+        #     na = consider.na,
+        #     name_repair = "unique_quiet"
+        #     )
+        # },
+        csv = import_delim,
+        tsv = import_delim,
+        txt = import_delim,
+        xls = import_xls,
+        xlsx = import_xls,
+        rds = function(file) {
+          readr::read_rds(
+            file = file,
+            name_repair = "unique_quiet"
+          )
+        }
+      )
     )
-  )
 
-  output$status <- shiny::renderPrint({
-    imported$status()
-  })
-  output$name <- shiny::renderPrint({
-    imported$name()
-  })
-  output$code <- shiny::renderPrint({
-    imported$code()
-  })
-  output$data <- shiny::renderPrint({
-    imported$data()
-  })
-}
-
-if (FALSE) {
+    output$status <- shiny::renderPrint({
+      imported$status()
+    })
+    output$name <- shiny::renderPrint({
+      imported$name()
+    })
+    output$code <- shiny::renderPrint({
+      imported$code()
+    })
+    output$data <- shiny::renderPrint({
+      imported$data()
+    })
+  }
   shiny::shinyApp(ui, server)
 }
