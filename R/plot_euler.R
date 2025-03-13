@@ -93,7 +93,8 @@ plot_euler <- function(data, x, y, z = NULL, seed = 2103) {
       plot_euler_single()
   })
 
-  patchwork::wrap_plots(out, guides = "collect")
+  wrap_plot_list(out)
+  # patchwork::wrap_plots(out, guides = "collect")
 }
 
 

@@ -8,7 +8,7 @@
 \usage{
 import_file_ui(
   id,
-  title = TRUE,
+  title = "",
   preview_data = TRUE,
   file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat",
     ".sav"),

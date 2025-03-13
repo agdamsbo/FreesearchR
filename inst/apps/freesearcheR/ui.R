@@ -49,13 +49,16 @@ ui_elements <- list(
           import_file_ui(
             id = "file_import",
             layout_params = "dropdown",
-            title = "Choose a datafile to upload",
+            # title = "Choose a datafile to upload",
             file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".sas7bdat", ".ods", ".dta")
           )
         ),
         shiny::conditionalPanel(
           condition = "input.source=='redcap'",
-          m_redcap_readUI("redcap_import")
+          m_redcap_readUI(
+            id = "redcap_import",
+            title = ""
+          )
         ),
         shiny::conditionalPanel(
           condition = "input.source=='env'",

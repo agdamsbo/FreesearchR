@@ -10,7 +10,7 @@
 #### Current file: R//app_version.R 
 ########
 
-app_version <- function()'250312_1817'
+app_version <- function()'250313_1240'
 
 
 ########
@@ -1079,7 +1079,7 @@ plot_histogram <- function(data, column, bins = 30, breaks = NULL, color = "#112
 #'
 #' @param id Module id. (Use 'ns("id")')
 #'
-#' @name data-correlations
+#' @name data-plots
 #' @returns Shiny ui module
 #' @export
 #'
@@ -1099,12 +1099,21 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
           shiny::uiOutput(outputId = ns("primary")),
           shiny::uiOutput(outputId = ns("type")),
           shiny::uiOutput(outputId = ns("secondary")),
-          shiny::uiOutput(outputId = ns("tertiary"))
+          shiny::uiOutput(outputId = ns("tertiary")),
+          shiny::br(),
+          shiny::actionButton(
+            inputId = ns("act_plot"),
+            label = "Plot",
+            width = "100%",
+            icon = shiny::icon("palette"),
+            disabled = FALSE
+          ),
+          shiny::helpText('Adjust settings, then press "Plot".')
         ),
-        bslib::accordion_panel(
-          title = "Advanced",
-          icon = bsicons::bs_icon("gear")
-        ),
+        # bslib::accordion_panel(
+        #   title = "Advanced",
+        #   icon = bsicons::bs_icon("gear")
+        # ),
         bslib::accordion_panel(
           title = "Download",
           icon = bsicons::bs_icon("download"),
@@ -1162,7 +1171,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
 #' @param data data
 #' @param ... ignored
 #'
-#' @name data-correlations
+#' @name data-plots
 #' @returns shiny server module
 #' @export
 data_visuals_server <- function(id,
@@ -1205,14 +1214,14 @@ data_visuals_server <- function(id,
 
         plots_named <- get_plot_options(plots) |>
           lapply(\(.x){
-            stats::setNames(.x$descr,.x$note)
+            stats::setNames(.x$descr, .x$note)
           })
 
         vectorSelectInput(
           inputId = ns("type"),
           selected = NULL,
           label = shiny::h4("Plot type"),
-          choices = Reduce(c,plots_named),
+          choices = Reduce(c, plots_named),
           multiple = FALSE
         )
       })
@@ -1223,7 +1232,6 @@ data_visuals_server <- function(id,
 
       output$secondary <- shiny::renderUI({
         shiny::req(input$type)
-        # browser()
 
         cols <- c(
           rv$plot.params()[["secondary.extra"]],
@@ -1239,9 +1247,9 @@ data_visuals_server <- function(id,
         columnSelectInput(
           inputId = ns("secondary"),
           data = data,
-          selected = 1,
-          placeholder = "Select variable",
-          label = "Secondary/group variable",
+          selected = cols[1],
+          placeholder = "Please select",
+          label = if (isTRUE(rv$plot.params()[["secondary.multi"]])) "Additional variables" else "Secondary variable",
           multiple = rv$plot.params()[["secondary.multi"]],
           maxItems = rv$plot.params()[["secondary.max"]],
           col_subset = cols,
@@ -1254,8 +1262,8 @@ data_visuals_server <- function(id,
         columnSelectInput(
           inputId = ns("tertiary"),
           data = data,
-          placeholder = "Select variable",
-          label = "Strata variable",
+          placeholder = "Please select",
+          label = "Grouping variable",
           multiple = FALSE,
           col_subset = c(
             "none",
@@ -1272,25 +1280,32 @@ data_visuals_server <- function(id,
         )
       })
 
-      rv$plot <- shiny::reactive({
-        shiny::req(input$primary)
-        shiny::req(input$type)
-        shiny::req(input$secondary)
-        shiny::req(input$tertiary)
-        # if (length(input$secondary)>1){
-        #   browser()
-        # }
-        create_plot(
-          data = data(),
-          type = rv$plot.params()[["fun"]],
-          x = input$primary,
-          y = input$secondary,
-          z = input$tertiary
-        )
-      })
+      shiny::observeEvent(input$act_plot,
+        {
+          tryCatch(
+            {
+              rv$plot <- create_plot(
+                data = data(),
+                type = rv$plot.params()[["fun"]],
+                x = input$primary,
+                y = input$secondary,
+                z = input$tertiary
+              )
+            },
+            warning = function(warn) {
+              showNotification(paste0(warn), type = "warning")
+            },
+            error = function(err) {
+              showNotification(paste0(err), type = "err")
+            }
+          )
+        },
+        ignoreInit = TRUE
+      )
 
       output$plot <- shiny::renderPlot({
-        rv$plot()
+        shiny::req(rv$plot)
+        rv$plot
       })
 
       output$download_plot <- shiny::downloadHandler(
@@ -1301,7 +1316,7 @@ data_visuals_server <- function(id,
           shiny::withProgress(message = "Drawing the plot. Hold on for a moment..", {
             ggplot2::ggsave(
               filename = file,
-              plot = rv$plot(),
+              plot = rv$plot,
               width = input$width,
               height = input$height,
               dpi = 300,
@@ -1318,7 +1333,6 @@ data_visuals_server <- function(id,
     }
   )
 }
-
 
 
 #' Select all from vector but
@@ -1439,36 +1453,6 @@ supported_plots <- function() {
   )
 }
 
-#' Plot nice ridge plot
-#'
-#' @returns ggplot2 object
-#' @export
-#'
-#' @name data-plots
-#'
-#' @examples
-#' mtcars |>
-#'   default_parsing() |>
-#'   plot_ridge(x = "mpg", y = "cyl")
-#' mtcars |> plot_ridge(x = "mpg", y = "cyl", z = "gear")
-plot_ridge <- function(data, x, y, z = NULL, ...) {
-  if (!is.null(z)) {
-    ds <- split(data, data[z])
-  } else {
-    ds <- list(data)
-  }
-
-  out <- lapply(ds, \(.ds){
-    ggplot2::ggplot(.ds, ggplot2::aes(x = !!dplyr::sym(x), y = !!dplyr::sym(y), fill = !!dplyr::sym(y))) +
-      ggridges::geom_density_ridges() +
-      ggridges::theme_ridges() +
-      ggplot2::theme(legend.position = "none") |> rempsyc:::theme_apa()
-  })
-
-  patchwork::wrap_plots(out)
-}
-
-
 #' Get possible regression models
 #'
 #' @param data data
@@ -1569,104 +1553,6 @@ create_plot <- function(data, type, x, y, z = NULL, ...) {
   )
 }
 
-
-#' Nice horizontal stacked bars (Grotta bars)
-#'
-#' @returns ggplot2 object
-#' @export
-#'
-#' @name data-plots
-#'
-#' @examples
-#' mtcars |> plot_hbars(x = "carb", y = "cyl")
-#' mtcars |> plot_hbars(x = "carb", y = NULL)
-plot_hbars <- function(data, x, y, z = NULL) {
-  out <- vertical_stacked_bars(data = data, score = x, group = y, strata = z)
-
-  out
-}
-
-
-#' Vertical stacked bar plot wrapper
-#'
-#' @param data data.frame
-#' @param score outcome variable
-#' @param group grouping variable
-#' @param strata stratifying variable
-#' @param t.size text size
-#'
-#' @return ggplot2 object
-#' @export
-#'
-vertical_stacked_bars <- function(data,
-                                  score = "full_score",
-                                  group = "pase_0_q",
-                                  strata = NULL,
-                                  t.size = 10,
-                                  l.color = "black",
-                                  l.size = .5,
-                                  draw.lines = TRUE) {
-  if (is.null(group)) {
-    df.table <- data[c(score, group, strata)] |>
-      dplyr::mutate("All" = 1) |>
-      table()
-    group <- "All"
-    draw.lines <- FALSE
-  } else {
-    df.table <- data[c(score, group, strata)] |>
-      table()
-  }
-
-  p <- df.table |>
-    rankinPlot::grottaBar(
-      scoreName = score,
-      groupName = group,
-      textColor = c("black", "white"),
-      strataName = strata,
-      textCut = 6,
-      textSize = 20,
-      printNumbers = "none",
-      lineSize = l.size,
-      returnData = TRUE
-    )
-
-  colors <- viridisLite::viridis(nrow(df.table))
-  contrast_cut <-
-    sum(contrast_text(colors, threshold = .3) == "white")
-
-  score_label <- ifelse(is.na(REDCapCAST::get_attr(data$score, "label")), score, REDCapCAST::get_attr(data$score, "label"))
-  group_label <- ifelse(is.na(REDCapCAST::get_attr(data$group, "label")), group, REDCapCAST::get_attr(data$group, "label"))
-
-
-  p |>
-    (\(.x){
-      .x$plot +
-        ggplot2::geom_text(
-          data = .x$rectData[which(.x$rectData$n >
-            0), ],
-          size = t.size,
-          fontface = "plain",
-          ggplot2::aes(
-            x = group,
-            y = p_prev + 0.49 * p,
-            color = as.numeric(score) > contrast_cut,
-            # label = paste0(sprintf("%2.0f", 100 * p),"%"),
-            label = sprintf("%2.0f", 100 * p)
-          )
-        ) +
-        ggplot2::labs(fill = score_label) +
-        ggplot2::scale_fill_manual(values = rev(colors)) +
-        ggplot2::theme(
-          legend.position = "bottom",
-          axis.title = ggplot2::element_text(),
-        ) +
-        ggplot2::xlab(group_label) +
-        ggplot2::ylab(NULL)
-      # viridis::scale_fill_viridis(discrete = TRUE, direction = -1, option = "D")
-    })()
-}
-
-
 #' Print label, and if missing print variable name
 #'
 #' @param data vector or data frame
@@ -1701,62 +1587,6 @@ get_label <- function(data, var = NULL) {
 }
 
 
-#' Beatiful violin plot
-#'
-#' @returns ggplot2 object
-#' @export
-#'
-#' @name data-plots
-#'
-#' @examples
-#' mtcars |> plot_violin(x = "mpg", y = "cyl", z = "gear")
-plot_violin <- function(data, x, y, z = NULL) {
-  if (!is.null(z)) {
-    ds <- split(data, data[z])
-  } else {
-    ds <- list(data)
-  }
-
-  out <- lapply(ds, \(.ds){
-    rempsyc::nice_violin(
-      data = .ds,
-      group = y,
-      response = x, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
-    )
-  })
-
-  patchwork::wrap_plots(out)
-}
-
-
-#' Beautiful violin plot
-#'
-#' @returns ggplot2 object
-#' @export
-#'
-#' @name data-plots
-#'
-#' @examples
-#' mtcars |> plot_scatter(x = "mpg", y = "wt")
-plot_scatter <- function(data, x, y, z = NULL) {
-  if (is.null(z)) {
-    rempsyc::nice_scatter(
-      data = data,
-      predictor = y,
-      response = x, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
-    )
-  } else {
-    rempsyc::nice_scatter(
-      data = data,
-      predictor = y,
-      response = x,
-      group = z, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
-    )
-  }
-}
-
-
-
 #' Line breaking at given number of characters for nicely plotting labels
 #'
 #' @param data string
@@ -1780,6 +1610,298 @@ line_break <- function(data, lineLength = 20, fixed = FALSE) {
 }
 
 
+wrap_plot_list <- function(data) {
+  if (length(data) > 1) {
+    out <- data |>
+      allign_axes() |>
+      patchwork::wrap_plots(guides = "collect", axes = "collect", axis_titles = "collect")
+  } else {
+    out <- data
+  }
+  out
+}
+
+
+allign_axes <- function(...) {
+  # https://stackoverflow.com/questions/62818776/get-axis-limits-from-ggplot-object
+  # https://github.com/thomasp85/patchwork/blob/main/R/plot_multipage.R#L150
+  if (ggplot2::is.ggplot(..1)) {
+    p <- list(...)
+  } else if (is.list(..1)) {
+    p <- ..1
+  } else {
+    cli::cli_abort("Can only align {.cls ggplot} objects or a list of them")
+  }
+
+  # browser()
+  yr <- purrr::map(p, ~ ggplot2::layer_scales(.x)$y$get_limits()) |>
+    unlist() |>
+    range() |>
+    unique()
+
+  xr <- purrr::map(p, ~ ggplot2::layer_scales(.x)$x$get_limits()) |>
+    unlist() |>
+    range() |>
+    unique()
+
+  p |> purrr::map(~ .x + ggplot2::xlim(xr) + ggplot2::ylim(yr))
+}
+
+
+########
+#### Current file: R//data-import.R 
+########
+
+#' data_import_ui <- function(id, include_title = TRUE) {
+#'   ns <- shiny::NS(id)
+#'
+#'   shiny::fluidRow(
+#'     shiny::column(width = 2),
+#'     shiny::column(
+#'       width = 8,
+#'       shiny::h4("Choose your data source"),
+#'       shiny::br(),
+#'       shinyWidgets::radioGroupButtons(
+#'         inputId = "source",
+#'         selected = "env",
+#'         choices = c(
+#'           "File upload" = "file",
+#'           "REDCap server export" = "redcap",
+#'           "Local or sample data" = "env"
+#'         ),
+#'         width = "100%"
+#'       ),
+#'       shiny::helpText("Upload a file from your device, get data directly from REDCap or select a sample data set for testing from the app."),
+#'       shiny::br(),
+#'       shiny::br(),
+#'       shiny::conditionalPanel(
+#'         condition = "input.source=='file'",
+#'         import_file_ui(
+#'           id = "file_import",
+#'           layout_params = "dropdown",
+#'           title = "Choose a datafile to upload",
+#'           file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".sas7bdat", ".ods", ".dta")
+#'         )
+#'       ),
+#'       shiny::conditionalPanel(
+#'         condition = "input.source=='redcap'",
+#'         m_redcap_readUI("redcap_import")
+#'       ),
+#'       shiny::conditionalPanel(
+#'         condition = "input.source=='env'",
+#'         import_globalenv_ui(id = "env", title = NULL)
+#'       ),
+#'       shiny::conditionalPanel(
+#'         condition = "input.source=='redcap'",
+#'         DT::DTOutput(outputId = "redcap_prev")
+#'       ),
+#'       shiny::br(),
+#'       shiny::br(),
+#'       shiny::h5("Specify variables to include"),
+#'       shiny::fluidRow(
+#'         shiny::column(
+#'           width = 6,
+#'           shiny::br(),
+#'           shiny::p("Filter by completeness threshold and manual selection:"),
+#'           shiny::br(),
+#'           shiny::br()
+#'         ),
+#'         shiny::column(
+#'           width = 6,
+#'           shinyWidgets::noUiSliderInput(
+#'             inputId = "complete_cutoff",
+#'             label = NULL,
+#'             min = 0,
+#'             max = 100,
+#'             step = 5,
+#'             value = 70,
+#'             format = shinyWidgets::wNumbFormat(decimals = 0),
+#'             color = datamods:::get_primary_color()
+#'           ),
+#'           shiny::helpText("Filter variables with completeness above the specified percentage."),
+#'           shiny::br(),
+#'           shiny::br(),
+#'           shiny::uiOutput(outputId = "import_var")
+#'         )
+#'       ),
+#'       shiny::br(),
+#'       shiny::br(),
+#'       shiny::actionButton(
+#'         inputId = "act_start",
+#'         label = "Start",
+#'         width = "100%",
+#'         icon = shiny::icon("play"),
+#'         disabled = TRUE
+#'       ),
+#'       shiny::helpText('After importing, hit "Start" or navigate to the desired tab.'),
+#'       shiny::br(),
+#'       shiny::br(),
+#'       shiny::column(width = 2)
+#'     )
+#'   )
+#'   }
+#'
+#'
+#' data_import_server <- function(id) {
+#'   module <- function(input, output, session) {
+#'     ns <- session$ns
+#'
+#'     rv <- shiny::reactiveValues(
+#'       data_original = NULL,
+#'       data_temp = NULL,
+#'       data = NULL,
+#'       code = list()
+#'     )
+#'
+#'   data_file <- import_file_server(
+#'     id = "file_import",
+#'     show_data_in = "popup",
+#'     trigger_return = "change",
+#'     return_class = "data.frame",
+#'     read_fns = list(
+#'       ods = import_ods,
+#'       dta = function(file) {
+#'         haven::read_dta(
+#'           file = file,
+#'           .name_repair = "unique_quiet"
+#'         )
+#'       },
+#'       # csv = function(file) {
+#'       #   readr::read_csv(
+#'       #     file = file,
+#'       #     na = consider.na,
+#'       #     name_repair = "unique_quiet"
+#'       #     )
+#'       # },
+#'       csv = import_delim,
+#'       tsv = import_delim,
+#'       txt = import_delim,
+#'       xls = import_xls,
+#'       xlsx = import_xls,
+#'       rds = function(file) {
+#'         readr::read_rds(
+#'           file = file,
+#'           name_repair = "unique_quiet"
+#'         )
+#'       }
+#'     )
+#'   )
+#'
+#'   shiny::observeEvent(data_file$data(), {
+#'     shiny::req(data_file$data())
+#'     rv$data_temp <- data_file$data()
+#'     rv$code <- append_list(data = data_file$code(), list = rv$code, index = "import")
+#'   })
+#'
+#'   data_redcap <- m_redcap_readServer(
+#'     id = "redcap_import" # ,
+#'     # output.format = "list"
+#'   )
+#'
+#'   shiny::observeEvent(data_redcap(), {
+#'     # rv$data_original <- purrr::pluck(data_redcap(), "data")()
+#'     rv$data_temp <- data_redcap()
+#'   })
+#'
+#'   output$redcap_prev <- DT::renderDT(
+#'     {
+#'       DT::datatable(head(data_redcap(), 5),
+#'         # DT::datatable(head(purrr::pluck(data_redcap(), "data")(), 5),
+#'         caption = "First 5 observations"
+#'       )
+#'     },
+#'     server = TRUE
+#'   )
+#'
+#'   from_env <- datamods::import_globalenv_server(
+#'     id = "env",
+#'     trigger_return = "change",
+#'     btn_show_data = FALSE,
+#'     reset = reactive(input$hidden)
+#'   )
+#'
+#'   shiny::observeEvent(from_env$data(), {
+#'     shiny::req(from_env$data())
+#'
+#'     rv$data_temp <- from_env$data()
+#'     # rv$code <- append_list(data = from_env$code(),list = rv$code,index = "import")
+#'   })
+#'
+#'   output$import_var <- shiny::renderUI({
+#'     shiny::req(rv$data_temp)
+#'
+#'     preselect <- names(rv$data_temp)[sapply(rv$data_temp, missing_fraction) <= input$complete_cutoff / 100]
+#'
+#'     shinyWidgets::virtualSelectInput(
+#'       inputId = "import_var",
+#'       label = "Select variables to include",
+#'       selected = preselect,
+#'       choices = names(rv$data_temp),
+#'       updateOn = "close",
+#'       multiple = TRUE,
+#'       search = TRUE,
+#'       showValueAsTags = TRUE
+#'     )
+#'   })
+#'
+#'
+#'   shiny::observeEvent(
+#'     eventExpr = list(
+#'       input$import_var
+#'     ),
+#'     handlerExpr = {
+#'       shiny::req(rv$data_temp)
+#'
+#'       rv$data_original <- rv$data_temp |>
+#'         dplyr::select(input$import_var) |>
+#'         # janitor::clean_names() |>
+#'         default_parsing()
+#'     }
+#'   )
+#'
+#'   return(shiny::reactive(rv$data_original))
+#'
+#'   }
+#'
+#'   shiny::moduleServer(
+#'     id = id,
+#'     module = module
+#'   )
+#'
+#'   }
+#'
+#'
+#' #' Test app for the data-import module
+#' #'
+#' #' @rdname data-import
+#' #'
+#' #' @examples
+#' #' \dontrun{
+#' #' data_import_demo_app()
+#' #' }
+#' data_import_demo_app <- function() {
+#'   ui <- shiny::fluidPage(
+#'     data_import_ui("data")
+#'   )
+#'   server <- function(input, output, session) {
+#'     data_val <- shiny::reactiveValues(data = NULL)
+#'
+#'
+#'     data_val$data <- data_import_server(id = "data")
+#'
+#'     output$data_summary <- DT::renderDataTable(
+#'       {
+#'         shiny::req(data_val$data)
+#'         data_val$data()
+#'       },
+#'       options = list(
+#'         scrollX = TRUE,
+#'         pageLength = 5
+#'       ),
+#'     )
+#'   }
+#'   shiny::shinyApp(ui, server)
+#' }
 
 
 ########
@@ -1818,14 +1940,6 @@ data_summary_server <- function(id,
     id = id,
     module = function(input, output, session) {
       ns <- session$ns
-
-      # data_r <- shiny::reactive({
-      #   if (shiny::is.reactive(data)) {
-      #     data()
-      #   } else {
-      #     data
-      #   }
-      # })
 
       output$tbl_summary <-
         toastui::renderDatagrid(
@@ -2548,6 +2662,11 @@ missing_fraction <- function(data){
 #### Current file: R//import-file-ext.R 
 ########
 
+# library(htmltools)
+# library(shiny)
+# library(shinyWidgets)
+# library(rlang)
+# library(readxl)
 
 #' @title Import data from a file
 #'
@@ -2561,26 +2680,20 @@ missing_fraction <- function(data){
 #'
 #' @name import-file
 #'
-#' @importFrom shiny NS fileInput actionButton icon
-#' @importFrom htmltools tags tagAppendAttributes css tagAppendChild
-#' @importFrom shinyWidgets pickerInput numericInputIcon textInputIcon dropMenu
-#' @importFrom phosphoricons ph
-#' @importFrom toastui datagridOutput2
 #'
 import_file_ui <- function(id,
-                           title = TRUE,
+                           title = "",
                            preview_data = TRUE,
                            file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat", ".sav"),
                            layout_params = c("dropdown", "inline")) {
-
-  ns <- NS(id)
+  ns <- shiny::NS(id)
 
   if (!is.null(layout_params)) {
     layout_params <- match.arg(layout_params)
   }
 
   if (isTRUE(title)) {
-    title <- tags$h4(
+    title <- shiny::tags$h4(
       datamods:::i18n("Import a file"),
       class = "datamods-title"
     )
@@ -2608,7 +2721,7 @@ import_file_ui <- function(id,
           size = "sm",
           width = "100%"
         ),
-        shiny::helpText(ph("info"), datamods:::i18n("if several use a comma (',') to separate them"))
+        shiny::helpText(phosphoricons::ph("info"), datamods:::i18n("if several use a comma (',') to separate them"))
       )
     ),
     shiny::column(
@@ -2624,8 +2737,10 @@ import_file_ui <- function(id,
       selectInputIcon(
         inputId = ns("encoding"),
         label = datamods:::i18n("Encoding:"),
-        choices = c("UTF-8"="UTF-8",
-                    "Latin1"="latin1"),
+        choices = c(
+          "UTF-8" = "UTF-8",
+          "Latin1" = "latin1"
+        ),
         icon = phosphoricons::ph("text-aa"),
         size = "sm",
         width = "100%"
@@ -2663,7 +2778,7 @@ import_file_ui <- function(id,
         shinyWidgets::dropMenu(
           shiny::actionButton(
             inputId = ns("dropdown_params"),
-            label = ph("gear", title = "Parameters"),
+            label = phosphoricons::ph("gear", title = "Parameters"),
             width = "50px",
             class = "px-1"
           ),
@@ -2672,23 +2787,24 @@ import_file_ui <- function(id,
       )
     )
   }
-  tags$div(
+  shiny::tags$div(
     class = "datamods-import",
     datamods:::html_dependency_datamods(),
     title,
     file_ui,
     if (identical(layout_params, "inline")) params_ui,
-    tags$div(
+    shiny::tags$div(
       class = "hidden",
       id = ns("sheet-container"),
       shinyWidgets::pickerInput(
         inputId = ns("sheet"),
         label = datamods:::i18n("Select sheet to import:"),
         choices = NULL,
-        width = "100%"
+        width = "100%",
+        multiple = TRUE
       )
     ),
-    tags$div(
+    shiny::tags$div(
       id = ns("import-placeholder"),
       shinyWidgets::alert(
         id = ns("import-result"),
@@ -2699,19 +2815,20 @@ import_file_ui <- function(id,
       )
     ),
     if (isTRUE(preview_data)) {
-      toastui::datagridOutput2(outputId = ns("table"))
-    },
-    uiOutput(
+    toastui::datagridOutput2(outputId = ns("table"))
+    }
+    ,
+    shiny::uiOutput(
       outputId = ns("container_confirm_btn"),
       style = "margin-top: 20px;"
-    ),
+    )  ,
     tags$div(
       style = htmltools::css(display = "none"),
-      shiny::checkboxInput(
-        inputId = ns("preview_data"),
-        label = NULL,
-        value = isTRUE(preview_data)
-      )
+    shiny::checkboxInput(
+      inputId = ns("preview_data"),
+      label = NULL,
+      value = isTRUE(preview_data)
+    )
     )
   )
 }
@@ -2730,16 +2847,6 @@ import_file_ui <- function(id,
 #'
 #' @export
 #'
-#' @importFrom shiny moduleServer
-#' @importFrom htmltools tags tagList
-#' @importFrom shiny reactiveValues reactive observeEvent removeUI req
-#' @importFrom shinyWidgets updatePickerInput
-#' @importFrom readxl excel_sheets
-#' @importFrom rio import
-#' @importFrom rlang exec fn_fmls_names is_named is_function
-#' @importFrom tools file_ext
-#' @importFrom utils head
-#' @importFrom toastui renderDatagrid2 datagrid
 #'
 #' @rdname import-file
 import_file_server <- function(id,
@@ -2749,48 +2856,49 @@ import_file_server <- function(id,
                                return_class = c("data.frame", "data.table", "tbl_df", "raw"),
                                reset = reactive(NULL),
                                read_fns = list()) {
-
   if (length(read_fns) > 0) {
-    if (!is_named(read_fns))
+    if (!rlang::is_named(read_fns)) {
       stop("import_file_server: `read_fns` must be a named list.", call. = FALSE)
-    if (!all(vapply(read_fns, is_function, logical(1))))
+    }
+    if (!all(vapply(read_fns, rlang::is_function, logical(1)))) {
       stop("import_file_server: `read_fns` must be list of function(s).", call. = FALSE)
+    }
   }
 
   trigger_return <- match.arg(trigger_return)
   return_class <- match.arg(return_class)
 
   module <- function(input, output, session) {
-
     ns <- session$ns
-    imported_rv <- reactiveValues(data = NULL, name = NULL)
-    temporary_rv <- reactiveValues(data = NULL, name = NULL, status = NULL)
+    imported_rv <- shiny::reactiveValues(data = NULL, name = NULL)
+    temporary_rv <- shiny::reactiveValues(data = NULL, name = NULL, status = NULL)
 
-    observeEvent(reset(), {
+    shiny::observeEvent(reset(), {
       temporary_rv$data <- NULL
       temporary_rv$name <- NULL
       temporary_rv$status <- NULL
     })
 
-    output$container_confirm_btn <- renderUI({
+    output$container_confirm_btn <- shiny::renderUI({
       if (identical(trigger_return, "button")) {
         datamods:::button_import()
       }
     })
 
-    observeEvent(input$file, {
-      if (isTRUE(is_excel(input$file$datapath))) {
+    shiny::observeEvent(input$file, {
+      if (isTRUE(is_workbook(input$file$datapath))) {
+        if (isTRUE(is_excel(input$file$datapath))) {
+          choices <- readxl::excel_sheets(input$file$datapath)
+        } else if (isTRUE(is_ods(input$file$datapath))) {
+          choices <- readODS::ods_sheets(input$file$datapath)
+        }
+        selected <- choices[1]
+
         shinyWidgets::updatePickerInput(
           session = session,
           inputId = "sheet",
-          choices = readxl::excel_sheets(input$file$datapath)
-        )
-        datamods:::showUI(paste0("#", ns("sheet-container")))
-      } else if (isTRUE(is_ods(input$file$datapath))) {
-        shinyWidgets::updatePickerInput(
-          session = session,
-          inputId = "sheet",
-          choices = readODS::ods_sheets(input$file$datapath)
+          choices = choices,
+          selected = selected
         )
         datamods:::showUI(paste0("#", ns("sheet-container")))
       } else {
@@ -2798,18 +2906,64 @@ import_file_server <- function(id,
       }
     })
 
-    observeEvent(list(
-      input$file,
-      input$sheet,
-      input$skip_rows,
-      input$dec,
-      input$encoding,
-      input$na_label
-    ), {
-      req(input$file)
-      # req(input$skip_rows)
-      extension <- tools::file_ext(input$file$datapath)
-      if (isTRUE(extension %in% names(read_fns))) {
+
+
+    # output$sheet <- shiny::renderUI({
+    #   if (is_workbook(input$file$datapath)) {
+    #     if (isTRUE(is_excel(input$file$datapath))) {
+    #       choices <- readxl::excel_sheets(input$file$datapath)
+    #     } else if (isTRUE(is_ods(input$file$datapath))) {
+    #       choices <- readODS::ods_sheets(input$file$datapath)
+    #     }
+    #     selected <- choices[1]
+    #
+    #     shiny::selectInput(
+    #       inputId = ns("sheet"),
+    #       label = datamods:::i18n("Select sheet(s) to import:"),
+    #       choices = choices,
+    #       selected = selected,
+    #       width = "100%",
+    #       multiple = TRUE
+    #     )
+    #     # shinyWidgets::pickerInput(
+    #     #   inputId = ns("sheet"),
+    #     #   label = datamods:::i18n("Select sheet(s) to import:"),
+    #     #   choices = choices,
+    #     #   selected = selected,
+    #     #   width = "100%",
+    #     #   multiple = TRUE
+    #     # )
+    #   }
+    # })
+
+    # observeEvent(
+    #   input$sheet,
+    #   {
+    #     req(input$file)
+    #     if (is_workbook(input$file$datapath) && is.null(shiny::req(input$sheet))) {
+    #       temporary_rv$data <- NULL
+    #     }
+    #   }
+    # )
+
+    observeEvent(
+      list(
+        input$file,
+        input$sheet,
+        input$skip_rows,
+        input$dec,
+        input$encoding,
+        input$na_label
+      ),
+      {
+        req(input$file)
+        if (is_workbook(input$file$datapath)) shiny::req(input$sheet)
+        # browser()
+
+        # browser()
+        # req(input$skip_rows)
+        extension <- tools::file_ext(input$file$datapath)
+
         parameters <- list(
           file = input$file$datapath,
           sheet = input$sheet,
@@ -2820,69 +2974,41 @@ import_file_server <- function(id,
         )
         parameters <- parameters[which(names(parameters) %in% rlang::fn_fmls_names(read_fns[[extension]]))]
         imported <- try(rlang::exec(read_fns[[extension]], !!!parameters), silent = TRUE)
-        code <- call2(read_fns[[extension]], !!!modifyList(parameters, list(file = input$file$name)))
-      } else {
-        if (is_excel(input$file$datapath) || is_ods(input$file$datapath)) {
-          req(input$sheet)
-          parameters <- list(
-            file = input$file$datapath,
-            which = input$sheet,
-            skip = input$skip_rows,
-            na = datamods:::split_char(input$na_label)
-          )
-        } else if (is_sas(input$file$datapath)) {
-          parameters <- list(
-            file = input$file$datapath,
-            skip = input$skip_rows,
-            encoding = input$encoding
-          )
-        } else {
-          parameters <- list(
-            file = input$file$datapath,
-            skip = input$skip_rows,
-            dec = input$dec,
-            encoding = input$encoding,
-            na.strings = datamods:::split_char(input$na_label)
-          )
+        code <- rlang::call2(read_fns[[extension]], !!!modifyList(parameters, list(file = input$file$name)))
+
+        if (inherits(imported, "try-error")) {
+          imported <- try(rlang::exec(rio::import, !!!parameters[1]), silent = TRUE)
+          code <- rlang::call2("import", !!!list(file = input$file$name), .ns = "rio")
         }
-        imported <- try(rlang::exec(rio::import, !!!parameters), silent = TRUE)
-        code <- rlang::call2("import", !!!utils::modifyList(parameters, list(file = input$file$name)), .ns = "rio")
-      }
 
-      if (inherits(imported, "try-error")) {
-        imported <- try(rlang::exec(rio::import, !!!parameters[1]), silent = TRUE)
-        code <- rlang::call2("import", !!!list(file = input$file$name), .ns = "rio")
-      }
+        if (inherits(imported, "try-error") || NROW(imported) < 1) {
+          datamods:::toggle_widget(inputId = "confirm", enable = FALSE)
+          datamods:::insert_error(mssg = datamods:::i18n(attr(imported, "condition")$message))
+          temporary_rv$status <- "error"
+          temporary_rv$data <- NULL
+          temporary_rv$name <- NULL
+          temporary_rv$code <- NULL
+        } else {
+          datamods:::toggle_widget(inputId = "confirm", enable = TRUE)
 
-      if (inherits(imported, "try-error") || NROW(imported) < 1) {
-
-        datamods:::toggle_widget(inputId = "confirm", enable = FALSE)
-        datamods:::insert_error(mssg = datamods:::i18n(attr(imported, "condition")$message))
-        temporary_rv$status <- "error"
-        temporary_rv$data <- NULL
-        temporary_rv$name <- NULL
-        temporary_rv$code <- NULL
-
-      } else {
-
-        datamods:::toggle_widget(inputId = "confirm", enable = TRUE)
-
-        datamods:::insert_alert(
-          selector = ns("import"),
-          status = "success",
-          datamods:::make_success_alert(
-            imported,
-            trigger_return = trigger_return,
-            btn_show_data = btn_show_data,
-            extra = if (isTRUE(input$preview_data)) datamods:::i18n("First five rows are shown below:")
+          datamods:::insert_alert(
+            selector = ns("import"),
+            status = "success",
+            datamods:::make_success_alert(
+              imported,
+              trigger_return = trigger_return,
+              btn_show_data = btn_show_data,
+              extra = if (isTRUE(input$preview_data)) datamods:::i18n("First five rows are shown below:")
+            )
           )
-        )
-        temporary_rv$status <- "success"
-        temporary_rv$data <- imported
-        temporary_rv$name <- input$file$name
-        temporary_rv$code <- code
-      }
-    }, ignoreInit = TRUE)
+          temporary_rv$status <- "success"
+          temporary_rv$data <- imported
+          temporary_rv$name <- input$file$name
+          temporary_rv$code <- code
+        }
+      },
+      ignoreInit = TRUE
+    )
 
     observeEvent(input$see_data, {
       datamods:::show_data(temporary_rv$data, title = datamods:::i18n("Imported data"), type = show_data_in)
@@ -2941,6 +3067,10 @@ is_sas <- function(path) {
   isTRUE(tools::file_ext(path) %in% c("sas7bdat"))
 }
 
+is_workbook <- function(path) {
+  is_excel(path) || is_ods(path)
+}
+
 #' Wrapper of data.table::fread to import delim files with few presets
 #'
 #' @param file file
@@ -2955,7 +3085,7 @@ import_delim <- function(file, skip, encoding, na.strings) {
     file = file,
     na.strings = na.strings,
     skip = skip,
-    check.names	= TRUE,
+    check.names = TRUE,
     encoding = encoding,
     data.table = FALSE,
     logical01 = TRUE,
@@ -2963,6 +3093,44 @@ import_delim <- function(file, skip, encoding, na.strings) {
     keepLeadingZeros = TRUE
   )
 }
+
+import_xls <- function(file, sheet, skip, na.strings) {
+  tryCatch(
+    {
+      # browser()
+      sheet |>
+        purrr::map(\(.x){
+          openxlsx2::read_xlsx(
+            file = file,
+            sheet = .x,
+            skip_empty_rows = TRUE,
+            start_row = skip - 1,
+            na.strings = na.strings
+          )
+        }) |>
+        purrr::reduce(dplyr::full_join)
+    },
+    warning = function(warn) {
+      showNotification(paste0(warn), type = "warning")
+    },
+    error = function(err) {
+      showNotification(paste0(err), type = "err")
+    }
+  )
+}
+
+import_ods <- function(file, sheet, skip, na.strings) {
+  readODS::read_ods(
+    path = file,
+    sheet = sheet,
+    skip = skip,
+    na = na.strings
+  )
+}
+
+# import_xls(openxlsx2::read_xlsx("~/freesearcheR/dev/Test data/trials_redcap_sheets.xlsx"),)
+# list()
+
 
 #' @title Create a select input control with icon(s)
 #'
@@ -2987,11 +3155,11 @@ selectInputIcon <- function(inputId,
                             width = NULL,
                             icon = NULL) {
   selected <- shiny::restoreInput(id = inputId, default = selected)
-  tags$div(
+  shiny::tags$div(
     class = "form-group shiny-input-container",
     shinyWidgets:::label_input(inputId, label),
     style = htmltools:::css(width = htmltools:::validateCssUnit(width)),
-    tags$div(
+    shiny::tags$div(
       class = "input-group",
       class = shinyWidgets:::validate_size(size),
       shinyWidgets:::markup_input_group(icon, "left", theme_func = shiny::getCurrentTheme),
@@ -3013,68 +3181,86 @@ selectInputIcon <- function(inputId,
 # library(shiny)
 # library(datamods)
 
-ui <- fluidPage(
+ui <- shiny::fluidPage(
   # theme = bslib::bs_theme(version = 5L),
   # theme = bslib::bs_theme(version = 5L, preset = "bootstrap"),
-  tags$h3("Import data from a file"),
-  fluidRow(
-    column(
+  shiny::tags$h3("Import data from a file"),
+  shiny::fluidRow(
+    shiny::column(
       width = 4,
       import_file_ui(
         id = "myid",
-        file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".json"),
-        layout_params = "dropdown" #"inline" # or "dropdown"
+        file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".sas7bdat", ".ods", ".dta"),
+        layout_params = "dropdown" # "inline" # or "dropdown"
       )
     ),
-    column(
+    shiny::column(
       width = 8,
-      tags$b("Import status:"),
-      verbatimTextOutput(outputId = "status"),
-      tags$b("Name:"),
-      verbatimTextOutput(outputId = "name"),
-      tags$b("Code:"),
-      verbatimTextOutput(outputId = "code"),
-      tags$b("Data:"),
-      verbatimTextOutput(outputId = "data")
+      shiny::tags$b("Import status:"),
+      shiny::verbatimTextOutput(outputId = "status"),
+      shiny::tags$b("Name:"),
+      shiny::verbatimTextOutput(outputId = "name"),
+      shiny::tags$b("Code:"),
+      shiny::verbatimTextOutput(outputId = "code"),
+      shiny::tags$b("Data:"),
+      shiny::verbatimTextOutput(outputId = "data")
     )
   )
 )
 
 server <- function(input, output, session) {
-
   imported <- import_file_server(
     id = "myid",
+    show_data_in = "popup",
+    trigger_return = "change",
+    return_class = "data.frame",
     # Custom functions to read data
     read_fns = list(
-      xls = function(file, sheet, skip, encoding) {
-        readxl::read_xls(path = file, sheet = sheet, skip = skip)
+      ods = import_ods,
+      dta = function(file) {
+        haven::read_dta(
+          file = file,
+          .name_repair = "unique_quiet"
+        )
       },
-      json = function(file) {
-        jsonlite::read_json(file, simplifyVector = TRUE)
+      # csv = function(file) {
+      #   readr::read_csv(
+      #     file = file,
+      #     na = consider.na,
+      #     name_repair = "unique_quiet"
+      #     )
+      # },
+      csv = import_delim,
+      tsv = import_delim,
+      txt = import_delim,
+      xls = import_xls,
+      xlsx = import_xls,
+      rds = function(file) {
+        readr::read_rds(
+          file = file,
+          name_repair = "unique_quiet"
+        )
       }
-    ),
-    show_data_in = "modal"
+    )
   )
 
-  output$status <- renderPrint({
+  output$status <- shiny::renderPrint({
     imported$status()
   })
-  output$name <- renderPrint({
+  output$name <- shiny::renderPrint({
     imported$name()
   })
-  output$code <- renderPrint({
+  output$code <- shiny::renderPrint({
     imported$code()
   })
-  output$data <- renderPrint({
+  output$data <- shiny::renderPrint({
     imported$data()
   })
-
 }
 
-if (interactive())
-  shinyApp(ui, server)
-
-
+if (FALSE) {
+  shiny::shinyApp(ui, server)
+}
 
 
 ########
@@ -3176,7 +3362,8 @@ plot_euler <- function(data, x, y, z = NULL, seed = 2103) {
       plot_euler_single()
   })
 
-  patchwork::wrap_plots(out, guides = "collect")
+  wrap_plot_list(out)
+  # patchwork::wrap_plots(out, guides = "collect")
 }
 
 
@@ -3210,6 +3397,141 @@ plot_euler_single <- function(data) {
       plot.background = ggplot2::element_rect(fill = "white"),
       panel.border = ggplot2::element_blank()
     )
+}
+
+
+########
+#### Current file: R//plot_hbar.R 
+########
+
+#' Nice horizontal stacked bars (Grotta bars)
+#'
+#' @returns ggplot2 object
+#' @export
+#'
+#' @name data-plots
+#'
+#' @examples
+#' mtcars |> plot_hbars(x = "carb", y = "cyl")
+#' mtcars |> plot_hbars(x = "carb", y = NULL)
+plot_hbars <- function(data, x, y, z = NULL) {
+  out <- vertical_stacked_bars(data = data, score = x, group = y, strata = z)
+
+  out
+}
+
+
+#' Vertical stacked bar plot wrapper
+#'
+#' @param data data.frame
+#' @param score outcome variable
+#' @param group grouping variable
+#' @param strata stratifying variable
+#' @param t.size text size
+#'
+#' @return ggplot2 object
+#' @export
+#'
+vertical_stacked_bars <- function(data,
+                                  score = "full_score",
+                                  group = "pase_0_q",
+                                  strata = NULL,
+                                  t.size = 10,
+                                  l.color = "black",
+                                  l.size = .5,
+                                  draw.lines = TRUE) {
+  if (is.null(group)) {
+    df.table <- data[c(score, group, strata)] |>
+      dplyr::mutate("All" = 1) |>
+      table()
+    group <- "All"
+    draw.lines <- FALSE
+  } else {
+    df.table <- data[c(score, group, strata)] |>
+      table()
+  }
+
+  p <- df.table |>
+    rankinPlot::grottaBar(
+      scoreName = score,
+      groupName = group,
+      textColor = c("black", "white"),
+      strataName = strata,
+      textCut = 6,
+      textSize = 20,
+      printNumbers = "none",
+      lineSize = l.size,
+      returnData = TRUE
+    )
+
+  colors <- viridisLite::viridis(nrow(df.table))
+  contrast_cut <-
+    sum(contrast_text(colors, threshold = .3) == "white")
+
+  score_label <- ifelse(is.na(REDCapCAST::get_attr(data$score, "label")), score, REDCapCAST::get_attr(data$score, "label"))
+  group_label <- ifelse(is.na(REDCapCAST::get_attr(data$group, "label")), group, REDCapCAST::get_attr(data$group, "label"))
+
+
+  p |>
+    (\(.x){
+      .x$plot +
+        ggplot2::geom_text(
+          data = .x$rectData[which(.x$rectData$n >
+                                     0), ],
+          size = t.size,
+          fontface = "plain",
+          ggplot2::aes(
+            x = group,
+            y = p_prev + 0.49 * p,
+            color = as.numeric(score) > contrast_cut,
+            # label = paste0(sprintf("%2.0f", 100 * p),"%"),
+            label = sprintf("%2.0f", 100 * p)
+          )
+        ) +
+        ggplot2::labs(fill = score_label) +
+        ggplot2::scale_fill_manual(values = rev(colors)) +
+        ggplot2::theme(
+          legend.position = "bottom",
+          axis.title = ggplot2::element_text(),
+        ) +
+        ggplot2::xlab(group_label) +
+        ggplot2::ylab(NULL)
+      # viridis::scale_fill_viridis(discrete = TRUE, direction = -1, option = "D")
+    })()
+}
+
+
+########
+#### Current file: R//plot_ridge.R 
+########
+
+#' Plot nice ridge plot
+#'
+#' @returns ggplot2 object
+#' @export
+#'
+#' @name data-plots
+#'
+#' @examples
+#' mtcars |>
+#'   default_parsing() |>
+#'   plot_ridge(x = "mpg", y = "cyl")
+#' mtcars |> plot_ridge(x = "mpg", y = "cyl", z = "gear")
+plot_ridge <- function(data, x, y, z = NULL, ...) {
+  if (!is.null(z)) {
+    ds <- split(data, data[z])
+  } else {
+    ds <- list(data)
+  }
+
+  out <- lapply(ds, \(.ds){
+    ggplot2::ggplot(.ds, ggplot2::aes(x = !!dplyr::sym(x), y = !!dplyr::sym(y), fill = !!dplyr::sym(y))) +
+      ggridges::geom_density_ridges() +
+      ggridges::theme_ridges() +
+      ggplot2::theme(legend.position = "none") |> rempsyc:::theme_apa()
+  })
+
+  patchwork::wrap_plots(out)
 }
 
 
@@ -3420,6 +3742,70 @@ plot_sankey_single <- function(data, x, y, color.group = c("x", "y"), colors = N
 
 
 ########
+#### Current file: R//plot_scatter.R 
+########
+
+#' Beautiful violin plot
+#'
+#' @returns ggplot2 object
+#' @export
+#'
+#' @name data-plots
+#'
+#' @examples
+#' mtcars |> plot_scatter(x = "mpg", y = "wt")
+plot_scatter <- function(data, x, y, z = NULL) {
+  if (is.null(z)) {
+    rempsyc::nice_scatter(
+      data = data,
+      predictor = y,
+      response = x, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
+    )
+  } else {
+    rempsyc::nice_scatter(
+      data = data,
+      predictor = y,
+      response = x,
+      group = z, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
+    )
+  }
+}
+
+
+########
+#### Current file: R//plot_violin.R 
+########
+
+#' Beatiful violin plot
+#'
+#' @returns ggplot2 object
+#' @export
+#'
+#' @name data-plots
+#'
+#' @examples
+#' mtcars |> plot_violin(x = "mpg", y = "cyl", z = "gear")
+plot_violin <- function(data, x, y, z = NULL) {
+  if (!is.null(z)) {
+    ds <- split(data, data[z])
+  } else {
+    ds <- list(data)
+  }
+
+  out <- lapply(ds, \(.ds){
+    rempsyc::nice_violin(
+      data = .ds,
+      group = y,
+      response = x, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
+    )
+  })
+
+  wrap_plot_list(out)
+  # patchwork::wrap_plots(out,guides = "collect")
+}
+
+
+########
 #### Current file: R//redcap_read_shiny_module.R 
 ########
 
@@ -3432,8 +3818,15 @@ plot_sankey_single <- function(data, x, y, color.group = c("x", "y"), colors = N
 #'
 #' @return shiny ui element
 #' @export
-m_redcap_readUI <- function(id, include_title = TRUE) {
+m_redcap_readUI <- function(id, title = TRUE) {
   ns <- shiny::NS(id)
+
+  if (isTRUE(title)) {
+    title <- shiny::tags$h4(
+      "Import data from REDCap",
+      class = "redcap-module-title"
+    )
+  }
 
   server_ui <- shiny::tagList(
     # width = 6,
@@ -3500,7 +3893,7 @@ m_redcap_readUI <- function(id, include_title = TRUE) {
 
 
   shiny::fluidPage(
-    if (include_title) shiny::tags$h3("Import data from REDCap"),
+    title=title,
     bslib::layout_columns(
       server_ui,
       params_ui,
@@ -3565,7 +3958,13 @@ m_redcap_readServer <- function(id) {
     )
 
     shiny::observeEvent(list(input$api, input$uri), {
+      shiny::req(input$api)
+      shiny::req(input$uri)
+      if (!is.null(input$uri)){
       uri <- paste0(ifelse(endsWith(input$uri, "/"), input$uri, paste0(input$uri, "/")), "api/")
+      } else {
+        uri <- input$uri
+      }
 
       if (is_valid_redcap_url(uri) & is_valid_token(input$api)) {
         data_rv$uri <- uri
@@ -6390,13 +6789,16 @@ ui_elements <- list(
           import_file_ui(
             id = "file_import",
             layout_params = "dropdown",
-            title = "Choose a datafile to upload",
+            # title = "Choose a datafile to upload",
             file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".sas7bdat", ".ods", ".dta")
           )
         ),
         shiny::conditionalPanel(
           condition = "input.source=='redcap'",
-          m_redcap_readUI("redcap_import")
+          m_redcap_readUI(
+            id = "redcap_import",
+            title = ""
+          )
         ),
         shiny::conditionalPanel(
           condition = "input.source=='env'",
@@ -7068,23 +7470,13 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
-  consider.na <- c("NA", "\"\"", "", "\'\'", "na")
-
   data_file <- import_file_server(
     id = "file_import",
     show_data_in = "popup",
     trigger_return = "change",
     return_class = "data.frame",
     read_fns = list(
-      ods = function(file, which, skip, na) {
-        readODS::read_ods(
-          path = file,
-          # Sheet and skip not implemented for .ods in the original implementation
-          sheet = which,
-          skip = skip,
-          na = na
-        )
-      },
+      ods = import_ods,
       dta = function(file) {
         haven::read_dta(
           file = file,
@@ -7101,24 +7493,8 @@ server <- function(input, output, session) {
       csv = import_delim,
       tsv = import_delim,
       txt = import_delim,
-      xls = function(file, which, skip, na) {
-        openxlsx2::read_xlsx(
-          file = file,
-          sheet = which,
-          skip_empty_rows = TRUE,
-          start_row = skip - 1,
-          na.strings = na
-        )
-      },
-      xlsx = function(file, which, skip, na) {
-        openxlsx2::read_xlsx(
-          file = file,
-          sheet = sheet,
-          skip_empty_rows = TRUE,
-          start_row = skip - 1,
-          na.strings = na
-        )
-      },
+      xls = import_xls,
+      xlsx = import_xls,
       rds = function(file) {
         readr::read_rds(
           file = file,
@@ -7135,8 +7511,7 @@ server <- function(input, output, session) {
   })
 
   data_redcap <- m_redcap_readServer(
-    id = "redcap_import" # ,
-    # output.format = "list"
+    id = "redcap_import"
   )
 
   shiny::observeEvent(data_redcap(), {

@@ -31,14 +31,6 @@ data_summary_server <- function(id,
     module = function(input, output, session) {
       ns <- session$ns
 
-      # data_r <- shiny::reactive({
-      #   if (shiny::is.reactive(data)) {
-      #     data()
-      #   } else {
-      #     data
-      #   }
-      # })
-
       output$tbl_summary <-
         toastui::renderDatagrid(
           {

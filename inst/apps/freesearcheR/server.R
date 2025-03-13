@@ -93,23 +93,13 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
-  consider.na <- c("NA", "\"\"", "", "\'\'", "na")
-
   data_file <- import_file_server(
     id = "file_import",
     show_data_in = "popup",
     trigger_return = "change",
     return_class = "data.frame",
     read_fns = list(
-      ods = function(file, which, skip, na) {
-        readODS::read_ods(
-          path = file,
-          # Sheet and skip not implemented for .ods in the original implementation
-          sheet = which,
-          skip = skip,
-          na = na
-        )
-      },
+      ods = import_ods,
       dta = function(file) {
         haven::read_dta(
           file = file,
@@ -126,24 +116,8 @@ server <- function(input, output, session) {
       csv = import_delim,
       tsv = import_delim,
       txt = import_delim,
-      xls = function(file, which, skip, na) {
-        openxlsx2::read_xlsx(
-          file = file,
-          sheet = which,
-          skip_empty_rows = TRUE,
-          start_row = skip - 1,
-          na.strings = na
-        )
-      },
-      xlsx = function(file, which, skip, na) {
-        openxlsx2::read_xlsx(
-          file = file,
-          sheet = sheet,
-          skip_empty_rows = TRUE,
-          start_row = skip - 1,
-          na.strings = na
-        )
-      },
+      xls = import_xls,
+      xlsx = import_xls,
       rds = function(file) {
         readr::read_rds(
           file = file,
@@ -160,8 +134,7 @@ server <- function(input, output, session) {
   })
 
   data_redcap <- m_redcap_readServer(
-    id = "redcap_import" # ,
-    # output.format = "list"
+    id = "redcap_import"
   )
 
   shiny::observeEvent(data_redcap(), {

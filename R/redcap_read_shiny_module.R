@@ -7,8 +7,15 @@
 #'
 #' @return shiny ui element
 #' @export
-m_redcap_readUI <- function(id, include_title = TRUE) {
+m_redcap_readUI <- function(id, title = TRUE) {
   ns <- shiny::NS(id)
+
+  if (isTRUE(title)) {
+    title <- shiny::tags$h4(
+      "Import data from REDCap",
+      class = "redcap-module-title"
+    )
+  }
 
   server_ui <- shiny::tagList(
     # width = 6,
@@ -75,7 +82,7 @@ m_redcap_readUI <- function(id, include_title = TRUE) {
 
 
   shiny::fluidPage(
-    if (include_title) shiny::tags$h3("Import data from REDCap"),
+    title=title,
     bslib::layout_columns(
       server_ui,
       params_ui,
@@ -140,7 +147,13 @@ m_redcap_readServer <- function(id) {
     )
 
     shiny::observeEvent(list(input$api, input$uri), {
+      shiny::req(input$api)
+      shiny::req(input$uri)
+      if (!is.null(input$uri)){
       uri <- paste0(ifelse(endsWith(input$uri, "/"), input$uri, paste0(input$uri, "/")), "api/")
+      } else {
+        uri <- input$uri
+      }
 
       if (is_valid_redcap_url(uri) & is_valid_token(input$api)) {
         data_rv$uri <- uri

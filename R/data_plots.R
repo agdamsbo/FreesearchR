@@ -4,7 +4,7 @@
 #'
 #' @param id Module id. (Use 'ns("id")')
 #'
-#' @name data-correlations
+#' @name data-plots
 #' @returns Shiny ui module
 #' @export
 #'
@@ -24,12 +24,21 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
           shiny::uiOutput(outputId = ns("primary")),
           shiny::uiOutput(outputId = ns("type")),
           shiny::uiOutput(outputId = ns("secondary")),
-          shiny::uiOutput(outputId = ns("tertiary"))
+          shiny::uiOutput(outputId = ns("tertiary")),
+          shiny::br(),
+          shiny::actionButton(
+            inputId = ns("act_plot"),
+            label = "Plot",
+            width = "100%",
+            icon = shiny::icon("palette"),
+            disabled = FALSE
+          ),
+          shiny::helpText('Adjust settings, then press "Plot".')
         ),
-        bslib::accordion_panel(
-          title = "Advanced",
-          icon = bsicons::bs_icon("gear")
-        ),
+        # bslib::accordion_panel(
+        #   title = "Advanced",
+        #   icon = bsicons::bs_icon("gear")
+        # ),
         bslib::accordion_panel(
           title = "Download",
           icon = bsicons::bs_icon("download"),
@@ -87,7 +96,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
 #' @param data data
 #' @param ... ignored
 #'
-#' @name data-correlations
+#' @name data-plots
 #' @returns shiny server module
 #' @export
 data_visuals_server <- function(id,
@@ -130,14 +139,14 @@ data_visuals_server <- function(id,
 
         plots_named <- get_plot_options(plots) |>
           lapply(\(.x){
-            stats::setNames(.x$descr,.x$note)
+            stats::setNames(.x$descr, .x$note)
           })
 
         vectorSelectInput(
           inputId = ns("type"),
           selected = NULL,
           label = shiny::h4("Plot type"),
-          choices = Reduce(c,plots_named),
+          choices = Reduce(c, plots_named),
           multiple = FALSE
         )
       })
@@ -148,7 +157,6 @@ data_visuals_server <- function(id,
 
       output$secondary <- shiny::renderUI({
         shiny::req(input$type)
-        # browser()
 
         cols <- c(
           rv$plot.params()[["secondary.extra"]],
@@ -164,9 +172,9 @@ data_visuals_server <- function(id,
         columnSelectInput(
           inputId = ns("secondary"),
           data = data,
-          selected = 1,
-          placeholder = "Select variable",
-          label = "Secondary/group variable",
+          selected = cols[1],
+          placeholder = "Please select",
+          label = if (isTRUE(rv$plot.params()[["secondary.multi"]])) "Additional variables" else "Secondary variable",
           multiple = rv$plot.params()[["secondary.multi"]],
           maxItems = rv$plot.params()[["secondary.max"]],
           col_subset = cols,
@@ -179,8 +187,8 @@ data_visuals_server <- function(id,
         columnSelectInput(
           inputId = ns("tertiary"),
           data = data,
-          placeholder = "Select variable",
-          label = "Strata variable",
+          placeholder = "Please select",
+          label = "Grouping variable",
           multiple = FALSE,
           col_subset = c(
             "none",
@@ -197,25 +205,32 @@ data_visuals_server <- function(id,
         )
       })
 
-      rv$plot <- shiny::reactive({
-        shiny::req(input$primary)
-        shiny::req(input$type)
-        shiny::req(input$secondary)
-        shiny::req(input$tertiary)
-        # if (length(input$secondary)>1){
-        #   browser()
-        # }
-        create_plot(
-          data = data(),
-          type = rv$plot.params()[["fun"]],
-          x = input$primary,
-          y = input$secondary,
-          z = input$tertiary
-        )
-      })
+      shiny::observeEvent(input$act_plot,
+        {
+          tryCatch(
+            {
+              rv$plot <- create_plot(
+                data = data(),
+                type = rv$plot.params()[["fun"]],
+                x = input$primary,
+                y = input$secondary,
+                z = input$tertiary
+              )
+            },
+            warning = function(warn) {
+              showNotification(paste0(warn), type = "warning")
+            },
+            error = function(err) {
+              showNotification(paste0(err), type = "err")
+            }
+          )
+        },
+        ignoreInit = TRUE
+      )
 
       output$plot <- shiny::renderPlot({
-        rv$plot()
+        shiny::req(rv$plot)
+        rv$plot
       })
 
       output$download_plot <- shiny::downloadHandler(
@@ -226,7 +241,7 @@ data_visuals_server <- function(id,
           shiny::withProgress(message = "Drawing the plot. Hold on for a moment..", {
             ggplot2::ggsave(
               filename = file,
-              plot = rv$plot(),
+              plot = rv$plot,
               width = input$width,
               height = input$height,
               dpi = 300,
@@ -243,7 +258,6 @@ data_visuals_server <- function(id,
     }
   )
 }
-
 
 
 #' Select all from vector but
@@ -364,36 +378,6 @@ supported_plots <- function() {
   )
 }
 
-#' Plot nice ridge plot
-#'
-#' @returns ggplot2 object
-#' @export
-#'
-#' @name data-plots
-#'
-#' @examples
-#' mtcars |>
-#'   default_parsing() |>
-#'   plot_ridge(x = "mpg", y = "cyl")
-#' mtcars |> plot_ridge(x = "mpg", y = "cyl", z = "gear")
-plot_ridge <- function(data, x, y, z = NULL, ...) {
-  if (!is.null(z)) {
-    ds <- split(data, data[z])
-  } else {
-    ds <- list(data)
-  }
-
-  out <- lapply(ds, \(.ds){
-    ggplot2::ggplot(.ds, ggplot2::aes(x = !!dplyr::sym(x), y = !!dplyr::sym(y), fill = !!dplyr::sym(y))) +
-      ggridges::geom_density_ridges() +
-      ggridges::theme_ridges() +
-      ggplot2::theme(legend.position = "none") |> rempsyc:::theme_apa()
-  })
-
-  patchwork::wrap_plots(out)
-}
-
-
 #' Get possible regression models
 #'
 #' @param data data
@@ -494,104 +478,6 @@ create_plot <- function(data, type, x, y, z = NULL, ...) {
   )
 }
 
-
-#' Nice horizontal stacked bars (Grotta bars)
-#'
-#' @returns ggplot2 object
-#' @export
-#'
-#' @name data-plots
-#'
-#' @examples
-#' mtcars |> plot_hbars(x = "carb", y = "cyl")
-#' mtcars |> plot_hbars(x = "carb", y = NULL)
-plot_hbars <- function(data, x, y, z = NULL) {
-  out <- vertical_stacked_bars(data = data, score = x, group = y, strata = z)
-
-  out
-}
-
-
-#' Vertical stacked bar plot wrapper
-#'
-#' @param data data.frame
-#' @param score outcome variable
-#' @param group grouping variable
-#' @param strata stratifying variable
-#' @param t.size text size
-#'
-#' @return ggplot2 object
-#' @export
-#'
-vertical_stacked_bars <- function(data,
-                                  score = "full_score",
-                                  group = "pase_0_q",
-                                  strata = NULL,
-                                  t.size = 10,
-                                  l.color = "black",
-                                  l.size = .5,
-                                  draw.lines = TRUE) {
-  if (is.null(group)) {
-    df.table <- data[c(score, group, strata)] |>
-      dplyr::mutate("All" = 1) |>
-      table()
-    group <- "All"
-    draw.lines <- FALSE
-  } else {
-    df.table <- data[c(score, group, strata)] |>
-      table()
-  }
-
-  p <- df.table |>
-    rankinPlot::grottaBar(
-      scoreName = score,
-      groupName = group,
-      textColor = c("black", "white"),
-      strataName = strata,
-      textCut = 6,
-      textSize = 20,
-      printNumbers = "none",
-      lineSize = l.size,
-      returnData = TRUE
-    )
-
-  colors <- viridisLite::viridis(nrow(df.table))
-  contrast_cut <-
-    sum(contrast_text(colors, threshold = .3) == "white")
-
-  score_label <- ifelse(is.na(REDCapCAST::get_attr(data$score, "label")), score, REDCapCAST::get_attr(data$score, "label"))
-  group_label <- ifelse(is.na(REDCapCAST::get_attr(data$group, "label")), group, REDCapCAST::get_attr(data$group, "label"))
-
-
-  p |>
-    (\(.x){
-      .x$plot +
-        ggplot2::geom_text(
-          data = .x$rectData[which(.x$rectData$n >
-            0), ],
-          size = t.size,
-          fontface = "plain",
-          ggplot2::aes(
-            x = group,
-            y = p_prev + 0.49 * p,
-            color = as.numeric(score) > contrast_cut,
-            # label = paste0(sprintf("%2.0f", 100 * p),"%"),
-            label = sprintf("%2.0f", 100 * p)
-          )
-        ) +
-        ggplot2::labs(fill = score_label) +
-        ggplot2::scale_fill_manual(values = rev(colors)) +
-        ggplot2::theme(
-          legend.position = "bottom",
-          axis.title = ggplot2::element_text(),
-        ) +
-        ggplot2::xlab(group_label) +
-        ggplot2::ylab(NULL)
-      # viridis::scale_fill_viridis(discrete = TRUE, direction = -1, option = "D")
-    })()
-}
-
-
 #' Print label, and if missing print variable name
 #'
 #' @param data vector or data frame
@@ -626,62 +512,6 @@ get_label <- function(data, var = NULL) {
 }
 
 
-#' Beatiful violin plot
-#'
-#' @returns ggplot2 object
-#' @export
-#'
-#' @name data-plots
-#'
-#' @examples
-#' mtcars |> plot_violin(x = "mpg", y = "cyl", z = "gear")
-plot_violin <- function(data, x, y, z = NULL) {
-  if (!is.null(z)) {
-    ds <- split(data, data[z])
-  } else {
-    ds <- list(data)
-  }
-
-  out <- lapply(ds, \(.ds){
-    rempsyc::nice_violin(
-      data = .ds,
-      group = y,
-      response = x, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
-    )
-  })
-
-  patchwork::wrap_plots(out)
-}
-
-
-#' Beautiful violin plot
-#'
-#' @returns ggplot2 object
-#' @export
-#'
-#' @name data-plots
-#'
-#' @examples
-#' mtcars |> plot_scatter(x = "mpg", y = "wt")
-plot_scatter <- function(data, x, y, z = NULL) {
-  if (is.null(z)) {
-    rempsyc::nice_scatter(
-      data = data,
-      predictor = y,
-      response = x, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
-    )
-  } else {
-    rempsyc::nice_scatter(
-      data = data,
-      predictor = y,
-      response = x,
-      group = z, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
-    )
-  }
-}
-
-
-
 #' Line breaking at given number of characters for nicely plotting labels
 #'
 #' @param data string
@@ -705,3 +535,39 @@ line_break <- function(data, lineLength = 20, fixed = FALSE) {
 }
 
 
+wrap_plot_list <- function(data) {
+  if (length(data) > 1) {
+    out <- data |>
+      allign_axes() |>
+      patchwork::wrap_plots(guides = "collect", axes = "collect", axis_titles = "collect")
+  } else {
+    out <- data
+  }
+  out
+}
+
+
+allign_axes <- function(...) {
+  # https://stackoverflow.com/questions/62818776/get-axis-limits-from-ggplot-object
+  # https://github.com/thomasp85/patchwork/blob/main/R/plot_multipage.R#L150
+  if (ggplot2::is.ggplot(..1)) {
+    p <- list(...)
+  } else if (is.list(..1)) {
+    p <- ..1
+  } else {
+    cli::cli_abort("Can only align {.cls ggplot} objects or a list of them")
+  }
+
+  # browser()
+  yr <- purrr::map(p, ~ ggplot2::layer_scales(.x)$y$get_limits()) |>
+    unlist() |>
+    range() |>
+    unique()
+
+  xr <- purrr::map(p, ~ ggplot2::layer_scales(.x)$x$get_limits()) |>
+    unlist() |>
+    range() |>
+    unique()
+
+  p |> purrr::map(~ .x + ggplot2::xlim(xr) + ggplot2::ylim(yr))
+}
