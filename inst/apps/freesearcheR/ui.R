@@ -567,7 +567,7 @@ ui_elements <- list(
   "docs" = bslib::nav_item(
     # shiny::img(shiny::icon("book")),
     shiny::tags$a(
-      href = "https://agdamsbo.github.io/freesearcheR/",
+      href = "https://agdamsbo.github.io/FreesearchR/",
       "Docs (external)",
       target = "_blank",
       rel = "noopener noreferrer"
@@ -623,7 +623,7 @@ ui <- bslib::page_fixed(
       ),
       shiny::p(
         style = "margin: 1; color: #888;",
-        "AG Damsbo | v", app_version(), " | AGPLv3 license | ", shiny::tags$a("Source on Github", href = "https://github.com/agdamsbo/freesearcheR/", target = "_blank", rel = "noopener noreferrer")
+        "AG Damsbo | v", app_version(), " | AGPLv3 license | ", shiny::tags$a("Source on Github", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer")
       ),
     )
   )

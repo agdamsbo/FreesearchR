@@ -46,3 +46,29 @@ Currently several data file formats are supported for easy import (csv, txt, xls
 
 
 ### Local or sample data
+
+
+## Evaluate
+
+### Baseline
+
+### Correlation matrix
+
+
+## Visualise
+
+- Would be nice to have a table of possible plots, their description and data options
+
+
+## Regression
+
+
+## Download
+
+### Report
+
+
+### Data
+
+
+### Code
