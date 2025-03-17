@@ -4,6 +4,8 @@
 <url><loc>https://agdamsbo.github.io/freesearcheR/LICENSE.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/QA.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/ROADMAP.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/articles/freesearcheR.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/articles/index.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/authors.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/index.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/news/index.html</loc></url>
@@ -22,6 +24,7 @@
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/cut-variable.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/cut.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/data-correlations.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/reference/data-import.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/data-plots.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/data-summary.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/default_format_arguments.html</loc></url>
@@ -38,8 +41,9 @@
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/gg_theme_shiny.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/ggeulerr.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/grepl_fix.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/reference/import-file-type.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/import-file.html</loc></url>
-<url><loc>https://agdamsbo.github.io/freesearcheR/reference/import_delim.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/reference/import-file_module.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/index.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/index_embed.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/is_any_class.html</loc></url>

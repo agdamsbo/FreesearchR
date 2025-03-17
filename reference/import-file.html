@@ -15,7 +15,8 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/freesearcheR.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="../ROADMAP.html">Roadmap</a></li>
 <li class="nav-item"><a class="nav-link" href="../QA.html">Q&amp;A</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -56,8 +57,7 @@
 <span>  show_data_in <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"popup"</span>, <span class="st">"modal"</span><span class="op">)</span>,</span>
 <span>  trigger_return <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"button"</span>, <span class="st">"change"</span><span class="op">)</span>,</span>
 <span>  return_class <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"data.frame"</span>, <span class="st">"data.table"</span>, <span class="st">"tbl_df"</span>, <span class="st">"raw"</span><span class="op">)</span>,</span>
-<span>  reset <span class="op">=</span> <span class="fu">reactive</span><span class="op">(</span><span class="cn">NULL</span><span class="op">)</span>,</span>
-<span>  read_fns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  reset <span class="op">=</span> <span class="fu">reactive</span><span class="op">(</span><span class="cn">NULL</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -75,19 +75,6 @@
 
 <dt id="arg-layout-params">layout_params<a class="anchor" aria-label="anchor" href="#arg-layout-params"></a></dt>
 <dd><p>How to display import parameters : in a dropdown button or inline below file input.</p></dd>
-
-
-<dt id="arg-read-fns">read_fns<a class="anchor" aria-label="anchor" href="#arg-read-fns"></a></dt>
-<dd><p>Named list with custom function(s) to read data:</p><ul><li><p>the name must be the extension of the files to which the function will be applied</p></li>
-<li><p>the value must be a function that can have 5 arguments (you can ignore some of them, but you have to use the same names),
-passed by user through the interface:</p><ul><li><p><code>file</code>: path to the file</p></li>
-<li><p><code>sheet</code>: for Excel files, sheet to read</p></li>
-<li><p><code>skip</code>: number of row to skip</p></li>
-<li><p><code>dec</code>: decimal separator</p></li>
-<li><p><code>encoding</code>: file encoding</p></li>
-<li><p><code>na.strings</code>: character(s) to interpret as missing values.</p></li>
-</ul></li>
-</ul></dd>
 
 </dl></div>
 
