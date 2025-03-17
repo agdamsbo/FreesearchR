@@ -239,10 +239,7 @@ import_file_server <- function(id,
       {
         req(input$file)
         if (is_workbook(input$file$datapath)) shiny::req(input$sheet)
-        # browser()
 
-        # browser()
-        # req(input$skip_rows)
         extension <- tools::file_ext(input$file$datapath)
 
         parameters <- list(
@@ -253,7 +250,7 @@ import_file_server <- function(id,
           encoding = input$encoding,
           na.strings = datamods:::split_char(input$na_label)
         )
-        # browser()
+
         parameters <- parameters[which(names(parameters) %in% rlang::fn_fmls_names(get(read_fns[[extension]])))]
         # parameters <- parameters[which(names(parameters) %in% rlang::fn_fmls_names(read_fns[[extension]]))]
         imported <- try(rlang::exec(read_fns[[extension]], !!!parameters), silent = TRUE)

@@ -84,7 +84,7 @@ data_import_server <- function(id) {
 
     shiny::observeEvent(data_file$data(), {
       shiny::req(data_file$data())
-      browser()
+
       rv$data_temp <- data_file$data()
       rv$code <- append_list(data = data_file$code(), list = rv$code, index = "import")
     })

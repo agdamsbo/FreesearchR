@@ -173,7 +173,7 @@ server <- function(input, output, session) {
         deparse() |>
         paste(collapse="") |>
         paste("|>
-        dplyr::select(tidyselect::all_of(c(",paste(input$import_var,collapse=","),"))) |>
+        dplyr::select(",paste(input$import_var,collapse=","),") |>
         freesearcheR::default_parsing()") |>
         (\(.x){
           paste0("data <- ",.x)

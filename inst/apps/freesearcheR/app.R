@@ -10,7 +10,7 @@
 #### Current file: R//app_version.R 
 ########
 
-app_version <- function()'250317_1458'
+app_version <- function()'250317_2026'
 
 
 ########
@@ -1757,7 +1757,7 @@ data_import_server <- function(id) {
 
     shiny::observeEvent(data_file$data(), {
       shiny::req(data_file$data())
-      browser()
+
       rv$data_temp <- data_file$data()
       rv$code <- append_list(data = data_file$code(), list = rv$code, index = "import")
     })
@@ -2843,10 +2843,7 @@ import_file_server <- function(id,
       {
         req(input$file)
         if (is_workbook(input$file$datapath)) shiny::req(input$sheet)
-        # browser()
 
-        # browser()
-        # req(input$skip_rows)
         extension <- tools::file_ext(input$file$datapath)
 
         parameters <- list(
@@ -2857,7 +2854,7 @@ import_file_server <- function(id,
           encoding = input$encoding,
           na.strings = datamods:::split_char(input$na_label)
         )
-        # browser()
+
         parameters <- parameters[which(names(parameters) %in% rlang::fn_fmls_names(get(read_fns[[extension]])))]
         # parameters <- parameters[which(names(parameters) %in% rlang::fn_fmls_names(read_fns[[extension]]))]
         imported <- try(rlang::exec(read_fns[[extension]], !!!parameters), silent = TRUE)
@@ -7477,7 +7474,7 @@ server <- function(input, output, session) {
         deparse() |>
         paste(collapse="") |>
         paste("|>
-        dplyr::select(tidyselect::all_of(c(",paste(input$import_var,collapse=","),"))) |>
+        dplyr::select(",paste(input$import_var,collapse=","),") |>
         freesearcheR::default_parsing()") |>
         (\(.x){
           paste0("data <- ",.x)
@@ -7725,7 +7722,7 @@ server <- function(input, output, session) {
   )
 
   output$code_import <- shiny::renderPrint({
-    rv$code$import
+    cat(rv$code$import)
   })
 
   output$code_data <- shiny::renderPrint({
@@ -7734,7 +7731,6 @@ server <- function(input, output, session) {
                  sapply(ls,\(.x) paste(deparse(.x),collapse=",")),
                  collapse="|> \n")
     cat(out)
-    # attr(rv$data, "code")
   })
 
   output$code_filter <- shiny::renderPrint({
