@@ -50,7 +50,7 @@ ui_elements <- list(
             id = "file_import",
             layout_params = "dropdown",
             # title = "Choose a datafile to upload",
-            file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".sas7bdat", ".ods", ".dta")
+            file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".ods", ".dta")
           )
         ),
         shiny::conditionalPanel(

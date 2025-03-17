@@ -21,8 +21,7 @@ import_file_server(
   show_data_in = c("popup", "modal"),
   trigger_return = c("button", "change"),
   return_class = c("data.frame", "data.table", "tbl_df", "raw"),
-  reset = reactive(NULL),
-  read_fns = list()
+  reset = reactive(NULL)
 )
 }
 \arguments{
@@ -31,21 +30,6 @@ import_file_server(
 \item{file_extensions}{File extensions accepted by \code{\link[shiny:fileInput]{shiny::fileInput()}}, can also be MIME type.}
 
 \item{layout_params}{How to display import parameters : in a dropdown button or inline below file input.}
-
-\item{read_fns}{Named list with custom function(s) to read data:
-\itemize{
-\item the name must be the extension of the files to which the function will be applied
-\item the value must be a function that can have 5 arguments (you can ignore some of them, but you have to use the same names),
-passed by user through the interface:
-\itemize{
-\item \code{file}: path to the file
-\item \code{sheet}: for Excel files, sheet to read
-\item \code{skip}: number of row to skip
-\item \code{dec}: decimal separator
-\item \code{encoding}: file encoding
-\item \code{na.strings}: character(s) to interpret as missing values.
-}
-}}
 }
 \description{
 Let user upload a file and import data

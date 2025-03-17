@@ -85,7 +85,9 @@ import_file_ui <- function(id,
       buttonLabel = datamods:::i18n("Browse..."),
       placeholder = datamods:::i18n("No file selected"),
       accept = file_extensions,
-      width = "100%"
+      width = "100%",
+      ## A solution to allow multiple file upload is being considered
+      multiple = FALSE
     ),
     class = "mb-0"
   )
@@ -145,35 +147,23 @@ import_file_ui <- function(id,
       )
     ),
     if (isTRUE(preview_data)) {
-    toastui::datagridOutput2(outputId = ns("table"))
-    }
-    ,
+      toastui::datagridOutput2(outputId = ns("table"))
+    },
     shiny::uiOutput(
       outputId = ns("container_confirm_btn"),
       style = "margin-top: 20px;"
-    )  ,
+    ),
     tags$div(
       style = htmltools::css(display = "none"),
-    shiny::checkboxInput(
-      inputId = ns("preview_data"),
-      label = NULL,
-      value = isTRUE(preview_data)
-    )
+      shiny::checkboxInput(
+        inputId = ns("preview_data"),
+        label = NULL,
+        value = isTRUE(preview_data)
+      )
     )
   )
 }
 
-
-#' @param read_fns Named list with custom function(s) to read data:
-#'  * the name must be the extension of the files to which the function will be applied
-#'  * the value must be a function that can have 5 arguments (you can ignore some of them, but you have to use the same names),
-#'    passed by user through the interface:
-#'    + `file`: path to the file
-#'    + `sheet`: for Excel files, sheet to read
-#'    + `skip`: number of row to skip
-#'    + `dec`: decimal separator
-#'    + `encoding`: file encoding
-#'    + `na.strings`: character(s) to interpret as missing values.
 #'
 #' @export
 #'
@@ -184,16 +174,17 @@ import_file_server <- function(id,
                                show_data_in = c("popup", "modal"),
                                trigger_return = c("button", "change"),
                                return_class = c("data.frame", "data.table", "tbl_df", "raw"),
-                               reset = reactive(NULL),
-                               read_fns = list()) {
-  if (length(read_fns) > 0) {
-    if (!rlang::is_named(read_fns)) {
-      stop("import_file_server: `read_fns` must be a named list.", call. = FALSE)
-    }
-    if (!all(vapply(read_fns, rlang::is_function, logical(1)))) {
-      stop("import_file_server: `read_fns` must be list of function(s).", call. = FALSE)
-    }
-  }
+                               reset = reactive(NULL)) {
+  read_fns <- list(
+    ods = "import_ods",
+    dta = "import_dta",
+    csv = "import_delim",
+    tsv = "import_delim",
+    txt = "import_delim",
+    xls = "import_xls",
+    xlsx = "import_xls",
+    rds = "import_rds"
+  )
 
   trigger_return <- match.arg(trigger_return)
   return_class <- match.arg(return_class)
@@ -262,9 +253,11 @@ import_file_server <- function(id,
           encoding = input$encoding,
           na.strings = datamods:::split_char(input$na_label)
         )
-        parameters <- parameters[which(names(parameters) %in% rlang::fn_fmls_names(read_fns[[extension]]))]
+        # browser()
+        parameters <- parameters[which(names(parameters) %in% rlang::fn_fmls_names(get(read_fns[[extension]])))]
+        # parameters <- parameters[which(names(parameters) %in% rlang::fn_fmls_names(read_fns[[extension]]))]
         imported <- try(rlang::exec(read_fns[[extension]], !!!parameters), silent = TRUE)
-        code <- rlang::call2(read_fns[[extension]], !!!modifyList(parameters, list(file = input$file$name)))
+        code <- rlang::call2(read_fns[[extension]], !!!modifyList(parameters, list(file = input$file$name)), .ns = "freesearcheR")
 
         if (inherits(imported, "try-error")) {
           imported <- try(rlang::exec(rio::import, !!!parameters[1]), silent = TRUE)
@@ -361,11 +354,19 @@ is_workbook <- function(path) {
   is_excel(path) || is_ods(path)
 }
 
-#' Wrapper of data.table::fread to import delim files with few presets
+
+# File import functions ---------------------------------------------------
+
+#' Wrapper to ease data file import
 #'
-#' @param file file
-#' @param encoding encoding
-#' @param na.strings na.strings
+#' @param file path to the file
+#' @param sheet for Excel files, sheet to read
+#' @param skip number of row to skip
+#' @param encoding file encoding
+#' @param na.strings character(s) to interpret as missing values.
+#'
+#'
+#' @name import-file-type
 #'
 #' @returns data.frame
 #' @export
@@ -384,6 +385,12 @@ import_delim <- function(file, skip, encoding, na.strings) {
   )
 }
 
+
+#' @name import-file-type
+#'
+#' @returns data.frame
+#' @export
+#'
 import_xls <- function(file, sheet, skip, na.strings) {
   tryCatch(
     {
@@ -409,6 +416,12 @@ import_xls <- function(file, sheet, skip, na.strings) {
   )
 }
 
+
+#' @name import-file-type
+#'
+#' @returns data.frame
+#' @export
+#'
 import_ods <- function(file, sheet, skip, na.strings) {
   tryCatch(
     {
@@ -429,6 +442,30 @@ import_ods <- function(file, sheet, skip, na.strings) {
     error = function(err) {
       showNotification(paste0(err), type = "err")
     }
+  )
+}
+
+#' @name import-file-type
+#'
+#' @returns data.frame
+#' @export
+#'
+import_dta <- function(file) {
+  haven::read_dta(
+    file = file,
+    .name_repair = "unique_quiet"
+  )
+}
+
+#' @name import-file-type
+#'
+#' @returns data.frame
+#' @export
+#'
+import_rds <- function(file) {
+  readr::read_rds(
+    file = file,
+    name_repair = "unique_quiet"
   )
 }
 
@@ -515,35 +552,7 @@ import_file_demo_app <- function() {
       id = "myid",
       show_data_in = "popup",
       trigger_return = "change",
-      return_class = "data.frame",
-      # Custom functions to read data
-      read_fns = list(
-        ods = import_ods,
-        dta = function(file) {
-          haven::read_dta(
-            file = file,
-            .name_repair = "unique_quiet"
-          )
-        },
-        # csv = function(file) {
-        #   readr::read_csv(
-        #     file = file,
-        #     na = consider.na,
-        #     name_repair = "unique_quiet"
-        #     )
-        # },
-        csv = import_delim,
-        tsv = import_delim,
-        txt = import_delim,
-        xls = import_xls,
-        xlsx = import_xls,
-        rds = function(file) {
-          readr::read_rds(
-            file = file,
-            name_repair = "unique_quiet"
-          )
-        }
-      )
+      return_class = "data.frame"
     )
 
     output$status <- shiny::renderPrint({

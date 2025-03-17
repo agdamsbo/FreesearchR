@@ -38,6 +38,6 @@ Below are some (the actual list is quite long and growing) of the planned featur
 
     - [x] Correlation matrix plot for data exploration 2025-2-20
     
-    - [ ] Grotta bars for ordianl outcomes
+    - [x] Grotta bars for ordianl outcomes (and sankey) 2025-3-17
     
     - [x] Coefficient plotting for regression analyses (forest plot) 2025-2-20

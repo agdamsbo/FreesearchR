@@ -1,0 +1,48 @@
+---
+title: "freesearcheR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{freesearcheR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,eval = FALSE)
+```
+
+# Getting started with ***freesearcheR***
+
+Below is a simple walk-trough and basic instructions for the functions on the freesearcheR app.
+
+## Launching
+
+The easiest way to get started is to launch [the hosted version of the app on shinyapps.io (click this link)](https://agdamsbo.shinyapps.io/freesearcheR/).
+
+Additionally you have the option to run the app locally with access to any data in your current working environment.
+
+To do this, open *R* (or RStudio or similar), and run the following code to install the latest version of ***freesearcheR*** and launch the app:
+
+``` {r}
+require("pak")
+pak::pak("agdamsbo/freesearcheR")
+library(freesearcheR)
+freesearcheR::launch_freesearcheR()
+```
+
+As a small note, a standalone Windows app version is on the drawing board as well, but no time frame is available.
+
+## Importing data
+
+Once in the app and in the "*Import*", you have three options available for importing data: file upload, REDCap server export and local or sample data.
+
+After choosing a data source, you can set a threshold to filter data be completenes and further manually specify variables to include for analyses.
+
+### File upload
+
+Currently several data file formats are supported for easy import (csv, txt, xls(x), ods, rds, dta). If importing workbooks (xls(x) or ods), you are prompted to specify sheet(s) to import. If choosing multiple sheets, these are automatically merged by common variable(s), so please make sure that key variables are correctly named identically.
+
+### REDCap server export
+
+
+### Local or sample data

@@ -77,6 +77,9 @@ Suggests:
     usethis,
     roxygen2,
     pak,
-    rsconnect
+    rsconnect,
+    knitr,
+    rmarkdown
 URL: https://github.com/agdamsbo/freesearcheR, https://agdamsbo.github.io/freesearcheR/
 BugReports: https://github.com/agdamsbo/freesearcheR/issues
+VignetteBuilder: knitr

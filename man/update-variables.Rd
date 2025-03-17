@@ -6,7 +6,7 @@
 \alias{update_variables_server}
 \title{Select, rename and convert variables}
 \usage{
-update_variables_ui(id, title = TRUE)
+update_variables_ui(id, title = "")
 
 update_variables_server(
   id,

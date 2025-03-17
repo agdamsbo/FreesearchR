@@ -10,7 +10,7 @@
 #### Current file: R//app_version.R 
 ########
 
-app_version <- function()'250313_1502'
+app_version <- function()'250317_1458'
 
 
 ########
@@ -1671,256 +1671,177 @@ allign_axes <- function(...) {
 #### Current file: R//data-import.R 
 ########
 
-#' data_import_ui <- function(id, include_title = TRUE) {
-#'   ns <- shiny::NS(id)
+data_import_ui <- function(id) {
+  ns <- shiny::NS(id)
+
+  shiny::fluidRow(
+    shiny::column(width = 2),
+    shiny::column(
+      width = 8,
+      shiny::h4("Choose your data source"),
+      shiny::br(),
+      shinyWidgets::radioGroupButtons(
+        inputId = "source",
+        selected = "env",
+        choices = c(
+          "File upload" = "file",
+          "REDCap server export" = "redcap",
+          "Local or sample data" = "env"
+        ),
+        width = "100%"
+      ),
+      shiny::helpText("Upload a file from your device, get data directly from REDCap or select a sample data set for testing from the app."),
+      shiny::br(),
+      shiny::br(),
+      shiny::conditionalPanel(
+        condition = "input.source=='file'",
+        import_file_ui(
+          id = ns("file_import"),
+          layout_params = "dropdown",
+          title = "Choose a datafile to upload",
+          file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".sas7bdat", ".ods", ".dta")
+        )
+      ),
+      shiny::conditionalPanel(
+        condition = "input.source=='redcap'",
+        m_redcap_readUI(id = ns("redcap_import"))
+      ),
+      shiny::conditionalPanel(
+        condition = "input.source=='env'",
+        import_globalenv_ui(id = ns("env"), title = NULL)
+      ),
+      shiny::conditionalPanel(
+        condition = "input.source=='redcap'",
+        DT::DTOutput(outputId = ns("redcap_prev"))
+      )
+    )
+  )
+  }
+
+
+data_import_server <- function(id) {
+  module <- function(input, output, session) {
+    ns <- session$ns
+
+    rv <- shiny::reactiveValues(
+      data_temp = NULL,
+      code = list()
+    )
+
+    data_file <- import_file_server(
+      id = ns("file_import"),
+      show_data_in = "popup",
+      trigger_return = "change",
+      return_class = "data.frame",
+      read_fns = list(
+        ods = import_ods,
+        dta = function(file) {
+          haven::read_dta(
+            file = file,
+            .name_repair = "unique_quiet"
+          )
+        },
+        csv = import_delim,
+        tsv = import_delim,
+        txt = import_delim,
+        xls = import_xls,
+        xlsx = import_xls,
+        rds = function(file) {
+          readr::read_rds(
+            file = file,
+            name_repair = "unique_quiet"
+          )
+        }
+      )
+    )
+
+    shiny::observeEvent(data_file$data(), {
+      shiny::req(data_file$data())
+      browser()
+      rv$data_temp <- data_file$data()
+      rv$code <- append_list(data = data_file$code(), list = rv$code, index = "import")
+    })
+
+    data_redcap <- m_redcap_readServer(
+      id = "redcap_import"
+    )
+
+    shiny::observeEvent(data_redcap(), {
+      # rv$data_original <- purrr::pluck(data_redcap(), "data")()
+      rv$data_temp <- data_redcap()
+    })
+
+    from_env <- datamods::import_globalenv_server(
+      id = "env",
+      trigger_return = "change",
+      btn_show_data = FALSE,
+      reset = reactive(input$hidden)
+    )
+
+    shiny::observeEvent(from_env$data(), {
+      shiny::req(from_env$data())
+
+      rv$data_temp <- from_env$data()
+      # rv$code <- append_list(data = from_env$code(),list = rv$code,index = "import")
+    })
+
+    return(list(
+      # status = reactive(temporary_rv$status),
+      # name = reactive(temporary_rv$name),
+      # code = reactive(temporary_rv$code),
+      data = shiny::reactive(rv$data_temp)
+    ))
+
+  }
+
+  shiny::moduleServer(
+    id = id,
+    module = module
+  )
+
+  }
+
+
+#' Test app for the data-import module
 #'
-#'   shiny::fluidRow(
-#'     shiny::column(width = 2),
-#'     shiny::column(
-#'       width = 8,
-#'       shiny::h4("Choose your data source"),
-#'       shiny::br(),
-#'       shinyWidgets::radioGroupButtons(
-#'         inputId = "source",
-#'         selected = "env",
-#'         choices = c(
-#'           "File upload" = "file",
-#'           "REDCap server export" = "redcap",
-#'           "Local or sample data" = "env"
-#'         ),
-#'         width = "100%"
-#'       ),
-#'       shiny::helpText("Upload a file from your device, get data directly from REDCap or select a sample data set for testing from the app."),
-#'       shiny::br(),
-#'       shiny::br(),
-#'       shiny::conditionalPanel(
-#'         condition = "input.source=='file'",
-#'         import_file_ui(
-#'           id = "file_import",
-#'           layout_params = "dropdown",
-#'           title = "Choose a datafile to upload",
-#'           file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".sas7bdat", ".ods", ".dta")
-#'         )
-#'       ),
-#'       shiny::conditionalPanel(
-#'         condition = "input.source=='redcap'",
-#'         m_redcap_readUI("redcap_import")
-#'       ),
-#'       shiny::conditionalPanel(
-#'         condition = "input.source=='env'",
-#'         import_globalenv_ui(id = "env", title = NULL)
-#'       ),
-#'       shiny::conditionalPanel(
-#'         condition = "input.source=='redcap'",
-#'         DT::DTOutput(outputId = "redcap_prev")
-#'       ),
-#'       shiny::br(),
-#'       shiny::br(),
-#'       shiny::h5("Specify variables to include"),
-#'       shiny::fluidRow(
-#'         shiny::column(
-#'           width = 6,
-#'           shiny::br(),
-#'           shiny::p("Filter by completeness threshold and manual selection:"),
-#'           shiny::br(),
-#'           shiny::br()
-#'         ),
-#'         shiny::column(
-#'           width = 6,
-#'           shinyWidgets::noUiSliderInput(
-#'             inputId = "complete_cutoff",
-#'             label = NULL,
-#'             min = 0,
-#'             max = 100,
-#'             step = 5,
-#'             value = 70,
-#'             format = shinyWidgets::wNumbFormat(decimals = 0),
-#'             color = datamods:::get_primary_color()
-#'           ),
-#'           shiny::helpText("Filter variables with completeness above the specified percentage."),
-#'           shiny::br(),
-#'           shiny::br(),
-#'           shiny::uiOutput(outputId = "import_var")
-#'         )
-#'       ),
-#'       shiny::br(),
-#'       shiny::br(),
-#'       shiny::actionButton(
-#'         inputId = "act_start",
-#'         label = "Start",
-#'         width = "100%",
-#'         icon = shiny::icon("play"),
-#'         disabled = TRUE
-#'       ),
-#'       shiny::helpText('After importing, hit "Start" or navigate to the desired tab.'),
-#'       shiny::br(),
-#'       shiny::br(),
-#'       shiny::column(width = 2)
-#'     )
-#'   )
-#'   }
+#' @rdname data-import
 #'
-#'
-#' data_import_server <- function(id) {
-#'   module <- function(input, output, session) {
-#'     ns <- session$ns
-#'
-#'     rv <- shiny::reactiveValues(
-#'       data_original = NULL,
-#'       data_temp = NULL,
-#'       data = NULL,
-#'       code = list()
-#'     )
-#'
-#'   data_file <- import_file_server(
-#'     id = "file_import",
-#'     show_data_in = "popup",
-#'     trigger_return = "change",
-#'     return_class = "data.frame",
-#'     read_fns = list(
-#'       ods = import_ods,
-#'       dta = function(file) {
-#'         haven::read_dta(
-#'           file = file,
-#'           .name_repair = "unique_quiet"
-#'         )
-#'       },
-#'       # csv = function(file) {
-#'       #   readr::read_csv(
-#'       #     file = file,
-#'       #     na = consider.na,
-#'       #     name_repair = "unique_quiet"
-#'       #     )
-#'       # },
-#'       csv = import_delim,
-#'       tsv = import_delim,
-#'       txt = import_delim,
-#'       xls = import_xls,
-#'       xlsx = import_xls,
-#'       rds = function(file) {
-#'         readr::read_rds(
-#'           file = file,
-#'           name_repair = "unique_quiet"
-#'         )
-#'       }
-#'     )
-#'   )
-#'
-#'   shiny::observeEvent(data_file$data(), {
-#'     shiny::req(data_file$data())
-#'     rv$data_temp <- data_file$data()
-#'     rv$code <- append_list(data = data_file$code(), list = rv$code, index = "import")
-#'   })
-#'
-#'   data_redcap <- m_redcap_readServer(
-#'     id = "redcap_import" # ,
-#'     # output.format = "list"
-#'   )
-#'
-#'   shiny::observeEvent(data_redcap(), {
-#'     # rv$data_original <- purrr::pluck(data_redcap(), "data")()
-#'     rv$data_temp <- data_redcap()
-#'   })
-#'
-#'   output$redcap_prev <- DT::renderDT(
-#'     {
-#'       DT::datatable(head(data_redcap(), 5),
-#'         # DT::datatable(head(purrr::pluck(data_redcap(), "data")(), 5),
-#'         caption = "First 5 observations"
-#'       )
-#'     },
-#'     server = TRUE
-#'   )
-#'
-#'   from_env <- datamods::import_globalenv_server(
-#'     id = "env",
-#'     trigger_return = "change",
-#'     btn_show_data = FALSE,
-#'     reset = reactive(input$hidden)
-#'   )
-#'
-#'   shiny::observeEvent(from_env$data(), {
-#'     shiny::req(from_env$data())
-#'
-#'     rv$data_temp <- from_env$data()
-#'     # rv$code <- append_list(data = from_env$code(),list = rv$code,index = "import")
-#'   })
-#'
-#'   output$import_var <- shiny::renderUI({
-#'     shiny::req(rv$data_temp)
-#'
-#'     preselect <- names(rv$data_temp)[sapply(rv$data_temp, missing_fraction) <= input$complete_cutoff / 100]
-#'
-#'     shinyWidgets::virtualSelectInput(
-#'       inputId = "import_var",
-#'       label = "Select variables to include",
-#'       selected = preselect,
-#'       choices = names(rv$data_temp),
-#'       updateOn = "close",
-#'       multiple = TRUE,
-#'       search = TRUE,
-#'       showValueAsTags = TRUE
-#'     )
-#'   })
-#'
-#'
-#'   shiny::observeEvent(
-#'     eventExpr = list(
-#'       input$import_var
-#'     ),
-#'     handlerExpr = {
-#'       shiny::req(rv$data_temp)
-#'
-#'       rv$data_original <- rv$data_temp |>
-#'         dplyr::select(input$import_var) |>
-#'         # janitor::clean_names() |>
-#'         default_parsing()
-#'     }
-#'   )
-#'
-#'   return(shiny::reactive(rv$data_original))
-#'
-#'   }
-#'
-#'   shiny::moduleServer(
-#'     id = id,
-#'     module = module
-#'   )
-#'
-#'   }
-#'
-#'
-#' #' Test app for the data-import module
-#' #'
-#' #' @rdname data-import
-#' #'
-#' #' @examples
-#' #' \dontrun{
-#' #' data_import_demo_app()
-#' #' }
-#' data_import_demo_app <- function() {
-#'   ui <- shiny::fluidPage(
-#'     data_import_ui("data")
-#'   )
-#'   server <- function(input, output, session) {
-#'     data_val <- shiny::reactiveValues(data = NULL)
-#'
-#'
-#'     data_val$data <- data_import_server(id = "data")
-#'
-#'     output$data_summary <- DT::renderDataTable(
-#'       {
-#'         shiny::req(data_val$data)
-#'         data_val$data()
-#'       },
-#'       options = list(
-#'         scrollX = TRUE,
-#'         pageLength = 5
-#'       ),
-#'     )
-#'   }
-#'   shiny::shinyApp(ui, server)
+#' @examples
+#' \dontrun{
+#' data_import_demo_app()
 #' }
+data_import_demo_app <- function() {
+  ui <- shiny::fluidPage(
+    data_import_ui("data_import"),
+    toastui::datagridOutput2(outputId = "table"),
+    DT::DTOutput("data_summary")
+  )
+  server <- function(input, output, session) {
+    imported <- shiny::reactive(data_import_server(id = "data_import"))
+
+    # output$data_summary <- DT::renderDataTable(
+    #   {
+    #     shiny::req(data_val$data)
+    #     data_val$data
+    #   },
+    #   options = list(
+    #     scrollX = TRUE,
+    #     pageLength = 5
+    #   )
+    # )
+    output$table <- toastui::renderDatagrid2({
+      req(imported$data)
+      toastui::datagrid(
+        data = head(imported$data, 5),
+        theme = "striped",
+        colwidths = "guess",
+        minBodyHeight = 250
+      )
+    })
+
+  }
+  shiny::shinyApp(ui, server)
+}
 
 
 ########
@@ -2768,7 +2689,9 @@ import_file_ui <- function(id,
       buttonLabel = datamods:::i18n("Browse..."),
       placeholder = datamods:::i18n("No file selected"),
       accept = file_extensions,
-      width = "100%"
+      width = "100%",
+      ## A solution to allow multiple file upload is being considered
+      multiple = FALSE
     ),
     class = "mb-0"
   )
@@ -2828,35 +2751,23 @@ import_file_ui <- function(id,
       )
     ),
     if (isTRUE(preview_data)) {
-    toastui::datagridOutput2(outputId = ns("table"))
-    }
-    ,
+      toastui::datagridOutput2(outputId = ns("table"))
+    },
     shiny::uiOutput(
       outputId = ns("container_confirm_btn"),
       style = "margin-top: 20px;"
-    )  ,
+    ),
     tags$div(
       style = htmltools::css(display = "none"),
-    shiny::checkboxInput(
-      inputId = ns("preview_data"),
-      label = NULL,
-      value = isTRUE(preview_data)
-    )
+      shiny::checkboxInput(
+        inputId = ns("preview_data"),
+        label = NULL,
+        value = isTRUE(preview_data)
+      )
     )
   )
 }
 
-
-#' @param read_fns Named list with custom function(s) to read data:
-#'  * the name must be the extension of the files to which the function will be applied
-#'  * the value must be a function that can have 5 arguments (you can ignore some of them, but you have to use the same names),
-#'    passed by user through the interface:
-#'    + `file`: path to the file
-#'    + `sheet`: for Excel files, sheet to read
-#'    + `skip`: number of row to skip
-#'    + `dec`: decimal separator
-#'    + `encoding`: file encoding
-#'    + `na.strings`: character(s) to interpret as missing values.
 #'
 #' @export
 #'
@@ -2867,16 +2778,17 @@ import_file_server <- function(id,
                                show_data_in = c("popup", "modal"),
                                trigger_return = c("button", "change"),
                                return_class = c("data.frame", "data.table", "tbl_df", "raw"),
-                               reset = reactive(NULL),
-                               read_fns = list()) {
-  if (length(read_fns) > 0) {
-    if (!rlang::is_named(read_fns)) {
-      stop("import_file_server: `read_fns` must be a named list.", call. = FALSE)
-    }
-    if (!all(vapply(read_fns, rlang::is_function, logical(1)))) {
-      stop("import_file_server: `read_fns` must be list of function(s).", call. = FALSE)
-    }
-  }
+                               reset = reactive(NULL)) {
+  read_fns <- list(
+    ods = "import_ods",
+    dta = "import_dta",
+    csv = "import_delim",
+    tsv = "import_delim",
+    txt = "import_delim",
+    xls = "import_xls",
+    xlsx = "import_xls",
+    rds = "import_rds"
+  )
 
   trigger_return <- match.arg(trigger_return)
   return_class <- match.arg(return_class)
@@ -2945,9 +2857,11 @@ import_file_server <- function(id,
           encoding = input$encoding,
           na.strings = datamods:::split_char(input$na_label)
         )
-        parameters <- parameters[which(names(parameters) %in% rlang::fn_fmls_names(read_fns[[extension]]))]
+        # browser()
+        parameters <- parameters[which(names(parameters) %in% rlang::fn_fmls_names(get(read_fns[[extension]])))]
+        # parameters <- parameters[which(names(parameters) %in% rlang::fn_fmls_names(read_fns[[extension]]))]
         imported <- try(rlang::exec(read_fns[[extension]], !!!parameters), silent = TRUE)
-        code <- rlang::call2(read_fns[[extension]], !!!modifyList(parameters, list(file = input$file$name)))
+        code <- rlang::call2(read_fns[[extension]], !!!modifyList(parameters, list(file = input$file$name)), .ns = "freesearcheR")
 
         if (inherits(imported, "try-error")) {
           imported <- try(rlang::exec(rio::import, !!!parameters[1]), silent = TRUE)
@@ -3044,11 +2958,19 @@ is_workbook <- function(path) {
   is_excel(path) || is_ods(path)
 }
 
-#' Wrapper of data.table::fread to import delim files with few presets
+
+# File import functions ---------------------------------------------------
+
+#' Wrapper to ease data file import
 #'
-#' @param file file
-#' @param encoding encoding
-#' @param na.strings na.strings
+#' @param file path to the file
+#' @param sheet for Excel files, sheet to read
+#' @param skip number of row to skip
+#' @param encoding file encoding
+#' @param na.strings character(s) to interpret as missing values.
+#'
+#'
+#' @name import-file-type
 #'
 #' @returns data.frame
 #' @export
@@ -3067,6 +2989,12 @@ import_delim <- function(file, skip, encoding, na.strings) {
   )
 }
 
+
+#' @name import-file-type
+#'
+#' @returns data.frame
+#' @export
+#'
 import_xls <- function(file, sheet, skip, na.strings) {
   tryCatch(
     {
@@ -3092,6 +3020,12 @@ import_xls <- function(file, sheet, skip, na.strings) {
   )
 }
 
+
+#' @name import-file-type
+#'
+#' @returns data.frame
+#' @export
+#'
 import_ods <- function(file, sheet, skip, na.strings) {
   tryCatch(
     {
@@ -3112,6 +3046,30 @@ import_ods <- function(file, sheet, skip, na.strings) {
     error = function(err) {
       showNotification(paste0(err), type = "err")
     }
+  )
+}
+
+#' @name import-file-type
+#'
+#' @returns data.frame
+#' @export
+#'
+import_dta <- function(file) {
+  haven::read_dta(
+    file = file,
+    .name_repair = "unique_quiet"
+  )
+}
+
+#' @name import-file-type
+#'
+#' @returns data.frame
+#' @export
+#'
+import_rds <- function(file) {
+  readr::read_rds(
+    file = file,
+    name_repair = "unique_quiet"
   )
 }
 
@@ -3198,35 +3156,7 @@ import_file_demo_app <- function() {
       id = "myid",
       show_data_in = "popup",
       trigger_return = "change",
-      return_class = "data.frame",
-      # Custom functions to read data
-      read_fns = list(
-        ods = import_ods,
-        dta = function(file) {
-          haven::read_dta(
-            file = file,
-            .name_repair = "unique_quiet"
-          )
-        },
-        # csv = function(file) {
-        #   readr::read_csv(
-        #     file = file,
-        #     na = consider.na,
-        #     name_repair = "unique_quiet"
-        #     )
-        # },
-        csv = import_delim,
-        tsv = import_delim,
-        txt = import_delim,
-        xls = import_xls,
-        xlsx = import_xls,
-        rds = function(file) {
-          readr::read_rds(
-            file = file,
-            name_repair = "unique_quiet"
-          )
-        }
-      )
+      return_class = "data.frame"
     )
 
     output$status <- shiny::renderPrint({
@@ -3937,7 +3867,7 @@ m_redcap_readServer <- function(id) {
       dd_list = NULL,
       data = NULL,
       rep_fields = NULL,
-      imported = NULL
+      code = NULL
     )
 
     shiny::observeEvent(list(input$api, input$uri), {
@@ -4134,7 +4064,10 @@ m_redcap_readServer <- function(id) {
       shiny::withProgress(message = "Downloading REDCap data. Hold on for a moment..", {
         imported <- try(rlang::exec(REDCapCAST::read_redcap_tables, !!!parameters), silent = TRUE)
       })
-      code <- rlang::call2(REDCapCAST::read_redcap_tables, !!!parameters)
+
+      code <- rlang::call2("read_redcap_tables",
+                           !!!utils::modifyList(parameters,list(token="PERSONAL_API_TOKEN")),
+                           , .ns = "REDCapCAST")
 
 
       if (inherits(imported, "try-error") || NROW(imported) < 1) {
@@ -4169,6 +4102,8 @@ m_redcap_readServer <- function(id) {
           }
         }
 
+        data_rv$code <- code
+
         data_rv$data <- out |>
           dplyr::select(-dplyr::ends_with("_complete")) |>
           # dplyr::select(-dplyr::any_of(record_id)) |>
@@ -4184,7 +4119,13 @@ m_redcap_readServer <- function(id) {
     #
     # })
 
-    return(shiny::reactive(data_rv$data))
+    return(list(
+      status = shiny::reactive(data_rv$data_status),
+      name = shiny::reactive(data_rv$info$project_title),
+      info = shiny::reactive(data_rv$info),
+      code = shiny::reactive(data_rv$code),
+      data = shiny::reactive(data_rv$data)
+    ))
   }
 
   shiny::moduleServer(
@@ -4337,15 +4278,15 @@ drop_empty_event <- function(data, event = "redcap_event_name") {
 redcap_demo_app <- function() {
   ui <- shiny::fluidPage(
     m_redcap_readUI("data"),
-    DT::DTOutput("data_summary")
+    DT::DTOutput("data"),
+    shiny::tags$b("Code:"),
+    shiny::verbatimTextOutput(outputId = "code")
   )
   server <- function(input, output, session) {
-    data_val <- shiny::reactiveValues(data = NULL)
 
+    data_val <- m_redcap_readServer(id = "data")
 
-    data_val$data <- m_redcap_readServer(id = "data")
-
-    output$data_summary <- DT::renderDataTable(
+    output$data <- DT::renderDataTable(
       {
         shiny::req(data_val$data)
         data_val$data()
@@ -4355,6 +4296,10 @@ redcap_demo_app <- function() {
         pageLength = 5
       ),
     )
+    output$code <- shiny::renderPrint({
+      shiny::req(data_val$code)
+      data_val$code()
+    })
   }
   shiny::shinyApp(ui, server)
 }
@@ -6773,7 +6718,7 @@ ui_elements <- list(
             id = "file_import",
             layout_params = "dropdown",
             # title = "Choose a datafile to upload",
-            file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".sas7bdat", ".ods", ".dta")
+            file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".ods", ".dta")
           )
         ),
         shiny::conditionalPanel(
@@ -7456,34 +7401,7 @@ server <- function(input, output, session) {
     id = "file_import",
     show_data_in = "popup",
     trigger_return = "change",
-    return_class = "data.frame",
-    read_fns = list(
-      ods = import_ods,
-      dta = function(file) {
-        haven::read_dta(
-          file = file,
-          .name_repair = "unique_quiet"
-        )
-      },
-      # csv = function(file) {
-      #   readr::read_csv(
-      #     file = file,
-      #     na = consider.na,
-      #     name_repair = "unique_quiet"
-      #     )
-      # },
-      csv = import_delim,
-      tsv = import_delim,
-      txt = import_delim,
-      xls = import_xls,
-      xlsx = import_xls,
-      rds = function(file) {
-        readr::read_rds(
-          file = file,
-          name_repair = "unique_quiet"
-        )
-      }
-    )
+    return_class = "data.frame"
   )
 
   shiny::observeEvent(data_file$data(), {
@@ -7492,18 +7410,19 @@ server <- function(input, output, session) {
     rv$code <- append_list(data = data_file$code(), list = rv$code, index = "import")
   })
 
-  data_redcap <- m_redcap_readServer(
+  from_redcap <- m_redcap_readServer(
     id = "redcap_import"
   )
 
-  shiny::observeEvent(data_redcap(), {
+  shiny::observeEvent(from_redcap$data(), {
     # rv$data_original <- purrr::pluck(data_redcap(), "data")()
-    rv$data_temp <- data_redcap()
+    rv$data_temp <- from_redcap$data()
+    rv$code <- append_list(data = from_redcap$code(),list = rv$code,index = "import")
   })
 
   output$redcap_prev <- DT::renderDT(
     {
-      DT::datatable(head(data_redcap(), 5),
+      DT::datatable(head(from_redcap$data(), 5),
         # DT::datatable(head(purrr::pluck(data_redcap(), "data")(), 5),
         caption = "First 5 observations"
       )
@@ -7552,8 +7471,20 @@ server <- function(input, output, session) {
 
       rv$data_original <- rv$data_temp |>
         dplyr::select(input$import_var) |>
-        # janitor::clean_names() |>
         default_parsing()
+
+      rv$code$import <- rv$code$import |>
+        deparse() |>
+        paste(collapse="") |>
+        paste("|>
+        dplyr::select(tidyselect::all_of(c(",paste(input$import_var,collapse=","),"))) |>
+        freesearcheR::default_parsing()") |>
+        (\(.x){
+          paste0("data <- ",.x)
+        })()
+
+      rv$code$filter <- NULL
+      rv$code$modify <- NULL
     }
   )
 
@@ -7590,6 +7521,8 @@ server <- function(input, output, session) {
       if (isTRUE(input$reset_confirm)) {
         shiny::req(rv$data_original)
         rv$data <- rv$data_original
+        rv$code$filter <- NULL
+        rv$code$modify <- NULL
       }
     },
     ignoreNULL = TRUE
@@ -7647,7 +7580,10 @@ server <- function(input, output, session) {
     data_r = shiny::reactive(rv$data)
   )
 
-  shiny::observeEvent(data_modal_cut(), rv$data <- data_modal_cut())
+  shiny::observeEvent(data_modal_cut(), {
+    rv$data <- data_modal_cut()
+    rv$code$modify[[length(rv$code$modify)+1]] <- attr(rv$data,"code")
+    })
 
   #########  Modify factor
 
@@ -7664,6 +7600,7 @@ server <- function(input, output, session) {
   shiny::observeEvent(data_modal_update(), {
     shiny::removeModal()
     rv$data <- data_modal_update()
+    rv$code$modify[[length(rv$code$modify)+1]] <- attr(rv$data,"code")
   })
 
   #########  Create column
@@ -7684,6 +7621,7 @@ server <- function(input, output, session) {
     data_modal_r(),
     {
       rv$data <- data_modal_r()
+      rv$code$modify[[length(rv$code$modify)+1]] <- attr(rv$data,"code")
     }
   )
 
@@ -7711,9 +7649,9 @@ server <- function(input, output, session) {
     }
   )
 
-  output$code <- renderPrint({
-    attr(rv$data, "code")
-  })
+  # output$code <- renderPrint({
+  #   attr(rv$data, "code")
+  # })
 
   # updated_data <- datamods::update_variables_server(
   updated_data <- update_variables_server(
@@ -7786,33 +7724,17 @@ server <- function(input, output, session) {
     }
   )
 
-  # output$filtered_code <- shiny::renderPrint({
-  #   out <- gsub(
-  #     "filter", "dplyr::filter",
-  #     gsub(
-  #       "\\s{2,}", " ",
-  #       paste0(
-  #         capture.output(attr(rv$data_filtered, "code")),
-  #         collapse = " "
-  #       )
-  #     )
-  #   )
-  #
-  #   out <- strsplit(out, "%>%") |>
-  #     unlist() |>
-  #     (\(.x){
-  #       paste(c("data", .x[-1]), collapse = "|> \n ")
-  #     })()
-  #
-  #   cat(out)
-  # })
-
   output$code_import <- shiny::renderPrint({
-    cat(rv$code$import)
+    rv$code$import
   })
 
   output$code_data <- shiny::renderPrint({
-    attr(rv$data, "code")
+    ls <- rv$code$modify |> unique()
+    out <- paste("data |> \n",
+                 sapply(ls,\(.x) paste(deparse(.x),collapse=",")),
+                 collapse="|> \n")
+    cat(out)
+    # attr(rv$data, "code")
   })
 
   output$code_filter <- shiny::renderPrint({

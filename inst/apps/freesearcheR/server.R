@@ -97,34 +97,7 @@ server <- function(input, output, session) {
     id = "file_import",
     show_data_in = "popup",
     trigger_return = "change",
-    return_class = "data.frame",
-    read_fns = list(
-      ods = import_ods,
-      dta = function(file) {
-        haven::read_dta(
-          file = file,
-          .name_repair = "unique_quiet"
-        )
-      },
-      # csv = function(file) {
-      #   readr::read_csv(
-      #     file = file,
-      #     na = consider.na,
-      #     name_repair = "unique_quiet"
-      #     )
-      # },
-      csv = import_delim,
-      tsv = import_delim,
-      txt = import_delim,
-      xls = import_xls,
-      xlsx = import_xls,
-      rds = function(file) {
-        readr::read_rds(
-          file = file,
-          name_repair = "unique_quiet"
-        )
-      }
-    )
+    return_class = "data.frame"
   )
 
   shiny::observeEvent(data_file$data(), {
@@ -133,18 +106,19 @@ server <- function(input, output, session) {
     rv$code <- append_list(data = data_file$code(), list = rv$code, index = "import")
   })
 
-  data_redcap <- m_redcap_readServer(
+  from_redcap <- m_redcap_readServer(
     id = "redcap_import"
   )
 
-  shiny::observeEvent(data_redcap(), {
+  shiny::observeEvent(from_redcap$data(), {
     # rv$data_original <- purrr::pluck(data_redcap(), "data")()
-    rv$data_temp <- data_redcap()
+    rv$data_temp <- from_redcap$data()
+    rv$code <- append_list(data = from_redcap$code(),list = rv$code,index = "import")
   })
 
   output$redcap_prev <- DT::renderDT(
     {
-      DT::datatable(head(data_redcap(), 5),
+      DT::datatable(head(from_redcap$data(), 5),
         # DT::datatable(head(purrr::pluck(data_redcap(), "data")(), 5),
         caption = "First 5 observations"
       )
@@ -193,8 +167,20 @@ server <- function(input, output, session) {
 
       rv$data_original <- rv$data_temp |>
         dplyr::select(input$import_var) |>
-        # janitor::clean_names() |>
         default_parsing()
+
+      rv$code$import <- rv$code$import |>
+        deparse() |>
+        paste(collapse="") |>
+        paste("|>
+        dplyr::select(tidyselect::all_of(c(",paste(input$import_var,collapse=","),"))) |>
+        freesearcheR::default_parsing()") |>
+        (\(.x){
+          paste0("data <- ",.x)
+        })()
+
+      rv$code$filter <- NULL
+      rv$code$modify <- NULL
     }
   )
 
@@ -231,6 +217,8 @@ server <- function(input, output, session) {
       if (isTRUE(input$reset_confirm)) {
         shiny::req(rv$data_original)
         rv$data <- rv$data_original
+        rv$code$filter <- NULL
+        rv$code$modify <- NULL
       }
     },
     ignoreNULL = TRUE
@@ -288,7 +276,10 @@ server <- function(input, output, session) {
     data_r = shiny::reactive(rv$data)
   )
 
-  shiny::observeEvent(data_modal_cut(), rv$data <- data_modal_cut())
+  shiny::observeEvent(data_modal_cut(), {
+    rv$data <- data_modal_cut()
+    rv$code$modify[[length(rv$code$modify)+1]] <- attr(rv$data,"code")
+    })
 
   #########  Modify factor
 
@@ -305,6 +296,7 @@ server <- function(input, output, session) {
   shiny::observeEvent(data_modal_update(), {
     shiny::removeModal()
     rv$data <- data_modal_update()
+    rv$code$modify[[length(rv$code$modify)+1]] <- attr(rv$data,"code")
   })
 
   #########  Create column
@@ -325,6 +317,7 @@ server <- function(input, output, session) {
     data_modal_r(),
     {
       rv$data <- data_modal_r()
+      rv$code$modify[[length(rv$code$modify)+1]] <- attr(rv$data,"code")
     }
   )
 
@@ -352,9 +345,9 @@ server <- function(input, output, session) {
     }
   )
 
-  output$code <- renderPrint({
-    attr(rv$data, "code")
-  })
+  # output$code <- renderPrint({
+  #   attr(rv$data, "code")
+  # })
 
   # updated_data <- datamods::update_variables_server(
   updated_data <- update_variables_server(
@@ -427,33 +420,16 @@ server <- function(input, output, session) {
     }
   )
 
-  # output$filtered_code <- shiny::renderPrint({
-  #   out <- gsub(
-  #     "filter", "dplyr::filter",
-  #     gsub(
-  #       "\\s{2,}", " ",
-  #       paste0(
-  #         capture.output(attr(rv$data_filtered, "code")),
-  #         collapse = " "
-  #       )
-  #     )
-  #   )
-  #
-  #   out <- strsplit(out, "%>%") |>
-  #     unlist() |>
-  #     (\(.x){
-  #       paste(c("data", .x[-1]), collapse = "|> \n ")
-  #     })()
-  #
-  #   cat(out)
-  # })
-
   output$code_import <- shiny::renderPrint({
     cat(rv$code$import)
   })
 
   output$code_data <- shiny::renderPrint({
-    attr(rv$data, "code")
+    ls <- rv$code$modify |> unique()
+    out <- paste("data |> \n",
+                 sapply(ls,\(.x) paste(deparse(.x),collapse=",")),
+                 collapse="|> \n")
+    cat(out)
   })
 
   output$code_filter <- shiny::renderPrint({

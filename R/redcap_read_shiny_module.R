@@ -143,7 +143,7 @@ m_redcap_readServer <- function(id) {
       dd_list = NULL,
       data = NULL,
       rep_fields = NULL,
-      imported = NULL
+      code = NULL
     )
 
     shiny::observeEvent(list(input$api, input$uri), {
@@ -340,7 +340,10 @@ m_redcap_readServer <- function(id) {
       shiny::withProgress(message = "Downloading REDCap data. Hold on for a moment..", {
         imported <- try(rlang::exec(REDCapCAST::read_redcap_tables, !!!parameters), silent = TRUE)
       })
-      code <- rlang::call2(REDCapCAST::read_redcap_tables, !!!parameters)
+
+      code <- rlang::call2("read_redcap_tables",
+                           !!!utils::modifyList(parameters,list(token="PERSONAL_API_TOKEN")),
+                           , .ns = "REDCapCAST")
 
 
       if (inherits(imported, "try-error") || NROW(imported) < 1) {
@@ -375,6 +378,8 @@ m_redcap_readServer <- function(id) {
           }
         }
 
+        data_rv$code <- code
+
         data_rv$data <- out |>
           dplyr::select(-dplyr::ends_with("_complete")) |>
           # dplyr::select(-dplyr::any_of(record_id)) |>
@@ -390,7 +395,13 @@ m_redcap_readServer <- function(id) {
     #
     # })
 
-    return(shiny::reactive(data_rv$data))
+    return(list(
+      status = shiny::reactive(data_rv$data_status),
+      name = shiny::reactive(data_rv$info$project_title),
+      info = shiny::reactive(data_rv$info),
+      code = shiny::reactive(data_rv$code),
+      data = shiny::reactive(data_rv$data)
+    ))
   }
 
   shiny::moduleServer(
@@ -543,15 +554,15 @@ drop_empty_event <- function(data, event = "redcap_event_name") {
 redcap_demo_app <- function() {
   ui <- shiny::fluidPage(
     m_redcap_readUI("data"),
-    DT::DTOutput("data_summary")
+    DT::DTOutput("data"),
+    shiny::tags$b("Code:"),
+    shiny::verbatimTextOutput(outputId = "code")
   )
   server <- function(input, output, session) {
-    data_val <- shiny::reactiveValues(data = NULL)
 
+    data_val <- m_redcap_readServer(id = "data")
 
-    data_val$data <- m_redcap_readServer(id = "data")
-
-    output$data_summary <- DT::renderDataTable(
+    output$data <- DT::renderDataTable(
       {
         shiny::req(data_val$data)
         data_val$data()
@@ -561,6 +572,10 @@ redcap_demo_app <- function() {
         pageLength = 5
       ),
     )
+    output$code <- shiny::renderPrint({
+      shiny::req(data_val$code)
+      data_val$code()
+    })
   }
   shiny::shinyApp(ui, server)
 }

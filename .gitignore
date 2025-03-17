@@ -9,3 +9,4 @@ app/rsconnect
 inst/shiny-examples/casting/functions.R
 functions.R
 docs
+inst/doc

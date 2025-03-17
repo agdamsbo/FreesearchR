@@ -6,6 +6,8 @@ First steps towards an updated name (will be FreesearchR), with renamed reposito
 
 Testing file upload conducted and improved.
 
+Working on omproving code export.
+
 # freesearcheR 25.3.1
 
 First steps towards a more focused and simplified interface.
