@@ -113,7 +113,7 @@ server <- function(input, output, session) {
   shiny::observeEvent(from_redcap$data(), {
     # rv$data_original <- purrr::pluck(data_redcap(), "data")()
     rv$data_temp <- from_redcap$data()
-    rv$code <- append_list(data = from_redcap$code(),list = rv$code,index = "import")
+    rv$code <- append_list(data = from_redcap$code(), list = rv$code, index = "import")
   })
 
   output$redcap_prev <- DT::renderDT(
@@ -171,12 +171,12 @@ server <- function(input, output, session) {
 
       rv$code$import <- rv$code$import |>
         deparse() |>
-        paste(collapse="") |>
+        paste(collapse = "") |>
         paste("|>
-        dplyr::select(",paste(input$import_var,collapse=","),") |>
+        dplyr::select(", paste(input$import_var, collapse = ","), ") |>
         freesearcheR::default_parsing()") |>
         (\(.x){
-          paste0("data <- ",.x)
+          paste0("data <- ", .x)
         })()
 
       rv$code$filter <- NULL
@@ -234,21 +234,6 @@ server <- function(input, output, session) {
     )
   })
 
-  # shiny::observeEvent(input$reset_confirm, {
-  #   rv$data <- rv$data_original |> default_parsing()
-  # })
-
-  #########  Overview
-
-  data_summary_server(
-    id = "data_summary",
-    data = shiny::reactive({
-      rv$data_filtered
-    }),
-    color.main = "#2A004E",
-    color.sec = "#C62300",
-    pagination = 20
-  )
 
   #########
   #########  Modifications
@@ -278,8 +263,8 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(data_modal_cut(), {
     rv$data <- data_modal_cut()
-    rv$code$modify[[length(rv$code$modify)+1]] <- attr(rv$data,"code")
-    })
+    rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
+  })
 
   #########  Modify factor
 
@@ -296,7 +281,7 @@ server <- function(input, output, session) {
   shiny::observeEvent(data_modal_update(), {
     shiny::removeModal()
     rv$data <- data_modal_update()
-    rv$code$modify[[length(rv$code$modify)+1]] <- attr(rv$data,"code")
+    rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
   })
 
   #########  Create column
@@ -317,11 +302,95 @@ server <- function(input, output, session) {
     data_modal_r(),
     {
       rv$data <- data_modal_r()
-      rv$code$modify[[length(rv$code$modify)+1]] <- attr(rv$data,"code")
+      rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
     }
   )
 
-  #########  Show result
+  #########  Subset, rename, reclass
+
+  updated_data <- update_variables_server(
+    id = "modal_variables",
+    data = shiny::reactive(rv$data),
+    return_data_on_init = FALSE
+  )
+
+  shiny::observeEvent(updated_data(), {
+    rv$data <- updated_data()
+    rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
+  })
+
+  #########  Data filter
+  # IDEAFilter has the least cluttered UI, but might have a License issue
+  data_filter <- IDEAFilter::IDEAFilter("data_filter",
+    data = shiny::reactive(rv$data),
+    verbose = TRUE
+  )
+
+  shiny::observeEvent(
+    list(
+      shiny::reactive(rv$data),
+      shiny::reactive(rv$data_original),
+      data_filter(),
+      regression_vars(),
+      input$complete_cutoff
+    ),
+    {
+      ###  Save filtered data
+      rv$data_filtered <- data_filter()
+
+      ###  Save filtered data
+      rv$list$data <- data_filter() |>
+        REDCapCAST::fct_drop()
+
+      out <- gsub(
+        "filter", "dplyr::filter",
+        gsub(
+          "\\s{2,}", " ",
+          paste0(
+            capture.output(attr(rv$data_filtered, "code")),
+            collapse = " "
+          )
+        )
+      )
+
+      out <- strsplit(out, "%>%") |>
+        unlist() |>
+        (\(.x){
+          paste(c("data <- data", .x[-1], "REDCapCAST::fct_drop()"),
+            collapse = "|> \n "
+          )
+        })()
+
+      rv$code <- append_list(data = out, list = rv$code, index = "filter")
+    }
+  )
+
+  # shiny::observeEvent(
+  #   list(
+  #     shiny::reactive(rv$data),
+  #     shiny::reactive(rv$data_original),
+  #     data_filter(),
+  #     shiny::reactive(rv$data_filtered)
+  #   ),
+  #   {
+  #
+  #   }
+  # )
+
+  #########  Data preview
+
+  ###  Overview
+
+  data_summary_server(
+    id = "data_summary",
+    data = shiny::reactive({
+      rv$data_filtered
+    }),
+    color.main = "#2A004E",
+    color.sec = "#C62300",
+    pagination = 20
+  )
+
   tryCatch(
     {
       output$table_mod <- toastui::renderDatagrid({
@@ -345,17 +414,6 @@ server <- function(input, output, session) {
     }
   )
 
-  # output$code <- renderPrint({
-  #   attr(rv$data, "code")
-  # })
-
-  # updated_data <- datamods::update_variables_server(
-  updated_data <- update_variables_server(
-    id = "modal_variables",
-    data = reactive(rv$data),
-    return_data_on_init = FALSE
-  )
-
   output$original_str <- renderPrint({
     str(rv$data_original)
   })
@@ -368,67 +426,32 @@ server <- function(input, output, session) {
       ))
   })
 
-  shiny::observeEvent(updated_data(), {
-    rv$data <- updated_data()
-  })
 
-  # IDEAFilter has the least cluttered UI, but might have a License issue
-  data_filter <- IDEAFilter::IDEAFilter("data_filter", data = reactive(rv$data), verbose = TRUE)
-
-  shiny::observeEvent(
-    list(
-      shiny::reactive(rv$data),
-      shiny::reactive(rv$data_original),
-      data_filter(),
-      regression_vars(),
-      input$complete_cutoff
-    ),
-    {
-      rv$data_filtered <- data_filter()
-
-      rv$list$data <- data_filter() |>
-        REDCapCAST::fct_drop()
-    }
-  )
-
-  shiny::observeEvent(
-    list(
-      shiny::reactive(rv$data),
-      shiny::reactive(rv$data_original),
-      data_filter(),
-      shiny::reactive(rv$data_filtered)
-    ),
-    {
-      out <- gsub(
-        "filter", "dplyr::filter",
-        gsub(
-          "\\s{2,}", " ",
-          paste0(
-            capture.output(attr(rv$data_filtered, "code")),
-            collapse = " "
-          )
-        )
-      )
-
-      out <- strsplit(out, "%>%") |>
-        unlist() |>
-        (\(.x){
-          paste(c("data", .x[-1]), collapse = "|> \n ")
-        })()
-
-      rv$code <- append_list(data = out, list = rv$code, index = "filter")
-    }
-  )
-
+  #########  Code export
   output$code_import <- shiny::renderPrint({
+    shiny::req(rv$code$import)
     cat(rv$code$import)
   })
 
   output$code_data <- shiny::renderPrint({
+    shiny::req(rv$code$modify)
     ls <- rv$code$modify |> unique()
-    out <- paste("data |> \n",
-                 sapply(ls,\(.x) paste(deparse(.x),collapse=",")),
-                 collapse="|> \n")
+    out <- paste("data <- data |>",
+      sapply(ls, \(.x) paste(deparse(.x), collapse = ",")),
+      collapse = "|>"
+    ) |>
+      (\(.x){
+        gsub(
+          "\\|>", "\\|> \n",
+          gsub(
+            "%>%", "",
+            gsub(
+              "\\s{2,}", " ",
+              gsub(",\\s{,},", ", ", .x)
+            )
+          )
+        )
+      })()
     cat(out)
   })
 

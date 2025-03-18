@@ -1,20 +1,20 @@
 
 
 ########
-#### Current file: /Users/au301842/freesearcheR/inst/apps/freesearcheR/functions.R 
+#### Current file: /Users/au301842/freesearcheR/inst/apps/freesearcheR/functions.R
 ########
 
 
 
 ########
-#### Current file: R//app_version.R 
+#### Current file: R//app_version.R
 ########
 
-app_version <- function()'250317_2113'
+app_version <- function()'250318_0819'
 
 
 ########
-#### Current file: R//baseline_table.R 
+#### Current file: R//baseline_table.R
 ########
 
 #' Print a flexible baseline characteristics table
@@ -42,7 +42,7 @@ baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, 
 
 
 ########
-#### Current file: R//contrast_text.R 
+#### Current file: R//contrast_text.R
 ########
 
 #' @title Contrast Text Color
@@ -99,7 +99,7 @@ contrast_text <- function(background,
 
 
 ########
-#### Current file: R//correlations-module.R 
+#### Current file: R//correlations-module.R
 ########
 
 #' Data correlations evaluation module
@@ -260,7 +260,7 @@ cor_demo_app()
 
 
 ########
-#### Current file: R//custom_SelectInput.R 
+#### Current file: R//custom_SelectInput.R
 ########
 
 #' A selectizeInput customized for data frames with column labels
@@ -447,7 +447,7 @@ vectorSelectInput <- function(inputId,
 
 
 ########
-#### Current file: R//cut-variable-dates.R 
+#### Current file: R//cut-variable-dates.R
 ########
 
 library(datamods)
@@ -1089,7 +1089,7 @@ plot_histogram <- function(data, column, bins = 30, breaks = NULL, color = "#112
 
 
 ########
-#### Current file: R//data_plots.R 
+#### Current file: R//data_plots.R
 ########
 
 # source(here::here("functions.R"))
@@ -1668,7 +1668,7 @@ allign_axes <- function(...) {
 
 
 ########
-#### Current file: R//data-import.R 
+#### Current file: R//data-import.R
 ########
 
 data_import_ui <- function(id) {
@@ -1845,7 +1845,7 @@ data_import_demo_app <- function() {
 
 
 ########
-#### Current file: R//data-summary.R 
+#### Current file: R//data-summary.R
 ########
 
 #' Data summary module
@@ -2154,7 +2154,7 @@ add_class_icon <- function(grid, column = "class") {
 
 
 ########
-#### Current file: R//file-import-module.R 
+#### Current file: R//file-import-module.R
 ########
 
 #' Shiny UI module to load a data file
@@ -2285,7 +2285,7 @@ file_app()
 
 
 ########
-#### Current file: R//helpers.R 
+#### Current file: R//helpers.R
 ########
 
 #' Wrapper function to get function from character vector referring to function from namespace. Passed to 'do.call()'
@@ -2599,7 +2599,7 @@ missing_fraction <- function(data){
 
 
 ########
-#### Current file: R//import-file-ext.R 
+#### Current file: R//import-file-ext.R
 ########
 
 #' @title Import data from a file
@@ -3174,7 +3174,7 @@ import_file_demo_app <- function() {
 
 
 ########
-#### Current file: R//plot_euler.R 
+#### Current file: R//plot_euler.R
 ########
 
 #' Area proportional venn diagrams
@@ -3311,7 +3311,7 @@ plot_euler_single <- function(data) {
 
 
 ########
-#### Current file: R//plot_hbar.R 
+#### Current file: R//plot_hbar.R
 ########
 
 #' Nice horizontal stacked bars (Grotta bars)
@@ -3412,7 +3412,7 @@ vertical_stacked_bars <- function(data,
 
 
 ########
-#### Current file: R//plot_ridge.R 
+#### Current file: R//plot_ridge.R
 ########
 
 #' Plot nice ridge plot
@@ -3446,7 +3446,7 @@ plot_ridge <- function(data, x, y, z = NULL, ...) {
 
 
 ########
-#### Current file: R//plot_sankey.R 
+#### Current file: R//plot_sankey.R
 ########
 
 #' Readying data for sankey plot
@@ -3652,7 +3652,7 @@ plot_sankey_single <- function(data, x, y, color.group = c("x", "y"), colors = N
 
 
 ########
-#### Current file: R//plot_scatter.R 
+#### Current file: R//plot_scatter.R
 ########
 
 #' Beautiful violin plot
@@ -3683,7 +3683,7 @@ plot_scatter <- function(data, x, y, z = NULL) {
 
 
 ########
-#### Current file: R//plot_violin.R 
+#### Current file: R//plot_violin.R
 ########
 
 #' Beatiful violin plot
@@ -3716,7 +3716,7 @@ plot_violin <- function(data, x, y, z = NULL) {
 
 
 ########
-#### Current file: R//redcap_read_shiny_module.R 
+#### Current file: R//redcap_read_shiny_module.R
 ########
 
 #' Shiny module to browser and export REDCap data
@@ -4303,14 +4303,14 @@ redcap_demo_app <- function() {
 
 
 ########
-#### Current file: R//redcap.R 
+#### Current file: R//redcap.R
 ########
 
 
 
 
 ########
-#### Current file: R//regression_model.R 
+#### Current file: R//regression_model.R
 ########
 
 #' Create a regression model programatically
@@ -4952,7 +4952,7 @@ regression_model_uv_list <- function(data,
 
 
 ########
-#### Current file: R//regression_plot.R 
+#### Current file: R//regression_plot.R
 ########
 
 #' Regression coef plot from gtsummary. Slightly modified to pass on arguments
@@ -5058,7 +5058,7 @@ merge_long <- function(list, model.names) {
 
 
 ########
-#### Current file: R//regression_table.R 
+#### Current file: R//regression_table.R
 ########
 
 #' Create table of regression model
@@ -5209,7 +5209,7 @@ tbl_merge <- function(data) {
 
 
 ########
-#### Current file: R//report.R 
+#### Current file: R//report.R
 ########
 
 #' Split vector by an index and embed addition
@@ -5297,7 +5297,7 @@ modify_qmd <- function(file, format) {
 
 
 ########
-#### Current file: R//shiny_freesearcheR.R 
+#### Current file: R//shiny_freesearcheR.R
 ########
 
 #' Launch the freesearcheR tool locally
@@ -5340,7 +5340,7 @@ launch_freesearcheR <- function(...){
 
 
 ########
-#### Current file: R//theme.R 
+#### Current file: R//theme.R
 ########
 
 #' Custom theme based on unity
@@ -5422,7 +5422,7 @@ gg_theme_export <- function(){
 
 
 ########
-#### Current file: R//update-factor-ext.R 
+#### Current file: R//update-factor-ext.R
 ########
 
 
@@ -5719,7 +5719,7 @@ winbox_update_factor <- function(id,
 
 
 ########
-#### Current file: R//update-variables-ext.R 
+#### Current file: R//update-variables-ext.R
 ########
 
 library(data.table)
@@ -6501,7 +6501,7 @@ clean_date <- function(data){
 
 
 ########
-#### Current file: R//wide2long.R 
+#### Current file: R//wide2long.R
 ########
 
 #' Alternative pivoting method for easily pivoting based on name pattern
@@ -6660,7 +6660,7 @@ grepl_fix <- function(data, pattern, type = c("prefix", "infix", "suffix")) {
 
 
 ########
-#### Current file: /Users/au301842/freesearcheR/inst/apps/freesearcheR/ui.R 
+#### Current file: /Users/au301842/freesearcheR/inst/apps/freesearcheR/ui.R
 ########
 
 # ns <- NS(id)
@@ -7296,7 +7296,7 @@ ui <- bslib::page_fixed(
 
 
 ########
-#### Current file: /Users/au301842/freesearcheR/inst/apps/freesearcheR/server.R 
+#### Current file: /Users/au301842/freesearcheR/inst/apps/freesearcheR/server.R
 ########
 
 library(readr)
@@ -7414,7 +7414,7 @@ server <- function(input, output, session) {
   shiny::observeEvent(from_redcap$data(), {
     # rv$data_original <- purrr::pluck(data_redcap(), "data")()
     rv$data_temp <- from_redcap$data()
-    rv$code <- append_list(data = from_redcap$code(),list = rv$code,index = "import")
+    rv$code <- append_list(data = from_redcap$code(), list = rv$code, index = "import")
   })
 
   output$redcap_prev <- DT::renderDT(
@@ -7472,12 +7472,12 @@ server <- function(input, output, session) {
 
       rv$code$import <- rv$code$import |>
         deparse() |>
-        paste(collapse="") |>
+        paste(collapse = "") |>
         paste("|>
-        dplyr::select(",paste(input$import_var,collapse=","),") |>
+        dplyr::select(", paste(input$import_var, collapse = ","), ") |>
         freesearcheR::default_parsing()") |>
         (\(.x){
-          paste0("data <- ",.x)
+          paste0("data <- ", .x)
         })()
 
       rv$code$filter <- NULL
@@ -7539,17 +7539,7 @@ server <- function(input, output, session) {
   #   rv$data <- rv$data_original |> default_parsing()
   # })
 
-  #########  Overview
 
-  data_summary_server(
-    id = "data_summary",
-    data = shiny::reactive({
-      rv$data_filtered
-    }),
-    color.main = "#2A004E",
-    color.sec = "#C62300",
-    pagination = 20
-  )
 
   #########
   #########  Modifications
@@ -7579,8 +7569,8 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(data_modal_cut(), {
     rv$data <- data_modal_cut()
-    rv$code$modify[[length(rv$code$modify)+1]] <- attr(rv$data,"code")
-    })
+    rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
+  })
 
   #########  Modify factor
 
@@ -7597,7 +7587,7 @@ server <- function(input, output, session) {
   shiny::observeEvent(data_modal_update(), {
     shiny::removeModal()
     rv$data <- data_modal_update()
-    rv$code$modify[[length(rv$code$modify)+1]] <- attr(rv$data,"code")
+    rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
   })
 
   #########  Create column
@@ -7618,11 +7608,98 @@ server <- function(input, output, session) {
     data_modal_r(),
     {
       rv$data <- data_modal_r()
-      rv$code$modify[[length(rv$code$modify)+1]] <- attr(rv$data,"code")
+      rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
     }
   )
 
-  #########  Show result
+
+  #########  Subset, rename, reclass
+
+  updated_data <- update_variables_server(
+    id = "modal_variables",
+    data = shiny::reactive(rv$data),
+    return_data_on_init = FALSE
+  )
+
+  shiny::observeEvent(updated_data(), {
+    rv$data <- updated_data()
+    rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
+  })
+
+
+
+  #########  Data filter
+  # IDEAFilter has the least cluttered UI, but might have a License issue
+  data_filter <- IDEAFilter::IDEAFilter("data_filter",
+    data = shiny::reactive(rv$data),
+    verbose = TRUE
+  )
+
+  shiny::observeEvent(
+    list(
+      shiny::reactive(rv$data),
+      shiny::reactive(rv$data_original),
+      data_filter(),
+      regression_vars(),
+      input$complete_cutoff
+    ),
+    {
+      ###  Save filtered data
+      rv$data_filtered <- data_filter()
+
+      ###  Save filtered data
+      rv$list$data <- data_filter() |>
+        REDCapCAST::fct_drop()
+
+      out <- gsub(
+        "filter", "dplyr::filter",
+        gsub(
+          "\\s{2,}", " ",
+          paste0(
+            capture.output(attr(rv$data_filtered, "code")),
+            collapse = " "
+          )
+        )
+      )
+
+      out <- strsplit(out, "%>%") |>
+        unlist() |>
+        (\(.x){
+          paste(c("data <- data", .x[-1], "REDCapCAST::fct_drop()"),
+            collapse = "|> \n "
+          )
+        })()
+
+      rv$code <- append_list(data = out, list = rv$code, index = "filter")
+    }
+  )
+
+  # shiny::observeEvent(
+  #   list(
+  #     shiny::reactive(rv$data),
+  #     shiny::reactive(rv$data_original),
+  #     data_filter(),
+  #     shiny::reactive(rv$data_filtered)
+  #   ),
+  #   {
+  #
+  #   }
+  # )
+
+  #########  Data preview
+
+  ###  Overview
+
+  data_summary_server(
+    id = "data_summary",
+    data = shiny::reactive({
+      rv$data_filtered
+    }),
+    color.main = "#2A004E",
+    color.sec = "#C62300",
+    pagination = 20
+  )
+
   tryCatch(
     {
       output$table_mod <- toastui::renderDatagrid({
@@ -7646,17 +7723,6 @@ server <- function(input, output, session) {
     }
   )
 
-  # output$code <- renderPrint({
-  #   attr(rv$data, "code")
-  # })
-
-  # updated_data <- datamods::update_variables_server(
-  updated_data <- update_variables_server(
-    id = "modal_variables",
-    data = reactive(rv$data),
-    return_data_on_init = FALSE
-  )
-
   output$original_str <- renderPrint({
     str(rv$data_original)
   })
@@ -7669,71 +7735,37 @@ server <- function(input, output, session) {
       ))
   })
 
-  shiny::observeEvent(updated_data(), {
-    rv$data <- updated_data()
-  })
 
-  # IDEAFilter has the least cluttered UI, but might have a License issue
-  data_filter <- IDEAFilter::IDEAFilter("data_filter", data = reactive(rv$data), verbose = TRUE)
-
-  shiny::observeEvent(
-    list(
-      shiny::reactive(rv$data),
-      shiny::reactive(rv$data_original),
-      data_filter(),
-      regression_vars(),
-      input$complete_cutoff
-    ),
-    {
-      rv$data_filtered <- data_filter()
-
-      rv$list$data <- data_filter() |>
-        REDCapCAST::fct_drop()
-    }
-  )
-
-  shiny::observeEvent(
-    list(
-      shiny::reactive(rv$data),
-      shiny::reactive(rv$data_original),
-      data_filter(),
-      shiny::reactive(rv$data_filtered)
-    ),
-    {
-      out <- gsub(
-        "filter", "dplyr::filter",
-        gsub(
-          "\\s{2,}", " ",
-          paste0(
-            capture.output(attr(rv$data_filtered, "code")),
-            collapse = " "
-          )
-        )
-      )
-
-      out <- strsplit(out, "%>%") |>
-        unlist() |>
-        (\(.x){
-          paste(c("data", .x[-1]), collapse = "|> \n ")
-        })()
-
-      rv$code <- append_list(data = out, list = rv$code, index = "filter")
-    }
-  )
-
+  #########  Code export
   output$code_import <- shiny::renderPrint({
+    shiny::req(rv$code$import)
     cat(rv$code$import)
   })
 
   output$code_data <- shiny::renderPrint({
+    shiny::req(rv$code$modify)
     ls <- rv$code$modify |> unique()
-    out <- paste("data |> \n",
-                 sapply(ls,\(.x) paste(deparse(.x),collapse=",")),
-                 collapse="|> \n")
+    out <- paste("data <- data |>",
+      sapply(ls, \(.x) paste(deparse(.x), collapse = ",")),
+      collapse = "|>"
+    ) |>
+      (\(.x){
+        gsub(
+          "\\|>", "\\|> \n",
+          gsub(
+            "%>%", "",
+            gsub(
+              "\\s{2,}", " ",
+              gsub(",\\s{,},", ", ", .x)
+            )
+          )
+        )
+      })()
     cat(out)
   })
 
   output$code_filter <- shiny::renderPrint({
+    shiny::req(rv$code$filter)
     cat(rv$code$filter)
   })
 
@@ -8255,7 +8287,7 @@ server <- function(input, output, session) {
 
 
 ########
-#### Current file: /Users/au301842/freesearcheR/inst/apps/freesearcheR/launch.R 
+#### Current file: /Users/au301842/freesearcheR/inst/apps/freesearcheR/launch.R
 ########
 
 shinyApp(ui, server)
