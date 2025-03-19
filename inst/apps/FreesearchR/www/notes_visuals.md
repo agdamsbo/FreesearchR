@@ -1,6 +1,6 @@
 # Basic visualisations
 
-This section on plotting data is kept very minimal, and includes only the most common plot types for clinical projects.
+The goal of ***FreesearchR*** is to keep things simple. Visuals can get very complicated. We provide a selection of plots, that helps visualise typical clinical and will be enough for most use cases, and for publishing to most journals.
 
 If you want to go further, have a look at these sites with suggestions and sample code for data plotting:
 
@@ -8,4 +8,4 @@ If you want to go further, have a look at these sites with suggestions and sampl
 
 -   [*R* Graph gallery](https://r-graph-gallery.com/): Another gallery with great graphs
 
--   [grphics principles](https://graphicsprinciples.github.io/): Easy to follow recommendations for clear visuals. 
+-   [graphics principles](https://graphicsprinciples.github.io/): Easy to follow recommendations for clear visuals. 

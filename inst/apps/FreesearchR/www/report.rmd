@@ -1,8 +1,8 @@
 ---
-title: "freesearcheR data report"
+title: "FreesearchR data report"
 date: "Report generated `r gsub('(\\D)0', '\\1', format(Sys.time(), '%A, %d.%m.%Y'))`"
 format: docx
-author: freesearcheR data analysis tool
+author: FreesearchR data analysis tool
 toc: false
 params:
   data.file: NA
@@ -12,7 +12,6 @@ params:
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 # glue::glue("{format(lubridate::today(),'%A')}, {lubridate::day(lubridate::today())}.{lubridate::month(lubridate::today())}.{lubridate::year(lubridate::today())}")
 ```
-
 
 ```{r}
 web_data <- readr::read_rds(file = params$data.file)
@@ -42,11 +41,11 @@ vec2sentence <- function(data, sep.word = "and") {
 
 ## Introduction
 
-Research should be free and open with easy access for all. The freesearcheR tool attempts to help lower the bar to participate in contributing to science by making guided data analysis easily accessible in the web-browser.
+Research should be free and open with easy access for all. The FreesearchR tool attempts to help lower the bar to participate in contributing to science by making guided data analysis easily accessible in the web-browser.
 
 ## Methods
 
-Analyses were conducted in the *freesearcheR* data analysis web-tool based on R version 4.4.1.
+Analyses were conducted in the *FreesearchR* data analysis web-tool based on R version 4.4.1.
 
 ## Results
 
@@ -70,3 +69,4 @@ knitr::knit_print(tbl_merge(reg_tbl))
 ## Discussion
 
 Good luck on your further work!
+

@@ -138,6 +138,6 @@ symmetrical_scale_x_log10 <- function(plot,breaks=c(1,2,3,5,10),...){
   max_abs_x <- max(abs(c(x_min,x_max)))
 
   ticks <- log10(breaks)+(ceiling(max_abs_x)-1)
-  browser()
+
   plot + ggplot2::scale_x_log10(limits=c(rx_min,rx_max),breaks=create_log_tics(10^ticks[ticks<=max_abs_x]))
 }
