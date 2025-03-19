@@ -1,6 +1,6 @@
 # Questions and answers
 
-A complete instructions set is not available, but below are a collection of questions and answers about the project and use of the app.
+A complete instructions set [is also available](https://agdamsbo.github.io/FreesearchR/articles/FreesearchR.html), but below are a collection of questions and answers about the project and use of the ***FreesearchR*** app.
 
 ## Are you keeping the uploaded data?
 

@@ -1,8 +1,8 @@
 ---
-title: "freesearcheR"
+title: "FreesearchR"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{freesearcheR}
+  %\VignetteIndexEntry{FreesearchR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -11,9 +11,9 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE,eval = FALSE)
 ```
 
-# Getting started with ***freesearcheR***
+# Getting started with ***FreesearchR***
 
-Below is a simple walk-trough and basic instructions for the functions on the freesearcheR app.
+Below is a simple walk-trough and basic instructions for the functions on the FreesearchR app.
 
 ## Launching
 
@@ -21,13 +21,13 @@ The easiest way to get started is to launch [the hosted version of the app on sh
 
 Additionally you have the option to run the app locally with access to any data in your current working environment.
 
-To do this, open *R* (or RStudio or similar), and run the following code to install the latest version of ***freesearcheR*** and launch the app:
+To do this, open *R* (or RStudio or similar), and run the following code to install the latest version of ***FreesearchR*** and launch the app:
 
-``` {r}
+```{r}
 require("pak")
-pak::pak("agdamsbo/freesearcheR")
-library(freesearcheR)
-freesearcheR::launch_freesearcheR()
+pak::pak("agdamsbo/FreesearchR")
+library(FreesearchR)
+FreesearchR::launch_FreesearchR()
 ```
 
 As a small note, a standalone Windows app version is on the drawing board as well, but no time frame is available.

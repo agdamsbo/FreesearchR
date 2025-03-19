@@ -15,15 +15,16 @@
 #'
 #' @examples
 #' \dontrun{
-#' mod <- lm(mpg ~ ., mtcars)
+#' mod <- lm(mpg ~ ., default_parsing(mtcars))
 #' p <- mod |>
 #'   gtsummary::tbl_regression() |>
 #'   plot(colour = "variable")
 #' }
 #'
 plot.tbl_regression <- function(x,
-                                # remove_header_rows = TRUE,
-                                # remove_reference_rows = FALSE,
+                                plot_ref = TRUE,
+                                remove_header_rows = TRUE,
+                                remove_reference_rows = FALSE,
                                 ...) {
   # check_dots_empty()
   gtsummary:::check_pkg_installed("ggstats")
@@ -32,18 +33,22 @@ plot.tbl_regression <- function(x,
   # gtsummary:::check_scalar_logical(remove_reference_rows)
 
   df_coefs <- x$table_body
-  # if (isTRUE(remove_header_rows)) {
-  #   df_coefs <- df_coefs |> dplyr::filter(!.data$header_row %in% TRUE)
-  # }
-  # if (isTRUE(remove_reference_rows)) {
-  #   df_coefs <- df_coefs |> dplyr::filter(!.data$reference_row %in% TRUE)
-  # }
+  browser()
+  if (isTRUE(remove_header_rows)) {
+    df_coefs <- df_coefs |> dplyr::filter(!header_row %in% TRUE)
+  }
+  if (isTRUE(remove_reference_rows)) {
+    df_coefs <- df_coefs |> dplyr::filter(!reference_row %in% TRUE)
+  }
 
-  # browser()
-
+  # Removes redundant label
   df_coefs$label[df_coefs$row_type == "label"] <- ""
 
-  df_coefs %>%
+  # Add estimate value to reference level
+  if (plot_ref == TRUE){
+  df_coefs[df_coefs$var_type == "categorical" & is.na(df_coefs$reference_row),"estimate"] <- if (x$inputs$exponentiate) 1 else 0}
+
+  df_coefs |>
     ggstats::ggcoef_plot(exponentiate = x$inputs$exponentiate, ...)
 }
 

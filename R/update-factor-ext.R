@@ -265,7 +265,7 @@ modal_update_factor <- function(id,
 #'
 #' @importFrom shinyWidgets WinBox wbOptions wbControls
 #' @importFrom htmltools tagList
-#' @rdname create-column
+#' @rdname update-factor
 winbox_update_factor <- function(id,
                                  title = i18n("Update levels of a factor"),
                                  options = shinyWidgets::wbOptions(),

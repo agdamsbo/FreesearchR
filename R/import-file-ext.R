@@ -254,7 +254,7 @@ import_file_server <- function(id,
         parameters <- parameters[which(names(parameters) %in% rlang::fn_fmls_names(get(read_fns[[extension]])))]
         # parameters <- parameters[which(names(parameters) %in% rlang::fn_fmls_names(read_fns[[extension]]))]
         imported <- try(rlang::exec(read_fns[[extension]], !!!parameters), silent = TRUE)
-        code <- rlang::call2(read_fns[[extension]], !!!modifyList(parameters, list(file = input$file$name)), .ns = "freesearcheR")
+        code <- rlang::call2(read_fns[[extension]], !!!modifyList(parameters, list(file = input$file$name)), .ns = "FreesearchR")
 
         if (inherits(imported, "try-error")) {
           imported <- try(rlang::exec(rio::import, !!!parameters[1]), silent = TRUE)

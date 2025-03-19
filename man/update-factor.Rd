@@ -5,6 +5,7 @@
 \alias{update_factor_ui}
 \alias{update_factor_server}
 \alias{modal_update_factor}
+\alias{winbox_update_factor}
 \title{Module to Reorder the Levels of a Factor Variable}
 \usage{
 update_factor_ui(id)
@@ -17,6 +18,13 @@ modal_update_factor(
   easyClose = TRUE,
   size = "l",
   footer = NULL
+)
+
+winbox_update_factor(
+  id,
+  title = i18n("Update levels of a factor"),
+  options = shinyWidgets::wbOptions(),
+  controls = shinyWidgets::wbControls()
 )
 }
 \arguments{
@@ -39,6 +47,10 @@ pass \code{\link[bslib:bs_theme]{bslib::bs_theme()}} to the \code{theme} argumen
 like \code{\link[shiny:fluidPage]{fluidPage()}}).}
 
 \item{footer}{UI for footer. Use \code{NULL} for no footer.}
+
+\item{options}{List of options, see \code{\link[shinyWidgets:wbOptions]{wbOptions()}}.}
+
+\item{controls}{List of controls, see \code{\link[shinyWidgets:wbControls]{wbControls()}}.}
 }
 \value{
 A \code{\link[shiny:reactive]{shiny::reactive()}} function returning the data.

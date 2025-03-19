@@ -10,7 +10,7 @@
 #### Current file: R//app_version.R
 ########
 
-app_version <- function()'250318_0819'
+app_version <- function()'250318_0827'
 
 
 ########
@@ -7214,7 +7214,8 @@ ui_elements <- list(
           ),
           shiny::br(),
           shiny::br(),
-          shiny::tags$b("Code snippets:"),
+          shiny::h4("Code snippets"),
+          shiny::tags$p("Below are the code used to create the final data set. This can be saved for reproducibility. The code may not be 100 % correct, but kan be used for learning and example code to get started on coding yourself."),
           shiny::verbatimTextOutput(outputId = "code_import"),
           shiny::verbatimTextOutput(outputId = "code_data"),
           shiny::verbatimTextOutput(outputId = "code_filter"),
@@ -7535,11 +7536,6 @@ server <- function(input, output, session) {
     )
   })
 
-  # shiny::observeEvent(input$reset_confirm, {
-  #   rv$data <- rv$data_original |> default_parsing()
-  # })
-
-
 
   #########
   #########  Modifications
@@ -7612,7 +7608,6 @@ server <- function(input, output, session) {
     }
   )
 
-
   #########  Subset, rename, reclass
 
   updated_data <- update_variables_server(
@@ -7625,8 +7620,6 @@ server <- function(input, output, session) {
     rv$data <- updated_data()
     rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
   })
-
-
 
   #########  Data filter
   # IDEAFilter has the least cluttered UI, but might have a License issue
@@ -7765,7 +7758,6 @@ server <- function(input, output, session) {
   })
 
   output$code_filter <- shiny::renderPrint({
-    shiny::req(rv$code$filter)
     cat(rv$code$filter)
   })
 

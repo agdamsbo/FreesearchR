@@ -4,7 +4,13 @@
 \alias{plot.tbl_regression}
 \title{Regression coef plot from gtsummary. Slightly modified to pass on arguments}
 \usage{
-\method{plot}{tbl_regression}(x, ...)
+\method{plot}{tbl_regression}(
+  x,
+  plot_ref = TRUE,
+  remove_header_rows = TRUE,
+  remove_reference_rows = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{(\code{tbl_regression}, \code{tbl_uvregression})\cr
@@ -20,7 +26,7 @@ Regression coef plot from gtsummary. Slightly modified to pass on arguments
 }
 \examples{
 \dontrun{
-mod <- lm(mpg ~ ., mtcars)
+mod <- lm(mpg ~ ., default_parsing(mtcars))
 p <- mod |>
   gtsummary::tbl_regression() |>
   plot(colour = "variable")
