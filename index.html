@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Browser Based Data Analysis • freesearcheR</title>
+<title>Browser Based Data Analysis • FreesearchR</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/Montserrat-0.4.9/font.css" rel="stylesheet">
@@ -23,7 +23,7 @@
 
     <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="index.html">freesearcheR</a>
+    <a class="navbar-brand me-2" href="index.html">FreesearchR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.3.2</small>
 
@@ -34,7 +34,7 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="articles/freesearcheR.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="articles/FreesearchR.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="ROADMAP.html">Roadmap</a></li>
 <li class="nav-item"><a class="nav-link" href="QA.html">Q&amp;A</a></li>
@@ -53,30 +53,30 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="freesearcher">freesearcheR<a class="anchor" aria-label="anchor" href="#freesearcher"></a>
+<div class="page-header"><h1 id="freesearchr">FreesearchR<a class="anchor" aria-label="anchor" href="#freesearchr"></a>
 </h1></div>
 <!-- badges: start -->
 
-<p>This package is the backbone of the <strong><em>freesearcheR</em></strong>, a free and open-source browser based data exploration and analysis tool for clinicians and researchers with publication ready output.</p>
-<p>This package and the <strong><em>freesearcheR</em></strong>-tool is part of a larger initiative to democratize health data analysis and remove barriers for clinicians to engage in health research.</p>
-<p>the <strong><em>freesearcheR</em></strong>-tool is online and accessible here: <a href="https://agdamsbo.shinyapps.io/freesearcheR/" class="external-link">link to the app freely hosted on shinyapps.io</a>. All feedback is welcome and can be shared as a GitHub issue.</p>
+<p>This package is the backbone of the <strong><em>FreesearchR</em></strong>, a free and open-source browser based data exploration and analysis tool for clinicians and researchers with publication ready output.</p>
+<p>This package and the <strong><em>FreesearchR</em></strong>-tool is part of a larger initiative to democratize health data analysis and remove barriers for clinicians to engage in health research.</p>
+<p>the <strong><em>FreesearchR</em></strong>-tool is online and accessible here: <a href="https://agdamsbo.shinyapps.io/FreesearchR/" class="external-link">link to the app freely hosted on shinyapps.io</a>. All feedback is welcome and can be shared as a GitHub issue.</p>
 <p>Initiatives for funding continued development of the tool and surrounding initiatives is ongoing.</p>
 <div class="section level2">
 <h2 id="install-locally">Install locally<a class="anchor" aria-label="anchor" href="#install-locally"></a>
 </h2>
-<p>The <strong><em>freesearcheR</em></strong>-tool can also be launched locally. Any data.frame available in the global environment will be accessible from the interface.</p>
+<p>The <strong><em>FreesearchR</em></strong>-tool can also be launched locally. Any data.frame available in the global environment will be accessible from the interface.</p>
 <pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://devtools.r-lib.org/" class="external-link">"devtools"</a></span><span class="op">)</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"agdamsbo/freesearcheR"</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/agdamsbo/freesearcheR" class="external-link">freesearcheR</a></span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"agdamsbo/FreesearchR"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/agdamsbo/freesearcheR" class="external-link">FreesearchR</a></span><span class="op">)</span></span>
 <span><span class="co"># By loading mtcars to the environment, it will be available</span></span>
 <span><span class="co"># in the interface like any other data.frame</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/shiny_freesearcheR.html">shiny_freesearcheR</a></span><span class="op">(</span><span class="op">)</span></span></code></pre>
+<span><span class="fu"><a href="reference/launch_FreesearchR.html">launch_FreesearchR</a></span><span class="op">(</span><span class="op">)</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="code-of-conduct">Code of Conduct<a class="anchor" aria-label="anchor" href="#code-of-conduct"></a>
 </h2>
-<p>Please note that the freesearcheR project is released with a <a href="https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html" class="external-link">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
+<p>Please note that the <strong><em>FreesearchR</em></strong> project is released with a <a href="https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html" class="external-link">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -105,7 +105,7 @@
 <div class="citation">
 <h2 data-toc-skip>Citation</h2>
 <ul class="list-unstyled">
-<li><a href="authors.html#citation">Citing freesearcheR</a></li>
+<li><a href="authors.html#citation">Citing FreesearchR</a></li>
 </ul>
 </div>
 
@@ -120,9 +120,9 @@
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
-<li><a href="https://github.com/agdamsbo/freesearcheR/actions/workflows/rhub.yaml" class="external-link"><img src="https://github.com/agdamsbo/freesearcheR/actions/workflows/rhub.yaml/badge.svg" alt="rhub"></a></li>
 <li><a href="https://doi.org/10.5281/zenodo.14527429" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.14527429.svg" alt="DOI"></a></li>
-<li><a href="https://agdamsbo.shinyapps.io/freesearcheR/" class="external-link"><img src="https://img.shields.io/badge/Shiny-shinyapps.io-blue?style=flat&amp;labelColor=white&amp;logo=RStudio&amp;logoColor=blue" alt="freesearcheR"></a></li>
+<li><a href="https://github.com/agdamsbo/FreesearchR/actions/workflows/rhub.yaml" class="external-link"><img src="https://github.com/agdamsbo/FreesearchR/actions/workflows/rhub.yaml/badge.svg" alt="rhub"></a></li>
+<li><a href="https://agdamsbo.shinyapps.io/freesearcheR/" class="external-link"><img src="https://img.shields.io/badge/Shiny-shinyapps.io-blue?style=flat&amp;labelColor=white&amp;logo=RStudio&amp;logoColor=blue" alt="FreesearchR"></a></li>
 </ul>
 </div>
 

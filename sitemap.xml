@@ -4,7 +4,7 @@
 <url><loc>https://agdamsbo.github.io/freesearcheR/LICENSE.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/QA.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/ROADMAP.html</loc></url>
-<url><loc>https://agdamsbo.github.io/freesearcheR/articles/freesearcheR.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/articles/FreesearchR.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/articles/index.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/authors.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/index.html</loc></url>
@@ -51,7 +51,7 @@
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/is_datetime.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/is_valid_redcap_url.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/is_valid_token.html</loc></url>
-<url><loc>https://agdamsbo.github.io/freesearcheR/reference/launch_freesearcheR.html</loc></url>
+<url><loc>https://agdamsbo.github.io/freesearcheR/reference/launch_FreesearchR.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/line_break.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/m_datafileUI.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/merge_long.html</loc></url>
@@ -73,7 +73,6 @@
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/remove_na_attr.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/repeated_instruments.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/selectInputIcon.html</loc></url>
-<url><loc>https://agdamsbo.github.io/freesearcheR/reference/shiny_freesearcheR.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/specify_qmd_format.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/subset_types.html</loc></url>
 <url><loc>https://agdamsbo.github.io/freesearcheR/reference/supported_functions.html</loc></url>
