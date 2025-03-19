@@ -22,7 +22,7 @@
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/agdamsbo/freesearcheR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/agdamsbo/FreesearchR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -32,7 +32,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Create a regression model programatically</h1>
-      <small class="dont-index">Source: <a href="https://github.com/agdamsbo/freesearcheR/blob/main/R/regression_model.R" class="external-link"><code>R/regression_model.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/agdamsbo/FreesearchR/blob/main/R/regression_model.R" class="external-link"><code>R/regression_model.R</code></a></small>
       <div class="d-none name"><code>regression_model.Rd</code></div>
     </div>
 
@@ -809,36 +809,52 @@ argsstring2list() or list of arguments. Default is NULL.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     1L, 1L, 1L, 3L, 1L, 1L, 2L, 1L, 1L, 3L, 3L, 1L, 3L, 2L, 1L, </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     3L, 1L, 2L, 1L, 1L, 3L, 1L, 2L, 1L, 2L, 2L, 2L, 3L, 2L, 2L, </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     3L, 2L, 3L, 3L, 2L, 1L, 2L, 3L, 3L, 1L), levels = c("I", </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     "II", "III"), class = "factor", label = "Grade"), response = structure(c(1L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     2L, 1L, 2L, 2L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 1L, 1L, 1L, 1L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     2L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 1L, 1L, 2L, 2L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1L, 1L, 2L, 1L, NA, 1L, 2L, 1L, 1L, 1L, 2L, 1L, 2L, 2L, 2L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     2L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 1L, 2L, 2L, 1L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1L, 1L, 1L, NA, 1L, 2L, 2L, 1L, 1L, 2L, 1L, 1L, 1L, 2L, 1L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1L, 1L, 1L, 1L, 1L, 2L, 1L, 1L, 1L, 2L, 1L, 2L, 1L, 1L, 1L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1L, 2L, 2L, 2L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, NA, 1L, 1L, 2L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1L, 1L, 1L, 1L, 2L, 2L, 1L, 1L, 2L, 2L, 1L, 1L, 1L, 1L, 2L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1L, 1L, 1L, 1L, 2L, 2L, 1L, 1L, 1L, 2L, 1L, 1L, 1L, 2L, 1L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     2L, 2L, NA, 2L, 2L, 2L, 1L, 2L, 1L, 1L, 2L, 1L, NA, 2L, 1L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 1L, 1L, 2L, 2L, 1L, 1L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L, 2L, 2L, 1L, 2L, NA, 1L, 2L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1L, 1L, 2L, 1L, 2L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, NA, 1L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     2L, 2L, 1L, 1L), levels = c("0", "1"), class = "factor", label = "Tumor Response"), </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     death = structure(c(1L, 1L, 1L, 2L, 2L, 2L, 1L, 2L, 1L, 2L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1L, 1L, 2L, 2L, 2L, 2L, 1L, 2L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     2L, 1L, 1L, 2L, 2L, 1L, 2L, 1L, 1L, 1L, 2L, 2L, 1L, 2L, 2L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     2L, 2L, 2L, 1L, 2L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 1L, 1L, 2L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     2L, 2L, 2L, 2L, 2L, 2L, 1L, 2L, 1L, 1L, 2L, 1L, 2L, 2L, 2L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 1L, 2L, 1L, 1L, 1L, 2L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     2L, 1L, 2L, 2L, 2L, 2L, 2L, 2L, 1L, 1L, 2L, 2L, 1L, 2L, 2L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     2L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 1L, 2L, 2L, 1L, 2L, 2L, 1L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1L, 2L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 1L, 2L, 2L, 2L, 2L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1L, 1L, 2L, 2L, 1L, 2L, 1L, 1L, 2L, 2L, 1L, 1L, 1L, 1L, 2L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1L, 1L, 1L, 2L, 2L, 1L, 1L, 2L, 2L, 2L, 1L, 2L, 2L, 2L, 1L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1L, 1L, 1L, 2L, 1L, 2L, 2L, 2L, 2L, 2L, 2L, 1L, 1L, 1L, 2L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1L, 2L, 1L, 2L, 2L, 2L, 1L, 2L, 2L, 1L, 1L, 2L, 2L, 2L, 2L, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1L, 2L, 1L, 2L, 2L, 1L, 2L, 1L, 2L, 1L), levels = c("0", </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     "1"), class = "factor", label = "Patient Died"), ttdeath = structure(c(24, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     "II", "III"), class = "factor", label = "Grade"), response = structure(c(FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, NA, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     NA, FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, FALSE, NA, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, TRUE, NA, TRUE, TRUE, TRUE, FALSE, TRUE, FALSE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, FALSE, NA, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, TRUE, TRUE, FALSE, TRUE, NA, FALSE, TRUE, FALSE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, FALSE, NA, FALSE, TRUE, TRUE, FALSE, FALSE), label = "Tumor Response"), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     death = structure(c(FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE, FALSE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, TRUE, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FALSE, TRUE, FALSE), label = "Patient Died"), ttdeath = structure(c(24, </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     24, 24, 17.64, 16.43, 15.64, 24, 18.43, 24, 10.53, 24, 24, </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     14.34, 12.89, 22.68, 8.71, 24, 15.21, 24, 24, 24, 24, 16.92, </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     23.89, 6.32, 15.77, 24, 24, 15.45, 17.43, 24, 20.9, 24, 24, </span>
@@ -861,10 +877,12 @@ argsstring2list() or list of arguments. Default is NULL.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "tbl", "data.frame"), row.names = c(NA, -200L)))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Coefficients:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)          age       marker      stageT2      stageT3      stageT4  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    1.652845    -0.002014    -0.259849     0.404341     0.117402    -0.002102  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     gradeII     gradeIII    response1       death1      ttdeath  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   -0.037012     0.022890     0.498952    -0.003916    -0.076073  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (Intercept)           age        marker       stageT2       stageT3  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1.652845     -0.002014     -0.259849      0.404341      0.117402  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      stageT4       gradeII      gradeIII  responseTRUE     deathTRUE  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    -0.002102     -0.037012      0.022890      0.498952     -0.003916  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      ttdeath  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    -0.076073  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Degrees of Freedom: 172 Total (i.e. Null);  162 Residual</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   (27 observations deleted due to missingness)</span>
