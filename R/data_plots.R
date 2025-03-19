@@ -112,6 +112,99 @@ data_visuals_server <- function(id,
         plot = NULL
       )
 
+      # ## --- New attempt
+      #
+      # rv$plot.params <- shiny::reactive({
+      #   get_plot_options(input$type) |> purrr::pluck(1)
+      # })
+      #
+      # c(output,
+      #            list(shiny::renderUI({
+      #   columnSelectInput(
+      #     inputId = ns("primary"),
+      #     data = data,
+      #     placeholder = "Select variable",
+      #     label = "Response variable",
+      #     multiple = FALSE
+      #   )
+      # }),
+      # shiny::renderUI({
+      #   shiny::req(input$primary)
+      #   # browser()
+      #
+      #   if (!input$primary %in% names(data())) {
+      #     plot_data <- data()[1]
+      #   } else {
+      #     plot_data <- data()[input$primary]
+      #   }
+      #
+      #   plots <- possible_plots(
+      #     data = plot_data
+      #   )
+      #
+      #   plots_named <- get_plot_options(plots) |>
+      #     lapply(\(.x){
+      #       stats::setNames(.x$descr, .x$note)
+      #     })
+      #
+      #   vectorSelectInput(
+      #     inputId = ns("type"),
+      #     selected = NULL,
+      #     label = shiny::h4("Plot type"),
+      #     choices = Reduce(c, plots_named),
+      #     multiple = FALSE
+      #   )
+      # }),
+      # shiny::renderUI({
+      #   shiny::req(input$type)
+      #
+      #   cols <- c(
+      #     rv$plot.params()[["secondary.extra"]],
+      #     all_but(
+      #       colnames(subset_types(
+      #         data(),
+      #         rv$plot.params()[["secondary.type"]]
+      #       )),
+      #       input$primary
+      #     )
+      #   )
+      #
+      #   columnSelectInput(
+      #     inputId = ns("secondary"),
+      #     data = data,
+      #     selected = cols[1],
+      #     placeholder = "Please select",
+      #     label = if (isTRUE(rv$plot.params()[["secondary.multi"]])) "Additional variables" else "Secondary variable",
+      #     multiple = rv$plot.params()[["secondary.multi"]],
+      #     maxItems = rv$plot.params()[["secondary.max"]],
+      #     col_subset = cols,
+      #     none_label = "No variable"
+      #   )
+      # }),
+      # shiny::renderUI({
+      #   shiny::req(input$type)
+      #   columnSelectInput(
+      #     inputId = ns("tertiary"),
+      #     data = data,
+      #     placeholder = "Please select",
+      #     label = "Grouping variable",
+      #     multiple = FALSE,
+      #     col_subset = c(
+      #       "none",
+      #       all_but(
+      #         colnames(subset_types(
+      #           data(),
+      #           rv$plot.params()[["tertiary.type"]]
+      #         )),
+      #         input$primary,
+      #         input$secondary
+      #       )
+      #     ),
+      #     none_label = "No stratification"
+      #   )
+      # })
+      # )|> setNames(c("primary","type","secondary","tertiary")),keep.null = TRUE)
+
       output$primary <- shiny::renderUI({
         columnSelectInput(
           inputId = ns("primary"),
@@ -364,6 +457,16 @@ supported_plots <- function() {
       tertiary.type = c("dichotomous", "ordinal"),
       secondary.extra = NULL
     ),
+    plot_box = list(
+      fun = "plot_box",
+      descr = "Box plot",
+      note = "A classic way to plot data distribution by groups",
+      primary.type = c("continuous", "dichotomous", "ordinal"),
+      secondary.type = c("dichotomous", "ordinal"),
+      secondary.multi = FALSE,
+      tertiary.type = c("dichotomous", "ordinal"),
+      secondary.extra = "none"
+    ),
     plot_euler = list(
       fun = "plot_euler",
       descr = "Euler diagram",
@@ -535,18 +638,49 @@ line_break <- function(data, lineLength = 20, fixed = FALSE) {
 }
 
 
-wrap_plot_list <- function(data) {
-  if (length(data) > 1) {
-    out <- data |>
-      allign_axes() |>
-      patchwork::wrap_plots(guides = "collect", axes = "collect", axis_titles = "collect")
+#' Wrapping
+#'
+#' @param data list of ggplot2 objects
+#' @param tag_levels passed to patchwork::plot_annotation if given. Default is NULL
+#'
+#' @returns list of ggplot2 objects
+#' @export
+#'
+wrap_plot_list <- function(data, tag_levels = NULL) {
+  if (ggplot2::is.ggplot(data[[1]])) {
+    if (length(data) > 1) {
+      out <- data |>
+        (\(.x){
+          if (rlang::is_named(.x)) {
+            purrr::imap(.x, \(.y, .i){
+              .y + ggplot2::ggtitle(.i)
+            })
+          } else {
+            .x
+          }
+        })() |>
+        allign_axes() |>
+        patchwork::wrap_plots(guides = "collect", axes = "collect", axis_titles = "collect")
+      if (!is.null(tag_levels)) {
+        out <- out + patchwork::plot_annotation(tag_levels = tag_levels)
+      }
+    } else {
+      out <- data
+    }
   } else {
-    out <- data
+    cli::cli_abort("Can only wrap lists of {.cls ggplot} objects")
   }
   out
 }
 
 
+#' Alligns axes between plots
+#'
+#' @param ... ggplot2 objects or list of ggplot2 objects
+#'
+#' @returns list of ggplot2 objects
+#' @export
+#'
 allign_axes <- function(...) {
   # https://stackoverflow.com/questions/62818776/get-axis-limits-from-ggplot-object
   # https://github.com/thomasp85/patchwork/blob/main/R/plot_multipage.R#L150
@@ -558,16 +692,30 @@ allign_axes <- function(...) {
     cli::cli_abort("Can only align {.cls ggplot} objects or a list of them")
   }
 
-  # browser()
-  yr <- purrr::map(p, ~ ggplot2::layer_scales(.x)$y$get_limits()) |>
-    unlist() |>
-    range() |>
-    unique()
+  yr <- clean_common_axis(p, "y")
 
-  xr <- purrr::map(p, ~ ggplot2::layer_scales(.x)$x$get_limits()) |>
-    unlist() |>
-    range() |>
-    unique()
+  xr <- clean_common_axis(p, "x")
 
   p |> purrr::map(~ .x + ggplot2::xlim(xr) + ggplot2::ylim(yr))
+}
+
+#' Extract and clean axis ranges
+#'
+#' @param p plot
+#' @param axis axis. x or y.
+#'
+#' @returns vector
+#' @export
+#'
+clean_common_axis <- function(p, axis) {
+  purrr::map(p, ~ ggplot2::layer_scales(.x)[[axis]]$get_limits()) |>
+    unlist() |>
+    (\(.x){
+      if (is.numeric(.x)) {
+        range(.x)
+      } else {
+        .x
+      }
+    })() |>
+    unique()
 }

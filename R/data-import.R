@@ -59,27 +59,7 @@ data_import_server <- function(id) {
       id = ns("file_import"),
       show_data_in = "popup",
       trigger_return = "change",
-      return_class = "data.frame",
-      read_fns = list(
-        ods = import_ods,
-        dta = function(file) {
-          haven::read_dta(
-            file = file,
-            .name_repair = "unique_quiet"
-          )
-        },
-        csv = import_delim,
-        tsv = import_delim,
-        txt = import_delim,
-        xls = import_xls,
-        xlsx = import_xls,
-        rds = function(file) {
-          readr::read_rds(
-            file = file,
-            name_repair = "unique_quiet"
-          )
-        }
-      )
+      return_class = "data.frame"
     )
 
     shiny::observeEvent(data_file$data(), {

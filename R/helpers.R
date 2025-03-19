@@ -215,7 +215,9 @@ default_parsing <- function(data) {
   out <- data |>
     REDCapCAST::parse_data() |>
     REDCapCAST::as_factor() |>
-    REDCapCAST::numchar2fct()
+    REDCapCAST::numchar2fct(numeric.threshold = 8,character.throshold = 10) |>
+    REDCapCAST::as_logical() |>
+    REDCapCAST::fct_drop()
 
   purrr::map2(out,name_labels,\(.x,.l){
     if (!(is.na(.l) | .l=="")) {
@@ -275,6 +277,7 @@ remove_empty_cols <- function(data,cutoff=.7){
 #' @param index index name
 #'
 #' @returns list
+#' @export
 #'
 #' @examples
 #' ls_d <- list(test=c(1:20))

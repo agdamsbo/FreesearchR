@@ -78,9 +78,6 @@ ggeulerr <- function(
 #' mtcars |> plot_euler("vs", "am", seed = 1)
 plot_euler <- function(data, x, y, z = NULL, seed = 2103) {
   set.seed(seed = seed)
-
-  # data <- data[c(...,z)]
-
   if (!is.null(z)) {
     ds <- split(data, data[z])
   } else {
@@ -93,6 +90,7 @@ plot_euler <- function(data, x, y, z = NULL, seed = 2103) {
       plot_euler_single()
   })
 
+# names(out)
   wrap_plot_list(out)
   # patchwork::wrap_plots(out, guides = "collect")
 }
@@ -116,7 +114,7 @@ plot_euler_single <- function(data) {
     ggeulerr(shape = "circle") +
     ggplot2::theme_void() +
     ggplot2::theme(
-      legend.position = "right",
+      legend.position = "none",
       # panel.grid.major = element_blank(),
       # panel.grid.minor = element_blank(),
       # axis.text.y = element_blank(),

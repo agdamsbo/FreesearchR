@@ -102,13 +102,16 @@ library(shiny)
 #' f <- d_t |> cut(2)
 #' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "03:02:20", NA)) |> cut(breaks = lubridate::as_datetime(c(hms::as_hms(levels(f)), hms::as_hms(max(d_t, na.rm = TRUE) + 1))), right = FALSE)
 cut.hms <- function(x, breaks, ...) {
+  ## as_hms keeps returning warnings on tz(); ignored
+  suppressWarnings({
   if (hms::is_hms(breaks)) {
-    breaks <- lubridate::as_datetime(breaks, tz = "UTC")
+    breaks <- lubridate::as_datetime(breaks)
   }
-  x <- lubridate::as_datetime(x, tz = "UTC")
+  x <- lubridate::as_datetime(x)
   out <- cut.POSIXt(x, breaks = breaks, ...)
   attr(out, which = "brks") <- hms::as_hms(lubridate::as_datetime(attr(out, which = "brks")))
   attr(out, which = "levels") <- as.character(hms::as_hms(lubridate::as_datetime(attr(out, which = "levels"))))
+  })
   out
 }
 

@@ -1,20 +1,20 @@
 
 
 ########
-#### Current file: /Users/au301842/freesearcheR/inst/apps/freesearcheR/functions.R
+#### Current file: /Users/au301842/FreesearchR/inst/apps/FreesearchR/functions.R 
 ########
 
 
 
 ########
-#### Current file: R//app_version.R
+#### Current file: R//app_version.R 
 ########
 
-app_version <- function()'250318_0827'
+app_version <- function()'250319_1306'
 
 
 ########
-#### Current file: R//baseline_table.R
+#### Current file: R//baseline_table.R 
 ########
 
 #' Print a flexible baseline characteristics table
@@ -42,7 +42,7 @@ baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, 
 
 
 ########
-#### Current file: R//contrast_text.R
+#### Current file: R//contrast_text.R 
 ########
 
 #' @title Contrast Text Color
@@ -99,7 +99,7 @@ contrast_text <- function(background,
 
 
 ########
-#### Current file: R//correlations-module.R
+#### Current file: R//correlations-module.R 
 ########
 
 #' Data correlations evaluation module
@@ -260,7 +260,7 @@ cor_demo_app()
 
 
 ########
-#### Current file: R//custom_SelectInput.R
+#### Current file: R//custom_SelectInput.R 
 ########
 
 #' A selectizeInput customized for data frames with column labels
@@ -447,7 +447,7 @@ vectorSelectInput <- function(inputId,
 
 
 ########
-#### Current file: R//cut-variable-dates.R
+#### Current file: R//cut-variable-dates.R 
 ########
 
 library(datamods)
@@ -554,13 +554,16 @@ library(shiny)
 #' f <- d_t |> cut(2)
 #' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "03:02:20", NA)) |> cut(breaks = lubridate::as_datetime(c(hms::as_hms(levels(f)), hms::as_hms(max(d_t, na.rm = TRUE) + 1))), right = FALSE)
 cut.hms <- function(x, breaks, ...) {
+  ## as_hms keeps returning warnings on tz(); ignored
+  suppressWarnings({
   if (hms::is_hms(breaks)) {
-    breaks <- lubridate::as_datetime(breaks, tz = "UTC")
+    breaks <- lubridate::as_datetime(breaks)
   }
-  x <- lubridate::as_datetime(x, tz = "UTC")
+  x <- lubridate::as_datetime(x)
   out <- cut.POSIXt(x, breaks = breaks, ...)
   attr(out, which = "brks") <- hms::as_hms(lubridate::as_datetime(attr(out, which = "brks")))
   attr(out, which = "levels") <- as.character(hms::as_hms(lubridate::as_datetime(attr(out, which = "levels"))))
+  })
   out
 }
 
@@ -1089,7 +1092,7 @@ plot_histogram <- function(data, column, bins = 30, breaks = NULL, color = "#112
 
 
 ########
-#### Current file: R//data_plots.R
+#### Current file: R//data_plots.R 
 ########
 
 # source(here::here("functions.R"))
@@ -1205,6 +1208,99 @@ data_visuals_server <- function(id,
         plot.params = NULL,
         plot = NULL
       )
+
+      # ## --- New attempt
+      #
+      # rv$plot.params <- shiny::reactive({
+      #   get_plot_options(input$type) |> purrr::pluck(1)
+      # })
+      #
+      # c(output,
+      #            list(shiny::renderUI({
+      #   columnSelectInput(
+      #     inputId = ns("primary"),
+      #     data = data,
+      #     placeholder = "Select variable",
+      #     label = "Response variable",
+      #     multiple = FALSE
+      #   )
+      # }),
+      # shiny::renderUI({
+      #   shiny::req(input$primary)
+      #   # browser()
+      #
+      #   if (!input$primary %in% names(data())) {
+      #     plot_data <- data()[1]
+      #   } else {
+      #     plot_data <- data()[input$primary]
+      #   }
+      #
+      #   plots <- possible_plots(
+      #     data = plot_data
+      #   )
+      #
+      #   plots_named <- get_plot_options(plots) |>
+      #     lapply(\(.x){
+      #       stats::setNames(.x$descr, .x$note)
+      #     })
+      #
+      #   vectorSelectInput(
+      #     inputId = ns("type"),
+      #     selected = NULL,
+      #     label = shiny::h4("Plot type"),
+      #     choices = Reduce(c, plots_named),
+      #     multiple = FALSE
+      #   )
+      # }),
+      # shiny::renderUI({
+      #   shiny::req(input$type)
+      #
+      #   cols <- c(
+      #     rv$plot.params()[["secondary.extra"]],
+      #     all_but(
+      #       colnames(subset_types(
+      #         data(),
+      #         rv$plot.params()[["secondary.type"]]
+      #       )),
+      #       input$primary
+      #     )
+      #   )
+      #
+      #   columnSelectInput(
+      #     inputId = ns("secondary"),
+      #     data = data,
+      #     selected = cols[1],
+      #     placeholder = "Please select",
+      #     label = if (isTRUE(rv$plot.params()[["secondary.multi"]])) "Additional variables" else "Secondary variable",
+      #     multiple = rv$plot.params()[["secondary.multi"]],
+      #     maxItems = rv$plot.params()[["secondary.max"]],
+      #     col_subset = cols,
+      #     none_label = "No variable"
+      #   )
+      # }),
+      # shiny::renderUI({
+      #   shiny::req(input$type)
+      #   columnSelectInput(
+      #     inputId = ns("tertiary"),
+      #     data = data,
+      #     placeholder = "Please select",
+      #     label = "Grouping variable",
+      #     multiple = FALSE,
+      #     col_subset = c(
+      #       "none",
+      #       all_but(
+      #         colnames(subset_types(
+      #           data(),
+      #           rv$plot.params()[["tertiary.type"]]
+      #         )),
+      #         input$primary,
+      #         input$secondary
+      #       )
+      #     ),
+      #     none_label = "No stratification"
+      #   )
+      # })
+      # )|> setNames(c("primary","type","secondary","tertiary")),keep.null = TRUE)
 
       output$primary <- shiny::renderUI({
         columnSelectInput(
@@ -1458,6 +1554,16 @@ supported_plots <- function() {
       tertiary.type = c("dichotomous", "ordinal"),
       secondary.extra = NULL
     ),
+    plot_box = list(
+      fun = "plot_box",
+      descr = "Box plot",
+      note = "A classic way to plot data distribution by groups",
+      primary.type = c("continuous", "dichotomous", "ordinal"),
+      secondary.type = c("dichotomous", "ordinal"),
+      secondary.multi = FALSE,
+      tertiary.type = c("dichotomous", "ordinal"),
+      secondary.extra = "none"
+    ),
     plot_euler = list(
       fun = "plot_euler",
       descr = "Euler diagram",
@@ -1629,18 +1735,49 @@ line_break <- function(data, lineLength = 20, fixed = FALSE) {
 }
 
 
-wrap_plot_list <- function(data) {
-  if (length(data) > 1) {
-    out <- data |>
-      allign_axes() |>
-      patchwork::wrap_plots(guides = "collect", axes = "collect", axis_titles = "collect")
+#' Wrapping
+#'
+#' @param data list of ggplot2 objects
+#' @param tag_levels passed to patchwork::plot_annotation if given. Default is NULL
+#'
+#' @returns list of ggplot2 objects
+#' @export
+#'
+wrap_plot_list <- function(data, tag_levels = NULL) {
+  if (ggplot2::is.ggplot(data[[1]])) {
+    if (length(data) > 1) {
+      out <- data |>
+        (\(.x){
+          if (rlang::is_named(.x)) {
+            purrr::imap(.x, \(.y, .i){
+              .y + ggplot2::ggtitle(.i)
+            })
+          } else {
+            .x
+          }
+        })() |>
+        allign_axes() |>
+        patchwork::wrap_plots(guides = "collect", axes = "collect", axis_titles = "collect")
+      if (!is.null(tag_levels)) {
+        out <- out + patchwork::plot_annotation(tag_levels = tag_levels)
+      }
+    } else {
+      out <- data
+    }
   } else {
-    out <- data
+    cli::cli_abort("Can only wrap lists of {.cls ggplot} objects")
   }
   out
 }
 
 
+#' Alligns axes between plots
+#'
+#' @param ... ggplot2 objects or list of ggplot2 objects
+#'
+#' @returns list of ggplot2 objects
+#' @export
+#'
 allign_axes <- function(...) {
   # https://stackoverflow.com/questions/62818776/get-axis-limits-from-ggplot-object
   # https://github.com/thomasp85/patchwork/blob/main/R/plot_multipage.R#L150
@@ -1652,23 +1789,37 @@ allign_axes <- function(...) {
     cli::cli_abort("Can only align {.cls ggplot} objects or a list of them")
   }
 
-  # browser()
-  yr <- purrr::map(p, ~ ggplot2::layer_scales(.x)$y$get_limits()) |>
-    unlist() |>
-    range() |>
-    unique()
+  yr <- clean_common_axis(p, "y")
 
-  xr <- purrr::map(p, ~ ggplot2::layer_scales(.x)$x$get_limits()) |>
-    unlist() |>
-    range() |>
-    unique()
+  xr <- clean_common_axis(p, "x")
 
   p |> purrr::map(~ .x + ggplot2::xlim(xr) + ggplot2::ylim(yr))
 }
 
+#' Extract and clean axis ranges
+#'
+#' @param p plot
+#' @param axis axis. x or y.
+#'
+#' @returns vector
+#' @export
+#'
+clean_common_axis <- function(p, axis) {
+  purrr::map(p, ~ ggplot2::layer_scales(.x)[[axis]]$get_limits()) |>
+    unlist() |>
+    (\(.x){
+      if (is.numeric(.x)) {
+        range(.x)
+      } else {
+        .x
+      }
+    })() |>
+    unique()
+}
+
 
 ########
-#### Current file: R//data-import.R
+#### Current file: R//data-import.R 
 ########
 
 data_import_ui <- function(id) {
@@ -1732,27 +1883,7 @@ data_import_server <- function(id) {
       id = ns("file_import"),
       show_data_in = "popup",
       trigger_return = "change",
-      return_class = "data.frame",
-      read_fns = list(
-        ods = import_ods,
-        dta = function(file) {
-          haven::read_dta(
-            file = file,
-            .name_repair = "unique_quiet"
-          )
-        },
-        csv = import_delim,
-        tsv = import_delim,
-        txt = import_delim,
-        xls = import_xls,
-        xlsx = import_xls,
-        rds = function(file) {
-          readr::read_rds(
-            file = file,
-            name_repair = "unique_quiet"
-          )
-        }
-      )
+      return_class = "data.frame"
     )
 
     shiny::observeEvent(data_file$data(), {
@@ -1845,7 +1976,7 @@ data_import_demo_app <- function() {
 
 
 ########
-#### Current file: R//data-summary.R
+#### Current file: R//data-summary.R 
 ########
 
 #' Data summary module
@@ -2154,7 +2285,7 @@ add_class_icon <- function(grid, column = "class") {
 
 
 ########
-#### Current file: R//file-import-module.R
+#### Current file: R//file-import-module.R 
 ########
 
 #' Shiny UI module to load a data file
@@ -2285,7 +2416,7 @@ file_app()
 
 
 ########
-#### Current file: R//helpers.R
+#### Current file: R//helpers.R 
 ########
 
 #' Wrapper function to get function from character vector referring to function from namespace. Passed to 'do.call()'
@@ -2505,7 +2636,9 @@ default_parsing <- function(data) {
   out <- data |>
     REDCapCAST::parse_data() |>
     REDCapCAST::as_factor() |>
-    REDCapCAST::numchar2fct()
+    REDCapCAST::numchar2fct(numeric.threshold = 8,character.throshold = 10) |>
+    REDCapCAST::as_logical() |>
+    REDCapCAST::fct_drop()
 
   purrr::map2(out,name_labels,\(.x,.l){
     if (!(is.na(.l) | .l=="")) {
@@ -2565,6 +2698,7 @@ remove_empty_cols <- function(data,cutoff=.7){
 #' @param index index name
 #'
 #' @returns list
+#' @export
 #'
 #' @examples
 #' ls_d <- list(test=c(1:20))
@@ -2599,7 +2733,7 @@ missing_fraction <- function(data){
 
 
 ########
-#### Current file: R//import-file-ext.R
+#### Current file: R//import-file-ext.R 
 ########
 
 #' @title Import data from a file
@@ -2858,7 +2992,7 @@ import_file_server <- function(id,
         parameters <- parameters[which(names(parameters) %in% rlang::fn_fmls_names(get(read_fns[[extension]])))]
         # parameters <- parameters[which(names(parameters) %in% rlang::fn_fmls_names(read_fns[[extension]]))]
         imported <- try(rlang::exec(read_fns[[extension]], !!!parameters), silent = TRUE)
-        code <- rlang::call2(read_fns[[extension]], !!!modifyList(parameters, list(file = input$file$name)), .ns = "freesearcheR")
+        code <- rlang::call2(read_fns[[extension]], !!!modifyList(parameters, list(file = input$file$name)), .ns = "FreesearchR")
 
         if (inherits(imported, "try-error")) {
           imported <- try(rlang::exec(rio::import, !!!parameters[1]), silent = TRUE)
@@ -3174,7 +3308,118 @@ import_file_demo_app <- function() {
 
 
 ########
-#### Current file: R//plot_euler.R
+#### Current file: R//launch_FreesearchR.R 
+########
+
+#' Easily launch the FreesearchR app
+#'
+#' @description
+#' All data.frames in the global environment will be accessible through the app.
+#'
+#' @param ... passed on to `shiny::runApp()`
+#'
+#' @returns shiny app
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' data(mtcars)
+#' shiny_FreesearchR(launch.browser = TRUE)
+#' }
+launch_FreesearchR <- function(...){
+  appDir <- system.file("apps", "FreesearchR", package = "FreesearchR")
+  if (appDir == "") {
+    stop("Could not find the app directory. Try re-installing `FreesearchR`.", call. = FALSE)
+  }
+
+  a <- shiny::runApp(appDir = paste0(appDir,"/app.R"), ...)
+  return(invisible(a))
+}
+
+
+########
+#### Current file: R//plot_box.R 
+########
+
+#' Beautiful box plot(s)
+#'
+#' @returns ggplot2 object
+#' @export
+#'
+#' @name data-plots
+#'
+#' @examples
+#' mtcars |> plot_box(x = "mpg", y = "cyl", z = "gear")
+#' mtcars |>
+#'   default_parsing() |>
+#'   plot_box(x = "mpg", y = "cyl", z = "gear")
+plot_box <- function(data, x, y, z = NULL) {
+  if (!is.null(z)) {
+    ds <- split(data, data[z])
+  } else {
+    ds <- list(data)
+  }
+
+  out <- lapply(ds, \(.ds){
+    plot_box_single(
+      data = .ds,
+      x = x,
+      y = y
+    )
+  })
+
+  wrap_plot_list(out)
+  # patchwork::wrap_plots(out,guides = "collect")
+}
+
+
+
+
+#' Create nice box-plots
+#'
+#' @name data-plots
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+#' mtcars |> plot_box_single("mpg","cyl")
+plot_box_single <- function(data, x, y=NULL, seed = 2103) {
+  set.seed(seed)
+
+  if (is.null(y)) {
+    y <- "All"
+    data[[y]] <- y
+  }
+
+  discrete <- !outcome_type(data[[y]]) %in% "continuous"
+
+  data |>
+    ggplot2::ggplot(ggplot2::aes(x = !!dplyr::sym(x), y = !!dplyr::sym(y), fill = !!dplyr::sym(y), group = !!dplyr::sym(y))) +
+    ggplot2::geom_boxplot(linewidth = 1.8, outliers = FALSE) +
+    ## THis could be optional in future
+    ggplot2::geom_jitter(color = "black", size = 2, alpha = 0.9) +
+    ggplot2::coord_flip() +
+    # viridis::scale_fill_viridis(discrete = discrete, option = "C") +
+    # ggplot2::theme_void() +
+    ggplot2::theme(
+      legend.position = "none",
+      # panel.grid.major = element_blank(),
+      # panel.grid.minor = element_blank(),
+      # axis.text.y = element_blank(),
+      # axis.title.y = element_blank(),
+      text = ggplot2::element_text(size = 20),
+      # axis.text = ggplot2::element_blank(),
+      # plot.title = element_blank(),
+      panel.background = ggplot2::element_rect(fill = "white"),
+      plot.background = ggplot2::element_rect(fill = "white"),
+      panel.border = ggplot2::element_blank()
+    )
+}
+
+
+########
+#### Current file: R//plot_euler.R 
 ########
 
 #' Area proportional venn diagrams
@@ -3257,9 +3502,6 @@ ggeulerr <- function(
 #' mtcars |> plot_euler("vs", "am", seed = 1)
 plot_euler <- function(data, x, y, z = NULL, seed = 2103) {
   set.seed(seed = seed)
-
-  # data <- data[c(...,z)]
-
   if (!is.null(z)) {
     ds <- split(data, data[z])
   } else {
@@ -3272,6 +3514,7 @@ plot_euler <- function(data, x, y, z = NULL, seed = 2103) {
       plot_euler_single()
   })
 
+# names(out)
   wrap_plot_list(out)
   # patchwork::wrap_plots(out, guides = "collect")
 }
@@ -3295,7 +3538,7 @@ plot_euler_single <- function(data) {
     ggeulerr(shape = "circle") +
     ggplot2::theme_void() +
     ggplot2::theme(
-      legend.position = "right",
+      legend.position = "none",
       # panel.grid.major = element_blank(),
       # panel.grid.minor = element_blank(),
       # axis.text.y = element_blank(),
@@ -3311,7 +3554,7 @@ plot_euler_single <- function(data) {
 
 
 ########
-#### Current file: R//plot_hbar.R
+#### Current file: R//plot_hbar.R 
 ########
 
 #' Nice horizontal stacked bars (Grotta bars)
@@ -3412,7 +3655,7 @@ vertical_stacked_bars <- function(data,
 
 
 ########
-#### Current file: R//plot_ridge.R
+#### Current file: R//plot_ridge.R 
 ########
 
 #' Plot nice ridge plot
@@ -3446,7 +3689,7 @@ plot_ridge <- function(data, x, y, z = NULL, ...) {
 
 
 ########
-#### Current file: R//plot_sankey.R
+#### Current file: R//plot_sankey.R 
 ########
 
 #' Readying data for sankey plot
@@ -3652,7 +3895,7 @@ plot_sankey_single <- function(data, x, y, color.group = c("x", "y"), colors = N
 
 
 ########
-#### Current file: R//plot_scatter.R
+#### Current file: R//plot_scatter.R 
 ########
 
 #' Beautiful violin plot
@@ -3683,7 +3926,7 @@ plot_scatter <- function(data, x, y, z = NULL) {
 
 
 ########
-#### Current file: R//plot_violin.R
+#### Current file: R//plot_violin.R 
 ########
 
 #' Beatiful violin plot
@@ -3716,7 +3959,7 @@ plot_violin <- function(data, x, y, z = NULL) {
 
 
 ########
-#### Current file: R//redcap_read_shiny_module.R
+#### Current file: R//redcap_read_shiny_module.R 
 ########
 
 #' Shiny module to browser and export REDCap data
@@ -4303,14 +4546,14 @@ redcap_demo_app <- function() {
 
 
 ########
-#### Current file: R//redcap.R
+#### Current file: R//redcap.R 
 ########
 
 
 
 
 ########
-#### Current file: R//regression_model.R
+#### Current file: R//regression_model.R 
 ########
 
 #' Create a regression model programatically
@@ -4952,7 +5195,7 @@ regression_model_uv_list <- function(data,
 
 
 ########
-#### Current file: R//regression_plot.R
+#### Current file: R//regression_plot.R 
 ########
 
 #' Regression coef plot from gtsummary. Slightly modified to pass on arguments
@@ -4972,15 +5215,16 @@ regression_model_uv_list <- function(data,
 #'
 #' @examples
 #' \dontrun{
-#' mod <- lm(mpg ~ ., mtcars)
+#' mod <- lm(mpg ~ ., default_parsing(mtcars))
 #' p <- mod |>
 #'   gtsummary::tbl_regression() |>
 #'   plot(colour = "variable")
 #' }
 #'
 plot.tbl_regression <- function(x,
-                                # remove_header_rows = TRUE,
-                                # remove_reference_rows = FALSE,
+                                plot_ref = TRUE,
+                                remove_header_rows = TRUE,
+                                remove_reference_rows = FALSE,
                                 ...) {
   # check_dots_empty()
   gtsummary:::check_pkg_installed("ggstats")
@@ -4989,31 +5233,29 @@ plot.tbl_regression <- function(x,
   # gtsummary:::check_scalar_logical(remove_reference_rows)
 
   df_coefs <- x$table_body
-  # if (isTRUE(remove_header_rows)) {
-  #   df_coefs <- df_coefs |> dplyr::filter(!.data$header_row %in% TRUE)
-  # }
-  # if (isTRUE(remove_reference_rows)) {
-  #   df_coefs <- df_coefs |> dplyr::filter(!.data$reference_row %in% TRUE)
-  # }
 
-  # browser()
+  if (isTRUE(remove_header_rows)) {
+    df_coefs <- df_coefs |> dplyr::filter(!header_row %in% TRUE)
+  }
+  if (isTRUE(remove_reference_rows)) {
+    df_coefs <- df_coefs |> dplyr::filter(!reference_row %in% TRUE)
+  }
 
+  # Removes redundant label
   df_coefs$label[df_coefs$row_type == "label"] <- ""
 
-  df_coefs %>%
+  # Add estimate value to reference level
+  if (plot_ref == TRUE){
+  df_coefs[df_coefs$var_type == "categorical" & is.na(df_coefs$reference_row),"estimate"] <- if (x$inputs$exponentiate) 1 else 0}
+
+  p <- df_coefs |>
     ggstats::ggcoef_plot(exponentiate = x$inputs$exponentiate, ...)
+
+  if (x$inputs$exponentiate){
+    p <- symmetrical_scale_x_log10(p)
+  }
+  p
 }
-
-
-# default_parsing(mtcars) |> lapply(class)
-#
-# purrr::imap(mtcars,\(.x,.i){
-#   if (.i %in% c("vs","am","gear","carb")){
-#     as.factor(.x)
-#   } else .x
-#   }) |> dplyr::bind_cols()
-#
-#
 
 
 #' Wrapper to pivot gtsummary table data to long for plotting
@@ -5057,8 +5299,52 @@ merge_long <- function(list, model.names) {
 }
 
 
+#' Easily round log scale limits for nice plots
+#'
+#' @param data data
+#' @param fun rounding function (floor/ceiling)
+#' @param ... ignored
+#'
+#' @returns numeric vector
+#' @export
+#'
+#' @examples
+#' limit_log(-.1,floor)
+#' limit_log(.1,ceiling)
+#' limit_log(-2.1,ceiling)
+#' limit_log(2.1,ceiling)
+limit_log <- function(data,fun,...){
+  fun(10^-floor(data)*10^data)/10^-floor(data)
+}
+
+#' Ensure symmetrical plot around 1 on a logarithmic x scale for ratio plots
+#'
+#' @param plot ggplot2 plot
+#' @param breaks breaks used and mirrored
+#' @param ... ignored
+#'
+#' @returns ggplot2 object
+#' @export
+#'
+symmetrical_scale_x_log10 <- function(plot,breaks=c(1,2,3,5,10),...){
+  rx <- ggplot2::layer_scales(plot)$x$get_limits()
+
+  x_min <- floor(10*rx[1])/10
+  x_max <- ceiling(10*rx[2])/10
+
+  rx_min <- limit_log(rx[1],floor)
+  rx_max <- limit_log(rx[2],ceiling)
+
+  max_abs_x <- max(abs(c(x_min,x_max)))
+
+  ticks <- log10(breaks)+(ceiling(max_abs_x)-1)
+  browser()
+  plot + ggplot2::scale_x_log10(limits=c(rx_min,rx_max),breaks=create_log_tics(10^ticks[ticks<=max_abs_x]))
+}
+
+
 ########
-#### Current file: R//regression_table.R
+#### Current file: R//regression_table.R 
 ########
 
 #' Create table of regression model
@@ -5144,7 +5430,7 @@ merge_long <- function(list, model.names) {
 #' #' @export
 #' regression_table.default <- function(x, ..., args.list = NULL, fun = "gtsummary::tbl_regression") {
 #'   # Stripping custom class
-#'   class(x) <- class(x)[class(x) != "freesearcher_model"]
+#'   class(x) <- class(x)[class(x) != "freesearchr_model"]
 #'
 #'   if (any(c(length(class(x)) != 1, class(x) != "lm"))) {
 #'     if (!"exponentiate" %in% names(args.list)) {
@@ -5173,7 +5459,7 @@ regression_table <- function(x, ...) {
 
 regression_table_create <- function(x, ..., args.list = NULL, fun = "gtsummary::tbl_regression") {
   # Stripping custom class
-  class(x) <- class(x)[class(x) != "freesearcher_model"]
+  class(x) <- class(x)[class(x) != "freesearchr_model"]
 
   if (any(c(length(class(x)) != 1, class(x) != "lm"))) {
     if (!"exponentiate" %in% names(args.list)) {
@@ -5209,7 +5495,7 @@ tbl_merge <- function(data) {
 
 
 ########
-#### Current file: R//report.R
+#### Current file: R//report.R 
 ########
 
 #' Split vector by an index and embed addition
@@ -5297,50 +5583,7 @@ modify_qmd <- function(file, format) {
 
 
 ########
-#### Current file: R//shiny_freesearcheR.R
-########
-
-#' Launch the freesearcheR tool locally
-#'
-#' @description
-#' All data.frames in the global environment will be accessible through the app.
-#'
-#'
-#' @param ... arguments passed on to `shiny::runApp()`
-#'
-#' @return shiny app
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#' data(mtcars)
-#' shiny_freesearcheR(launch.browser = TRUE)
-#' }
-shiny_freesearcheR <- function(...) {
-  appDir <- system.file("apps", "freesearcheR", package = "freesearcheR")
-  if (appDir == "") {
-    stop("Could not find the app directory. Try re-installing `freesearcheR`.", call. = FALSE)
-  }
-
-  a <- shiny::runApp(appDir = paste0(appDir,"/app.R"), ...)
-  return(invisible(a))
-}
-
-
-#' Easily launch the freesearcheR app
-#'
-#' @param ... passed on to `shiny::runApp()`
-#'
-#' @returns shiny app
-#' @export
-#'
-launch_freesearcheR <- function(...){
-  shiny_freesearcheR(...)
-}
-
-
-########
-#### Current file: R//theme.R
+#### Current file: R//theme.R 
 ########
 
 #' Custom theme based on unity
@@ -5422,7 +5665,7 @@ gg_theme_export <- function(){
 
 
 ########
-#### Current file: R//update-factor-ext.R
+#### Current file: R//update-factor-ext.R 
 ########
 
 
@@ -5692,7 +5935,7 @@ modal_update_factor <- function(id,
 #'
 #' @importFrom shinyWidgets WinBox wbOptions wbControls
 #' @importFrom htmltools tagList
-#' @rdname create-column
+#' @rdname update-factor
 winbox_update_factor <- function(id,
                                  title = i18n("Update levels of a factor"),
                                  options = shinyWidgets::wbOptions(),
@@ -5719,7 +5962,7 @@ winbox_update_factor <- function(id,
 
 
 ########
-#### Current file: R//update-variables-ext.R
+#### Current file: R//update-variables-ext.R 
 ########
 
 library(data.table)
@@ -6501,7 +6744,7 @@ clean_date <- function(data){
 
 
 ########
-#### Current file: R//wide2long.R
+#### Current file: R//wide2long.R 
 ########
 
 #' Alternative pivoting method for easily pivoting based on name pattern
@@ -6660,7 +6903,7 @@ grepl_fix <- function(data, pattern, type = c("prefix", "infix", "suffix")) {
 
 
 ########
-#### Current file: /Users/au301842/freesearcheR/inst/apps/freesearcheR/ui.R
+#### Current file: /Users/au301842/FreesearchR/inst/apps/FreesearchR/ui.R 
 ########
 
 # ns <- NS(id)
@@ -6672,7 +6915,7 @@ ui_elements <- list(
   #########
   ##############################################################################
   "home" = bslib::nav_panel(
-    title = "freesearcheR",
+    title = "FreesearchR",
     shiny::fluidRow(
       shiny::column(width = 2),
       shiny::column(
@@ -7263,10 +7506,10 @@ ui <- bslib::page_fixed(
     # add the name of the tab you want to use as title in data-value
     shiny::HTML(
       ".container-fluid > .nav > li >
-                        a[data-value='freesearcheR'] {font-size: 28px}"
+                        a[data-value='FreesearchR'] {font-size: 28px}"
     )
   ),
-  title = "freesearcheR",
+  title = "FreesearchR",
   theme = light,
   shiny::useBusyIndicators(),
   bslib::page_navbar(
@@ -7289,7 +7532,7 @@ ui <- bslib::page_fixed(
       ),
       shiny::p(
         style = "margin: 1; color: #888;",
-        "AG Damsbo | v", app_version(), " | AGPLv3 license | ", shiny::tags$a("Source on Github", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer")
+        "AG Damsbo | v", app_version(), " | ",shiny::tags$a("AGPLv3 license", href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer")," | ", shiny::tags$a("Source on Github", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer")
       ),
     )
   )
@@ -7297,7 +7540,7 @@ ui <- bslib::page_fixed(
 
 
 ########
-#### Current file: /Users/au301842/freesearcheR/inst/apps/freesearcheR/server.R
+#### Current file: /Users/au301842/FreesearchR/inst/apps/FreesearchR/server.R 
 ########
 
 library(readr)
@@ -7328,7 +7571,7 @@ library(IDEAFilter)
 library(shinyWidgets)
 library(DT)
 library(gtsummary)
-# library(freesearcheR)
+# library(FreesearchR)
 
 # source("functions.R")
 
@@ -7476,7 +7719,7 @@ server <- function(input, output, session) {
         paste(collapse = "") |>
         paste("|>
         dplyr::select(", paste(input$import_var, collapse = ","), ") |>
-        freesearcheR::default_parsing()") |>
+        FreesearchR::default_parsing()") |>
         (\(.x){
           paste0("data <- ", .x)
         })()
@@ -8279,7 +8522,7 @@ server <- function(input, output, session) {
 
 
 ########
-#### Current file: /Users/au301842/freesearcheR/inst/apps/freesearcheR/launch.R
+#### Current file: /Users/au301842/FreesearchR/inst/apps/FreesearchR/launch.R 
 ########
 
 shinyApp(ui, server)

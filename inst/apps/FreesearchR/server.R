@@ -26,7 +26,7 @@ library(IDEAFilter)
 library(shinyWidgets)
 library(DT)
 library(gtsummary)
-# library(freesearcheR)
+# library(FreesearchR)
 
 # source("functions.R")
 
@@ -174,7 +174,7 @@ server <- function(input, output, session) {
         paste(collapse = "") |>
         paste("|>
         dplyr::select(", paste(input$import_var, collapse = ","), ") |>
-        freesearcheR::default_parsing()") |>
+        FreesearchR::default_parsing()") |>
         (\(.x){
           paste0("data <- ", .x)
         })()

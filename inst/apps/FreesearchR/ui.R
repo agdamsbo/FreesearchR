@@ -7,7 +7,7 @@ ui_elements <- list(
   #########
   ##############################################################################
   "home" = bslib::nav_panel(
-    title = "freesearcheR",
+    title = "FreesearchR",
     shiny::fluidRow(
       shiny::column(width = 2),
       shiny::column(
@@ -598,10 +598,10 @@ ui <- bslib::page_fixed(
     # add the name of the tab you want to use as title in data-value
     shiny::HTML(
       ".container-fluid > .nav > li >
-                        a[data-value='freesearcheR'] {font-size: 28px}"
+                        a[data-value='FreesearchR'] {font-size: 28px}"
     )
   ),
-  title = "freesearcheR",
+  title = "FreesearchR",
   theme = light,
   shiny::useBusyIndicators(),
   bslib::page_navbar(
@@ -624,7 +624,7 @@ ui <- bslib::page_fixed(
       ),
       shiny::p(
         style = "margin: 1; color: #888;",
-        "AG Damsbo | v", app_version(), " | AGPLv3 license | ", shiny::tags$a("Source on Github", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer")
+        "AG Damsbo | v", app_version(), " | ",shiny::tags$a("AGPLv3 license", href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer")," | ", shiny::tags$a("Source on Github", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer")
       ),
     )
   )

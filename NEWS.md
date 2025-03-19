@@ -1,8 +1,8 @@
-# freesearcheR 25.3.2
+# FreesearchR 25.3.2
 
 Focus is on polish and improved ui/ux.
 
-First steps towards an updated name (will be FreesearchR), with renamed repository. This may introduce some breaking chances for others calling or installing the package. No future changes are planned. A complete transition is planned before attending and presenting a poster at the European Stroke Organisation COnference 2025 in May.
+Updating name (will be FreesearchR), with renamed repository and some graphics are comng. This may introduce some breaking chances for others calling or installing the package. No future changes are planned. A complete transition is planned before attending and presenting a poster at the European Stroke Organisation Conference 2025 in May.
 
 Testing file upload conducted and improved.
 

@@ -80,6 +80,6 @@ Suggests:
     rsconnect,
     knitr,
     rmarkdown
-URL: https://github.com/agdamsbo/freesearcheR, https://agdamsbo.github.io/freesearcheR/
-BugReports: https://github.com/agdamsbo/freesearcheR/issues
+URL: https://github.com/agdamsbo/FreesearchR, https://agdamsbo.github.io/FreesearchR/
+BugReports: https://github.com/agdamsbo/FreesearchR/issues
 VignetteBuilder: knitr
