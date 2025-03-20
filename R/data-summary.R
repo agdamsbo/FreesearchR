@@ -282,6 +282,8 @@ add_class_icon <- function(grid, column = "class") {
             shiny::icon("arrow-down-1-9")
           } else if (identical(x, "character")) {
             shiny::icon("arrow-down-a-z")
+          } else if (identical(x, "logical")) {
+            shiny::icon("toggle-off")
           } else if (any(c("Date", "POSIXct", "POSIXt") %in% x)) {
             shiny::icon("calendar-days")
           } else if ("hms" %in% x) {
