@@ -339,6 +339,7 @@ server <- function(input, output, session) {
       rv$data_filtered <- data_filter()
 
       ###  Save filtered data
+      ###  without empty factor levels
       rv$list$data <- data_filter() |>
         REDCapCAST::fct_drop()
 
@@ -468,23 +469,39 @@ server <- function(input, output, session) {
   ## Keep these "old" selection options as a simple alternative to the modification pane
 
   output$include_vars <- shiny::renderUI({
-    shiny::selectizeInput(
+    columnSelectInputStat(
       inputId = "include_vars",
       selected = NULL,
       label = "Covariables to include",
-      choices = colnames(rv$data_filtered),
+      data = rv$data_filtered,
       multiple = TRUE
     )
+
+    # shiny::selectizeInput(
+    #   inputId = "include_vars",
+    #   selected = NULL,
+    #   label = "Covariables to include",
+    #   choices = colnames(rv$data_filtered),
+    #   multiple = TRUE
+    # )
   })
 
   output$outcome_var <- shiny::renderUI({
-    shiny::selectInput(
+    columnSelectInputStat(
       inputId = "outcome_var",
       selected = NULL,
       label = "Select outcome variable",
-      choices = colnames(rv$data_filtered),
+      data = rv$data_filtered,
       multiple = FALSE
     )
+
+    # shiny::selectInput(
+    #   inputId = "outcome_var",
+    #   selected = NULL,
+    #   label = "Select outcome variable",
+    #   choices = colnames(rv$data_filtered),
+    #   multiple = FALSE
+    # )
   })
 
   output$regression_type <- shiny::renderUI({
@@ -527,25 +544,37 @@ server <- function(input, output, session) {
   })
 
   output$strat_var <- shiny::renderUI({
-    shiny::selectInput(
+    columnSelectInputStat(
       inputId = "strat_var",
       selected = "none",
       label = "Select variable to stratify baseline",
-      choices = c(
+      data = rv$data_filtered,
+      col_subset = c(
         "none",
-        rv$data_filtered |>
-          (\(.x){
-            lapply(.x, \(.c){
-              if (identical("factor", class(.c))) {
-                .c
-              }
-            }) |>
-              dplyr::bind_cols()
-          })() |>
-          colnames()
-      ),
-      multiple = FALSE
+        names(rv$data_filtered)[unlist(lapply(rv$data_filtered, data_type)) %in% c("dichotomous", "categorical", "ordinal")]
+      )
     )
+
+    # shiny::selectInput(
+    #   inputId = "strat_var",
+    #   selected = "none",
+    #   label = "Select variable to stratify baseline",
+    #   choices = c(
+    #     "none",
+    #     names(rv$list$data)[unlist(lapply(rv$list$data,data_type)) %in% c("dichotomous","categorical","ordinal")]
+    #     # rv$data_filtered |>
+    #     #   (\(.x){
+    #     #     lapply(.x, \(.c){
+    #     #       if (identical("factor", class(.c))) {
+    #     #         .c
+    #     #       }
+    #     #     }) |>
+    #     #       dplyr::bind_cols()
+    #     #   })() |>
+    #     #   colnames()
+    #   ),
+    #   multiple = FALSE
+    # )
   })
 
 
@@ -570,27 +599,37 @@ server <- function(input, output, session) {
   shiny::observeEvent(
     # ignoreInit = TRUE,
     list(
-      shiny::reactive(rv$list$data),
-      shiny::reactive(rv$data),
-      shiny::reactive(rv$data_original),
-      data_filter(),
-      input$strat_var,
-      input$include_vars,
-      input$complete_cutoff,
-      input$add_p
+      # shiny::reactive(rv$list$data),
+      # shiny::reactive(rv$data),
+      # shiny::reactive(rv$data_original),
+      # data_filter(),
+      # input$strat_var,
+      # input$include_vars,
+      # input$complete_cutoff,
+      # input$add_p
+      input$act_eval
     ),
     {
       shiny::req(input$strat_var)
       shiny::req(rv$list$data)
 
-      if (input$strat_var == "none" | !input$strat_var %in% names(rv$list$data)) {
+      data_tbl1 <- rv$list$data
+
+      if (input$strat_var == "none" | !input$strat_var %in% names(data_tbl1)) {
         by.var <- NULL
       } else {
         by.var <- input$strat_var
       }
 
+      ## These steps are to handle logicals/booleans, that messes up the order of columns
+      ## Has been reported
+
+      if (!is.null(by.var) & identical("logical",class(data_tbl1[[by.var]]))) {
+        data_tbl1[by.var] <- as.character(data_tbl1[[by.var]])
+      }
+
       rv$list$table1 <-
-        rv$list$data |>
+        data_tbl1 |>
         baseline_table(
           fun.args =
             list(

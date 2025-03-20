@@ -357,6 +357,7 @@ supported_functions <- function() {
 #'   possible_functions(design = "cross-sectional")
 possible_functions <- function(data, design = c("cross-sectional")) {
   # browser()
+  # data <- if (is.reactive(data)) data() else data
   if (is.data.frame(data)) {
     data <- data[[1]]
   }

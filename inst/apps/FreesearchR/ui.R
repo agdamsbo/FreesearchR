@@ -304,6 +304,15 @@ ui_elements <- list(
                   )
                 ),
                 shiny::helpText("Option to perform statistical comparisons between strata in baseline table.")
+              ),
+              shiny::br(),
+              shiny::br(),
+              shiny::actionButton(
+                inputId = "act_eval",
+                label = "Evaluate",
+                width = "100%",
+                icon = shiny::icon("calculator"),
+                disabled = FALSE
               )
             ),
             bslib::accordion_panel(

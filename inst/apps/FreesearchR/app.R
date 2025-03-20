@@ -10,7 +10,7 @@
 #### Current file: R//app_version.R 
 ########
 
-app_version <- function()'250320_1144'
+app_version <- function()'250320_1310'
 
 
 ########
@@ -329,13 +329,16 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
           return '<div style=\"padding: 3px 12px\">' +
                    '<div><strong>' +
                       escape(item.data.name) + ' ' +
+                      '</strong>' +
+                      (item.data.dataclass != '' ?
                       '<span style=\"opacity: 0.9;\"><code style=\"color: black;\"> ' +
                         item.data.dataclass +
-                      '</code></span>' + ' ' +
+                      '</code></span>' : '' ) + ' ' +
+                      (item.data.datatype != '' ?
                       '<span style=\"opacity: 0.9;\"><code style=\"color: black;\"> ' +
                         item.data.datatype +
-                      '</code></span>' +
-                   '</strong></div>' +
+                      '</code></span>' : '' ) +
+                   '</div>' +
                    (item.data.label != '' ? '<div style=\"line-height: 1em;\"><small>' + escape(item.data.label) + '</small></div>' : '') +
                  '</div>';
         },
@@ -353,7 +356,76 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
   )
 }
 
+columnSelectInputStat <- function(inputId, label, data, selected = "", ...,
+                              col_subset = NULL, placeholder = "", onInitialize, none_label="No variable selected",maxItems=NULL) {
+  data <- if (is.reactive(data)) data() else data
+  col_subsetr <- if (is.reactive(col_subset)) col_subset else reactive(col_subset)
 
+  labels <- Map(function(col) {
+    json <- sprintf(
+      IDEAFilter:::strip_leading_ws('
+    {
+      "name": "%s",
+      "label": "%s",
+      "dataclass": "%s",
+      "datatype": "%s"
+    }'),
+      col,
+      attr(data[[col]], "label") %||% "",
+      IDEAFilter:::get_dataFilter_class(data[[col]]),
+      data_type(data[[col]])
+    )
+  }, col = names(data))
+
+  if (!"none" %in% names(data)){
+    labels <- c("none"=list(sprintf('\n    {\n      \"name\": \"none\",\n      \"label\": \"%s\",\n      \"dataclass\": \"\",\n      \"datatype\": \"\"\n    }',none_label)),labels)
+    choices <- setNames(names(labels), labels)
+    choices <- choices[match(if (length(col_subsetr()) == 0 || isTRUE(col_subsetr() == "")) names(data) else col_subsetr(), choices)]
+  } else {
+    choices <- setNames(names(data), labels)
+    choices <- choices[match(if (length(col_subsetr()) == 0 || isTRUE(col_subsetr() == "")) choices else col_subsetr(), choices)]
+  }
+
+  shiny::selectizeInput(
+    inputId = inputId,
+    label = label,
+    choices = choices,
+    selected = selected,
+    ...,
+    options = c(
+      list(render = I("{
+        // format the way that options are rendered
+        option: function(item, escape) {
+          item.data = JSON.parse(item.label);
+          return '<div style=\"padding: 3px 12px\">' +
+                   '<div><strong>' +
+                      escape(item.data.name) + ' ' +
+                      '</strong>' +
+                      (item.data.dataclass != '' ?
+                      '<span style=\"opacity: 0.9;\"><code style=\"color: black;\"> ' +
+                        item.data.dataclass +
+                      '</code></span>' : '' ) + ' ' +
+                      (item.data.datatype != '' ?
+                      '<span style=\"opacity: 0.9;\"><code style=\"color: black;\"> ' +
+                        item.data.datatype +
+                      '</code></span>' : '' ) +
+                   '</div>' +
+                   (item.data.label != '' ? '<div style=\"line-height: 1em;\"><small>' + escape(item.data.label) + '</small></div>' : '') +
+                 '</div>';
+        },
+
+        // avoid data vomit splashing on screen when an option is selected
+        item: function(item, escape) {
+        item.data = JSON.parse(item.label);
+        return '<div>' +
+                 escape(item.data.name) +
+               '</div>';
+        }
+      }")),
+      if (!is.null(maxItems)) list(maxItems=maxItems)
+    )
+  )
+}
 
 #' A selectizeInput customized for named vectors
 #'
@@ -1602,6 +1674,7 @@ supported_plots <- function() {
 #'   possible_plots()
 possible_plots <- function(data) {
   # browser()
+  # data <- if (is.reactive(data)) data() else data
   if (is.data.frame(data)) {
     data <- data[[1]]
   }
@@ -1698,6 +1771,7 @@ create_plot <- function(data, type, x, y, z = NULL, ...) {
 #' gtsummary::trial |> get_label(var = "trt")
 #' 1:10 |> get_label()
 get_label <- function(data, var = NULL) {
+  # data <- if (is.reactive(data)) data() else data
   if (!is.null(var) & is.data.frame(data)) {
     data <- data[[var]]
   }
@@ -2270,6 +2344,8 @@ add_class_icon <- function(grid, column = "class") {
             shiny::icon("arrow-down-1-9")
           } else if (identical(x, "character")) {
             shiny::icon("arrow-down-a-z")
+          } else if (identical(x, "logical")) {
+            shiny::icon("toggle-off")
           } else if (any(c("Date", "POSIXct", "POSIXt") %in% x)) {
             shiny::icon("calendar-days")
           } else if ("hms" %in% x) {
@@ -4927,6 +5003,7 @@ supported_functions <- function() {
 #'   possible_functions(design = "cross-sectional")
 possible_functions <- function(data, design = c("cross-sectional")) {
   # browser()
+  # data <- if (is.reactive(data)) data() else data
   if (is.data.frame(data)) {
     data <- data[[1]]
   }
@@ -7244,6 +7321,15 @@ ui_elements <- list(
                   )
                 ),
                 shiny::helpText("Option to perform statistical comparisons between strata in baseline table.")
+              ),
+              shiny::br(),
+              shiny::br(),
+              shiny::actionButton(
+                inputId = "act_eval",
+                label = "Evaluate",
+                width = "100%",
+                icon = shiny::icon("calculator"),
+                disabled = FALSE
               )
             ),
             bslib::accordion_panel(
@@ -7916,6 +8002,7 @@ server <- function(input, output, session) {
       rv$data_filtered <- data_filter()
 
       ###  Save filtered data
+      ###  without empty factor levels
       rv$list$data <- data_filter() |>
         REDCapCAST::fct_drop()
 
@@ -8045,23 +8132,39 @@ server <- function(input, output, session) {
   ## Keep these "old" selection options as a simple alternative to the modification pane
 
   output$include_vars <- shiny::renderUI({
-    shiny::selectizeInput(
+    columnSelectInputStat(
       inputId = "include_vars",
       selected = NULL,
       label = "Covariables to include",
-      choices = colnames(rv$data_filtered),
+      data = rv$data_filtered,
       multiple = TRUE
     )
+
+    # shiny::selectizeInput(
+    #   inputId = "include_vars",
+    #   selected = NULL,
+    #   label = "Covariables to include",
+    #   choices = colnames(rv$data_filtered),
+    #   multiple = TRUE
+    # )
   })
 
   output$outcome_var <- shiny::renderUI({
-    shiny::selectInput(
+    columnSelectInputStat(
       inputId = "outcome_var",
       selected = NULL,
       label = "Select outcome variable",
-      choices = colnames(rv$data_filtered),
+      data = rv$data_filtered,
       multiple = FALSE
     )
+
+    # shiny::selectInput(
+    #   inputId = "outcome_var",
+    #   selected = NULL,
+    #   label = "Select outcome variable",
+    #   choices = colnames(rv$data_filtered),
+    #   multiple = FALSE
+    # )
   })
 
   output$regression_type <- shiny::renderUI({
@@ -8104,25 +8207,37 @@ server <- function(input, output, session) {
   })
 
   output$strat_var <- shiny::renderUI({
-    shiny::selectInput(
+    columnSelectInputStat(
       inputId = "strat_var",
       selected = "none",
       label = "Select variable to stratify baseline",
-      choices = c(
+      data = rv$data_filtered,
+      col_subset = c(
         "none",
-        rv$data_filtered |>
-          (\(.x){
-            lapply(.x, \(.c){
-              if (identical("factor", class(.c))) {
-                .c
-              }
-            }) |>
-              dplyr::bind_cols()
-          })() |>
-          colnames()
-      ),
-      multiple = FALSE
+        names(rv$data_filtered)[unlist(lapply(rv$data_filtered, data_type)) %in% c("dichotomous", "categorical", "ordinal")]
+      )
     )
+
+    # shiny::selectInput(
+    #   inputId = "strat_var",
+    #   selected = "none",
+    #   label = "Select variable to stratify baseline",
+    #   choices = c(
+    #     "none",
+    #     names(rv$list$data)[unlist(lapply(rv$list$data,data_type)) %in% c("dichotomous","categorical","ordinal")]
+    #     # rv$data_filtered |>
+    #     #   (\(.x){
+    #     #     lapply(.x, \(.c){
+    #     #       if (identical("factor", class(.c))) {
+    #     #         .c
+    #     #       }
+    #     #     }) |>
+    #     #       dplyr::bind_cols()
+    #     #   })() |>
+    #     #   colnames()
+    #   ),
+    #   multiple = FALSE
+    # )
   })
 
 
@@ -8147,27 +8262,37 @@ server <- function(input, output, session) {
   shiny::observeEvent(
     # ignoreInit = TRUE,
     list(
-      shiny::reactive(rv$list$data),
-      shiny::reactive(rv$data),
-      shiny::reactive(rv$data_original),
-      data_filter(),
-      input$strat_var,
-      input$include_vars,
-      input$complete_cutoff,
-      input$add_p
+      # shiny::reactive(rv$list$data),
+      # shiny::reactive(rv$data),
+      # shiny::reactive(rv$data_original),
+      # data_filter(),
+      # input$strat_var,
+      # input$include_vars,
+      # input$complete_cutoff,
+      # input$add_p
+      input$act_eval
     ),
     {
       shiny::req(input$strat_var)
       shiny::req(rv$list$data)
 
-      if (input$strat_var == "none" | !input$strat_var %in% names(rv$list$data)) {
+      data_tbl1 <- rv$list$data
+
+      if (input$strat_var == "none" | !input$strat_var %in% names(data_tbl1)) {
         by.var <- NULL
       } else {
         by.var <- input$strat_var
       }
 
+      ## These steps are to handle logicals/booleans, that messes up the order of columns
+      ## Has been reported
+
+      if (!is.null(by.var) & identical("logical",class(data_tbl1[[by.var]]))) {
+        data_tbl1[by.var] <- as.character(data_tbl1[[by.var]])
+      }
+
       rv$list$table1 <-
-        rv$list$data |>
+        data_tbl1 |>
         baseline_table(
           fun.args =
             list(

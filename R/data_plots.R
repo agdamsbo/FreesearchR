@@ -500,6 +500,7 @@ supported_plots <- function() {
 #'   possible_plots()
 possible_plots <- function(data) {
   # browser()
+  # data <- if (is.reactive(data)) data() else data
   if (is.data.frame(data)) {
     data <- data[[1]]
   }
@@ -596,6 +597,7 @@ create_plot <- function(data, type, x, y, z = NULL, ...) {
 #' gtsummary::trial |> get_label(var = "trt")
 #' 1:10 |> get_label()
 get_label <- function(data, var = NULL) {
+  # data <- if (is.reactive(data)) data() else data
   if (!is.null(var) & is.data.frame(data)) {
     data <- data[[var]]
   }
