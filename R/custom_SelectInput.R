@@ -31,16 +31,18 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
     {
       "name": "%s",
       "label": "%s",
+      "dataclass": "%s",
       "datatype": "%s"
     }'),
       col,
       attr(datar()[[col]], "label") %||% "",
-      IDEAFilter:::get_dataFilter_class(datar()[[col]])
+      IDEAFilter:::get_dataFilter_class(datar()[[col]]),
+      data_type(datar()[[col]])
     )
   }, col = names(datar()))
 
   if (!"none" %in% names(datar())){
-    labels <- c("none"=list(sprintf('\n    {\n      \"name\": \"none\",\n      \"label\": \"%s\",\n      \"datatype\": \"\"\n    }',none_label)),labels)
+    labels <- c("none"=list(sprintf('\n    {\n      \"name\": \"none\",\n      \"label\": \"%s\",\n      \"dataclass\": \"\",\n      \"datatype\": \"\"\n    }',none_label)),labels)
     choices <- setNames(names(labels), labels)
     choices <- choices[match(if (length(col_subsetr()) == 0 || isTRUE(col_subsetr() == "")) names(datar()) else col_subsetr(), choices)]
   } else {
@@ -62,7 +64,10 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
           return '<div style=\"padding: 3px 12px\">' +
                    '<div><strong>' +
                       escape(item.data.name) + ' ' +
-                      '<span style=\"opacity: 0.3;\"><code style=\"color: black;\"> ' +
+                      '<span style=\"opacity: 0.9;\"><code style=\"color: black;\"> ' +
+                        item.data.dataclass +
+                      '</code></span>' + ' ' +
+                      '<span style=\"opacity: 0.9;\"><code style=\"color: black;\"> ' +
                         item.data.datatype +
                       '</code></span>' +
                    '</strong></div>' +
