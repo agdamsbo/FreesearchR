@@ -64,13 +64,16 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
           return '<div style=\"padding: 3px 12px\">' +
                    '<div><strong>' +
                       escape(item.data.name) + ' ' +
+                      '</strong>' +
+                      (item.data.dataclass != '' ?
                       '<span style=\"opacity: 0.9;\"><code style=\"color: black;\"> ' +
                         item.data.dataclass +
-                      '</code></span>' + ' ' +
+                      '</code></span>' : '' ) + ' ' +
+                      (item.data.datatype != '' ?
                       '<span style=\"opacity: 0.9;\"><code style=\"color: black;\"> ' +
                         item.data.datatype +
-                      '</code></span>' +
-                   '</strong></div>' +
+                      '</code></span>' : '' ) +
+                   '</div>' +
                    (item.data.label != '' ? '<div style=\"line-height: 1em;\"><small>' + escape(item.data.label) + '</small></div>' : '') +
                  '</div>';
         },
@@ -87,7 +90,6 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
     )
   )
 }
-
 
 
 #' A selectizeInput customized for named vectors
