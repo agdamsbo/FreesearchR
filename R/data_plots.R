@@ -310,9 +310,9 @@ data_visuals_server <- function(id,
                 z = input$tertiary
               )
             },
-            warning = function(warn) {
-              showNotification(paste0(warn), type = "warning")
-            },
+            # warning = function(warn) {
+            #   showNotification(paste0(warn), type = "warning")
+            # },
             error = function(err) {
               showNotification(paste0(err), type = "err")
             }
@@ -378,9 +378,9 @@ all_but <- function(data, ...) {
 #'
 #' @examples
 #' default_parsing(mtcars) |> subset_types("ordinal")
-#' default_parsing(mtcars) |> subset_types(c("dichotomous", "ordinal"))
+#' default_parsing(mtcars) |> subset_types(c("dichotomous", "ordinal" ,"categorical"))
 #' #' default_parsing(mtcars) |> subset_types("factor",class)
-subset_types <- function(data, types, type.fun = outcome_type) {
+subset_types <- function(data, types, type.fun = data_type) {
   data[sapply(data, type.fun) %in% types]
 }
 
@@ -413,58 +413,58 @@ supported_plots <- function() {
       fun = "plot_hbars",
       descr = "Stacked horizontal bars",
       note = "A classical way of visualising the distribution of an ordinal scale like the modified Ranking Scale and known as Grotta bars",
-      primary.type = c("dichotomous", "ordinal"),
-      secondary.type = c("dichotomous", "ordinal"),
+      primary.type = c("dichotomous", "ordinal" ,"categorical"),
+      secondary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "ordinal"),
+      tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.extra = "none"
     ),
     plot_violin = list(
       fun = "plot_violin",
       descr = "Violin plot",
       note = "A modern alternative to the classic boxplot to visualise data distribution",
-      primary.type = c("continuous", "dichotomous", "ordinal"),
-      secondary.type = c("dichotomous", "ordinal"),
+      primary.type = c("continuous", "dichotomous", "ordinal" ,"categorical"),
+      secondary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.multi = FALSE,
       secondary.extra = "none",
-      tertiary.type = c("dichotomous", "ordinal")
+      tertiary.type = c("dichotomous", "ordinal" ,"categorical")
     ),
     # plot_ridge = list(
     #   descr = "Ridge plot",
     #   note = "An alternative option to visualise data distribution",
     #   primary.type = "continuous",
-    #   secondary.type = c("dichotomous", "ordinal"),
-    #   tertiary.type = c("dichotomous", "ordinal"),
+    #   secondary.type = c("dichotomous", "ordinal" ,"categorical"),
+    #   tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
     #   secondary.extra = NULL
     # ),
     plot_sankey = list(
       fun = "plot_sankey",
       descr = "Sankey plot",
       note = "A way of visualising change between groups",
-      primary.type = c("dichotomous", "ordinal"),
-      secondary.type = c("dichotomous", "ordinal"),
+      primary.type = c("dichotomous", "ordinal" ,"categorical"),
+      secondary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.multi = FALSE,
       secondary.extra = NULL,
-      tertiary.type = c("dichotomous", "ordinal")
+      tertiary.type = c("dichotomous", "ordinal" ,"categorical")
     ),
     plot_scatter = list(
       fun = "plot_scatter",
       descr = "Scatter plot",
       note = "A classic way of showing the association between to variables",
       primary.type = "continuous",
-      secondary.type = c("continuous", "ordinal"),
+      secondary.type = c("continuous", "ordinal" ,"categorical"),
       secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "ordinal"),
+      tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.extra = NULL
     ),
     plot_box = list(
       fun = "plot_box",
       descr = "Box plot",
       note = "A classic way to plot data distribution by groups",
-      primary.type = c("continuous", "dichotomous", "ordinal"),
-      secondary.type = c("dichotomous", "ordinal"),
+      primary.type = c("continuous", "dichotomous", "ordinal" ,"categorical"),
+      secondary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "ordinal"),
+      tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.extra = "none"
     ),
     plot_euler = list(
@@ -475,7 +475,7 @@ supported_plots <- function() {
       secondary.type = "dichotomous",
       secondary.multi = TRUE,
       secondary.max = 4,
-      tertiary.type = c("dichotomous", "ordinal"),
+      tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.extra = NULL
     )
   )
@@ -504,7 +504,7 @@ possible_plots <- function(data) {
     data <- data[[1]]
   }
 
-  type <- outcome_type(data)
+  type <- data_type(data)
 
   if (type == "unknown") {
     out <- type
@@ -696,7 +696,9 @@ allign_axes <- function(...) {
 
   xr <- clean_common_axis(p, "x")
 
-  p |> purrr::map(~ .x + ggplot2::xlim(xr) + ggplot2::ylim(yr))
+  suppressWarnings({
+    p |> purrr::map(~ .x + ggplot2::xlim(xr) + ggplot2::ylim(yr))
+    })
 }
 
 #' Extract and clean axis ranges
@@ -714,7 +716,7 @@ clean_common_axis <- function(p, axis) {
       if (is.numeric(.x)) {
         range(.x)
       } else {
-        .x
+        as.character(.x)
       }
     })() |>
     unique()
