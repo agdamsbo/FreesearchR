@@ -49,13 +49,13 @@ plot_box_single <- function(data, x, y=NULL, seed = 2103) {
     data[[y]] <- y
   }
 
-  discrete <- !outcome_type(data[[y]]) %in% "continuous"
+  discrete <- !data_type(data[[y]]) %in% "continuous"
 
   data |>
     ggplot2::ggplot(ggplot2::aes(x = !!dplyr::sym(x), y = !!dplyr::sym(y), fill = !!dplyr::sym(y), group = !!dplyr::sym(y))) +
     ggplot2::geom_boxplot(linewidth = 1.8, outliers = FALSE) +
     ## THis could be optional in future
-    ggplot2::geom_jitter(color = "black", size = 2, alpha = 0.9) +
+    ggplot2::geom_jitter(color = "black", size = 2, alpha = 0.9, width = 0.1, height = .5) +
     ggplot2::coord_flip() +
     viridis::scale_fill_viridis(discrete = discrete, option = "D") +
     # ggplot2::theme_void() +

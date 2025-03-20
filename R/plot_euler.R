@@ -95,7 +95,7 @@ plot_euler <- function(data, x, y, z = NULL, seed = 2103) {
   # patchwork::wrap_plots(out, guides = "collect")
 }
 
-
+?withCallingHandlers()
 #' Easily plot single euler diagrams
 #'
 #' @returns ggplot2 object

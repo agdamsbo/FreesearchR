@@ -10,7 +10,7 @@
 #### Current file: R//app_version.R 
 ########
 
-app_version <- function()'250319_1327'
+app_version <- function()'250320_1144'
 
 
 ########
@@ -296,16 +296,18 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
     {
       "name": "%s",
       "label": "%s",
+      "dataclass": "%s",
       "datatype": "%s"
     }'),
       col,
       attr(datar()[[col]], "label") %||% "",
-      IDEAFilter:::get_dataFilter_class(datar()[[col]])
+      IDEAFilter:::get_dataFilter_class(datar()[[col]]),
+      data_type(datar()[[col]])
     )
   }, col = names(datar()))
 
   if (!"none" %in% names(datar())){
-    labels <- c("none"=list(sprintf('\n    {\n      \"name\": \"none\",\n      \"label\": \"%s\",\n      \"datatype\": \"\"\n    }',none_label)),labels)
+    labels <- c("none"=list(sprintf('\n    {\n      \"name\": \"none\",\n      \"label\": \"%s\",\n      \"dataclass\": \"\",\n      \"datatype\": \"\"\n    }',none_label)),labels)
     choices <- setNames(names(labels), labels)
     choices <- choices[match(if (length(col_subsetr()) == 0 || isTRUE(col_subsetr() == "")) names(datar()) else col_subsetr(), choices)]
   } else {
@@ -327,7 +329,10 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
           return '<div style=\"padding: 3px 12px\">' +
                    '<div><strong>' +
                       escape(item.data.name) + ' ' +
-                      '<span style=\"opacity: 0.3;\"><code style=\"color: black;\"> ' +
+                      '<span style=\"opacity: 0.9;\"><code style=\"color: black;\"> ' +
+                        item.data.dataclass +
+                      '</code></span>' + ' ' +
+                      '<span style=\"opacity: 0.9;\"><code style=\"color: black;\"> ' +
                         item.data.datatype +
                       '</code></span>' +
                    '</strong></div>' +
@@ -1407,9 +1412,9 @@ data_visuals_server <- function(id,
                 z = input$tertiary
               )
             },
-            warning = function(warn) {
-              showNotification(paste0(warn), type = "warning")
-            },
+            # warning = function(warn) {
+            #   showNotification(paste0(warn), type = "warning")
+            # },
             error = function(err) {
               showNotification(paste0(err), type = "err")
             }
@@ -1475,9 +1480,9 @@ all_but <- function(data, ...) {
 #'
 #' @examples
 #' default_parsing(mtcars) |> subset_types("ordinal")
-#' default_parsing(mtcars) |> subset_types(c("dichotomous", "ordinal"))
+#' default_parsing(mtcars) |> subset_types(c("dichotomous", "ordinal" ,"categorical"))
 #' #' default_parsing(mtcars) |> subset_types("factor",class)
-subset_types <- function(data, types, type.fun = outcome_type) {
+subset_types <- function(data, types, type.fun = data_type) {
   data[sapply(data, type.fun) %in% types]
 }
 
@@ -1510,58 +1515,58 @@ supported_plots <- function() {
       fun = "plot_hbars",
       descr = "Stacked horizontal bars",
       note = "A classical way of visualising the distribution of an ordinal scale like the modified Ranking Scale and known as Grotta bars",
-      primary.type = c("dichotomous", "ordinal"),
-      secondary.type = c("dichotomous", "ordinal"),
+      primary.type = c("dichotomous", "ordinal" ,"categorical"),
+      secondary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "ordinal"),
+      tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.extra = "none"
     ),
     plot_violin = list(
       fun = "plot_violin",
       descr = "Violin plot",
       note = "A modern alternative to the classic boxplot to visualise data distribution",
-      primary.type = c("continuous", "dichotomous", "ordinal"),
-      secondary.type = c("dichotomous", "ordinal"),
+      primary.type = c("continuous", "dichotomous", "ordinal" ,"categorical"),
+      secondary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.multi = FALSE,
       secondary.extra = "none",
-      tertiary.type = c("dichotomous", "ordinal")
+      tertiary.type = c("dichotomous", "ordinal" ,"categorical")
     ),
     # plot_ridge = list(
     #   descr = "Ridge plot",
     #   note = "An alternative option to visualise data distribution",
     #   primary.type = "continuous",
-    #   secondary.type = c("dichotomous", "ordinal"),
-    #   tertiary.type = c("dichotomous", "ordinal"),
+    #   secondary.type = c("dichotomous", "ordinal" ,"categorical"),
+    #   tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
     #   secondary.extra = NULL
     # ),
     plot_sankey = list(
       fun = "plot_sankey",
       descr = "Sankey plot",
       note = "A way of visualising change between groups",
-      primary.type = c("dichotomous", "ordinal"),
-      secondary.type = c("dichotomous", "ordinal"),
+      primary.type = c("dichotomous", "ordinal" ,"categorical"),
+      secondary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.multi = FALSE,
       secondary.extra = NULL,
-      tertiary.type = c("dichotomous", "ordinal")
+      tertiary.type = c("dichotomous", "ordinal" ,"categorical")
     ),
     plot_scatter = list(
       fun = "plot_scatter",
       descr = "Scatter plot",
       note = "A classic way of showing the association between to variables",
       primary.type = "continuous",
-      secondary.type = c("continuous", "ordinal"),
+      secondary.type = c("continuous", "ordinal" ,"categorical"),
       secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "ordinal"),
+      tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.extra = NULL
     ),
     plot_box = list(
       fun = "plot_box",
       descr = "Box plot",
       note = "A classic way to plot data distribution by groups",
-      primary.type = c("continuous", "dichotomous", "ordinal"),
-      secondary.type = c("dichotomous", "ordinal"),
+      primary.type = c("continuous", "dichotomous", "ordinal" ,"categorical"),
+      secondary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "ordinal"),
+      tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.extra = "none"
     ),
     plot_euler = list(
@@ -1572,7 +1577,7 @@ supported_plots <- function() {
       secondary.type = "dichotomous",
       secondary.multi = TRUE,
       secondary.max = 4,
-      tertiary.type = c("dichotomous", "ordinal"),
+      tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.extra = NULL
     )
   )
@@ -1601,7 +1606,7 @@ possible_plots <- function(data) {
     data <- data[[1]]
   }
 
-  type <- outcome_type(data)
+  type <- data_type(data)
 
   if (type == "unknown") {
     out <- type
@@ -1793,7 +1798,9 @@ allign_axes <- function(...) {
 
   xr <- clean_common_axis(p, "x")
 
-  p |> purrr::map(~ .x + ggplot2::xlim(xr) + ggplot2::ylim(yr))
+  suppressWarnings({
+    p |> purrr::map(~ .x + ggplot2::xlim(xr) + ggplot2::ylim(yr))
+    })
 }
 
 #' Extract and clean axis ranges
@@ -1811,7 +1818,7 @@ clean_common_axis <- function(p, axis) {
       if (is.numeric(.x)) {
         range(.x)
       } else {
-        .x
+        as.character(.x)
       }
     })() |>
     unique()
@@ -3392,13 +3399,13 @@ plot_box_single <- function(data, x, y=NULL, seed = 2103) {
     data[[y]] <- y
   }
 
-  discrete <- !outcome_type(data[[y]]) %in% "continuous"
+  discrete <- !data_type(data[[y]]) %in% "continuous"
 
   data |>
     ggplot2::ggplot(ggplot2::aes(x = !!dplyr::sym(x), y = !!dplyr::sym(y), fill = !!dplyr::sym(y), group = !!dplyr::sym(y))) +
     ggplot2::geom_boxplot(linewidth = 1.8, outliers = FALSE) +
     ## THis could be optional in future
-    ggplot2::geom_jitter(color = "black", size = 2, alpha = 0.9) +
+    ggplot2::geom_jitter(color = "black", size = 2, alpha = 0.9, width = 0.1, height = .5) +
     ggplot2::coord_flip() +
     viridis::scale_fill_viridis(discrete = discrete, option = "D") +
     # ggplot2::theme_void() +
@@ -3524,7 +3531,7 @@ plot_euler <- function(data, x, y, z = NULL, seed = 2103) {
   # patchwork::wrap_plots(out, guides = "collect")
 }
 
-
+?withCallingHandlers()
 #' Easily plot single euler diagrams
 #'
 #' @returns ggplot2 object
@@ -4607,7 +4614,7 @@ redcap_demo_app <- function() {
 #'     args.list = NULL,
 #'     vars = c("mpg", "cyl")
 #'   )
-#'   broom::tidy(m)
+#' broom::tidy(m)
 regression_model <- function(data,
                              outcome.str,
                              auto.mode = FALSE,
@@ -4623,7 +4630,7 @@ regression_model <- function(data,
   }
 
   ## This will handle if outcome is not in data for nicer shiny behavior
-  if (!outcome.str %in% names(data)){
+  if (!outcome.str %in% names(data)) {
     outcome.str <- names(data)[1]
     print("outcome is not in data, first column is used")
   }
@@ -4733,7 +4740,7 @@ regression_model <- function(data,
 #'   fun = "stats::glm",
 #'   args.list = list(family = stats::binomial(link = "logit"))
 #' )
-#' lapply(m,broom::tidy) |> dplyr::bind_rows()
+#' lapply(m, broom::tidy) |> dplyr::bind_rows()
 #' }
 regression_model_uv <- function(data,
                                 outcome.str,
@@ -4741,9 +4748,8 @@ regression_model_uv <- function(data,
                                 fun = NULL,
                                 vars = NULL,
                                 ...) {
-
   ## This will handle if outcome is not in data for nicer shiny behavior
-  if (!outcome.str %in% names(data)){
+  if (!outcome.str %in% names(data)) {
     outcome.str <- names(data)[1]
     print("outcome is not in data, first column is used")
   }
@@ -4804,7 +4810,7 @@ regression_model_uv <- function(data,
 
 ### HELPERS
 
-#' Outcome data type assessment
+#' Data type assessment
 #'
 #' @param data data
 #'
@@ -4814,17 +4820,35 @@ regression_model_uv <- function(data,
 #' @examples
 #' mtcars |>
 #'   default_parsing() |>
-#'   lapply(outcome_type)
-outcome_type <- function(data) {
+#'   lapply(data_type)
+#' c(1, 2) |> data_type()
+#' 1 |> data_type()
+#' c(rep(NA, 10)) |> data_type()
+#' sample(1:100, 50) |> data_type()
+#' factor(letters[1:20]) |> data_type()
+data_type <- function(data) {
   cl_d <- class(data)
-  if (any(c("numeric", "integer") %in% cl_d)) {
-    out <- "continuous"
-  } else if (any(c("factor", "logical") %in% cl_d)) {
-    if (length(levels(data)) == 2 | identical("logical",cl_d)) {
+  if (all(is.na(data))) {
+    out <- "empty"
+  } else if (length(unique(data)) < 2) {
+    out <- "monotone"
+  } else if (any(c("factor", "logical") %in% cl_d) | length(unique(data)) == 2) {
+    if (identical("logical", cl_d) | length(unique(data)) == 2) {
       out <- "dichotomous"
-    } else if (length(levels(data)) > 2) {
-      out <- "ordinal"
+    } else {
+      if (is.ordered(data)) {
+        out <- "ordinal"
+      } else {
+        out <- "categorical"
+      }
     }
+  } else if (identical(cl_d, "character")) {
+    out <- "text"
+  } else if (!length(unique(data)) == 2) {
+    ## Previously had all thinkable classes
+    ## Now just assumes the class has not been defined above
+    ## any(c("numeric", "integer", "hms", "Date", "timediff") %in% cl_d) &
+    out <- "continuous"
   } else {
     out <- "unknown"
   }
@@ -4870,7 +4894,7 @@ supported_functions <- function() {
     polr = list(
       descr = "Ordinal logistic regression model",
       design = "cross-sectional",
-      out.type = "ordinal",
+      out.type = c("ordinal","categorical"),
       fun = "MASS::polr",
       args.list = list(
         Hess = TRUE,
@@ -4908,7 +4932,7 @@ possible_functions <- function(data, design = c("cross-sectional")) {
   }
 
   design <- match.arg(design)
-  type <- outcome_type(data)
+  type <- data_type(data)
 
   design_ls <- supported_functions() |>
     lapply(\(.x){
@@ -5100,13 +5124,16 @@ list2str <- function(data) {
 #'
 #' @examples
 #' \dontrun{
-#' gtsummary::trial |> regression_model_uv(
-#'   outcome.str = "trt",
-#'   fun = "stats::glm",
-#'   args.list = list(family = stats::binomial(link = "logit"))
-#' ) |> lapply(broom::tidy) |> dplyr::bind_rows()
+#' gtsummary::trial |>
+#'   regression_model_uv(
+#'     outcome.str = "trt",
+#'     fun = "stats::glm",
+#'     args.list = list(family = stats::binomial(link = "logit"))
+#'   ) |>
+#'   lapply(broom::tidy) |>
+#'   dplyr::bind_rows()
 #' ms <- regression_model_uv_list(data = default_parsing(mtcars), outcome.str = "mpg", fun.descr = "Linear regression model")
-#' lapply(ms$model,broom::tidy) |> dplyr::bind_rows()
+#' lapply(ms$model, broom::tidy) |> dplyr::bind_rows()
 #' }
 regression_model_uv_list <- function(data,
                                      outcome.str,

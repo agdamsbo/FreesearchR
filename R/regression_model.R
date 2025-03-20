@@ -44,7 +44,7 @@
 #'     args.list = NULL,
 #'     vars = c("mpg", "cyl")
 #'   )
-#'   broom::tidy(m)
+#' broom::tidy(m)
 regression_model <- function(data,
                              outcome.str,
                              auto.mode = FALSE,
@@ -60,7 +60,7 @@ regression_model <- function(data,
   }
 
   ## This will handle if outcome is not in data for nicer shiny behavior
-  if (!outcome.str %in% names(data)){
+  if (!outcome.str %in% names(data)) {
     outcome.str <- names(data)[1]
     print("outcome is not in data, first column is used")
   }
@@ -170,7 +170,7 @@ regression_model <- function(data,
 #'   fun = "stats::glm",
 #'   args.list = list(family = stats::binomial(link = "logit"))
 #' )
-#' lapply(m,broom::tidy) |> dplyr::bind_rows()
+#' lapply(m, broom::tidy) |> dplyr::bind_rows()
 #' }
 regression_model_uv <- function(data,
                                 outcome.str,
@@ -178,9 +178,8 @@ regression_model_uv <- function(data,
                                 fun = NULL,
                                 vars = NULL,
                                 ...) {
-
   ## This will handle if outcome is not in data for nicer shiny behavior
-  if (!outcome.str %in% names(data)){
+  if (!outcome.str %in% names(data)) {
     outcome.str <- names(data)[1]
     print("outcome is not in data, first column is used")
   }
@@ -241,7 +240,7 @@ regression_model_uv <- function(data,
 
 ### HELPERS
 
-#' Outcome data type assessment
+#' Data type assessment
 #'
 #' @param data data
 #'
@@ -251,17 +250,35 @@ regression_model_uv <- function(data,
 #' @examples
 #' mtcars |>
 #'   default_parsing() |>
-#'   lapply(outcome_type)
-outcome_type <- function(data) {
+#'   lapply(data_type)
+#' c(1, 2) |> data_type()
+#' 1 |> data_type()
+#' c(rep(NA, 10)) |> data_type()
+#' sample(1:100, 50) |> data_type()
+#' factor(letters[1:20]) |> data_type()
+data_type <- function(data) {
   cl_d <- class(data)
-  if (any(c("numeric", "integer") %in% cl_d)) {
-    out <- "continuous"
-  } else if (any(c("factor", "logical") %in% cl_d)) {
-    if (length(levels(data)) == 2 | identical("logical",cl_d)) {
+  if (all(is.na(data))) {
+    out <- "empty"
+  } else if (length(unique(data)) < 2) {
+    out <- "monotone"
+  } else if (any(c("factor", "logical") %in% cl_d) | length(unique(data)) == 2) {
+    if (identical("logical", cl_d) | length(unique(data)) == 2) {
       out <- "dichotomous"
-    } else if (length(levels(data)) > 2) {
-      out <- "ordinal"
+    } else {
+      if (is.ordered(data)) {
+        out <- "ordinal"
+      } else {
+        out <- "categorical"
+      }
     }
+  } else if (identical(cl_d, "character")) {
+    out <- "text"
+  } else if (!length(unique(data)) == 2) {
+    ## Previously had all thinkable classes
+    ## Now just assumes the class has not been defined above
+    ## any(c("numeric", "integer", "hms", "Date", "timediff") %in% cl_d) &
+    out <- "continuous"
   } else {
     out <- "unknown"
   }
@@ -307,7 +324,7 @@ supported_functions <- function() {
     polr = list(
       descr = "Ordinal logistic regression model",
       design = "cross-sectional",
-      out.type = "ordinal",
+      out.type = c("ordinal","categorical"),
       fun = "MASS::polr",
       args.list = list(
         Hess = TRUE,
@@ -345,7 +362,7 @@ possible_functions <- function(data, design = c("cross-sectional")) {
   }
 
   design <- match.arg(design)
-  type <- outcome_type(data)
+  type <- data_type(data)
 
   design_ls <- supported_functions() |>
     lapply(\(.x){
@@ -537,13 +554,16 @@ list2str <- function(data) {
 #'
 #' @examples
 #' \dontrun{
-#' gtsummary::trial |> regression_model_uv(
-#'   outcome.str = "trt",
-#'   fun = "stats::glm",
-#'   args.list = list(family = stats::binomial(link = "logit"))
-#' ) |> lapply(broom::tidy) |> dplyr::bind_rows()
+#' gtsummary::trial |>
+#'   regression_model_uv(
+#'     outcome.str = "trt",
+#'     fun = "stats::glm",
+#'     args.list = list(family = stats::binomial(link = "logit"))
+#'   ) |>
+#'   lapply(broom::tidy) |>
+#'   dplyr::bind_rows()
 #' ms <- regression_model_uv_list(data = default_parsing(mtcars), outcome.str = "mpg", fun.descr = "Linear regression model")
-#' lapply(ms$model,broom::tidy) |> dplyr::bind_rows()
+#' lapply(ms$model, broom::tidy) |> dplyr::bind_rows()
 #' }
 regression_model_uv_list <- function(data,
                                      outcome.str,
