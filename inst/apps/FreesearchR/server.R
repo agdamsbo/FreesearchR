@@ -160,11 +160,12 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     eventExpr = list(
-      input$import_var
+      input$import_var,
+      input$complete_cutoff
     ),
     handlerExpr = {
       shiny::req(rv$data_temp)
-
+# browser()
       rv$data_original <- rv$data_temp |>
         dplyr::select(input$import_var) |>
         default_parsing()
@@ -183,6 +184,11 @@ server <- function(input, output, session) {
       rv$code$modify <- NULL
     }
   )
+
+  output$data_info_import <- shiny::renderUI({
+    shiny::req(rv$data_original)
+    data_description(rv$data_original)
+  })
 
 
   shiny::observeEvent(rv$data_original, {
@@ -247,6 +253,17 @@ server <- function(input, output, session) {
     input$modal_variables,
     modal_update_variables("modal_variables", title = "Update and select variables")
   )
+
+  output$data_info <- shiny::renderUI({
+    shiny::req(data_filter())
+    data_description(data_filter())
+  })
+
+  output$data_info_regression <- shiny::renderUI({
+    shiny::req(regression_vars())
+    shiny::req(rv$list$data)
+    data_description(rv$list$data[regression_vars()])
+  })
 
 
   #########  Create factor
@@ -468,40 +485,25 @@ server <- function(input, output, session) {
 
   ## Keep these "old" selection options as a simple alternative to the modification pane
 
-  output$include_vars <- shiny::renderUI({
-    columnSelectInputStat(
-      inputId = "include_vars",
+
+  output$regression_vars <- shiny::renderUI({
+    columnSelectInput(
+      inputId = "regression_vars",
       selected = NULL,
       label = "Covariables to include",
       data = rv$data_filtered,
-      multiple = TRUE
+      multiple = TRUE,
     )
-
-    # shiny::selectizeInput(
-    #   inputId = "include_vars",
-    #   selected = NULL,
-    #   label = "Covariables to include",
-    #   choices = colnames(rv$data_filtered),
-    #   multiple = TRUE
-    # )
   })
 
   output$outcome_var <- shiny::renderUI({
-    columnSelectInputStat(
+    columnSelectInput(
       inputId = "outcome_var",
       selected = NULL,
       label = "Select outcome variable",
       data = rv$data_filtered,
       multiple = FALSE
     )
-
-    # shiny::selectInput(
-    #   inputId = "outcome_var",
-    #   selected = NULL,
-    #   label = "Select outcome variable",
-    #   choices = colnames(rv$data_filtered),
-    #   multiple = FALSE
-    # )
   })
 
   output$regression_type <- shiny::renderUI({
@@ -535,16 +537,16 @@ server <- function(input, output, session) {
 
   ## Collected regression variables
   regression_vars <- shiny::reactive({
-    if (is.null(input$include_vars)) {
+    if (is.null(input$regression_vars)) {
       out <- colnames(rv$data_filtered)
     } else {
-      out <- unique(c(input$include_vars, input$outcome_var))
+      out <- unique(c(input$regression_vars, input$outcome_var))
     }
     return(out)
   })
 
   output$strat_var <- shiny::renderUI({
-    columnSelectInputStat(
+    columnSelectInput(
       inputId = "strat_var",
       selected = "none",
       label = "Select variable to stratify baseline",
@@ -554,27 +556,6 @@ server <- function(input, output, session) {
         names(rv$data_filtered)[unlist(lapply(rv$data_filtered, data_type)) %in% c("dichotomous", "categorical", "ordinal")]
       )
     )
-
-    # shiny::selectInput(
-    #   inputId = "strat_var",
-    #   selected = "none",
-    #   label = "Select variable to stratify baseline",
-    #   choices = c(
-    #     "none",
-    #     names(rv$list$data)[unlist(lapply(rv$list$data,data_type)) %in% c("dichotomous","categorical","ordinal")]
-    #     # rv$data_filtered |>
-    #     #   (\(.x){
-    #     #     lapply(.x, \(.c){
-    #     #       if (identical("factor", class(.c))) {
-    #     #         .c
-    #     #       }
-    #     #     }) |>
-    #     #       dplyr::bind_cols()
-    #     #   })() |>
-    #     #   colnames()
-    #   ),
-    #   multiple = FALSE
-    # )
   })
 
 
@@ -604,7 +585,7 @@ server <- function(input, output, session) {
       # shiny::reactive(rv$data_original),
       # data_filter(),
       # input$strat_var,
-      # input$include_vars,
+      # input$regression_vars,
       # input$complete_cutoff,
       # input$add_p
       input$act_eval
@@ -613,48 +594,16 @@ server <- function(input, output, session) {
       shiny::req(input$strat_var)
       shiny::req(rv$list$data)
 
-      data_tbl1 <- rv$list$data
+      # data_tbl1 <- rv$list$data
 
-      if (input$strat_var == "none" | !input$strat_var %in% names(data_tbl1)) {
-        by.var <- NULL
-      } else {
-        by.var <- input$strat_var
-      }
-
-      ## These steps are to handle logicals/booleans, that messes up the order of columns
-      ## Has been reported
-
-      if (!is.null(by.var) & identical("logical",class(data_tbl1[[by.var]]))) {
-        data_tbl1[by.var] <- as.character(data_tbl1[[by.var]])
-      }
-
-      rv$list$table1 <-
-        data_tbl1 |>
-        baseline_table(
-          fun.args =
-            list(
-              by = by.var
-            )
-        ) |>
-        (\(.x){
-          if (!is.null(by.var)) {
-            .x |> gtsummary::add_overall()
-          } else {
-            .x
-          }
-        })() |>
-        (\(.x){
-          if (input$add_p == "yes" & !is.null(by.var)) {
-            .x |>
-              gtsummary::add_p() |>
-              gtsummary::bold_p()
-          } else {
-            .x
-          }
-        })()
-
-      # gtsummary::as_kable(rv$list$table1) |>
-      #   readr::write_lines(file="./www/_table1.md")
+      shiny::withProgress(message = "Creating the table. Hold on for a moment..", {
+        rv$list$table1 <- create_baseline(
+          rv$list$data,
+          by.var = input$strat_var,
+          add.p = input$add_p == "yes",
+          add.overall = TRUE
+        )
+      })
     }
   )
 
@@ -753,9 +702,9 @@ server <- function(input, output, session) {
           #   .x$model
           # })
         },
-        warning = function(warn) {
-          showNotification(paste0(warn), type = "warning")
-        },
+        # warning = function(warn) {
+        #   showNotification(paste0(warn), type = "warning")
+        # },
         error = function(err) {
           showNotification(paste0("Creating regression models failed with the following error: ", err), type = "err")
         }
@@ -778,9 +727,9 @@ server <- function(input, output, session) {
             purrr::pluck("Multivariable") |>
             performance::check_model()
         },
-        warning = function(warn) {
-          showNotification(paste0(warn), type = "warning")
-        },
+        # warning = function(warn) {
+        #   showNotification(paste0(warn), type = "warning")
+        # },
         error = function(err) {
           showNotification(paste0("Running model assumptions checks failed with the following error: ", err), type = "err")
         }

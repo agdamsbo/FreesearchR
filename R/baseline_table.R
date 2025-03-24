@@ -20,3 +20,55 @@ baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, 
   return(out)
 }
 
+
+
+#' Create a baseline table
+#'
+#' @param data data
+#' @param ... passed as fun.arg to baseline_table()
+#' @param strat.var grouping/strat variable
+#' @param add.p add comparison/p-value
+#' @param add.overall add overall column
+#'
+#' @returns gtsummary table list object
+#' @export
+#'
+#' @examples
+#' mtcars |> create_baseline(by.var = "gear", add.p="yes"=="yes")
+create_baseline <- function(data,...,by.var,add.p=FALSE,add.overall=FALSE){
+  if (by.var == "none" | !by.var %in% names(data)) {
+    by.var <- NULL
+  }
+
+  ## These steps are to handle logicals/booleans, that messes up the order of columns
+  ## Has been reported
+
+  if (!is.null(by.var)) {
+    if (identical("logical",class(data[[by.var]]))){
+      data[by.var] <- as.character(data[[by.var]])
+    }
+  }
+
+  out <- data |>
+    baseline_table(
+      fun.args =
+        list(
+          by = by.var,
+          ...
+        )
+    )
+
+  if (!is.null(by.var)) {
+    if (isTRUE(add.overall)){
+  out <- out |> gtsummary::add_overall()
+    }
+    if (isTRUE(add.p)) {
+      out <- out |>
+        gtsummary::add_p() |>
+        gtsummary::bold_p()
+    }
+
+    }
+
+  out
+}

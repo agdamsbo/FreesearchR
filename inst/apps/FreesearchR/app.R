@@ -10,7 +10,7 @@
 #### Current file: R//app_version.R 
 ########
 
-app_version <- function()'250320_1310'
+app_version <- function()'250324_1432'
 
 
 ########
@@ -39,6 +39,58 @@ baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, 
   return(out)
 }
 
+
+
+#' Create a baseline table
+#'
+#' @param data data
+#' @param ... passed as fun.arg to baseline_table()
+#' @param strat.var grouping/strat variable
+#' @param add.p add comparison/p-value
+#' @param add.overall add overall column
+#'
+#' @returns gtsummary table list object
+#' @export
+#'
+#' @examples
+#' mtcars |> create_baseline(by.var = "gear", add.p="yes"=="yes")
+create_baseline <- function(data,...,by.var,add.p=FALSE,add.overall=FALSE){
+  if (by.var == "none" | !by.var %in% names(data)) {
+    by.var <- NULL
+  }
+
+  ## These steps are to handle logicals/booleans, that messes up the order of columns
+  ## Has been reported
+
+  if (!is.null(by.var)) {
+    if (identical("logical",class(data[[by.var]]))){
+      data[by.var] <- as.character(data[[by.var]])
+    }
+  }
+
+  out <- data |>
+    baseline_table(
+      fun.args =
+        list(
+          by = by.var,
+          ...
+        )
+    )
+
+  if (!is.null(by.var)) {
+    if (isTRUE(add.overall)){
+  out <- out |> gtsummary::add_overall()
+    }
+    if (isTRUE(add.p)) {
+      out <- out |>
+        gtsummary::add_p() |>
+        gtsummary::bold_p()
+    }
+
+    }
+
+  out
+}
 
 
 ########
@@ -356,76 +408,6 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
   )
 }
 
-columnSelectInputStat <- function(inputId, label, data, selected = "", ...,
-                              col_subset = NULL, placeholder = "", onInitialize, none_label="No variable selected",maxItems=NULL) {
-  data <- if (is.reactive(data)) data() else data
-  col_subsetr <- if (is.reactive(col_subset)) col_subset else reactive(col_subset)
-
-  labels <- Map(function(col) {
-    json <- sprintf(
-      IDEAFilter:::strip_leading_ws('
-    {
-      "name": "%s",
-      "label": "%s",
-      "dataclass": "%s",
-      "datatype": "%s"
-    }'),
-      col,
-      attr(data[[col]], "label") %||% "",
-      IDEAFilter:::get_dataFilter_class(data[[col]]),
-      data_type(data[[col]])
-    )
-  }, col = names(data))
-
-  if (!"none" %in% names(data)){
-    labels <- c("none"=list(sprintf('\n    {\n      \"name\": \"none\",\n      \"label\": \"%s\",\n      \"dataclass\": \"\",\n      \"datatype\": \"\"\n    }',none_label)),labels)
-    choices <- setNames(names(labels), labels)
-    choices <- choices[match(if (length(col_subsetr()) == 0 || isTRUE(col_subsetr() == "")) names(data) else col_subsetr(), choices)]
-  } else {
-    choices <- setNames(names(data), labels)
-    choices <- choices[match(if (length(col_subsetr()) == 0 || isTRUE(col_subsetr() == "")) choices else col_subsetr(), choices)]
-  }
-
-  shiny::selectizeInput(
-    inputId = inputId,
-    label = label,
-    choices = choices,
-    selected = selected,
-    ...,
-    options = c(
-      list(render = I("{
-        // format the way that options are rendered
-        option: function(item, escape) {
-          item.data = JSON.parse(item.label);
-          return '<div style=\"padding: 3px 12px\">' +
-                   '<div><strong>' +
-                      escape(item.data.name) + ' ' +
-                      '</strong>' +
-                      (item.data.dataclass != '' ?
-                      '<span style=\"opacity: 0.9;\"><code style=\"color: black;\"> ' +
-                        item.data.dataclass +
-                      '</code></span>' : '' ) + ' ' +
-                      (item.data.datatype != '' ?
-                      '<span style=\"opacity: 0.9;\"><code style=\"color: black;\"> ' +
-                        item.data.datatype +
-                      '</code></span>' : '' ) +
-                   '</div>' +
-                   (item.data.label != '' ? '<div style=\"line-height: 1em;\"><small>' + escape(item.data.label) + '</small></div>' : '') +
-                 '</div>';
-        },
-
-        // avoid data vomit splashing on screen when an option is selected
-        item: function(item, escape) {
-        item.data = JSON.parse(item.label);
-        return '<div>' +
-                 escape(item.data.name) +
-               '</div>';
-        }
-      }")),
-      if (!is.null(maxItems)) list(maxItems=maxItems)
-    )
-  )
-}
 
 #' A selectizeInput customized for named vectors
 #'
@@ -1476,6 +1458,7 @@ data_visuals_server <- function(id,
         {
           tryCatch(
             {
+              shiny::withProgress(message = "Drawing the plot. Hold tight for a moment..", {
               rv$plot <- create_plot(
                 data = data(),
                 type = rv$plot.params()[["fun"]],
@@ -1483,6 +1466,7 @@ data_visuals_server <- function(id,
                 y = input$secondary,
                 z = input$tertiary
               )
+              })
             },
             # warning = function(warn) {
             #   showNotification(paste0(warn), type = "warning")
@@ -2533,7 +2517,7 @@ getfun <- function(x) {
 #' @return output file name
 #' @export
 #'
-write_quarto <- function(data,...) {
+write_quarto <- function(data, ...) {
   # Exports data to temporary location
   #
   # I assume this is more secure than putting it in the www folder and deleting
@@ -2554,7 +2538,7 @@ write_quarto <- function(data,...) {
   )
 }
 
-write_rmd <- function(data,...) {
+write_rmd <- function(data, ...) {
   # Exports data to temporary location
   #
   # I assume this is more secure than putting it in the www folder and deleting
@@ -2714,17 +2698,17 @@ file_export <- function(data, output.format = c("df", "teal", "list"), filename,
 #'   default_parsing() |>
 #'   str()
 default_parsing <- function(data) {
-  name_labels <- lapply(data,\(.x) REDCapCAST::get_attr(.x,attr = "label"))
+  name_labels <- lapply(data, \(.x) REDCapCAST::get_attr(.x, attr = "label"))
 
   out <- data |>
     REDCapCAST::parse_data() |>
     REDCapCAST::as_factor() |>
-    REDCapCAST::numchar2fct(numeric.threshold = 8,character.throshold = 10) |>
+    REDCapCAST::numchar2fct(numeric.threshold = 8, character.throshold = 10) |>
     REDCapCAST::as_logical() |>
     REDCapCAST::fct_drop()
 
-  purrr::map2(out,name_labels,\(.x,.l){
-    if (!(is.na(.l) | .l=="")) {
+  purrr::map2(out, name_labels, \(.x, .l){
+    if (!(is.na(.l) | .l == "")) {
       REDCapCAST::set_attr(.x, .l, attr = "label")
     } else {
       attr(x = .x, which = "label") <- NULL
@@ -2742,12 +2726,14 @@ default_parsing <- function(data) {
 #' @export
 #'
 #' @examples
-#' ds <- mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x,label=NA,attr = "label"))
-#' ds |> remove_na_attr() |> str()
-remove_na_attr <- function(data,attr="label"){
+#' ds <- mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label"))
+#' ds |>
+#'   remove_na_attr() |>
+#'   str()
+remove_na_attr <- function(data, attr = "label") {
   out <- data |> lapply(\(.x){
-    ls <- REDCapCAST::get_attr(data = .x,attr = attr)
-    if (is.na(ls) | ls == ""){
+    ls <- REDCapCAST::get_attr(data = .x, attr = attr)
+    if (is.na(ls) | ls == "") {
       attr(x = .x, which = attr) <- NULL
     }
     .x
@@ -2765,10 +2751,10 @@ remove_na_attr <- function(data,attr="label"){
 #' @export
 #'
 #' @examples
-#'data.frame(a=1:10,b=NA, c=c(2,NA)) |> remove_empty_cols(cutoff=.5)
-remove_empty_cols <- function(data,cutoff=.7){
-  filter <- apply(X = data,MARGIN = 2,FUN = \(.x){
-    sum(as.numeric(!is.na(.x)))/length(.x)
+#' data.frame(a = 1:10, b = NA, c = c(2, NA)) |> remove_empty_cols(cutoff = .5)
+remove_empty_cols <- function(data, cutoff = .7) {
+  filter <- apply(X = data, MARGIN = 2, FUN = \(.x){
+    sum(as.numeric(!is.na(.x))) / length(.x)
   }) >= cutoff
   data[filter]
 }
@@ -2784,18 +2770,18 @@ remove_empty_cols <- function(data,cutoff=.7){
 #' @export
 #'
 #' @examples
-#' ls_d <- list(test=c(1:20))
+#' ls_d <- list(test = c(1:20))
 #' ls_d <- list()
-#' data.frame(letters[1:20],1:20) |> append_list(ls_d,"letters")
-#' letters[1:20]|> append_list(ls_d,"letters")
-append_list <- function(data,list,index){
+#' data.frame(letters[1:20], 1:20) |> append_list(ls_d, "letters")
+#' letters[1:20] |> append_list(ls_d, "letters")
+append_list <- function(data, list, index) {
   ## This will overwrite and not warn
   ## Not very safe, but convenient to append code to list
-  if (index %in% names(list)){
+  if (index %in% names(list)) {
     list[[index]] <- data
     out <- list
   } else {
-    out <- setNames(c(list,list(data)),c(names(list),index))
+    out <- setNames(c(list, list(data)), c(names(list), index))
   }
   out
 }
@@ -2809,9 +2795,35 @@ append_list <- function(data,list,index){
 #' @export
 #'
 #' @examples
-#' c(NA,1:10,rep(NA,3)) |> missing_fraction()
-missing_fraction <- function(data){
-  NROW(data[is.na(data)])/NROW(data)
+#' c(NA, 1:10, rep(NA, 3)) |> missing_fraction()
+missing_fraction <- function(data) {
+  NROW(data[is.na(data)]) / NROW(data)
+}
+
+
+
+#' Ultra short data dascription
+#'
+#' @param data
+#'
+#' @returns character vector
+#' @export
+#'
+#' @examples
+#' data.frame(
+#'   sample(1:8, 20, TRUE),
+#'   sample(c(1:8, NA), 20, TRUE)
+#' ) |> data_description()
+data_description <- function(data) {
+  data <- if (shiny::is.reactive(data)) data() else data
+
+  sprintf(
+    i18n("Data has %s observations and %s variables, with %s (%s%%) complete cases"),
+    nrow(data),
+    ncol(data),
+    sum(complete.cases(data)),
+    signif(100 * (1 - missing_fraction(data)), 3)
+  )
 }
 
 
@@ -5352,15 +5364,16 @@ plot.tbl_regression <- function(x,
 
   # Removes redundant label
   df_coefs$label[df_coefs$row_type == "label"] <- ""
-
+  # browser()
   # Add estimate value to reference level
-  if (plot_ref == TRUE){
-  df_coefs[df_coefs$var_type == "categorical" & is.na(df_coefs$reference_row),"estimate"] <- if (x$inputs$exponentiate) 1 else 0}
+  if (plot_ref == TRUE) {
+    df_coefs[df_coefs$var_type %in% c("categorical", "dichotomous") & df_coefs$reference_row & !is.na(df_coefs$reference_row), "estimate"] <- if (x$inputs$exponentiate) 1 else 0
+  }
 
   p <- df_coefs |>
     ggstats::ggcoef_plot(exponentiate = x$inputs$exponentiate, ...)
 
-  if (x$inputs$exponentiate){
+  if (x$inputs$exponentiate) {
     p <- symmetrical_scale_x_log10(p)
   }
   p
@@ -5398,7 +5411,8 @@ merge_long <- function(list, model.names) {
       )
       setNames(d, gsub("_[0-9]{,}$", "", names(d)))
     }) |>
-    dplyr::bind_rows() |> dplyr::mutate(model=as_factor(model))
+    dplyr::bind_rows() |>
+    dplyr::mutate(model = as_factor(model))
 
   l_merged$table_body <- df_body_long
 
@@ -5418,12 +5432,25 @@ merge_long <- function(list, model.names) {
 #' @export
 #'
 #' @examples
-#' limit_log(-.1,floor)
-#' limit_log(.1,ceiling)
-#' limit_log(-2.1,ceiling)
-#' limit_log(2.1,ceiling)
-limit_log <- function(data,fun,...){
-  fun(10^-floor(data)*10^data)/10^-floor(data)
+#' limit_log(-.1, floor)
+#' limit_log(.1, ceiling)
+#' limit_log(-2.1, ceiling)
+#' limit_log(2.1, ceiling)
+limit_log <- function(data, fun, ...) {
+  fun(10^-floor(data) * 10^data) / 10^-floor(data)
+}
+
+#' Create summetric log ticks
+#'
+#' @param data numeric vector
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+#' c(sample(seq(.1, 1, .1), 3), sample(1:10, 3)) |> create_log_tics()
+create_log_tics <- function(data) {
+  sort(round(unique(c(1 / data, data, 1)), 2))
 }
 
 #' Ensure symmetrical plot around 1 on a logarithmic x scale for ratio plots
@@ -5435,20 +5462,20 @@ limit_log <- function(data,fun,...){
 #' @returns ggplot2 object
 #' @export
 #'
-symmetrical_scale_x_log10 <- function(plot,breaks=c(1,2,3,5,10),...){
+symmetrical_scale_x_log10 <- function(plot, breaks = c(1, 2, 3, 5, 10), ...) {
   rx <- ggplot2::layer_scales(plot)$x$get_limits()
 
-  x_min <- floor(10*rx[1])/10
-  x_max <- ceiling(10*rx[2])/10
+  x_min <- floor(10 * rx[1]) / 10
+  x_max <- ceiling(10 * rx[2]) / 10
 
-  rx_min <- limit_log(rx[1],floor)
-  rx_max <- limit_log(rx[2],ceiling)
+  rx_min <- limit_log(rx[1], floor)
+  rx_max <- limit_log(rx[2], ceiling)
 
-  max_abs_x <- max(abs(c(x_min,x_max)))
+  max_abs_x <- max(abs(c(x_min, x_max)))
 
-  ticks <- log10(breaks)+(ceiling(max_abs_x)-1)
+  ticks <- log10(breaks) + (ceiling(max_abs_x) - 1)
 
-  plot + ggplot2::scale_x_log10(limits=c(rx_min,rx_max),breaks=create_log_tics(10^ticks[ticks<=max_abs_x]))
+  plot + ggplot2::scale_x_log10(limits = c(rx_min, rx_max), breaks = create_log_tics(10^ticks[ticks <= max_abs_x]))
 }
 
 
@@ -5577,8 +5604,8 @@ regression_table_create <- function(x, ..., args.list = NULL, fun = "gtsummary::
   }
 
   out <- do.call(getfun(fun), c(list(x = x), args.list))
-  out |>
-    gtsummary::add_glance_source_note() # |>
+  out #|>
+    # gtsummary::add_glance_source_note() # |>
   # gtsummary::bold_p()
 }
 
@@ -7101,6 +7128,7 @@ ui_elements <- list(
             shinyWidgets::noUiSliderInput(
               inputId = "complete_cutoff",
               label = NULL,
+              update_on = "change",
               min = 0,
               max = 100,
               step = 5,
@@ -7111,7 +7139,8 @@ ui_elements <- list(
             shiny::helpText("Filter variables with completeness above the specified percentage."),
             shiny::br(),
             shiny::br(),
-            shiny::uiOutput(outputId = "import_var")
+            shiny::uiOutput(outputId = "import_var"),
+            shiny::uiOutput(outputId = "data_info_import", inline = TRUE)
           )
         ),
         shiny::br(),
@@ -7148,10 +7177,9 @@ ui_elements <- list(
           fluidRow(
             shiny::column(
               width = 9,
+              shiny::uiOutput(outputId = "data_info", inline = TRUE),
               shiny::tags$p(
-                "Below is a short summary table of the provided data.
-              On the right hand side you have the option to create filters.
-              At the bottom you'll find a raw overview of the original vs the modified data."
+                "Below is a short summary table, on the right you can create data filters."
               )
             )
           ),
@@ -7406,6 +7434,7 @@ ui_elements <- list(
         # bslib::layout_sidebar(
         #   fillable = TRUE,
         sidebar = bslib::sidebar(
+          shiny::uiOutput(outputId = "data_info_regression", inline = TRUE),
           bslib::accordion(
             open = "acc_reg",
             multiple = FALSE,
@@ -7467,7 +7496,7 @@ ui_elements <- list(
               ),
               shiny::conditionalPanel(
                 condition = "input.all==1",
-                shiny::uiOutput("include_vars")
+                shiny::uiOutput("regression_vars")
               )
             )
           ),
@@ -7823,11 +7852,12 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     eventExpr = list(
-      input$import_var
+      input$import_var,
+      input$complete_cutoff
     ),
     handlerExpr = {
       shiny::req(rv$data_temp)
-
+# browser()
       rv$data_original <- rv$data_temp |>
         dplyr::select(input$import_var) |>
         default_parsing()
@@ -7846,6 +7876,11 @@ server <- function(input, output, session) {
       rv$code$modify <- NULL
     }
   )
+
+  output$data_info_import <- shiny::renderUI({
+    shiny::req(rv$data_original)
+    data_description(rv$data_original)
+  })
 
 
   shiny::observeEvent(rv$data_original, {
@@ -7910,6 +7945,17 @@ server <- function(input, output, session) {
     input$modal_variables,
     modal_update_variables("modal_variables", title = "Update and select variables")
   )
+
+  output$data_info <- shiny::renderUI({
+    shiny::req(data_filter())
+    data_description(data_filter())
+  })
+
+  output$data_info_regression <- shiny::renderUI({
+    shiny::req(regression_vars())
+    shiny::req(rv$list$data)
+    data_description(rv$list$data[regression_vars()])
+  })
 
 
   #########  Create factor
@@ -8131,40 +8177,25 @@ server <- function(input, output, session) {
 
   ## Keep these "old" selection options as a simple alternative to the modification pane
 
-  output$include_vars <- shiny::renderUI({
-    columnSelectInputStat(
-      inputId = "include_vars",
+
+  output$regression_vars <- shiny::renderUI({
+    columnSelectInput(
+      inputId = "regression_vars",
       selected = NULL,
       label = "Covariables to include",
       data = rv$data_filtered,
-      multiple = TRUE
+      multiple = TRUE,
     )
-
-    # shiny::selectizeInput(
-    #   inputId = "include_vars",
-    #   selected = NULL,
-    #   label = "Covariables to include",
-    #   choices = colnames(rv$data_filtered),
-    #   multiple = TRUE
-    # )
   })
 
   output$outcome_var <- shiny::renderUI({
-    columnSelectInputStat(
+    columnSelectInput(
       inputId = "outcome_var",
       selected = NULL,
       label = "Select outcome variable",
       data = rv$data_filtered,
       multiple = FALSE
     )
-
-    # shiny::selectInput(
-    #   inputId = "outcome_var",
-    #   selected = NULL,
-    #   label = "Select outcome variable",
-    #   choices = colnames(rv$data_filtered),
-    #   multiple = FALSE
-    # )
   })
 
   output$regression_type <- shiny::renderUI({
@@ -8198,16 +8229,16 @@ server <- function(input, output, session) {
 
   ## Collected regression variables
   regression_vars <- shiny::reactive({
-    if (is.null(input$include_vars)) {
+    if (is.null(input$regression_vars)) {
       out <- colnames(rv$data_filtered)
     } else {
-      out <- unique(c(input$include_vars, input$outcome_var))
+      out <- unique(c(input$regression_vars, input$outcome_var))
     }
     return(out)
   })
 
   output$strat_var <- shiny::renderUI({
-    columnSelectInputStat(
+    columnSelectInput(
       inputId = "strat_var",
       selected = "none",
       label = "Select variable to stratify baseline",
@@ -8217,27 +8248,6 @@ server <- function(input, output, session) {
         names(rv$data_filtered)[unlist(lapply(rv$data_filtered, data_type)) %in% c("dichotomous", "categorical", "ordinal")]
       )
     )
-
-    # shiny::selectInput(
-    #   inputId = "strat_var",
-    #   selected = "none",
-    #   label = "Select variable to stratify baseline",
-    #   choices = c(
-    #     "none",
-    #     names(rv$list$data)[unlist(lapply(rv$list$data,data_type)) %in% c("dichotomous","categorical","ordinal")]
-    #     # rv$data_filtered |>
-    #     #   (\(.x){
-    #     #     lapply(.x, \(.c){
-    #     #       if (identical("factor", class(.c))) {
-    #     #         .c
-    #     #       }
-    #     #     }) |>
-    #     #       dplyr::bind_cols()
-    #     #   })() |>
-    #     #   colnames()
-    #   ),
-    #   multiple = FALSE
-    # )
   })
 
 
@@ -8267,7 +8277,7 @@ server <- function(input, output, session) {
       # shiny::reactive(rv$data_original),
       # data_filter(),
       # input$strat_var,
-      # input$include_vars,
+      # input$regression_vars,
       # input$complete_cutoff,
       # input$add_p
       input$act_eval
@@ -8276,48 +8286,16 @@ server <- function(input, output, session) {
       shiny::req(input$strat_var)
       shiny::req(rv$list$data)
 
-      data_tbl1 <- rv$list$data
+      # data_tbl1 <- rv$list$data
 
-      if (input$strat_var == "none" | !input$strat_var %in% names(data_tbl1)) {
-        by.var <- NULL
-      } else {
-        by.var <- input$strat_var
-      }
-
-      ## These steps are to handle logicals/booleans, that messes up the order of columns
-      ## Has been reported
-
-      if (!is.null(by.var) & identical("logical",class(data_tbl1[[by.var]]))) {
-        data_tbl1[by.var] <- as.character(data_tbl1[[by.var]])
-      }
-
-      rv$list$table1 <-
-        data_tbl1 |>
-        baseline_table(
-          fun.args =
-            list(
-              by = by.var
-            )
-        ) |>
-        (\(.x){
-          if (!is.null(by.var)) {
-            .x |> gtsummary::add_overall()
-          } else {
-            .x
-          }
-        })() |>
-        (\(.x){
-          if (input$add_p == "yes" & !is.null(by.var)) {
-            .x |>
-              gtsummary::add_p() |>
-              gtsummary::bold_p()
-          } else {
-            .x
-          }
-        })()
-
-      # gtsummary::as_kable(rv$list$table1) |>
-      #   readr::write_lines(file="./www/_table1.md")
+      shiny::withProgress(message = "Creating the table. Hold on for a moment..", {
+        rv$list$table1 <- create_baseline(
+          rv$list$data,
+          by.var = input$strat_var,
+          add.p = input$add_p == "yes",
+          add.overall = TRUE
+        )
+      })
     }
   )
 
@@ -8416,9 +8394,9 @@ server <- function(input, output, session) {
           #   .x$model
           # })
         },
-        warning = function(warn) {
-          showNotification(paste0(warn), type = "warning")
-        },
+        # warning = function(warn) {
+        #   showNotification(paste0(warn), type = "warning")
+        # },
         error = function(err) {
           showNotification(paste0("Creating regression models failed with the following error: ", err), type = "err")
         }
@@ -8441,9 +8419,9 @@ server <- function(input, output, session) {
             purrr::pluck("Multivariable") |>
             performance::check_model()
         },
-        warning = function(warn) {
-          showNotification(paste0(warn), type = "warning")
-        },
+        # warning = function(warn) {
+        #   showNotification(paste0(warn), type = "warning")
+        # },
         error = function(err) {
           showNotification(paste0("Running model assumptions checks failed with the following error: ", err), type = "err")
         }

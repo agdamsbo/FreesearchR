@@ -119,8 +119,8 @@ regression_table_create <- function(x, ..., args.list = NULL, fun = "gtsummary::
   }
 
   out <- do.call(getfun(fun), c(list(x = x), args.list))
-  out |>
-    gtsummary::add_glance_source_note() # |>
+  out #|>
+    # gtsummary::add_glance_source_note() # |>
   # gtsummary::bold_p()
 }
 

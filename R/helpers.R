@@ -29,7 +29,7 @@ getfun <- function(x) {
 #' @return output file name
 #' @export
 #'
-write_quarto <- function(data,...) {
+write_quarto <- function(data, ...) {
   # Exports data to temporary location
   #
   # I assume this is more secure than putting it in the www folder and deleting
@@ -50,7 +50,7 @@ write_quarto <- function(data,...) {
   )
 }
 
-write_rmd <- function(data,...) {
+write_rmd <- function(data, ...) {
   # Exports data to temporary location
   #
   # I assume this is more secure than putting it in the www folder and deleting
@@ -210,17 +210,17 @@ file_export <- function(data, output.format = c("df", "teal", "list"), filename,
 #'   default_parsing() |>
 #'   str()
 default_parsing <- function(data) {
-  name_labels <- lapply(data,\(.x) REDCapCAST::get_attr(.x,attr = "label"))
+  name_labels <- lapply(data, \(.x) REDCapCAST::get_attr(.x, attr = "label"))
 
   out <- data |>
     REDCapCAST::parse_data() |>
     REDCapCAST::as_factor() |>
-    REDCapCAST::numchar2fct(numeric.threshold = 8,character.throshold = 10) |>
+    REDCapCAST::numchar2fct(numeric.threshold = 8, character.throshold = 10) |>
     REDCapCAST::as_logical() |>
     REDCapCAST::fct_drop()
 
-  purrr::map2(out,name_labels,\(.x,.l){
-    if (!(is.na(.l) | .l=="")) {
+  purrr::map2(out, name_labels, \(.x, .l){
+    if (!(is.na(.l) | .l == "")) {
       REDCapCAST::set_attr(.x, .l, attr = "label")
     } else {
       attr(x = .x, which = "label") <- NULL
@@ -238,12 +238,14 @@ default_parsing <- function(data) {
 #' @export
 #'
 #' @examples
-#' ds <- mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x,label=NA,attr = "label"))
-#' ds |> remove_na_attr() |> str()
-remove_na_attr <- function(data,attr="label"){
+#' ds <- mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label"))
+#' ds |>
+#'   remove_na_attr() |>
+#'   str()
+remove_na_attr <- function(data, attr = "label") {
   out <- data |> lapply(\(.x){
-    ls <- REDCapCAST::get_attr(data = .x,attr = attr)
-    if (is.na(ls) | ls == ""){
+    ls <- REDCapCAST::get_attr(data = .x, attr = attr)
+    if (is.na(ls) | ls == "") {
       attr(x = .x, which = attr) <- NULL
     }
     .x
@@ -261,10 +263,10 @@ remove_na_attr <- function(data,attr="label"){
 #' @export
 #'
 #' @examples
-#'data.frame(a=1:10,b=NA, c=c(2,NA)) |> remove_empty_cols(cutoff=.5)
-remove_empty_cols <- function(data,cutoff=.7){
-  filter <- apply(X = data,MARGIN = 2,FUN = \(.x){
-    sum(as.numeric(!is.na(.x)))/length(.x)
+#' data.frame(a = 1:10, b = NA, c = c(2, NA)) |> remove_empty_cols(cutoff = .5)
+remove_empty_cols <- function(data, cutoff = .7) {
+  filter <- apply(X = data, MARGIN = 2, FUN = \(.x){
+    sum(as.numeric(!is.na(.x))) / length(.x)
   }) >= cutoff
   data[filter]
 }
@@ -280,18 +282,18 @@ remove_empty_cols <- function(data,cutoff=.7){
 #' @export
 #'
 #' @examples
-#' ls_d <- list(test=c(1:20))
+#' ls_d <- list(test = c(1:20))
 #' ls_d <- list()
-#' data.frame(letters[1:20],1:20) |> append_list(ls_d,"letters")
-#' letters[1:20]|> append_list(ls_d,"letters")
-append_list <- function(data,list,index){
+#' data.frame(letters[1:20], 1:20) |> append_list(ls_d, "letters")
+#' letters[1:20] |> append_list(ls_d, "letters")
+append_list <- function(data, list, index) {
   ## This will overwrite and not warn
   ## Not very safe, but convenient to append code to list
-  if (index %in% names(list)){
+  if (index %in% names(list)) {
     list[[index]] <- data
     out <- list
   } else {
-    out <- setNames(c(list,list(data)),c(names(list),index))
+    out <- setNames(c(list, list(data)), c(names(list), index))
   }
   out
 }
@@ -305,7 +307,33 @@ append_list <- function(data,list,index){
 #' @export
 #'
 #' @examples
-#' c(NA,1:10,rep(NA,3)) |> missing_fraction()
-missing_fraction <- function(data){
-  NROW(data[is.na(data)])/NROW(data)
+#' c(NA, 1:10, rep(NA, 3)) |> missing_fraction()
+missing_fraction <- function(data) {
+  NROW(data[is.na(data)]) / NROW(data)
+}
+
+
+
+#' Ultra short data dascription
+#'
+#' @param data
+#'
+#' @returns character vector
+#' @export
+#'
+#' @examples
+#' data.frame(
+#'   sample(1:8, 20, TRUE),
+#'   sample(c(1:8, NA), 20, TRUE)
+#' ) |> data_description()
+data_description <- function(data) {
+  data <- if (shiny::is.reactive(data)) data() else data
+
+  sprintf(
+    i18n("Data has %s observations and %s variables, with %s (%s%%) complete cases"),
+    nrow(data),
+    ncol(data),
+    sum(complete.cases(data)),
+    signif(100 * (1 - missing_fraction(data)), 3)
+  )
 }

@@ -302,6 +302,7 @@ data_visuals_server <- function(id,
         {
           tryCatch(
             {
+              shiny::withProgress(message = "Drawing the plot. Hold tight for a moment..", {
               rv$plot <- create_plot(
                 data = data(),
                 type = rv$plot.params()[["fun"]],
@@ -309,6 +310,7 @@ data_visuals_server <- function(id,
                 y = input$secondary,
                 z = input$tertiary
               )
+              })
             },
             # warning = function(warn) {
             #   showNotification(paste0(warn), type = "warning")

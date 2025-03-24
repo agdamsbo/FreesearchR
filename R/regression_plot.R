@@ -43,15 +43,16 @@ plot.tbl_regression <- function(x,
 
   # Removes redundant label
   df_coefs$label[df_coefs$row_type == "label"] <- ""
-
+  # browser()
   # Add estimate value to reference level
-  if (plot_ref == TRUE){
-  df_coefs[df_coefs$var_type == "categorical" & is.na(df_coefs$reference_row),"estimate"] <- if (x$inputs$exponentiate) 1 else 0}
+  if (plot_ref == TRUE) {
+    df_coefs[df_coefs$var_type %in% c("categorical", "dichotomous") & df_coefs$reference_row & !is.na(df_coefs$reference_row), "estimate"] <- if (x$inputs$exponentiate) 1 else 0
+  }
 
   p <- df_coefs |>
     ggstats::ggcoef_plot(exponentiate = x$inputs$exponentiate, ...)
 
-  if (x$inputs$exponentiate){
+  if (x$inputs$exponentiate) {
     p <- symmetrical_scale_x_log10(p)
   }
   p
@@ -89,7 +90,8 @@ merge_long <- function(list, model.names) {
       )
       setNames(d, gsub("_[0-9]{,}$", "", names(d)))
     }) |>
-    dplyr::bind_rows() |> dplyr::mutate(model=as_factor(model))
+    dplyr::bind_rows() |>
+    dplyr::mutate(model = as_factor(model))
 
   l_merged$table_body <- df_body_long
 
@@ -109,12 +111,25 @@ merge_long <- function(list, model.names) {
 #' @export
 #'
 #' @examples
-#' limit_log(-.1,floor)
-#' limit_log(.1,ceiling)
-#' limit_log(-2.1,ceiling)
-#' limit_log(2.1,ceiling)
-limit_log <- function(data,fun,...){
-  fun(10^-floor(data)*10^data)/10^-floor(data)
+#' limit_log(-.1, floor)
+#' limit_log(.1, ceiling)
+#' limit_log(-2.1, ceiling)
+#' limit_log(2.1, ceiling)
+limit_log <- function(data, fun, ...) {
+  fun(10^-floor(data) * 10^data) / 10^-floor(data)
+}
+
+#' Create summetric log ticks
+#'
+#' @param data numeric vector
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+#' c(sample(seq(.1, 1, .1), 3), sample(1:10, 3)) |> create_log_tics()
+create_log_tics <- function(data) {
+  sort(round(unique(c(1 / data, data, 1)), 2))
 }
 
 #' Ensure symmetrical plot around 1 on a logarithmic x scale for ratio plots
@@ -126,18 +141,18 @@ limit_log <- function(data,fun,...){
 #' @returns ggplot2 object
 #' @export
 #'
-symmetrical_scale_x_log10 <- function(plot,breaks=c(1,2,3,5,10),...){
+symmetrical_scale_x_log10 <- function(plot, breaks = c(1, 2, 3, 5, 10), ...) {
   rx <- ggplot2::layer_scales(plot)$x$get_limits()
 
-  x_min <- floor(10*rx[1])/10
-  x_max <- ceiling(10*rx[2])/10
+  x_min <- floor(10 * rx[1]) / 10
+  x_max <- ceiling(10 * rx[2]) / 10
 
-  rx_min <- limit_log(rx[1],floor)
-  rx_max <- limit_log(rx[2],ceiling)
+  rx_min <- limit_log(rx[1], floor)
+  rx_max <- limit_log(rx[2], ceiling)
 
-  max_abs_x <- max(abs(c(x_min,x_max)))
+  max_abs_x <- max(abs(c(x_min, x_max)))
 
-  ticks <- log10(breaks)+(ceiling(max_abs_x)-1)
+  ticks <- log10(breaks) + (ceiling(max_abs_x) - 1)
 
-  plot + ggplot2::scale_x_log10(limits=c(rx_min,rx_max),breaks=create_log_tics(10^ticks[ticks<=max_abs_x]))
+  plot + ggplot2::scale_x_log10(limits = c(rx_min, rx_max), breaks = create_log_tics(10^ticks[ticks <= max_abs_x]))
 }

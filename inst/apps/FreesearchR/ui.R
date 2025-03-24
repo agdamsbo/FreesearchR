@@ -84,6 +84,7 @@ ui_elements <- list(
             shinyWidgets::noUiSliderInput(
               inputId = "complete_cutoff",
               label = NULL,
+              update_on = "change",
               min = 0,
               max = 100,
               step = 5,
@@ -94,7 +95,8 @@ ui_elements <- list(
             shiny::helpText("Filter variables with completeness above the specified percentage."),
             shiny::br(),
             shiny::br(),
-            shiny::uiOutput(outputId = "import_var")
+            shiny::uiOutput(outputId = "import_var"),
+            shiny::uiOutput(outputId = "data_info_import", inline = TRUE)
           )
         ),
         shiny::br(),
@@ -131,10 +133,9 @@ ui_elements <- list(
           fluidRow(
             shiny::column(
               width = 9,
+              shiny::uiOutput(outputId = "data_info", inline = TRUE),
               shiny::tags$p(
-                "Below is a short summary table of the provided data.
-              On the right hand side you have the option to create filters.
-              At the bottom you'll find a raw overview of the original vs the modified data."
+                "Below is a short summary table, on the right you can create data filters."
               )
             )
           ),
@@ -389,6 +390,7 @@ ui_elements <- list(
         # bslib::layout_sidebar(
         #   fillable = TRUE,
         sidebar = bslib::sidebar(
+          shiny::uiOutput(outputId = "data_info_regression", inline = TRUE),
           bslib::accordion(
             open = "acc_reg",
             multiple = FALSE,
@@ -450,7 +452,7 @@ ui_elements <- list(
               ),
               shiny::conditionalPanel(
                 condition = "input.all==1",
-                shiny::uiOutput("include_vars")
+                shiny::uiOutput("regression_vars")
               )
             )
           ),
