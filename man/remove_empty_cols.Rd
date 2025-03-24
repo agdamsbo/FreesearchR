@@ -18,5 +18,5 @@ data frame
 Removes columns with completenes below cutoff
 }
 \examples{
-data.frame(a=1:10,b=NA, c=c(2,NA)) |> remove_empty_cols(cutoff=.5)
+data.frame(a = 1:10, b = NA, c = c(2, NA)) |> remove_empty_cols(cutoff = .5)
 }

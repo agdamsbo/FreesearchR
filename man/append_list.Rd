@@ -20,8 +20,8 @@ list
 Append list with named index
 }
 \examples{
-ls_d <- list(test=c(1:20))
+ls_d <- list(test = c(1:20))
 ls_d <- list()
-data.frame(letters[1:20],1:20) |> append_list(ls_d,"letters")
-letters[1:20]|> append_list(ls_d,"letters")
+data.frame(letters[1:20], 1:20) |> append_list(ls_d, "letters")
+letters[1:20] |> append_list(ls_d, "letters")
 }

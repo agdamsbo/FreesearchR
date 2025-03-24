@@ -20,8 +20,8 @@ numeric vector
 Easily round log scale limits for nice plots
 }
 \examples{
-limit_log(-.1,floor)
-limit_log(.1,ceiling)
-limit_log(-2.1,ceiling)
-limit_log(2.1,ceiling)
+limit_log(-.1, floor)
+limit_log(.1, ceiling)
+limit_log(-2.1, ceiling)
+limit_log(2.1, ceiling)
 }

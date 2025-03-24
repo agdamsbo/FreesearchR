@@ -123,7 +123,7 @@ limit_log <- function(data, fun, ...) {
 #'
 #' @param data numeric vector
 #'
-#' @returns
+#' @returns numeric vector
 #' @export
 #'
 #' @examples

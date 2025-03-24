@@ -4,7 +4,7 @@
 \alias{subset_types}
 \title{Easily subset by data type function}
 \usage{
-subset_types(data, types, type.fun = outcome_type)
+subset_types(data, types, type.fun = data_type)
 }
 \arguments{
 \item{data}{data}
@@ -21,6 +21,6 @@ Easily subset by data type function
 }
 \examples{
 default_parsing(mtcars) |> subset_types("ordinal")
-default_parsing(mtcars) |> subset_types(c("dichotomous", "ordinal"))
+default_parsing(mtcars) |> subset_types(c("dichotomous", "ordinal" ,"categorical"))
 #' default_parsing(mtcars) |> subset_types("factor",class)
 }

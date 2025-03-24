@@ -111,7 +111,7 @@ m <- mtcars |>
     args.list = NULL,
     vars = c("mpg", "cyl")
   )
-  broom::tidy(m)
+broom::tidy(m)
 \dontrun{
 gtsummary::trial |>
   regression_model_uv(outcome.str = "age")
@@ -126,7 +126,7 @@ m <- gtsummary::trial |> regression_model_uv(
   fun = "stats::glm",
   args.list = list(family = stats::binomial(link = "logit"))
 )
-lapply(m,broom::tidy) |> dplyr::bind_rows()
+lapply(m, broom::tidy) |> dplyr::bind_rows()
 }
 \dontrun{
 gtsummary::trial |>
@@ -154,12 +154,15 @@ broom::tidy(ls$model)
 broom::tidy(m)
 }
 \dontrun{
-gtsummary::trial |> regression_model_uv(
-  outcome.str = "trt",
-  fun = "stats::glm",
-  args.list = list(family = stats::binomial(link = "logit"))
-) |> lapply(broom::tidy) |> dplyr::bind_rows()
+gtsummary::trial |>
+  regression_model_uv(
+    outcome.str = "trt",
+    fun = "stats::glm",
+    args.list = list(family = stats::binomial(link = "logit"))
+  ) |>
+  lapply(broom::tidy) |>
+  dplyr::bind_rows()
 ms <- regression_model_uv_list(data = default_parsing(mtcars), outcome.str = "mpg", fun.descr = "Linear regression model")
-lapply(ms$model,broom::tidy) |> dplyr::bind_rows()
+lapply(ms$model, broom::tidy) |> dplyr::bind_rows()
 }
 }

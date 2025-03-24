@@ -16,5 +16,5 @@ numeric vector
 Get missingsness fraction
 }
 \examples{
-c(NA,1:10,rep(NA,3)) |> missing_fraction()
+c(NA, 1:10, rep(NA, 3)) |> missing_fraction()
 }

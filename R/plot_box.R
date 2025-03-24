@@ -36,7 +36,7 @@ plot_box <- function(data, x, y, z = NULL) {
 #'
 #' @name data-plots
 #'
-#' @returns
+#' @returns ggplot object
 #' @export
 #'
 #' @examples

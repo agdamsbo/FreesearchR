@@ -16,6 +16,8 @@ data.frame
 Remove NA labels
 }
 \examples{
-ds <- mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x,label=NA,attr = "label"))
-ds |> remove_na_attr() |> str()
+ds <- mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label"))
+ds |>
+  remove_na_attr() |>
+  str()
 }
