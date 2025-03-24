@@ -16,10 +16,13 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/append_list.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/argsstring2list.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/baseline_table.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/clean_common_axis.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/clean_date.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/clean_sep.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/columnSelectInput.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/contrast_text.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/create_baseline.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/create_log_tics.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/create_overview_datagrid.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/custom_theme.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/cut-variable.html</loc></url>
@@ -28,6 +31,8 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/data-import.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/data-plots.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/data-summary.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/data_description.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/data_type.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/default_format_arguments.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/default_parsing.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/drop_empty_event.html</loc></url>
@@ -59,7 +64,6 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/merge_long.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/missing_fraction.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/modify_qmd.html</loc></url>
-<url><loc>https://agdamsbo.github.io/FreesearchR/reference/outcome_type.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/overview_vars.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/plot.tbl_regression.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/plot_euler.html</loc></url>
