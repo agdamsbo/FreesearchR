@@ -329,11 +329,16 @@ missing_fraction <- function(data) {
 data_description <- function(data) {
   data <- if (shiny::is.reactive(data)) data() else data
 
+  n <- nrow(data)
+  n_var <- ncol(data)
+  n_complete <- sum(complete.cases(data))
+  p_complete <- n_complete/n
+
   sprintf(
     i18n("Data has %s observations and %s variables, with %s (%s%%) complete cases"),
-    nrow(data),
-    ncol(data),
-    sum(complete.cases(data)),
-    signif(100 * (1 - missing_fraction(data)), 3)
+    n,
+    n_var,
+    n_complete,
+    signif(100 * p_complete, 3)
   )
 }
