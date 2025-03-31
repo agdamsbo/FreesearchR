@@ -133,6 +133,15 @@ sentence_paste <- function(data, and.str = "and") {
 }
 
 
+#' Correlations plot demo app
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' cor_demo_app()
+#' }
 cor_demo_app <- function() {
   ui <- shiny::fluidPage(
     shiny::sliderInput(
@@ -152,4 +161,3 @@ cor_demo_app <- function() {
   shiny::shinyApp(ui, server)
 }
 
-cor_demo_app()

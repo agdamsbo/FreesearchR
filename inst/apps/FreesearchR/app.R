@@ -10,7 +10,7 @@
 #### Current file: R//app_version.R 
 ########
 
-app_version <- function()'250326_1206'
+app_version <- function()'250331_1248'
 
 
 ########
@@ -289,6 +289,15 @@ sentence_paste <- function(data, and.str = "and") {
 }
 
 
+#' Correlations plot demo app
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' cor_demo_app()
+#' }
 cor_demo_app <- function() {
   ui <- shiny::fluidPage(
     shiny::sliderInput(
@@ -308,7 +317,6 @@ cor_demo_app <- function() {
   shiny::shinyApp(ui, server)
 }
 
-cor_demo_app()
 
 
 ########
@@ -5417,7 +5425,7 @@ merge_long <- function(list, model.names) {
       setNames(d, gsub("_[0-9]{,}$", "", names(d)))
     }) |>
     dplyr::bind_rows() |>
-    dplyr::mutate(model = as_factor(model))
+    dplyr::mutate(model = REDCapCAST::as_factor(model))
 
   l_merged$table_body <- df_body_long
 
@@ -5781,8 +5789,7 @@ gg_theme_shiny <- function(){
       legend.title = ggplot2::element_text(size = 18),
       legend.text = ggplot2::element_text(size = 14),
       plot.title = ggplot2::element_text(size = 24),
-      plot.subtitle = ggplot2::element_text(size = 18),
-      legend.position = "none"
+      plot.subtitle = ggplot2::element_text(size = 18)
     )
 }
 
@@ -8541,9 +8548,9 @@ server <- function(input, output, session) {
     alt = "Regression coefficient plot"
   )
 
-  shiny::conditionalPanel(
-    condition = "output.uploaded == 'yes'",
-  )
+  # shiny::conditionalPanel(
+  #   condition = "output.uploaded == 'yes'",
+  # )
 
   ##############################################################################
   #########

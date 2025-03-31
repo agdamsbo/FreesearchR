@@ -52,8 +52,7 @@ gg_theme_shiny <- function(){
       legend.title = ggplot2::element_text(size = 18),
       legend.text = ggplot2::element_text(size = 14),
       plot.title = ggplot2::element_text(size = 24),
-      plot.subtitle = ggplot2::element_text(size = 18),
-      legend.position = "none"
+      plot.subtitle = ggplot2::element_text(size = 18)
     )
 }
 

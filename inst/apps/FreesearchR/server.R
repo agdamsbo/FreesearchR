@@ -844,9 +844,9 @@ server <- function(input, output, session) {
     alt = "Regression coefficient plot"
   )
 
-  shiny::conditionalPanel(
-    condition = "output.uploaded == 'yes'",
-  )
+  # shiny::conditionalPanel(
+  #   condition = "output.uploaded == 'yes'",
+  # )
 
   ##############################################################################
   #########

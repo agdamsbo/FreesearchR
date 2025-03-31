@@ -91,7 +91,7 @@ merge_long <- function(list, model.names) {
       setNames(d, gsub("_[0-9]{,}$", "", names(d)))
     }) |>
     dplyr::bind_rows() |>
-    dplyr::mutate(model = as_factor(model))
+    dplyr::mutate(model = REDCapCAST::as_factor(model))
 
   l_merged$table_body <- df_body_long
 

@@ -342,3 +342,24 @@ data_description <- function(data) {
     signif(100 * p_complete, 3)
   )
 }
+
+#' Drop-in replacement for the base::sort_by with option to remove NAs
+#'
+#' @param x x
+#' @param y y
+#' @param na.rm remove NAs
+#' @param ... passed to base_sort_by
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+#' sort_by(c("Multivariable", "Univariable"),c("Univariable","Minimal","Multivariable"))
+sort_by <- function(x,y,na.rm=FALSE,...){
+  out <- base::sort_by(x,y,...)
+  if (na.rm==TRUE){
+    out[!is.na(out)]
+  } else {
+    out
+  }
+}
