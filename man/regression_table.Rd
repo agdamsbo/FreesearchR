@@ -36,7 +36,8 @@ gtsummary::trial |>
     formula.str = "{outcome.str}~.",
     args.list = NULL
   ) |>
-  regression_table() |> plot()
+  regression_table() |>
+  plot()
 gtsummary::trial |>
   regression_model(
     outcome.str = "trt",
@@ -73,7 +74,7 @@ list(
   }) |>
   purrr::map(regression_table) |>
   tbl_merge()
-  }
+}
 regression_table <- function(x, ...) {
   UseMethod("regression_table")
 }

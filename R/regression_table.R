@@ -24,7 +24,8 @@
 #'     formula.str = "{outcome.str}~.",
 #'     args.list = NULL
 #'   ) |>
-#'   regression_table() |> plot()
+#'   regression_table() |>
+#'   plot()
 #' gtsummary::trial |>
 #'   regression_model(
 #'     outcome.str = "trt",
@@ -61,7 +62,7 @@
 #'   }) |>
 #'   purrr::map(regression_table) |>
 #'   tbl_merge()
-#'   }
+#' }
 #' regression_table <- function(x, ...) {
 #'   UseMethod("regression_table")
 #' }
@@ -94,9 +95,8 @@
 #'     gtsummary::add_glance_source_note() # |>
 #'   # gtsummary::bold_p()
 #' }
-
 regression_table <- function(x, ...) {
-  if ("list" %in% class(x)){
+  if ("list" %in% class(x)) {
     x |>
       purrr::map(\(.m){
         regression_table_create(x = .m, ...) |>
@@ -104,13 +104,15 @@ regression_table <- function(x, ...) {
       }) |>
       gtsummary::tbl_stack()
   } else {
-    regression_table_create(x,...)
+    regression_table_create(x, ...)
   }
 }
 
-regression_table_create <- function(x, ..., args.list = NULL, fun = "gtsummary::tbl_regression") {
+regression_table_create <- function(x, ..., args.list = NULL, fun = "gtsummary::tbl_regression", theme = c("jama", "lancet", "nejm", "qjecon")) {
   # Stripping custom class
   class(x) <- class(x)[class(x) != "freesearchr_model"]
+
+  theme <- match.arg(theme)
 
   if (any(c(length(class(x)) != 1, class(x) != "lm"))) {
     if (!"exponentiate" %in% names(args.list)) {
@@ -118,10 +120,26 @@ regression_table_create <- function(x, ..., args.list = NULL, fun = "gtsummary::
     }
   }
 
-  out <- do.call(getfun(fun), c(list(x = x), args.list))
-  out #|>
-    # gtsummary::add_glance_source_note() # |>
-  # gtsummary::bold_p()
+  gtsummary::theme_gtsummary_journal(journal = theme)
+  if (inherits(x, "polr")) {
+    # browser()
+    out <- do.call(getfun(fun), c(list(x = x), args.list))
+    # out <- do.call(getfun(fun), c(list(x = x, tidy_fun = list(residual_type = "normal")), args.list))
+    # out <- do.call(what = getfun(fun),
+    #                args = c(
+    #                  list(
+    #                    x = x,
+    #                    tidy_fun = list(
+    #                      conf.int = TRUE,
+    #                      conf.level = 0.95,
+    #                      residual_type = "normal")),
+    #                  args.list)
+    # )
+  } else {
+    out <- do.call(getfun(fun), c(list(x = x), args.list))
+  }
+
+  out
 }
 
 

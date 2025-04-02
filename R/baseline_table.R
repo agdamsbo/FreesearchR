@@ -34,20 +34,24 @@ baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, 
 #' @export
 #'
 #' @examples
-#' mtcars |> create_baseline(by.var = "gear", add.p="yes"=="yes")
-create_baseline <- function(data,...,by.var,add.p=FALSE,add.overall=FALSE){
+#' mtcars |> create_baseline(by.var = "gear", add.p = "yes" == "yes")
+create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALSE, theme=c("jama", "lancet", "nejm", "qjecon")) {
+  theme <- match.arg(theme)
+
   if (by.var == "none" | !by.var %in% names(data)) {
     by.var <- NULL
   }
 
   ## These steps are to handle logicals/booleans, that messes up the order of columns
-  ## Has been reported
+  ## Has been reported and should be fixed soon (02042025)
 
   if (!is.null(by.var)) {
-    if (identical("logical",class(data[[by.var]]))){
+    if (identical("logical", class(data[[by.var]]))) {
       data[by.var] <- as.character(data[[by.var]])
     }
   }
+
+  gtsummary::theme_gtsummary_journal(journal = theme)
 
   out <- data |>
     baseline_table(
@@ -59,16 +63,15 @@ create_baseline <- function(data,...,by.var,add.p=FALSE,add.overall=FALSE){
     )
 
   if (!is.null(by.var)) {
-    if (isTRUE(add.overall)){
-  out <- out |> gtsummary::add_overall()
+    if (isTRUE(add.overall)) {
+      out <- out |> gtsummary::add_overall()
     }
     if (isTRUE(add.p)) {
       out <- out |>
         gtsummary::add_p() |>
         gtsummary::bold_p()
     }
-
-    }
+  }
 
   out
 }

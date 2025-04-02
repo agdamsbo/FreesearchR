@@ -350,7 +350,7 @@ data_description <- function(data) {
 #' @param na.rm remove NAs
 #' @param ... passed to base_sort_by
 #'
-#' @returns
+#' @returns vector
 #' @export
 #'
 #' @examples
@@ -362,4 +362,10 @@ sort_by <- function(x,y,na.rm=FALSE,...){
   } else {
     out
   }
+}
+
+
+get_ggplot_label <- function(data,label){
+  assertthat::assert_that(ggplot2::is.ggplot(data))
+  data$labels[[label]]
 }

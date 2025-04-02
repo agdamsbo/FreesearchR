@@ -1,12 +1,16 @@
-# FreesearchR 25.3.2
+# FreesearchR 25.4.1
 
 Focus is on polish and improved ui/ux.
 
-Updating name (will be FreesearchR), with renamed repository and some graphics are comng. This may introduce some breaking chances for others calling or installing the package. No future changes are planned. A complete transition is planned before attending and presenting a poster at the European Stroke Organisation Conference 2025 in May.
+Updating name (will be FreesearchR), with renamed repository and some graphics are coming. This may introduce some breaking chances for others calling or installing the package. No future changes are planned. A complete transition is planned before attending and presenting a poster at the European Stroke Organisation Conference 2025 in May.
 
 Testing file upload conducted and improved.
 
-Working on improving code export.
+Working on improving code export. This is very difficult to get perfect. Initial focus is on extracting enough to be able to learn from it.
+
+Regression calculations, plots, and checks have been improved and moved to standalone module.
+
+Data overview/modifications has been simplified slightly.
 
 # freesearcheR 25.3.1
 

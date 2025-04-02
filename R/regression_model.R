@@ -134,6 +134,8 @@ regression_model <- function(data,
     )
   )
 
+  # out <- REDCapCAST::set_attr(out,label = fun,attr = "fun.call")
+
   # Recreating the call
   # out$call <-  match.call(definition=eval(parse(text=fun)), call(fun, data = 'data',formula = as.formula(formula.str),args.list))
 

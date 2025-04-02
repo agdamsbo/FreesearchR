@@ -146,27 +146,34 @@ ui_elements <- list(
             ),
             shiny::column(
               width = 3,
+              shiny::actionButton(
+                inputId = "modal_browse",
+                label = "Browse data",
+                width = "100%"
+              ),
+              shiny::tags$br(),
+              shiny::tags$br(),
               IDEAFilter::IDEAFilter_ui("data_filter"),
               shiny::tags$br()
             )
           )
         ),
-        bslib::nav_panel(
-          title = "Browse",
-          tags$h3("Browse the provided data"),
-          shiny::tags$p(
-            "Below is a table with all the modified data provided to browse and understand data."
-          ),
-          shinyWidgets::html_dependency_winbox(),
-          fluidRow(
-            toastui::datagridOutput(outputId = "table_mod")
-          ),
-          shiny::tags$br(),
-          shiny::tags$br(),
-          shiny::tags$br(),
-          shiny::tags$br(),
-          shiny::tags$br()
-        ),
+        # bslib::nav_panel(
+        #   title = "Browse",
+        #   tags$h3("Browse the provided data"),
+        #   shiny::tags$p(
+        #     "Below is a table with all the modified data provided to browse and understand data."
+        #   ),
+        #   shinyWidgets::html_dependency_winbox(),
+        #   fluidRow(
+        #     toastui::datagridOutput(outputId = "table_mod")
+        #   ),
+        #   shiny::tags$br(),
+        #   shiny::tags$br(),
+        #   shiny::tags$br(),
+        #   shiny::tags$br(),
+        #   shiny::tags$br()
+        # ),
         bslib::nav_panel(
           title = "Modify",
           tags$h3("Subset, rename and convert variables"),
@@ -178,26 +185,31 @@ ui_elements <- list(
           ),
           shiny::tags$br(),
           shiny::tags$br(),
+          update_variables_ui("modal_variables"),
+          shiny::tags$br(),
+          shiny::tags$br(),
           fluidRow(
             shiny::column(
               width = 2
             ),
             shiny::column(
               width = 8,
+              tags$h4("Advanced data manipulation"),
+              shiny::tags$br(),
               fluidRow(
                 shiny::column(
                   width = 6,
-                  tags$h4("Update or modify variables"),
-                  shiny::tags$br(),
-                  shiny::actionButton(
-                    inputId = "modal_variables",
-                    label = "Subset, rename and change class/type",
-                    width = "100%"
-                  ),
-                  shiny::tags$br(),
-                  shiny::helpText("Subset variables, rename variables and labels, and apply new class to variables"),
-                  shiny::tags$br(),
-                  shiny::tags$br(),
+                  # tags$h4("Update or modify variables"),
+                  # shiny::tags$br(),
+                  # shiny::actionButton(
+                  #   inputId = "modal_variables",
+                  #   label = "Subset, rename and change class/type",
+                  #   width = "100%"
+                  # ),
+                  # shiny::tags$br(),
+                  # shiny::helpText("Subset variables, rename variables and labels, and apply new class to variables"),
+                  # shiny::tags$br(),
+                  # shiny::tags$br(),
                   shiny::actionButton(
                     inputId = "modal_update",
                     label = "Reorder factor levels",
@@ -206,12 +218,21 @@ ui_elements <- list(
                   shiny::tags$br(),
                   shiny::helpText("Reorder the levels of factor/categorical variables."),
                   shiny::tags$br(),
+                  shiny::tags$br(),
+                  shiny::actionButton(
+                    inputId = "data_reset",
+                    label = "Restore original data",
+                    width = "100%"
+                  ),
+                  shiny::tags$br(),
+                  shiny::helpText("Reset to original imported dataset. Careful! There is no un-doing."),
+                  shiny::tags$br(),
                   shiny::tags$br()
                 ),
                 shiny::column(
                   width = 6,
-                  tags$h4("Create new variables"),
-                  shiny::tags$br(),
+                  # tags$h4("Create new variables"),
+                  # shiny::tags$br(),
                   shiny::actionButton(
                     inputId = "modal_cut",
                     label = "New factor",
@@ -231,15 +252,15 @@ ui_elements <- list(
                   shiny::tags$br(),
                   shiny::tags$br()
                 )
-              ),
-              tags$h4("Restore"),
-              shiny::actionButton(
-                inputId = "data_reset",
-                label = "Restore original data",
-                width = "100%"
-              ),
-              shiny::tags$br(),
-              shiny::helpText("Reset to original imported dataset. Careful! There is no un-doing.")
+              ) # ,
+              # tags$h4("Restore"),
+              # shiny::actionButton(
+              #   inputId = "data_reset",
+              #   label = "Restore original data",
+              #   width = "100%"
+              # ),
+              # shiny::tags$br(),
+              # shiny::helpText("Reset to original imported dataset. Careful! There is no un-doing.")
             ),
             shiny::column(
               width = 2
@@ -247,10 +268,10 @@ ui_elements <- list(
           ),
           shiny::tags$br(),
           shiny::tags$br(),
-          tags$h4("Restore"),
+          tags$h4("Compare modified data to original"),
           shiny::tags$br(),
           shiny::tags$p(
-            "Below, you'll find a raw overview of the original vs the modified data."
+            "Here is a overview of the original vs the modified data."
           ),
           shiny::tags$br(),
           shiny::tags$br(),
@@ -385,110 +406,114 @@ ui_elements <- list(
     bslib::nav_panel(
       title = "Regression",
       id = "navanalyses",
-      bslib::navset_bar(
-        title = "",
-        # bslib::layout_sidebar(
-        #   fillable = TRUE,
-        sidebar = bslib::sidebar(
-          shiny::uiOutput(outputId = "data_info_regression", inline = TRUE),
-          bslib::accordion(
-            open = "acc_reg",
-            multiple = FALSE,
-            bslib::accordion_panel(
-              value = "acc_reg",
-              title = "Regression",
-              icon = bsicons::bs_icon("calculator"),
-              shiny::uiOutput("outcome_var"),
-              # shiny::selectInput(
-              #   inputId = "design",
-              #   label = "Study design",
-              #   selected = "no",
-              #   inline = TRUE,
-              #   choices = list(
-              #     "Cross-sectional" = "cross-sectional"
-              #   )
-              # ),
-              shiny::uiOutput("regression_type"),
-              shiny::radioButtons(
-                inputId = "add_regression_p",
-                label = "Add p-value",
-                inline = TRUE,
-                selected = "yes",
-                choices = list(
-                  "Yes" = "yes",
-                  "No" = "no"
-                )
-              ),
-              bslib::input_task_button(
-                id = "load",
-                label = "Analyse",
-                # icon = shiny::icon("pencil", lib = "glyphicon"),
-                icon = bsicons::bs_icon("pencil"),
-                label_busy = "Working...",
-                icon_busy = fontawesome::fa_i("arrows-rotate",
-                  class = "fa-spin",
-                  "aria-hidden" = "true"
-                ),
-                type = "secondary",
-                auto_reset = TRUE
-              ),
-              shiny::helpText("Press 'Analyse' again after changing parameters."),
-              shiny::tags$br(),
-              shiny::uiOutput("plot_model")
-            ),
-            bslib::accordion_panel(
-              value = "acc_advanced",
-              title = "Advanced",
-              icon = bsicons::bs_icon("gear"),
-              shiny::radioButtons(
-                inputId = "all",
-                label = "Specify covariables",
-                inline = TRUE, selected = 2,
-                choiceNames = c(
-                  "Yes",
-                  "No"
-                ),
-                choiceValues = c(1, 2)
-              ),
-              shiny::conditionalPanel(
-                condition = "input.all==1",
-                shiny::uiOutput("regression_vars")
-              )
-            )
-          ),
-          # shiny::helpText(em("Please specify relevant settings for your data, and press 'Analyse'")),
-          # shiny::radioButtons(
-          #   inputId = "specify_factors",
-          #   label = "Specify categorical variables?",
-          #   selected = "no",
-          #   inline = TRUE,
-          #   choices = list(
-          #     "Yes" = "yes",
-          #     "No" = "no"
-          #   )
-          # ),
-          # shiny::conditionalPanel(
-          #   condition = "input.specify_factors=='yes'",
-          #   shiny::uiOutput("factor_vars")
-          # ),
-          # shiny::conditionalPanel(
-          #   condition = "output.ready=='yes'",
-          # shiny::tags$hr(),
-        ),
-        bslib::nav_panel(
-          title = "Regression table",
-          gt::gt_output(outputId = "table2")
-        ),
-        bslib::nav_panel(
-          title = "Coefficient plot",
-          shiny::plotOutput(outputId = "regression_plot")
-        ),
-        bslib::nav_panel(
-          title = "Model checks",
-          shiny::plotOutput(outputId = "check")
-          # shiny::uiOutput(outputId = "check_1")
-        )
+      do.call(
+        bslib::navset_bar,
+        regression_ui("regression")
       )
+      # bslib::navset_bar(
+      #   title = "",
+      #   # bslib::layout_sidebar(
+      #   #   fillable = TRUE,
+      #   sidebar = bslib::sidebar(
+      #     shiny::uiOutput(outputId = "data_info_regression", inline = TRUE),
+      #     bslib::accordion(
+      #       open = "acc_reg",
+      #       multiple = FALSE,
+      #       bslib::accordion_panel(
+      #         value = "acc_reg",
+      #         title = "Regression",
+      #         icon = bsicons::bs_icon("calculator"),
+      #         shiny::uiOutput("outcome_var"),
+      #         # shiny::selectInput(
+      #         #   inputId = "design",
+      #         #   label = "Study design",
+      #         #   selected = "no",
+      #         #   inline = TRUE,
+      #         #   choices = list(
+      #         #     "Cross-sectional" = "cross-sectional"
+      #         #   )
+      #         # ),
+      #         shiny::uiOutput("regression_type"),
+      #         shiny::radioButtons(
+      #           inputId = "add_regression_p",
+      #           label = "Add p-value",
+      #           inline = TRUE,
+      #           selected = "yes",
+      #           choices = list(
+      #             "Yes" = "yes",
+      #             "No" = "no"
+      #           )
+      #         ),
+      #         bslib::input_task_button(
+      #           id = "load",
+      #           label = "Analyse",
+      #           # icon = shiny::icon("pencil", lib = "glyphicon"),
+      #           icon = bsicons::bs_icon("pencil"),
+      #           label_busy = "Working...",
+      #           icon_busy = fontawesome::fa_i("arrows-rotate",
+      #             class = "fa-spin",
+      #             "aria-hidden" = "true"
+      #           ),
+      #           type = "secondary",
+      #           auto_reset = TRUE
+      #         ),
+      #         shiny::helpText("Press 'Analyse' again after changing parameters."),
+      #         shiny::tags$br(),
+      #         shiny::uiOutput("plot_model")
+      #       ),
+      #       bslib::accordion_panel(
+      #         value = "acc_advanced",
+      #         title = "Advanced",
+      #         icon = bsicons::bs_icon("gear"),
+      #         shiny::radioButtons(
+      #           inputId = "all",
+      #           label = "Specify covariables",
+      #           inline = TRUE, selected = 2,
+      #           choiceNames = c(
+      #             "Yes",
+      #             "No"
+      #           ),
+      #           choiceValues = c(1, 2)
+      #         ),
+      #         shiny::conditionalPanel(
+      #           condition = "input.all==1",
+      #           shiny::uiOutput("regression_vars")
+      #         )
+      #       )
+      #     ),
+      #     # shiny::helpText(em("Please specify relevant settings for your data, and press 'Analyse'")),
+      #     # shiny::radioButtons(
+      #     #   inputId = "specify_factors",
+      #     #   label = "Specify categorical variables?",
+      #     #   selected = "no",
+      #     #   inline = TRUE,
+      #     #   choices = list(
+      #     #     "Yes" = "yes",
+      #     #     "No" = "no"
+      #     #   )
+      #     # ),
+      #     # shiny::conditionalPanel(
+      #     #   condition = "input.specify_factors=='yes'",
+      #     #   shiny::uiOutput("factor_vars")
+      #     # ),
+      #     # shiny::conditionalPanel(
+      #     #   condition = "output.ready=='yes'",
+      #     # shiny::tags$hr(),
+      #   ),
+      #   bslib::nav_panel(
+      #     title = "Regression table",
+      #     gt::gt_output(outputId = "table2")
+      #   ),
+      #   bslib::nav_panel(
+      #     title = "Coefficient plot",
+      #     shiny::plotOutput(outputId = "regression_plot")
+      #   ),
+      #   bslib::nav_panel(
+      #     title = "Model checks",
+      #     shiny::plotOutput(outputId = "check")
+      #     # shiny::uiOutput(outputId = "check_1")
+      #   )
+      # )
     ),
   ##############################################################################
   #########
@@ -635,7 +660,7 @@ ui <- bslib::page_fixed(
       ),
       shiny::p(
         style = "margin: 1; color: #888;",
-        "AG Damsbo | v", app_version(), " | ",shiny::tags$a("AGPLv3 license", href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer")," | ", shiny::tags$a("Source on Github", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer")
+        "AG Damsbo | v", app_version(), " | ", shiny::tags$a("AGPLv3 license", href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Source on Github", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer")
       ),
     )
   )

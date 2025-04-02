@@ -75,6 +75,7 @@ server <- function(input, output, session) {
 
   rv <- shiny::reactiveValues(
     list = list(),
+    regression = list(),
     ds = NULL,
     local_temp = NULL,
     ready = NULL,
@@ -165,7 +166,7 @@ server <- function(input, output, session) {
     ),
     handlerExpr = {
       shiny::req(rv$data_temp)
-# browser()
+      # browser()
       rv$data_original <- rv$data_temp |>
         dplyr::select(input$import_var) |>
         default_parsing()
@@ -251,18 +252,17 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_variables,
-    modal_update_variables("modal_variables", title = "Update and select variables")
+    modal_update_variables(
+      id = "modal_variables",
+      title = "Update and select variables",
+      footer = tagList(
+        actionButton("ok", "OK")
+      ))
   )
 
   output$data_info <- shiny::renderUI({
     shiny::req(data_filter())
     data_description(data_filter())
-  })
-
-  output$data_info_regression <- shiny::renderUI({
-    shiny::req(regression_vars())
-    shiny::req(rv$list$data)
-    data_description(rv$list$data[regression_vars()])
   })
 
 
@@ -348,7 +348,7 @@ server <- function(input, output, session) {
       shiny::reactive(rv$data),
       shiny::reactive(rv$data_original),
       data_filter(),
-      regression_vars(),
+      # regression_vars(),
       input$complete_cutoff
     ),
     {
@@ -409,28 +409,32 @@ server <- function(input, output, session) {
     pagination = 20
   )
 
-  tryCatch(
-    {
-      output$table_mod <- toastui::renderDatagrid({
-        shiny::req(rv$data)
-        # data <- rv$data
-        toastui::datagrid(
-          # data = rv$data # ,
-          data = data_filter(),
-          pagination = 10
-          # bordered = TRUE,
-          # compact = TRUE,
-          # striped = TRUE
-        )
-      })
-    },
-    warning = function(warn) {
-      showNotification(paste0(warn), type = "warning")
-    },
-    error = function(err) {
-      showNotification(paste0(err), type = "err")
-    }
-  )
+  observeEvent(input$modal_browse, {
+    datamods::show_data(REDCapCAST::fct_drop(rv$data_filtered), title = "Uploaded data overview", type = "modal")
+  })
+
+  # tryCatch(
+  #   {
+  #     output$table_mod <- toastui::renderDatagrid({
+  #       shiny::req(rv$data)
+  #       # data <- rv$data
+  #       toastui::datagrid(
+  #         # data = rv$data # ,
+  #         data = data_filter(),
+  #         pagination = 10
+  #         # bordered = TRUE,
+  #         # compact = TRUE,
+  #         # striped = TRUE
+  #       )
+  #     })
+  #   },
+  #   warning = function(warn) {
+  #     showNotification(paste0(warn), type = "warning")
+  #   },
+  #   error = function(err) {
+  #     showNotification(paste0(err), type = "err")
+  #   }
+  # )
 
   output$original_str <- renderPrint({
     str(rv$data_original)
@@ -486,65 +490,65 @@ server <- function(input, output, session) {
   ## Keep these "old" selection options as a simple alternative to the modification pane
 
 
-  output$regression_vars <- shiny::renderUI({
-    columnSelectInput(
-      inputId = "regression_vars",
-      selected = NULL,
-      label = "Covariables to include",
-      data = rv$data_filtered,
-      multiple = TRUE,
-    )
-  })
-
-  output$outcome_var <- shiny::renderUI({
-    columnSelectInput(
-      inputId = "outcome_var",
-      selected = NULL,
-      label = "Select outcome variable",
-      data = rv$data_filtered,
-      multiple = FALSE
-    )
-  })
-
-  output$regression_type <- shiny::renderUI({
-    shiny::req(input$outcome_var)
-    shiny::selectizeInput(
-      inputId = "regression_type",
-      label = "Choose regression analysis",
-      ## The below ifelse statement handles the case of loading a new dataset
-      choices = possible_functions(
-        data = dplyr::select(
-          rv$data_filtered,
-          ifelse(input$outcome_var %in% names(rv$data_filtered),
-            input$outcome_var,
-            names(rv$data_filtered)[1]
-          )
-        ), design = "cross-sectional"
-      ),
-      multiple = FALSE
-    )
-  })
-
-  output$factor_vars <- shiny::renderUI({
-    shiny::selectizeInput(
-      inputId = "factor_vars",
-      selected = colnames(rv$data_filtered)[sapply(rv$data_filtered, is.factor)],
-      label = "Covariables to format as categorical",
-      choices = colnames(rv$data_filtered),
-      multiple = TRUE
-    )
-  })
-
-  ## Collected regression variables
-  regression_vars <- shiny::reactive({
-    if (is.null(input$regression_vars)) {
-      out <- colnames(rv$data_filtered)
-    } else {
-      out <- unique(c(input$regression_vars, input$outcome_var))
-    }
-    return(out)
-  })
-
+  # output$regression_vars <- shiny::renderUI({
+  #   columnSelectInput(
+  #     inputId = "regression_vars",
+  #     selected = NULL,
+  #     label = "Covariables to include",
+  #     data = rv$data_filtered,
+  #     multiple = TRUE,
+  #   )
+  # })
+  #
+  # output$outcome_var <- shiny::renderUI({
+  #   columnSelectInput(
+  #     inputId = "outcome_var",
+  #     selected = NULL,
+  #     label = "Select outcome variable",
+  #     data = rv$data_filtered,
+  #     multiple = FALSE
+  #   )
+  # })
+  #
+  # output$regression_type <- shiny::renderUI({
+  #   shiny::req(input$outcome_var)
+  #   shiny::selectizeInput(
+  #     inputId = "regression_type",
+  #     label = "Choose regression analysis",
+  #     ## The below ifelse statement handles the case of loading a new dataset
+  #     choices = possible_functions(
+  #       data = dplyr::select(
+  #         rv$data_filtered,
+  #         ifelse(input$outcome_var %in% names(rv$data_filtered),
+  #           input$outcome_var,
+  #           names(rv$data_filtered)[1]
+  #         )
+  #       ), design = "cross-sectional"
+  #     ),
+  #     multiple = FALSE
+  #   )
+  # })
+  #
+  # output$factor_vars <- shiny::renderUI({
+  #   shiny::selectizeInput(
+  #     inputId = "factor_vars",
+  #     selected = colnames(rv$data_filtered)[sapply(rv$data_filtered, is.factor)],
+  #     label = "Covariables to format as categorical",
+  #     choices = colnames(rv$data_filtered),
+  #     multiple = TRUE
+  #   )
+  # })
+  #
+  # ## Collected regression variables
+  # regression_vars <- shiny::reactive({
+  #   if (is.null(input$regression_vars)) {
+  #     out <- colnames(rv$data_filtered)
+  #   } else {
+  #     out <- unique(c(input$regression_vars, input$outcome_var))
+  #   }
+  #   return(out)
+  # })
+  #
   output$strat_var <- shiny::renderUI({
     columnSelectInput(
       inputId = "strat_var",
@@ -557,18 +561,18 @@ server <- function(input, output, session) {
       )
     )
   })
-
-
-  output$plot_model <- shiny::renderUI({
-    shiny::req(rv$list$regression$tables)
-    shiny::selectInput(
-      inputId = "plot_model",
-      selected = "none",
-      label = "Select models to plot",
-      choices = names(rv$list$regression$tables),
-      multiple = TRUE
-    )
-  })
+  #
+  #
+  # output$plot_model <- shiny::renderUI({
+  #   shiny::req(rv$list$regression$tables)
+  #   shiny::selectInput(
+  #     inputId = "plot_model",
+  #     selected = "none",
+  #     label = "Select models to plot",
+  #     choices = names(rv$list$regression$tables),
+  #     multiple = TRUE
+  #   )
+  # })
 
 
   ##############################################################################
@@ -656,193 +660,197 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
-  shiny::observeEvent(
-    input$load,
-    {
-      shiny::req(input$outcome_var)
-      # browser()
-      # Assumes all character variables can be formatted as factors
-      # data <- data_filter$filtered() |>
-      tryCatch(
-        {
-          ## Which models to create should be decided by input
-          ## Could also include
-          ##   imputed or
-          ##   minimally adjusted
-          model_lists <- list(
-            "Univariable" = regression_model_uv_list,
-            "Multivariable" = regression_model_list
-          ) |>
-            lapply(\(.fun){
-              ls <- do.call(
-                .fun,
-                c(
-                  list(data = rv$list$data |>
-                    (\(.x){
-                      .x[regression_vars()]
-                    })()),
-                  list(outcome.str = input$outcome_var),
-                  list(fun.descr = input$regression_type)
-                )
-              )
-            })
+  rv$regression <- regression_server("regression", data = shiny::reactive(rv$data_filtered))
 
-          # browser()
+  # rv$list$regression <- regression_server("regression", data = shiny::reactive(rv$data_filtered))
 
-          rv$list$regression$params <- get_fun_options(input$regression_type) |>
-            (\(.x){
-              .x[[1]]
-            })()
-
-          rv$list$regression$models <- model_lists
-
-          # names(rv$list$regression)
-
-          # rv$models <- lapply(model_lists, \(.x){
-          #   .x$model
-          # })
-        },
-        # warning = function(warn) {
-        #   showNotification(paste0(warn), type = "warning")
-        # },
-        error = function(err) {
-          showNotification(paste0("Creating regression models failed with the following error: ", err), type = "err")
-        }
-      )
-    }
-  )
-
-  shiny::observeEvent(
-    ignoreInit = TRUE,
-    list(
-      rv$list$regression$models
-    ),
-    {
-      shiny::req(rv$list$regression$models)
-      tryCatch(
-        {
-          rv$check <- lapply(rv$list$regression$models, \(.x){
-            .x$model
-          }) |>
-            purrr::pluck("Multivariable") |>
-            performance::check_model()
-        },
-        # warning = function(warn) {
-        #   showNotification(paste0(warn), type = "warning")
-        # },
-        error = function(err) {
-          showNotification(paste0("Running model assumptions checks failed with the following error: ", err), type = "err")
-        }
-      )
-    }
-  )
-
-  output$check <- shiny::renderPlot(
-    {
-      shiny::req(rv$check)
-      # browser()
-      # p <- plot(rv$check) +
-      #   patchwork::plot_annotation(title = "Multivariable regression model checks")
-
-      p <- plot(rv$check) +
-        patchwork::plot_annotation(title = "Multivariable regression model checks")
-
-      for (i in seq_len(length(p))) {
-        p[[i]] <- p[[i]] + gg_theme_shiny()
-      }
-
-      p
-
-      # p + patchwork::plot_layout(ncol = 1, design = ggplot2::waiver())
-
-      # Generate checks in one column
-      # layout <- sapply(seq_len(length(p)), \(.x){
-      #   patchwork::area(.x, 1)
-      # })
-      #
-      # p + patchwork::plot_layout(design = Reduce(c, layout))
-
-      # patchwork::wrap_plots(ncol=1) +
-      # patchwork::plot_annotation(title = 'Multivariable regression model checks')
-    },
-    height = 600,
-    alt = "Assumptions testing of the multivariable regression model"
-  )
-
-
-  shiny::observeEvent(
-    input$load,
-    {
-      shiny::req(rv$list$regression$models)
-      tryCatch(
-        {
-          out <- lapply(rv$list$regression$models, \(.x){
-            .x$model
-          }) |>
-            purrr::map(regression_table)
-
-          if (input$add_regression_p == "no") {
-            out <- out |>
-              lapply(\(.x){
-                .x |>
-                  gtsummary::modify_column_hide(
-                    column = "p.value"
-                  )
-              })
-          }
-
-          rv$list$regression$tables <- out
-
-          # rv$list$regression$table <- out |>
-          #   tbl_merge()
-
-          # gtsummary::as_kable(rv$list$regression$table) |>
-          #   readr::write_lines(file="./www/_regression_table.md")
-
-          rv$list$input <- input
-        },
-        warning = function(warn) {
-          showNotification(paste0(warn), type = "warning")
-        },
-        error = function(err) {
-          showNotification(paste0("Creating a regression table failed with the following error: ", err), type = "err")
-        }
-      )
-      rv$ready <- "ready"
-    }
-  )
-
-  output$table2 <- gt::render_gt({
-    shiny::req(rv$list$regression$tables)
-    rv$list$regression$tables |>
-      tbl_merge() |>
-      gtsummary::as_gt() |>
-      gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$params$descr}**")))
-  })
-
-  output$regression_plot <- shiny::renderPlot(
-    {
-      # shiny::req(rv$list$regression$plot)
-      shiny::req(input$plot_model)
-
-      out <- merge_long(rv$list$regression, input$plot_model) |>
-        plot.tbl_regression(
-          colour = "variable",
-          facet_col = "model"
-        )
-
-      out +
-        ggplot2::scale_y_discrete(labels = scales::label_wrap(15)) +
-        gg_theme_shiny()
-
-      # rv$list$regression$tables$Multivariable |>
-      #   plot(colour = "variable") +
-      #   ggplot2::scale_y_discrete(labels = scales::label_wrap(15)) +
-      #   gg_theme_shiny()
-    },
-    height = 500,
-    alt = "Regression coefficient plot"
-  )
+  # shiny::observeEvent(
+  #   input$load,
+  #   {
+  #     shiny::req(input$outcome_var)
+  #     # browser()
+  #     # Assumes all character variables can be formatted as factors
+  #     # data <- data_filter$filtered() |>
+  #     tryCatch(
+  #       {
+  #         ## Which models to create should be decided by input
+  #         ## Could also include
+  #         ##   imputed or
+  #         ##   minimally adjusted
+  #         model_lists <- list(
+  #           "Univariable" = regression_model_uv_list,
+  #           "Multivariable" = regression_model_list
+  #         ) |>
+  #           lapply(\(.fun){
+  #             ls <- do.call(
+  #               .fun,
+  #               c(
+  #                 list(data = rv$list$data |>
+  #                   (\(.x){
+  #                     .x[regression_vars()]
+  #                   })()),
+  #                 list(outcome.str = input$outcome_var),
+  #                 list(fun.descr = input$regression_type)
+  #               )
+  #             )
+  #           })
+  #
+  #         # browser()
+  #
+  #         rv$list$regression$params <- get_fun_options(input$regression_type) |>
+  #           (\(.x){
+  #             .x[[1]]
+  #           })()
+  #
+  #         rv$list$regression$models <- model_lists
+  #
+  #         # names(rv$list$regression)
+  #
+  #         # rv$models <- lapply(model_lists, \(.x){
+  #         #   .x$model
+  #         # })
+  #       },
+  #       # warning = function(warn) {
+  #       #   showNotification(paste0(warn), type = "warning")
+  #       # },
+  #       error = function(err) {
+  #         showNotification(paste0("Creating regression models failed with the following error: ", err), type = "err")
+  #       }
+  #     )
+  #   }
+  # )
+  #
+  # shiny::observeEvent(
+  #   ignoreInit = TRUE,
+  #   list(
+  #     rv$list$regression$models
+  #   ),
+  #   {
+  #     shiny::req(rv$list$regression$models)
+  #     tryCatch(
+  #       {
+  #         rv$check <- lapply(rv$list$regression$models, \(.x){
+  #           .x$model
+  #         }) |>
+  #           purrr::pluck("Multivariable") |>
+  #           performance::check_model()
+  #       },
+  #       # warning = function(warn) {
+  #       #   showNotification(paste0(warn), type = "warning")
+  #       # },
+  #       error = function(err) {
+  #         showNotification(paste0("Running model assumptions checks failed with the following error: ", err), type = "err")
+  #       }
+  #     )
+  #   }
+  # )
+  #
+  # output$check <- shiny::renderPlot(
+  #   {
+  #     shiny::req(rv$check)
+  #     # browser()
+  #     # p <- plot(rv$check) +
+  #     #   patchwork::plot_annotation(title = "Multivariable regression model checks")
+  #
+  #     p <- plot(rv$check) +
+  #       patchwork::plot_annotation(title = "Multivariable regression model checks")
+  #
+  #     for (i in seq_len(length(p))) {
+  #       p[[i]] <- p[[i]] + gg_theme_shiny()
+  #     }
+  #
+  #     p
+  #
+  #     # p + patchwork::plot_layout(ncol = 1, design = ggplot2::waiver())
+  #
+  #     # Generate checks in one column
+  #     # layout <- sapply(seq_len(length(p)), \(.x){
+  #     #   patchwork::area(.x, 1)
+  #     # })
+  #     #
+  #     # p + patchwork::plot_layout(design = Reduce(c, layout))
+  #
+  #     # patchwork::wrap_plots(ncol=1) +
+  #     # patchwork::plot_annotation(title = 'Multivariable regression model checks')
+  #   },
+  #   height = 600,
+  #   alt = "Assumptions testing of the multivariable regression model"
+  # )
+  #
+  #
+  # shiny::observeEvent(
+  #   input$load,
+  #   {
+  #     shiny::req(rv$list$regression$models)
+  #     tryCatch(
+  #       {
+  #         out <- lapply(rv$list$regression$models, \(.x){
+  #           .x$model
+  #         }) |>
+  #           purrr::map(regression_table)
+  #
+  #         if (input$add_regression_p == "no") {
+  #           out <- out |>
+  #             lapply(\(.x){
+  #               .x |>
+  #                 gtsummary::modify_column_hide(
+  #                   column = "p.value"
+  #                 )
+  #             })
+  #         }
+  #
+  #         rv$list$regression$tables <- out
+  #
+  #         # rv$list$regression$table <- out |>
+  #         #   tbl_merge()
+  #
+  #         # gtsummary::as_kable(rv$list$regression$table) |>
+  #         #   readr::write_lines(file="./www/_regression_table.md")
+  #
+  #         rv$list$input <- input
+  #       },
+  #       warning = function(warn) {
+  #         showNotification(paste0(warn), type = "warning")
+  #       },
+  #       error = function(err) {
+  #         showNotification(paste0("Creating a regression table failed with the following error: ", err), type = "err")
+  #       }
+  #     )
+  #     rv$ready <- "ready"
+  #   }
+  # )
+  #
+  # output$table2 <- gt::render_gt({
+  #   shiny::req(rv$list$regression$tables)
+  #   rv$list$regression$tables |>
+  #     tbl_merge() |>
+  #     gtsummary::as_gt() |>
+  #     gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$params$descr}**")))
+  # })
+  #
+  # output$regression_plot <- shiny::renderPlot(
+  #   {
+  #     # shiny::req(rv$list$regression$plot)
+  #     shiny::req(input$plot_model)
+  #
+  #     out <- merge_long(rv$list$regression, input$plot_model) |>
+  #       plot.tbl_regression(
+  #         colour = "variable",
+  #         facet_col = "model"
+  #       )
+  #
+  #     out +
+  #       ggplot2::scale_y_discrete(labels = scales::label_wrap(15)) +
+  #       gg_theme_shiny()
+  #
+  #     # rv$list$regression$tables$Multivariable |>
+  #     #   plot(colour = "variable") +
+  #     #   ggplot2::scale_y_discrete(labels = scales::label_wrap(15)) +
+  #     #   gg_theme_shiny()
+  #   },
+  #   height = 500,
+  #   alt = "Regression coefficient plot"
+  # )
 
   # shiny::conditionalPanel(
   #   condition = "output.uploaded == 'yes'",
@@ -912,21 +920,26 @@ server <- function(input, output, session) {
       # shiny::req(rv$list$regression)
       ## Notification is not progressing
       ## Presumably due to missing
-
+      # browser()
       # Simplified for .rmd output attempt
       format <- ifelse(type == "docx", "word_document", "odt_document")
 
-      shiny::withProgress(message = "Generating the report. Hold on for a moment..", {
-        rv$list |>
-          write_rmd(
-            output_format = format,
-            input = file.path(getwd(), "www/report.rmd")
-          )
+      # browser()
+      rv$list$regression <- rv$regression()
 
-        # write_quarto(
-        #   output_format = type,
-        #   input = file.path(getwd(), "www/report.qmd")
-        # )
+      shiny::withProgress(message = "Generating the report. Hold on for a moment..", {
+        tryCatch(
+          {
+            rv$list |>
+              write_rmd(
+                output_format = format,
+                input = file.path(getwd(), "www/report.rmd")
+              )
+          },
+          error = function(err) {
+            showNotification(paste0("We encountered the following error creating your report: ", err), type = "err")
+          }
+        )
       })
       file.rename(paste0("www/report.", type), file)
     }

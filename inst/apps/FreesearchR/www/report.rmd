@@ -15,6 +15,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 ```{r}
 web_data <- readr::read_rds(file = params$data.file)
+# web_data <- readr::read_rds(file = "~/FreesearchR/inst/apps/FreesearchR/www/web_data.rds")
 library(gtsummary)
 library(gt)
 
@@ -52,21 +53,21 @@ Analyses were conducted in the *FreesearchR* data analysis web-tool based on R v
 Below are the baseline characteristics.
 
 ```{r, results = 'asis'}
-if ("table1" %in% names(web_data)){
-tbl <- gtsummary::as_gt(web_data$table1)
-knitr::knit_print(tbl)}
+if ("table1" %in% names(web_data)) {
+  tbl <- gtsummary::as_gt(web_data$table1)
+  knitr::knit_print(tbl)
+}
 ```
 
-`r if ("regression" %in% names(web_data)) glue::glue("Below are the results from the { tolower(vec2sentence(names(web_data$regression$tables)))} {web_data$regression$params$descr}.")`
+`r if (length(web_data$regression) > 0) glue::glue("Below are the results from the { tolower(vec2sentence(names(web_data$regression$regression$tables)))} {web_data$regression$regression$params$descr}.")`
 
 ```{r, results = 'asis'}
-if ("regression" %in% names(web_data)){
-reg_tbl <- web_data$regression$tables
-knitr::knit_print(tbl_merge(reg_tbl))
+if ("regression" %in% names(web_data) && length(web_data$regression) > 0) {
+  reg_tbl <- web_data$regression$regression$tables
+  knitr::knit_print(tbl_merge(reg_tbl))
 }
 ```
 
 ## Discussion
 
 Good luck on your further work!
-

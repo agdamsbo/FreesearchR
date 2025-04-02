@@ -461,8 +461,7 @@ import_dta <- function(file) {
 #'
 import_rds <- function(file) {
   readr::read_rds(
-    file = file,
-    name_repair = "unique_quiet"
+    file = file
   )
 }
 

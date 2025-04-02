@@ -79,7 +79,7 @@ update_variables_ui <- function(id, title = "") {
     shiny::actionButton(
       inputId = ns("validate"),
       label = htmltools::tagList(
-        phosphoricons::ph("arrow-circle-right", title = i18n("Apply changes")),
+        phosphoricons::ph("arrow-circle-right", title = datamods::i18n("Apply changes")),
         datamods::i18n("Apply changes")
       ),
       width = "100%"
@@ -137,14 +137,8 @@ update_variables_server <- function(id,
 
       output$table <- toastui::renderDatagrid({
         shiny::req(variables_r())
-        # browser()
+
         variables <- variables_r()
-
-        # variables <- variables |>
-        #   dplyr::mutate(vals=as.list(dplyr::as_tibble(data_r())))
-
-        # variables <- variables |>
-        #   dplyr::mutate(n_id=seq_len(nrow(variables)))
 
         update_variables_datagrid(
           variables,
@@ -165,7 +159,7 @@ update_variables_server <- function(id,
           if (length(new_selections) < 1) {
             new_selections <- seq_along(data)
           }
-          # browser()
+
           data_inputs <- data.table::as.data.table(input$table_data)
           data.table::setorderv(data_inputs, "rowKey")
 
@@ -184,7 +178,6 @@ update_variables_server <- function(id,
           new_classes <- data_inputs$class_toset
           new_classes[new_classes == "Select"] <- NA
 
-          # browser()
           data_sv <- variables_r()
           vars_to_change <- get_vars_to_convert(data_sv, setNames(as.list(new_classes), old_names))
 
@@ -251,6 +244,8 @@ update_variables_server <- function(id,
         ignoreInit = TRUE
       )
 
+      # shiny::observeEvent(input$close,
+      #                                         {
       return(shiny::reactive({
         data <- updated_data$x
         code <- list()
@@ -277,24 +272,62 @@ update_variables_server <- function(id,
         }
         return(data)
       }))
+                                              # })
+
+      # shiny::reactive({
+      #   data <- updated_data$x
+      #   code <- list()
+      #   if (!is.null(data) && shiny::isTruthy(updated_data$list_mutate) && length(updated_data$list_mutate) > 0) {
+      #     code <- c(code, list(rlang::call2("mutate", !!!updated_data$list_mutate)))
+      #   }
+      #   if (!is.null(data) && shiny::isTruthy(updated_data$list_rename) && length(updated_data$list_rename) > 0) {
+      #     code <- c(code, list(rlang::call2("rename", !!!updated_data$list_rename)))
+      #   }
+      #   if (!is.null(data) && shiny::isTruthy(updated_data$list_select) && length(updated_data$list_select) > 0) {
+      #     code <- c(code, list(rlang::expr(select(-any_of(c(!!!updated_data$list_select))))))
+      #   }
+      #   if (!is.null(data) && shiny::isTruthy(updated_data$list_relabel) && length(updated_data$list_relabel) > 0) {
+      #     code <- c(code, list(rlang::call2("purrr::map2(list_relabel,
+      #                                                  function(.data,.label){
+      #                                                    REDCapCAST::set_attr(.data,.label,attr = 'label')
+      #                                                  }) |> dplyr::bind_cols(.name_repair = 'unique_quiet')")))
+      #   }
+      #   if (length(code) > 0) {
+      #     attr(data, "code") <- Reduce(
+      #       f = function(x, y) rlang::expr(!!x %>% !!y),
+      #       x = code
+      #     )
+      #   }
+      #   updated_data$return_data <- data
+      # })
+
+      # shiny::observeEvent(input$close,
+      #                     {
+      #                       shiny::req(input$close)
+      #                       return(shiny::reactive({
+      #                         data <- updated_data$return_data
+      #                         return(data)
+      #                         }))
+      #                     })
+
     }
   )
 }
 
 
 modal_update_variables <- function(id,
-                                title = "Select, rename and reclass variables",
-                                easyClose = TRUE,
-                                size = "xl",
-                                footer = NULL) {
+                                   title = "Select, rename and reclass variables",
+                                   easyClose = TRUE,
+                                   size = "xl",
+                                   footer = NULL) {
   ns <- NS(id)
   showModal(modalDialog(
     title = tagList(title, datamods:::button_close_modal()),
     update_variables_ui(id),
-    tags$div(
-      style = "display: none;",
-      textInput(inputId = ns("hidden"), label = NULL, value = datamods:::genId())
-    ),
+    # tags$div(
+    #   style = "display: none;",
+    #   textInput(inputId = ns("hidden"), label = NULL, value = datamods:::genId())
+    # ),
     easyClose = easyClose,
     size = size,
     footer = footer
@@ -618,7 +651,11 @@ convert_to <- function(data,
       setNames(list(expr(as.factor(!!sym(variable)))), variable)
     )
   } else if (identical(new_class, "numeric")) {
-    data[[variable]] <- as.numeric(type.convert(data[[variable]], as.is = TRUE, ...))
+    data[[variable]] <- as.numeric(data[[variable]], ...)
+    # This is the original, that would convert to character and then to numeric
+    # resulting in all NAs, setting as.is = FALSE would result in a numeric
+    # vector in order of appearance. Now it is acting like integer conversion
+    # data[[variable]] <- as.numeric(type.convert(data[[variable]], as.is = TRUE, ...))
     attr(data, "code_03_convert") <- c(
       attr(data, "code_03_convert"),
       setNames(list(expr(as.numeric(!!sym(variable)))), variable)
@@ -633,7 +670,7 @@ convert_to <- function(data,
     data[[variable]] <- as.Date(x = clean_date(data[[variable]]), ...)
     attr(data, "code_03_convert") <- c(
       attr(data, "code_03_convert"),
-      setNames(list(expr(as.Date(clean_date(!!sym(variable)), origin = !!args$origin, format=clean_sep(!!args$format)))), variable)
+      setNames(list(expr(as.Date(clean_date(!!sym(variable)), origin = !!args$origin, format = clean_sep(!!args$format)))), variable)
     )
   } else if (identical(new_class, "datetime")) {
     data[[variable]] <- as.POSIXct(x = data[[variable]], ...)
@@ -747,8 +784,8 @@ get_vars_to_convert <- function(vars, classes_input) {
 #' @returns character vector
 #' @export
 #'
-clean_sep <- function(data,old.sep="[-.,/]",new.sep="-"){
-  gsub(old.sep,new.sep,data)
+clean_sep <- function(data, old.sep = "[-.,/]", new.sep = "-") {
+  gsub(old.sep, new.sep, data)
 }
 
 #' Attempts at applying uniform date format
@@ -758,18 +795,19 @@ clean_sep <- function(data,old.sep="[-.,/]",new.sep="-"){
 #' @returns character string
 #' @export
 #'
-clean_date <- function(data){
+clean_date <- function(data) {
   data |>
     clean_sep() |>
     sapply(\(.x){
-      if (is.na(.x)){
+      if (is.na(.x)) {
         .x
       } else {
-        strsplit(.x,"-") |>
-          unlist()|>
+        strsplit(.x, "-") |>
+          unlist() |>
           lapply(\(.y){
-            if (nchar(.y)==1) paste0("0",.y) else .y
-          }) |> paste(collapse="-")
+            if (nchar(.y) == 1) paste0("0", .y) else .y
+          }) |>
+          paste(collapse = "-")
       }
     }) |>
     unname()

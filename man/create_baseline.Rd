@@ -4,7 +4,14 @@
 \alias{create_baseline}
 \title{Create a baseline table}
 \usage{
-create_baseline(data, ..., by.var, add.p = FALSE, add.overall = FALSE)
+create_baseline(
+  data,
+  ...,
+  by.var,
+  add.p = FALSE,
+  add.overall = FALSE,
+  theme = c("jama", "lancet", "nejm", "qjecon")
+)
 }
 \arguments{
 \item{data}{data}
@@ -24,5 +31,5 @@ gtsummary table list object
 Create a baseline table
 }
 \examples{
-mtcars |> create_baseline(by.var = "gear", add.p="yes"=="yes")
+mtcars |> create_baseline(by.var = "gear", add.p = "yes" == "yes")
 }
