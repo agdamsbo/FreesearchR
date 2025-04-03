@@ -10,7 +10,7 @@
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'Version: 25.4.1.250403_1309'
+app_version <- function()'Version: 25.4.1.250403_1409'
 
 
 ########
@@ -287,7 +287,7 @@ sentence_paste <- function(data, and.str = "and") {
   } else if (length(data) == 2) {
     paste(data, collapse = glue::glue(" {and.str} "))
   } else if (length(data) > 2) {
-    paste(paste(data[-length(data)], collapse = ", "), data[length(data)], collapse = glue::glue(" {and.str} "))
+    paste(paste(data[-length(data)], collapse = ", "), data[length(data)], sep = glue::glue(" {and.str} "))
   }
 }
 

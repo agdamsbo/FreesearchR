@@ -9,6 +9,7 @@ vignette: >
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,eval = FALSE)
+source(here::here("functions.R"))
 ```
 
 # Getting started with ***FreesearchR***
@@ -57,7 +58,25 @@ Currently several data file formats are supported for easy import (csv, txt, xls
 
 ## Visualise
 
-- Would be nice to have a table of possible plots, their description and data options
+Below are the available plot types listed.
+
+```{r echo = FALSE, eval = TRUE}
+c("continuous", "dichotomous", "ordinal", "categorical") |> 
+  lapply(\(.x){
+    dplyr::bind_cols(
+      dplyr::tibble("Data type"=.x),
+      supported_plots() |> 
+      lapply(\(.y){
+        if (.x %in% .y$primary.type){
+          .y[c("descr","note")]|> dplyr::bind_cols()
+        }
+})|> 
+  dplyr::bind_rows() |> 
+  setNames(c("Plot type","Description")))
+  }) |> 
+  dplyr::bind_rows() |> 
+  toastui::datagrid(filters=TRUE,theme="striped")
+```
 
 
 ## Regression

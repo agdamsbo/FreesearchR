@@ -128,7 +128,7 @@ sentence_paste <- function(data, and.str = "and") {
   } else if (length(data) == 2) {
     paste(data, collapse = glue::glue(" {and.str} "))
   } else if (length(data) > 2) {
-    paste(paste(data[-length(data)], collapse = ", "), data[length(data)], collapse = glue::glue(" {and.str} "))
+    paste(paste(data[-length(data)], collapse = ", "), data[length(data)], sep = glue::glue(" {and.str} "))
   }
 }
 
