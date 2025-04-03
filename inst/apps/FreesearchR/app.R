@@ -10,7 +10,7 @@
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'Version: 25.4.1.250403_1409'
+app_version <- function()'Version: 25.4.1.250403_1506'
 
 
 ########

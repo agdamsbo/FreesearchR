@@ -1,4 +1,4 @@
-# FreesearchR 25.4.12
+# FreesearchR 25.4.2
 
 Polished and simplified data import module including a much improved REDCap import module.
 
@@ -6,7 +6,7 @@ Polished and simplified data import module including a much improved REDCap impo
 
 Focus is on polish and improved ui/ux.
 
-Updating name (will be FreesearchR), with renamed repository and some graphics are coming. This may introduce some breaking chances for others calling or installing the package. No future changes are planned. A complete transition is planned before attending and presenting a poster at the European Stroke Organisation Conference 2025 in May.
+Updating project name to FreesearchR, with renamed repository. Graphics are coming. This may introduce some breaking chances for others calling or installing the package. No additional future changes are planned. A complete transition is planned before attending and presenting a poster at the European Stroke Organisation Conference 2025 in May.
 
 Testing file upload conducted and improved.
 
