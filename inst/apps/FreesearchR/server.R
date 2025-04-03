@@ -158,18 +158,33 @@ server <- function(input, output, session) {
     )
   })
 
+  output$data_loaded <- shiny::reactive({
+    !is.null(rv$data_temp)
+    })
+
+  shiny::observeEvent(input$source,{
+    rv$data_temp <- NULL
+    })
+
+  shiny::outputOptions(output, "data_loaded", suspendWhenHidden = FALSE)
 
   shiny::observeEvent(
     eventExpr = list(
       input$import_var,
-      input$complete_cutoff
+      input$complete_cutoff,
+      rv$data_temp
     ),
     handlerExpr = {
       shiny::req(rv$data_temp)
       # browser()
-      rv$data_original <- rv$data_temp |>
-        dplyr::select(input$import_var) |>
+      temp_data <- rv$data_temp
+      if (all(input$import_var %in% names(temp_data))){
+        temp_data <- temp_data |> dplyr::select(input$import_var)
+      }
+
+      rv$data_original <- temp_data |>
         default_parsing()
+
 
       rv$code$import <- rv$code$import |>
         deparse() |>
@@ -183,7 +198,7 @@ server <- function(input, output, session) {
 
       rv$code$filter <- NULL
       rv$code$modify <- NULL
-    }
+    },ignoreNULL = FALSE
   )
 
   output$data_info_import <- shiny::renderUI({
@@ -208,8 +223,7 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     eventExpr = list(
-      rv$data_original,
-      input$complete_cutoff
+      rv$data_original
     ),
     handlerExpr = {
       shiny::req(rv$data_original)

@@ -1,3 +1,7 @@
+# FreesearchR 25.4.12
+
+Polished and simplified data import module including a much improved REDCap import module.
+
 # FreesearchR 25.4.1
 
 Focus is on polish and improved ui/ux.

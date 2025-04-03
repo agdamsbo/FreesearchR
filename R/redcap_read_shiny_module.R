@@ -7,7 +7,7 @@
 #'
 #' @return shiny ui element
 #' @export
-m_redcap_readUI <- function(id, title = TRUE) {
+m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
   ns <- shiny::NS(id)
 
   if (isTRUE(title)) {
@@ -23,7 +23,7 @@ m_redcap_readUI <- function(id, title = TRUE) {
     shiny::textInput(
       inputId = ns("uri"),
       label = "Web address",
-      value = "https://redcap.your.institution/"
+      value = if_not_missing(url, "https://redcap.your.institution/")
     ),
     shiny::helpText("Format should be either 'https://redcap.your.institution/' or 'https://your.institution/redcap/'"),
     shiny::textInput(
@@ -32,11 +32,13 @@ m_redcap_readUI <- function(id, title = TRUE) {
       value = ""
     ),
     shiny::helpText("The token is a string of 32 numbers and letters."),
+    shiny::br(),
+    shiny::br(),
     shiny::actionButton(
       inputId = ns("data_connect"),
       label = "Connect",
       icon = shiny::icon("link", lib = "glyphicon"),
-      # width = NULL,
+      width = "100%",
       disabled = TRUE
     ),
     shiny::br(),
@@ -53,6 +55,15 @@ m_redcap_readUI <- function(id, title = TRUE) {
     shiny::br()
   )
 
+  filter_ui <-
+    shiny::tagList(
+      # width = 6,
+      shiny::uiOutput(outputId = ns("arms")),
+      shiny::textInput(
+        inputId = ns("filter"),
+        label = "Optional filter logic (e.g., ⁠[gender] = 'female')"
+      )
+    )
 
   params_ui <-
     shiny::tagList(
@@ -60,41 +71,28 @@ m_redcap_readUI <- function(id, title = TRUE) {
       shiny::tags$h4("Data import parameters"),
       shiny::helpText("Options here will show, when API and uri are typed"),
       shiny::uiOutput(outputId = ns("fields")),
+      shiny::tags$div(
+        class = "shiny-input-container",
+        shiny::tags$label(
+          class = "control-label",
+          `for` = ns("dropdown_params"),
+          "...",
+          style = htmltools::css(visibility = "hidden")
+        ),
+        shinyWidgets::dropMenu(
+          shiny::actionButton(
+            inputId = ns("dropdown_params"),
+            label = "Add data filters",
+            icon = shiny::icon("filter"),
+            width = "100%",
+            class = "px-1"
+          ),
+          filter_ui
+        ),
+        shiny::helpText("Optionally filter project arms if logitudinal or apply server side data filters")
+      ),
       shiny::uiOutput(outputId = ns("data_type")),
       shiny::uiOutput(outputId = ns("fill")),
-      shinyWidgets::switchInput(
-        inputId = "do_filter",
-        label = "Apply filter?",
-        value = FALSE,
-        inline = FALSE,
-        onLabel = "YES",
-        offLabel = "NO"
-      ),
-      shiny::conditionalPanel(
-        condition = "input.do_filter",
-        shiny::uiOutput(outputId = ns("arms")),
-        shiny::textInput(
-          inputId = ns("filter"),
-          label = "Optional filter logic (e.g., ⁠[gender] = 'female')"
-        )
-      )
-    )
-
-
-  shiny::fluidPage(
-    title=title,
-    bslib::layout_columns(
-      server_ui,
-      params_ui,
-      col_widths = bslib::breakpoints(
-        sm = c(12, 12),
-        md = c(12, 12)
-      )
-    ),
-    shiny::column(
-      width = 12,
-      # shiny::actionButton(inputId = ns("import"), label = "Import"),
-      ## TODO: Use busy indicator like on download to have button activate/deactivate
       shiny::actionButton(
         inputId = ns("data_import"),
         label = "Import",
@@ -102,6 +100,18 @@ m_redcap_readUI <- function(id, title = TRUE) {
         width = "100%",
         disabled = TRUE
       ),
+      shiny::tags$br(),
+      shiny::tags$br(),
+      tags$div(
+        id = ns("retrieved-placeholder"),
+        shinyWidgets::alert(
+          id = ns("retrieved-result"),
+          status = "info",
+          tags$p(phosphoricons::ph("info", weight = "bold"), "Please specify data to download, then press 'Import'.")
+        ),
+        dismissible = TRUE
+      )#,
+      ## TODO: Use busy indicator like on download to have button activate/deactivate
       # bslib::input_task_button(
       #   id = ns("data_import"),
       #   label = "Import",
@@ -114,12 +124,20 @@ m_redcap_readUI <- function(id, title = TRUE) {
       #   type = "primary",
       #   auto_reset = TRUE#,state="busy"
       # ),
-      shiny::br(),
-      shiny::br(),
-      shiny::helpText("Press 'Import' to get data from the REDCap server. Check the preview below before proceeding."),
-      shiny::br(),
-      shiny::br()
+      # shiny::br(),
+      # shiny::helpText("Press 'Import' to get data from the REDCap server. Check the preview below before proceeding.")
     )
+
+
+  shiny::fluidPage(
+    title = title,
+    server_ui,
+    shiny::conditionalPanel(
+      condition = "output.connect_success == true",
+      params_ui,
+      ns = ns
+    ),
+    shiny::br()
   )
 }
 
@@ -149,8 +167,8 @@ m_redcap_readServer <- function(id) {
     shiny::observeEvent(list(input$api, input$uri), {
       shiny::req(input$api)
       shiny::req(input$uri)
-      if (!is.null(input$uri)){
-      uri <- paste0(ifelse(endsWith(input$uri, "/"), input$uri, paste0(input$uri, "/")), "api/")
+      if (!is.null(input$uri)) {
+        uri <- paste0(ifelse(endsWith(input$uri, "/"), input$uri, paste0(input$uri, "/")), "api/")
       } else {
         uri <- input$uri
       }
@@ -204,9 +222,11 @@ m_redcap_readServer <- function(id) {
               datamods:::insert_alert(
                 selector = ns("connect"),
                 status = "success",
-                include_data_alert(see_data_text = "Click to see data dictionary",
+                include_data_alert(
+                  see_data_text = "Click to see data dictionary",
                   dataIdName = "see_data",
-                  extra = tags$p(tags$b(phosphoricons::ph("check", weight = "bold"), "Connected to server!"), tags$p(paste0(data_rv$info$project_title, " loaded."))),
+                  extra = tags$p(tags$b(phosphoricons::ph("check", weight = "bold"), "Connected to server!"),
+                                 glue::glue("The {data_rv$info$project_title} project is loaded.")),
                   btn_show_data = TRUE
                 )
               )
@@ -224,6 +244,9 @@ m_redcap_readServer <- function(id) {
         showNotification(paste0(err), type = "err")
       }
     )
+
+    output$connect_success <- shiny::reactive(identical(data_rv$dd_status, "success"))
+    shiny::outputOptions(output, "connect_success", suspendWhenHidden = FALSE)
 
     shiny::observeEvent(input$see_data, {
       datamods::show_data(
@@ -313,17 +336,21 @@ m_redcap_readServer <- function(id) {
     })
 
     output$arms <- shiny::renderUI({
-      vectorSelectInput(
-        inputId = ns("arms"),
-        selected = NULL,
-        label = "Filter by events/arms",
-        choices = stats::setNames(arms()[[3]], arms()[[1]]),
-        multiple = TRUE
-      )
+      if (NROW(arms()) > 0) {
+        vectorSelectInput(
+          inputId = ns("arms"),
+          selected = NULL,
+          label = "Filter by events/arms",
+          choices = stats::setNames(arms()[[3]], arms()[[1]]),
+          multiple = TRUE
+        )
+      }
     })
 
     shiny::observeEvent(input$data_import, {
       shiny::req(input$fields)
+
+      # browser()
       record_id <- purrr::pluck(data_rv$dd_list, "data")[[1]][1]
 
 
@@ -334,7 +361,11 @@ m_redcap_readServer <- function(id) {
         events = input$arms,
         raw_or_label = "both",
         filter_logic = input$filter,
-        split_forms = if (input$data_type == "long") "none" else "all"
+        split_forms = ifelse(
+          input$data_type == "long" && !is.null(input$data_type),
+          "none",
+          "all"
+        )
       )
 
       shiny::withProgress(message = "Downloading REDCap data. Hold on for a moment..", {
@@ -342,19 +373,24 @@ m_redcap_readServer <- function(id) {
       })
 
       code <- rlang::call2("read_redcap_tables",
-                           !!!utils::modifyList(parameters,list(token="PERSONAL_API_TOKEN")),
-                           , .ns = "REDCapCAST")
+        !!!utils::modifyList(parameters, list(token = "PERSONAL_API_TOKEN")), ,
+        .ns = "REDCapCAST"
+      )
 
+      # browser()
 
       if (inherits(imported, "try-error") || NROW(imported) < 1) {
         data_rv$data_status <- "error"
         data_rv$data_list <- NULL
+        data_rv$data_message <- imported$raw_text
       } else {
         data_rv$data_status <- "success"
+        data_rv$data_message <- "Requested data was retrieved!"
 
         ## The data management below should be separated to allow for changing
         ## "wide"/"long" without re-importing data
-        if (input$data_type != "long") {
+
+        if (parameters$split_form == "all") {
           # browser()
           out <- imported |>
             # redcap_wider()
@@ -378,6 +414,20 @@ m_redcap_readServer <- function(id) {
           }
         }
 
+        # browser()
+        in_data_check <- parameters$fields %in% names(out) |
+          sapply(names(out), \(.x) any(sapply(parameters$fields, \(.y) startsWith(.x, .y))))
+
+        if (!any(in_data_check[-1])) {
+          data_rv$data_status <- "warning"
+          data_rv$data_message <- "Data retrieved, but it looks like only the ID was retrieved from the server. Please check with your REDCap administrator that you have required permissions for data access."
+        }
+
+        if (!all(in_data_check)) {
+          data_rv$data_status <- "warning"
+          data_rv$data_message <- "Data retrieved, but it looks like not all requested fields were retrieved from the server. Please check with your REDCap administrator that you have required permissions for data access."
+        }
+
         data_rv$code <- code
 
         data_rv$data <- out |>
@@ -387,13 +437,33 @@ m_redcap_readServer <- function(id) {
       }
     })
 
-    # shiny::observe({
-    #   shiny::req(data_rv$imported)
-    #
-    #   imported <- data_rv$imported
-    #
-    #
-    # })
+    shiny::observeEvent(
+      data_rv$data_status,
+      {
+        # browser()
+        if (identical(data_rv$data_status, "error")) {
+          datamods:::insert_error(mssg = data_rv$data_message, selector = ns("retrieved"))
+        } else if (identical(data_rv$data_status, "success")) {
+          datamods:::insert_alert(
+            selector = ns("retrieved"),
+            status = data_rv$data_status,
+            tags$p(
+              tags$b(phosphoricons::ph("check", weight = "bold"), "Success!"),
+              data_rv$data_message
+            )
+          )
+        } else {
+          datamods:::insert_alert(
+            selector = ns("retrieved"),
+            status = data_rv$data_status,
+            tags$p(
+              tags$b(phosphoricons::ph("warning", weight = "bold"), "Warning!"),
+              data_rv$data_message
+            )
+          )
+        }
+      }
+    )
 
     return(list(
       status = shiny::reactive(data_rv$data_status),
@@ -553,13 +623,12 @@ drop_empty_event <- function(data, event = "redcap_event_name") {
 #' }
 redcap_demo_app <- function() {
   ui <- shiny::fluidPage(
-    m_redcap_readUI("data"),
+    m_redcap_readUI("data", url = NULL),
     DT::DTOutput("data"),
     shiny::tags$b("Code:"),
     shiny::verbatimTextOutput(outputId = "code")
   )
   server <- function(input, output, session) {
-
     data_val <- m_redcap_readServer(id = "data")
 
     output$data <- DT::renderDataTable(

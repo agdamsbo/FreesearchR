@@ -369,3 +369,26 @@ get_ggplot_label <- function(data,label){
   assertthat::assert_that(ggplot2::is.ggplot(data))
   data$labels[[label]]
 }
+
+
+#' Return if available
+#'
+#' @param data vector
+#' @param default assigned value for missings
+#'
+#' @returns vector
+#' @export
+#'
+#' @examples
+#' NULL |> if_not_missing("new")
+#' c(2,"a",NA) |> if_not_missing()
+#' "See" |> if_not_missing()
+if_not_missing <- function(data,default=NULL){
+  if (length(data)>1){
+    Reduce(c,lapply(data,if_not_missing))
+  } else if (is.na(data) || is.null(data)){
+    return(default)
+  } else {
+    return(data)
+  }
+}

@@ -2,12 +2,14 @@
 #'
 #' @param x (`tbl_regression`, `tbl_uvregression`)\cr
 #'   A 'tbl_regression' or 'tbl_uvregression' object
-##  #' @param remove_header_rows (scalar `logical`)\cr
-##  #'   logical indicating whether to remove header rows
-##  #'   for categorical variables. Default is `TRUE`
-##  #' @param remove_reference_rows (scalar `logical`)\cr
-##  #'   logical indicating whether to remove reference rows
-##  #'   for categorical variables. Default is `FALSE`.
+#' @param plot_ref (scalar `logical`)\cr
+#'   plot reference values
+#' @param remove_header_rows (scalar `logical`)\cr
+#'   logical indicating whether to remove header rows
+#'   for categorical variables. Default is `TRUE`
+#' @param remove_reference_rows (scalar `logical`)\cr
+#'   logical indicating whether to remove reference rows
+#'   for categorical variables. Default is `FALSE`.
 #' @param ... arguments passed to `ggstats::ggcoef_plot(...)`
 #'
 #' @returns ggplot object

@@ -16,6 +16,17 @@
 \item{x}{(\code{tbl_regression}, \code{tbl_uvregression})\cr
 A 'tbl_regression' or 'tbl_uvregression' object}
 
+\item{plot_ref}{(scalar \code{logical})\cr
+plot reference values}
+
+\item{remove_header_rows}{(scalar \code{logical})\cr
+logical indicating whether to remove header rows
+for categorical variables. Default is \code{TRUE}}
+
+\item{remove_reference_rows}{(scalar \code{logical})\cr
+logical indicating whether to remove reference rows
+for categorical variables. Default is \code{FALSE}.}
+
 \item{...}{arguments passed to \code{ggstats::ggcoef_plot(...)}}
 }
 \value{

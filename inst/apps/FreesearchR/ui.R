@@ -68,6 +68,8 @@ ui_elements <- list(
           condition = "input.source=='redcap'",
           DT::DTOutput(outputId = "redcap_prev")
         ),
+        shiny::conditionalPanel(
+          condition = "output.data_loaded == true",
         shiny::br(),
         shiny::br(),
         shiny::h5("Specify variables to include"),
@@ -84,7 +86,7 @@ ui_elements <- list(
             shinyWidgets::noUiSliderInput(
               inputId = "complete_cutoff",
               label = NULL,
-              update_on = "change",
+              update_on = "end",
               min = 0,
               max = 100,
               step = 5,
@@ -92,12 +94,13 @@ ui_elements <- list(
               format = shinyWidgets::wNumbFormat(decimals = 0),
               color = datamods:::get_primary_color()
             ),
-            shiny::helpText("Filter variables with completeness above the specified percentage."),
+            shiny::helpText("Exclude variables with completeness below the specified percentage."),
             shiny::br(),
             shiny::br(),
             shiny::uiOutput(outputId = "import_var"),
             shiny::uiOutput(outputId = "data_info_import", inline = TRUE)
           )
+        )
         ),
         shiny::br(),
         shiny::br(),

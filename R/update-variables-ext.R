@@ -645,10 +645,10 @@ convert_to <- function(data,
       setNames(list(expr(as.character(!!sym(variable)))), variable)
     )
   } else if (identical(new_class, "factor")) {
-    data[[variable]] <- as.factor(x = data[[variable]])
+    data[[variable]] <- REDCapCAST::as_factor(x = data[[variable]])
     attr(data, "code_03_convert") <- c(
       attr(data, "code_03_convert"),
-      setNames(list(expr(as.factor(!!sym(variable)))), variable)
+      setNames(list(expr(REDCapCAST::as_factor(!!sym(variable)))), variable)
     )
   } else if (identical(new_class, "numeric")) {
     data[[variable]] <- as.numeric(data[[variable]], ...)

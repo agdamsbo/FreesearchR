@@ -6,7 +6,7 @@
 \alias{redcap_demo_app}
 \title{Shiny module to browser and export REDCap data}
 \usage{
-m_redcap_readUI(id, title = TRUE)
+m_redcap_readUI(id, title = TRUE, url = NULL)
 
 m_redcap_readServer(id)
 
