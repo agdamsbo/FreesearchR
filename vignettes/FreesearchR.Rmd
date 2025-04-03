@@ -9,7 +9,7 @@ vignette: >
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,eval = FALSE)
-source("functions.R")
+library(FreesearchR)
 ```
 
 # Getting started with ***FreesearchR***
