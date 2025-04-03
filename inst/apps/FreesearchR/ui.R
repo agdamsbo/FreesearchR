@@ -180,90 +180,47 @@ ui_elements <- list(
           fluidRow(
             shiny::column(
               width = 9,
-              shiny::tags$p(shiny::markdown("Below, are several options to update variables (rename, set new labels (for nicer tables in the report) and change variable classes (numeric, factor/categorical etc.).), modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code."))
+              shiny::tags$p(shiny::markdown("Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."),
+                            shiny::tags$p("There are also more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code. At the bottom you can restore the original data."))
             )
           ),
-          shiny::tags$br(),
-          shiny::tags$br(),
+          # shiny::tags$br(),
           update_variables_ui("modal_variables"),
           shiny::tags$br(),
           shiny::tags$br(),
-          fluidRow(
+          tags$h4("Advanced data manipulation"),
+          shiny::tags$br(),
+          shiny::tags$br(),
+          shiny::fluidRow(
             shiny::column(
-              width = 2
-            ),
-            shiny::column(
-              width = 8,
-              tags$h4("Advanced data manipulation"),
+              width = 4,
+              shiny::actionButton(
+                inputId = "modal_update",
+                label = "Reorder factor levels",
+                width = "100%"
+              ),
               shiny::tags$br(),
-              fluidRow(
-                shiny::column(
-                  width = 6,
-                  # tags$h4("Update or modify variables"),
-                  # shiny::tags$br(),
-                  # shiny::actionButton(
-                  #   inputId = "modal_variables",
-                  #   label = "Subset, rename and change class/type",
-                  #   width = "100%"
-                  # ),
-                  # shiny::tags$br(),
-                  # shiny::helpText("Subset variables, rename variables and labels, and apply new class to variables"),
-                  # shiny::tags$br(),
-                  # shiny::tags$br(),
-                  shiny::actionButton(
-                    inputId = "modal_update",
-                    label = "Reorder factor levels",
-                    width = "100%"
-                  ),
-                  shiny::tags$br(),
-                  shiny::helpText("Reorder the levels of factor/categorical variables."),
-                  shiny::tags$br(),
-                  shiny::tags$br(),
-                  shiny::actionButton(
-                    inputId = "data_reset",
-                    label = "Restore original data",
-                    width = "100%"
-                  ),
-                  shiny::tags$br(),
-                  shiny::helpText("Reset to original imported dataset. Careful! There is no un-doing."),
-                  shiny::tags$br(),
-                  shiny::tags$br()
-                ),
-                shiny::column(
-                  width = 6,
-                  # tags$h4("Create new variables"),
-                  # shiny::tags$br(),
-                  shiny::actionButton(
-                    inputId = "modal_cut",
-                    label = "New factor",
-                    width = "100%"
-                  ),
-                  shiny::tags$br(),
-                  shiny::helpText("Create factor/categorical variable from a continous variable (number/date/time)."),
-                  shiny::tags$br(),
-                  shiny::tags$br(),
-                  shiny::actionButton(
-                    inputId = "modal_column",
-                    label = "New variable",
-                    width = "100%"
-                  ),
-                  shiny::tags$br(),
-                  shiny::helpText(shiny::markdown("Create a new variable/column based on an *R*-expression.")),
-                  shiny::tags$br(),
-                  shiny::tags$br()
-                )
-              ) # ,
-              # tags$h4("Restore"),
-              # shiny::actionButton(
-              #   inputId = "data_reset",
-              #   label = "Restore original data",
-              #   width = "100%"
-              # ),
-              # shiny::tags$br(),
-              # shiny::helpText("Reset to original imported dataset. Careful! There is no un-doing.")
+              shiny::helpText("Reorder the levels of factor/categorical variables."),
             ),
             shiny::column(
-              width = 2
+              width = 4,
+              shiny::actionButton(
+                inputId = "modal_cut",
+                label = "New factor",
+                width = "100%"
+              ),
+              shiny::tags$br(),
+              shiny::helpText("Create factor/categorical variable from a continous variable (number/date/time).")
+            ),
+            shiny::column(
+              width = 4,
+              shiny::actionButton(
+                inputId = "modal_column",
+                label = "New variable",
+                width = "100%"
+              ),
+              shiny::tags$br(),
+              shiny::helpText(shiny::markdown("Create a new variable/column based on an *R*-expression."))
             )
           ),
           shiny::tags$br(),
@@ -271,24 +228,32 @@ ui_elements <- list(
           tags$h4("Compare modified data to original"),
           shiny::tags$br(),
           shiny::tags$p(
-            "Here is a overview of the original vs the modified data."
+            "Raw print of the original vs the modified data."
           ),
           shiny::tags$br(),
-          shiny::tags$br(),
-          fluidRow(
-            column(
+          shiny::fluidRow(
+            shiny::column(
               width = 6,
-              tags$b("Original data:"),
+              shiny::tags$b("Original data:"),
               # verbatimTextOutput("original"),
-              verbatimTextOutput("original_str")
+              shiny::verbatimTextOutput("original_str")
             ),
-            column(
+            shiny::column(
               width = 6,
-              tags$b("Modified data:"),
+              shiny::tags$b("Modified data:"),
               # verbatimTextOutput("modified"),
-              verbatimTextOutput("modified_str")
+              shiny::verbatimTextOutput("modified_str")
             )
-          )
+          ),
+          shiny::tags$br(),
+          shiny::actionButton(
+            inputId = "data_reset",
+            label = "Restore original data",
+            width = "100%"
+          ),
+          shiny::tags$br(),
+          shiny::helpText("Reset to original imported dataset. Careful! There is no un-doing."),
+          shiny::tags$br()
         )
       )
     ),

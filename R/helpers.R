@@ -335,7 +335,7 @@ data_description <- function(data) {
   p_complete <- n_complete/n
 
   sprintf(
-    i18n("Data has %s observations and %s variables, with %s (%s%%) complete cases"),
+    i18n("Data has %s observations and %s variables, with %s (%s%%) complete cases."),
     n,
     n_var,
     n_complete,
