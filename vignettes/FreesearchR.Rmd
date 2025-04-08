@@ -35,7 +35,7 @@ As a small note, a standalone Windows app version is on the drawing board as wel
 
 ## Importing data
 
-Once in the app and in the "*Import*", you have three options available for importing data: file upload, REDCap server export and local or sample data.
+Once in the app and in the "**Import**", you have three options available for importing data: file upload, REDCap server export and local or sample data.
 
 After choosing a data source, you can set a threshold to filter data be completenes and further manually specify variables to include for analyses.
 
@@ -43,11 +43,21 @@ After choosing a data source, you can set a threshold to filter data be complete
 
 Currently several data file formats are supported for easy import (csv, txt, xls(x), ods, rds, dta). If importing workbooks (xls(x) or ods), you are prompted to specify sheet(s) to import. If choosing multiple sheets, these are automatically merged by common variable(s), so please make sure that key variables are correctly named identically.
 
+A notification is posted with error or success. After succesfull import data can be previewed directly by clicking "click to see data" in the notification.
+
 ### REDCap server export
 
+Export data directly from a REDCap server. You need to first generate an API-token ([see these instruction](https://confluence.research.cchmc.org/pages/viewpage.action?pageId=50987698)) in REDCap. Make sure you have the necessary rights to do so.
+
+Please don't store the API-key on your device unless encrypted or in a keyring, as this may compromise data safety. Log in to your REDCap server and retrieve the token when needed.
+
+Type the correct webaddress of your REDCap server.
+
+The module will validate the information and you can click "Connect".
+
+This will unfold options to preview your data dictionary (the main database metadata), choose fields/variables to download as well as filtering options.
 
 ### Local or sample data
-
 
 ## Evaluate
 
@@ -55,8 +65,9 @@ Currently several data file formats are supported for easy import (csv, txt, xls
 
 ### Correlation matrix
 
+## Visuals
 
-## Visualise
+There are a number of plotting options to visualise different aspects of the data.
 
 Below are the available plot types listed.
 
@@ -78,16 +89,12 @@ c("continuous", "dichotomous", "ordinal", "categorical") |>
   toastui::datagrid(filters=TRUE,theme="striped")
 ```
 
-
 ## Regression
-
 
 ## Download
 
 ### Report
 
-
 ### Data
-
 
 ### Code
