@@ -218,8 +218,8 @@ import_file_server <- function(id,
         shinyWidgets::updatePickerInput(
           session = session,
           inputId = "sheet",
-          choices = choices,
-          selected = selected
+          selected = selected,
+          choices = choices
         )
         datamods:::showUI(paste0("#", ns("sheet-container")))
       } else {
@@ -291,16 +291,31 @@ import_file_server <- function(id,
     )
 
     observeEvent(input$see_data, {
-      datamods:::show_data(temporary_rv$data, title = datamods:::i18n("Imported data"), type = show_data_in)
+      tryCatch({
+      datamods:::show_data(default_parsing(temporary_rv$data), title = datamods:::i18n("Imported data"), type = show_data_in)
+      },
+      # warning = function(warn) {
+      #     showNotification(warn, type = "warning")
+      # },
+      error = function(err) {
+        showNotification(err, type = "err")
+      }
+      )
     })
 
     output$table <- toastui::renderDatagrid2({
       req(temporary_rv$data)
+      tryCatch({
       toastui::datagrid(
-        data = head(temporary_rv$data, 5),
+        data = setNames(head(temporary_rv$data, 5),make.names(names(temporary_rv$data))),
         theme = "striped",
         colwidths = "guess",
         minBodyHeight = 250
+      )
+      },
+      error = function(err) {
+        showNotification(err, type = "err")
+      }
       )
     })
 
@@ -404,9 +419,9 @@ import_xls <- function(file, sheet, skip, na.strings) {
         }) |>
         purrr::reduce(dplyr::full_join)
     },
-    warning = function(warn) {
-      showNotification(paste0(warn), type = "warning")
-    },
+    # warning = function(warn) {
+    #   showNotification(paste0(warn), type = "warning")
+    # },
     error = function(err) {
       showNotification(paste0(err), type = "err")
     }
@@ -433,9 +448,9 @@ import_ods <- function(file, sheet, skip, na.strings) {
         }) |>
         purrr::reduce(dplyr::full_join)
     },
-    warning = function(warn) {
-      showNotification(paste0(warn), type = "warning")
-    },
+    # warning = function(warn) {
+    #   showNotification(paste0(warn), type = "warning")
+    # },
     error = function(err) {
       showNotification(paste0(err), type = "err")
     }

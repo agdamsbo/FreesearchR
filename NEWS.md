@@ -2,6 +2,8 @@
 
 Polished and simplified data import module including a much improved REDCap import module.
 
+- *CHANGE* `default_parsing()` now ensure unique variable names.
+
 # FreesearchR 25.4.1
 
 Focus is on polish and improved ui/ux.

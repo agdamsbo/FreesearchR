@@ -71,7 +71,11 @@ add_sparkline <- function(grid, column = "vals", color.main = "#2a8484", color.s
     column = column,
     renderer = function(data) {
       data_cl <- class(data)
-      if (identical(data_cl, "factor")) {
+      if (all(sapply(data,is.na))){
+        type <- "line"
+        ds <- data.frame(x = NA, y = NA)
+        horizontal <- FALSE
+      } else if (identical(data_cl, "factor")) {
         type <- "column"
         s <- summary(data)
         ds <- data.frame(x = names(s), y = s)

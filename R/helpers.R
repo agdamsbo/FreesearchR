@@ -213,6 +213,7 @@ default_parsing <- function(data) {
   name_labels <- lapply(data, \(.x) REDCapCAST::get_attr(.x, attr = "label"))
 
   out <- data |>
+    setNames(make.names(names(data),unique = TRUE)) |>
     REDCapCAST::parse_data() |>
     REDCapCAST::as_factor() |>
     REDCapCAST::numchar2fct(numeric.threshold = 8, character.throshold = 10) |>

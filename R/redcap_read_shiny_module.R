@@ -321,7 +321,7 @@ m_redcap_readServer <- function(id) {
             "Yes, fill missing, non-repeated values" = "yes",
             "No, leave the data as is" = "no"
           ),
-          selected = "yes",
+          selected = "no",
           multiple = FALSE
         )
       }

@@ -10,7 +10,7 @@
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'Version: 25.4.1.250403_1506'
+app_version <- function()'Version: 25.4.1.250408_1343'
 
 
 ########
@@ -2102,7 +2102,11 @@ add_sparkline <- function(grid, column = "vals", color.main = "#2a8484", color.s
     column = column,
     renderer = function(data) {
       data_cl <- class(data)
-      if (identical(data_cl, "factor")) {
+      if (all(sapply(data,is.na))){
+        type <- "line"
+        ds <- data.frame(x = NA, y = NA)
+        horizontal <- FALSE
+      } else if (identical(data_cl, "factor")) {
         type <- "column"
         s <- summary(data)
         ds <- data.frame(x = names(s), y = s)
@@ -2686,6 +2690,7 @@ default_parsing <- function(data) {
   name_labels <- lapply(data, \(.x) REDCapCAST::get_attr(.x, attr = "label"))
 
   out <- data |>
+    setNames(make.names(names(data),unique = TRUE)) |>
     REDCapCAST::parse_data() |>
     REDCapCAST::as_factor() |>
     REDCapCAST::numchar2fct(numeric.threshold = 8, character.throshold = 10) |>
@@ -3091,8 +3096,8 @@ import_file_server <- function(id,
         shinyWidgets::updatePickerInput(
           session = session,
           inputId = "sheet",
-          choices = choices,
-          selected = selected
+          selected = selected,
+          choices = choices
         )
         datamods:::showUI(paste0("#", ns("sheet-container")))
       } else {
@@ -3164,16 +3169,31 @@ import_file_server <- function(id,
     )
 
     observeEvent(input$see_data, {
-      datamods:::show_data(temporary_rv$data, title = datamods:::i18n("Imported data"), type = show_data_in)
+      tryCatch({
+      datamods:::show_data(default_parsing(temporary_rv$data), title = datamods:::i18n("Imported data"), type = show_data_in)
+      },
+      # warning = function(warn) {
+      #     showNotification(warn, type = "warning")
+      # },
+      error = function(err) {
+        showNotification(err, type = "err")
+      }
+      )
     })
 
     output$table <- toastui::renderDatagrid2({
       req(temporary_rv$data)
+      tryCatch({
       toastui::datagrid(
-        data = head(temporary_rv$data, 5),
+        data = setNames(head(temporary_rv$data, 5),make.names(names(temporary_rv$data))),
         theme = "striped",
         colwidths = "guess",
         minBodyHeight = 250
+      )
+      },
+      error = function(err) {
+        showNotification(err, type = "err")
+      }
       )
     })
 
@@ -3277,9 +3297,9 @@ import_xls <- function(file, sheet, skip, na.strings) {
         }) |>
         purrr::reduce(dplyr::full_join)
     },
-    warning = function(warn) {
-      showNotification(paste0(warn), type = "warning")
-    },
+    # warning = function(warn) {
+    #   showNotification(paste0(warn), type = "warning")
+    # },
     error = function(err) {
       showNotification(paste0(err), type = "err")
     }
@@ -3306,9 +3326,9 @@ import_ods <- function(file, sheet, skip, na.strings) {
         }) |>
         purrr::reduce(dplyr::full_join)
     },
-    warning = function(warn) {
-      showNotification(paste0(warn), type = "warning")
-    },
+    # warning = function(warn) {
+    #   showNotification(paste0(warn), type = "warning")
+    # },
     error = function(err) {
       showNotification(paste0(err), type = "err")
     }
@@ -4505,7 +4525,7 @@ m_redcap_readServer <- function(id) {
             "Yes, fill missing, non-repeated values" = "yes",
             "No, leave the data as is" = "no"
           ),
-          selected = "yes",
+          selected = "no",
           multiple = FALSE
         )
       }
