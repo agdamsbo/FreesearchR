@@ -70,6 +70,7 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
       # width = 6,
       shiny::tags$h4("Data import parameters"),
       shiny::helpText("Options here will show, when API and uri are typed"),
+      shiny::tags$br(),
       shiny::uiOutput(outputId = ns("fields")),
       shiny::tags$div(
         class = "shiny-input-container",
@@ -91,6 +92,7 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
         ),
         shiny::helpText("Optionally filter project arms if logitudinal or apply server side data filters")
       ),
+      shiny::tags$br(),
       shiny::uiOutput(outputId = ns("data_type")),
       shiny::uiOutput(outputId = ns("fill")),
       shiny::actionButton(

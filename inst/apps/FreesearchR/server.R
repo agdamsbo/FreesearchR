@@ -176,6 +176,7 @@ server <- function(input, output, session) {
     ),
     handlerExpr = {
       shiny::req(rv$data_temp)
+      shiny::req(input$import_var)
       # browser()
       temp_data <- rv$data_temp
       if (all(input$import_var %in% names(temp_data))){
@@ -185,16 +186,24 @@ server <- function(input, output, session) {
       rv$data_original <- temp_data |>
         default_parsing()
 
+      rv$code$import <- list(
+        rv$code$import,
+        rlang::call2(.fn = "select",input$import_var,.ns = "dplyr"),
+        rlang::call2(.fn = "default_parsing",.ns = "FreesearchR")
+      ) |>
+        merge_expression() |>
+        expression_string()
 
-      rv$code$import <- rv$code$import |>
-        deparse() |>
-        paste(collapse = "") |>
-        paste("|>
-        dplyr::select(", paste(input$import_var, collapse = ","), ") |>
-        FreesearchR::default_parsing()") |>
-        (\(.x){
-          paste0("data <- ", .x)
-        })()
+
+      # rv$code$import <- rv$code$import |>
+      #   deparse() |>
+      #   paste(collapse = "") |>
+      #   paste("|>
+      #   dplyr::select(", paste(input$import_var, collapse = ","), ") |>
+      #   FreesearchR::default_parsing()") |>
+      #   (\(.x){
+      #     paste0("data <- ", .x)
+      #   })()
 
       rv$code$filter <- NULL
       rv$code$modify <- NULL
@@ -397,18 +406,6 @@ server <- function(input, output, session) {
     }
   )
 
-  # shiny::observeEvent(
-  #   list(
-  #     shiny::reactive(rv$data),
-  #     shiny::reactive(rv$data_original),
-  #     data_filter(),
-  #     shiny::reactive(rv$data_filtered)
-  #   ),
-  #   {
-  #
-  #   }
-  # )
-
   #########  Data preview
 
   ###  Overview
@@ -420,35 +417,12 @@ server <- function(input, output, session) {
     }),
     color.main = "#2A004E",
     color.sec = "#C62300",
-    pagination = 20
+    pagination = 10
   )
 
   observeEvent(input$modal_browse, {
     datamods::show_data(REDCapCAST::fct_drop(rv$data_filtered), title = "Uploaded data overview", type = "modal")
   })
-
-  # tryCatch(
-  #   {
-  #     output$table_mod <- toastui::renderDatagrid({
-  #       shiny::req(rv$data)
-  #       # data <- rv$data
-  #       toastui::datagrid(
-  #         # data = rv$data # ,
-  #         data = data_filter(),
-  #         pagination = 10
-  #         # bordered = TRUE,
-  #         # compact = TRUE,
-  #         # striped = TRUE
-  #       )
-  #     })
-  #   },
-  #   warning = function(warn) {
-  #     showNotification(paste0(warn), type = "warning")
-  #   },
-  #   error = function(err) {
-  #     showNotification(paste0(err), type = "err")
-  #   }
-  # )
 
   output$original_str <- renderPrint({
     str(rv$data_original)
@@ -463,7 +437,12 @@ server <- function(input, output, session) {
   })
 
 
+  ##############################################################################
+  #########
   #########  Code export
+  #########
+  ##############################################################################
+
   output$code_import <- shiny::renderPrint({
     shiny::req(rv$code$import)
     cat(rv$code$import)
@@ -494,6 +473,18 @@ server <- function(input, output, session) {
   output$code_filter <- shiny::renderPrint({
     cat(rv$code$filter)
   })
+
+  output$code_table1 <- shiny::renderPrint({
+    shiny::req(rv$code$table1)
+    cat(rv$code$table1)
+  })
+
+  shiny::observe({
+  rv$regression()$regression$models |> purrr::imap(\(.x,.i){
+    output[[paste0("code_",tolower(.i))]] <- shiny::renderPrint({cat(.x$code_table)})
+  })
+  })
+
 
   ##############################################################################
   #########
@@ -612,16 +603,33 @@ server <- function(input, output, session) {
       shiny::req(input$strat_var)
       shiny::req(rv$list$data)
 
-      # data_tbl1 <- rv$list$data
+      parameters <- list(
+        by.var = input$strat_var,
+        add.p = input$add_p == "yes",
+        add.overall = TRUE
+      )
 
       shiny::withProgress(message = "Creating the table. Hold on for a moment..", {
-        rv$list$table1 <- create_baseline(
-          rv$list$data,
-          by.var = input$strat_var,
-          add.p = input$add_p == "yes",
-          add.overall = TRUE
-        )
+        rv$list$table1 <- rlang::exec(create_baseline, !!!append_list(rv$list$data,parameters,"data"))
+
+        # rv$list$table1 <- create_baseline(
+        #   data = rv$list$data,
+        #   by.var = input$strat_var,
+        #   add.p = input$add_p == "yes",
+        #   add.overall = TRUE
+        # )
       })
+
+      rv$code$table1 <- glue::glue("FreesearchR::create_baseline(data,{list2str(parameters)})")
+
+      #   list(
+      #   rv$code$import,
+      #   rlang::call2(.fn = "select",!!!list(input$import_var),.ns = "dplyr"),
+      #   rlang::call2(.fn = "default_parsing",.ns = "FreesearchR")
+      # ) |>
+      #   merge_expression() |>
+      #   expression_string()
+
     }
   )
 

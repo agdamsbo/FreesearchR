@@ -393,3 +393,41 @@ if_not_missing <- function(data,default=NULL){
     return(data)
   }
 }
+
+
+#' Merge list of expressions
+#'
+#' @param data list
+#'
+#' @returns expression
+#' @export
+#'
+#' @examples
+#' list(
+#' rlang::call2(.fn = "select",!!!list(c("cyl","disp")),.ns = "dplyr"),
+#' rlang::call2(.fn = "default_parsing",.ns = "FreesearchR")
+#' ) |> merge_expression()
+merge_expression <- function(data){
+  Reduce(
+    f = function(x, y) rlang::expr(!!x %>% !!y),
+    x = data
+  )
+}
+
+#' Deparses expression as string, substitutes native pipe and adds assign
+#'
+#' @param data expression
+#'
+#' @returns string
+#' @export
+#'
+#' @examples
+#' list(
+#' rlang::call2(.fn = "select",!!!list(c("cyl","disp")),.ns = "dplyr"),
+#' rlang::call2(.fn = "default_parsing",.ns = "FreesearchR")
+#' ) |> merge_expression() |> expression_string()
+expression_string <- function(data,assign.str="data <- "){
+  out <- paste0(assign.str, gsub("%>%","|>\n",paste(gsub('"',"'",deparse(data)),collapse = "")))
+  gsub(" ","",out)
+}
+

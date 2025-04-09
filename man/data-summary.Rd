@@ -19,7 +19,7 @@ data_summary_server(id, data, color.main, color.sec, ...)
 
 \item{color.sec}{secondary color}
 
-\item{...}{arguments passed to toastui::datagrid}
+\item{...}{arguments passed to create_overview_datagrid}
 }
 \value{
 Shiny ui module

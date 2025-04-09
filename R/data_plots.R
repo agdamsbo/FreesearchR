@@ -86,7 +86,10 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
     ),
     bslib::nav_panel(
       title = tab_title,
-      shiny::plotOutput(ns("plot"))
+      shiny::plotOutput(ns("plot"),height = "70vh"),
+      shiny::tags$br(),
+      shiny::h4("Plot code:"),
+      shiny::verbatimTextOutput(outputId = ns("code_plot"))
     )
   )
 }
@@ -109,7 +112,8 @@ data_visuals_server <- function(id,
 
       rv <- shiny::reactiveValues(
         plot.params = NULL,
-        plot = NULL
+        plot = NULL,
+        code=NULL
       )
 
       # ## --- New attempt
@@ -302,15 +306,26 @@ data_visuals_server <- function(id,
         {
           tryCatch(
             {
-              shiny::withProgress(message = "Drawing the plot. Hold tight for a moment..", {
-              rv$plot <- create_plot(
-                data = data(),
+              parameters <- list(
                 type = rv$plot.params()[["fun"]],
                 x = input$primary,
                 y = input$secondary,
                 z = input$tertiary
               )
+
+              shiny::withProgress(message = "Drawing the plot. Hold tight for a moment..", {
+                rv$plot <- rlang::exec(create_plot, !!!append_list(data(),parameters,"data"))
+              # rv$plot <- create_plot(
+              #   data = data(),
+              #   type = rv$plot.params()[["fun"]],
+              #   x = input$primary,
+              #   y = input$secondary,
+              #   z = input$tertiary
+              # )
               })
+
+              rv$code <- glue::glue("FreesearchR::create_plot(data,{list2str(parameters)})")
+
             },
             # warning = function(warn) {
             #   showNotification(paste0(warn), type = "warning")
@@ -322,6 +337,10 @@ data_visuals_server <- function(id,
         },
         ignoreInit = TRUE
       )
+
+      output$code_plot <- shiny::renderPrint({
+        cat(rv$code)
+      })
 
       output$plot <- shiny::renderPlot({
         shiny::req(rv$plot)

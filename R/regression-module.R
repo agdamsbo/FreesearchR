@@ -285,23 +285,21 @@ regression_server <- function(id,
               ##   imputed or
               ##   minimally adjusted
               model_lists <- list(
-                "Univariable" = regression_model_uv_list,
-                "Multivariable" = regression_model_list
+                "Univariable" = "regression_model_uv_list",
+                "Multivariable" = "regression_model_list"
               ) |>
                 lapply(\(.fun){
-                  ls <- do.call(
+                  parameters=list(
+                    data = data_r()[regression_vars()],
+                  outcome.str = input$outcome_var,
+              fun.descr = input$regression_type
+                  )
+
+                  do.call(
                     .fun,
-                    c(
-                      list(data = data_r() |>
-                        (\(.x){
-                          .x[regression_vars()]
-                        })()),
-                      list(outcome.str = input$outcome_var),
-                      list(fun.descr = input$regression_type)
-                    )
+                    parameters
                   )
                 })
-
 
               rv$list$regression$params <- get_fun_options(input$regression_type) |>
                 (\(.x){
@@ -415,7 +413,7 @@ regression_server <- function(id,
         alt = "Assumptions testing of the multivariable regression model"
       )
 
-
+### Creating the regression table
       shiny::observeEvent(
         input$load,
         {
@@ -425,20 +423,44 @@ regression_server <- function(id,
 
           tryCatch(
             {
+              parameters <- list(
+                add_p = input$add_regression_p == "no"
+              )
+
               out <- lapply(rv$list$regression$models, \(.x){
                 .x$model
               }) |>
-                purrr::map(regression_table)
+                purrr::map(\(.x){
+                  do.call(
+                    regression_table,
+                    append_list(.x,parameters,"x")
+                  )
+})
 
-              if (input$add_regression_p == "no") {
-                out <- out |>
-                  lapply(\(.x){
-                    .x |>
-                      gtsummary::modify_column_hide(
-                        column = "p.value"
-                      )
-                  })
-              }
+              # if (input$add_regression_p == "no") {
+              #   out <- out |>
+              #     lapply(\(.x){
+              #       .x |>
+              #         gtsummary::modify_column_hide(
+              #           column = "p.value"
+              #         )
+              #     })
+              # }
+
+              rv$list$regression$models |>
+                purrr::imap(\(.x,.i){
+                  rv$list$regression$models[[.i]][["code_table"]] <- paste(
+                  .x$code,
+                  expression_string(rlang::call2(.fn = "regression_table",!!!parameters,.ns = "FreesearchR"),assign.str=NULL),sep="|>\n")
+                })
+
+              list(
+                rv$code$import,
+                rlang::call2(.fn = "select",!!!list(input$import_var),.ns = "dplyr"),
+                rlang::call2(.fn = "default_parsing",.ns = "FreesearchR")
+              ) |>
+                merge_expression() |>
+                expression_string()
 
               rv$list$regression$tables <- out
 
@@ -550,16 +572,7 @@ regression_server <- function(id,
       ##############################################################################
 
       return(shiny::reactive({
-        data <- rv$list
-        # code <- list()
-        #
-        # if (length(code) > 0) {
-        #   attr(data, "code") <- Reduce(
-        #     f = function(x, y) rlang::expr(!!x %>% !!y),
-        #     x = code
-        #   )
-        # }
-        return(data)
+        return(rv$list)
       }))
     }
   )

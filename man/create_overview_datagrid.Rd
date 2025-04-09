@@ -4,7 +4,7 @@
 \alias{create_overview_datagrid}
 \title{Create a data overview datagrid}
 \usage{
-create_overview_datagrid(data)
+create_overview_datagrid(data, ...)
 }
 \arguments{
 \item{data}{data}

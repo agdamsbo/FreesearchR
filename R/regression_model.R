@@ -97,7 +97,7 @@ regression_model <- function(data,
 
   if (is.null(fun)) auto.mode <- TRUE
 
-  if (auto.mode) {
+  if (isTRUE(auto.mode)) {
     if (is.numeric(data[[outcome.str]])) {
       fun <- "stats::lm"
     } else if (is.factor(data[[outcome.str]])) {
@@ -318,7 +318,7 @@ supported_functions <- function() {
       design = "cross-sectional",
       out.type = "dichotomous",
       fun = "stats::glm",
-      args.list = list(family = stats::binomial(link = "logit")),
+      args.list = list(family = "binomial"),
       formula.str = "{outcome.str}~{paste(vars,collapse='+')}",
       table.fun = "gtsummary::tbl_regression",
       table.args.list = list()
@@ -326,7 +326,7 @@ supported_functions <- function() {
     polr = list(
       descr = "Ordinal logistic regression model",
       design = "cross-sectional",
-      out.type = c("ordinal","categorical"),
+      out.type = c("ordinal", "categorical"),
       fun = "MASS::polr",
       args.list = list(
         Hess = TRUE,
@@ -449,6 +449,7 @@ get_fun_options <- function(data) {
 #'   )
 #' ls <- regression_model_list(data = default_parsing(mtcars), outcome.str = "cyl", fun.descr = "Ordinal logistic regression model")
 #' summary(ls$model)
+#' ls <- regression_model_list(data = default_parsing(mtcars), outcome.str = "mpg", fun.descr = "Linear regression model")
 #'
 #' ls <- regression_model_list(data = default_parsing(gtsummary::trial), outcome.str = "trt", fun.descr = "Logistic regression model")
 #' tbl <- gtsummary::tbl_regression(ls$model, exponentiate = TRUE)
@@ -458,7 +459,7 @@ get_fun_options <- function(data) {
 #'     outcome.str = "trt",
 #'     fun = "stats::glm",
 #'     formula.str = "{outcome.str}~.",
-#'     args.list = list(family = stats::binomial(link = "logit"))
+#'     args.list = list(family = "binomial")
 #'   )
 #' tbl2 <- gtsummary::tbl_regression(m, exponentiate = TRUE)
 #' broom::tidy(ls$model)
@@ -509,20 +510,27 @@ regression_model_list <- function(data,
     }
   }
 
+  parameters <- list(
+    outcome.str = outcome.str,
+    fun = fun.c,
+    formula.str = formula.str.c,
+    args.list = args.list.c
+  )
+
   model <- do.call(
     regression_model,
-    list(
-      data = data,
-      outcome.str = outcome.str,
-      fun = fun.c,
-      formula.str = formula.str.c,
-      args.list = args.list.c
+    append_list(parameters,
+      data = data, "data"
     )
   )
 
-  code <- glue::glue(
-    "{fun.c}({paste(Filter(length,list(glue::glue(formula.str.c),'data = data',list2str(args.list.c))),collapse=', ')})"
-  )
+  parameters_print <- list2str(Filter(length,
+                                      modifyList(parameters, list(
+                                        formula.str = glue::glue(formula.str.c),
+                                        args.list = NULL
+                                      ))))
+
+  code <- glue::glue("FreesearchR::regression_model(data,{parameters_print}, args.list=list({list2str(args.list.c)}))",.null = "NULL")
 
   list(
     options = options,
@@ -566,6 +574,7 @@ list2str <- function(data) {
 #'   lapply(broom::tidy) |>
 #'   dplyr::bind_rows()
 #' ms <- regression_model_uv_list(data = default_parsing(mtcars), outcome.str = "mpg", fun.descr = "Linear regression model")
+#' ms$code
 #' lapply(ms$model, broom::tidy) |> dplyr::bind_rows()
 #' }
 regression_model_uv_list <- function(data,
@@ -628,28 +637,43 @@ regression_model_uv_list <- function(data,
   #   )
   # )
 
-  model <- vars |>
-    lapply(\(.var){
-      do.call(
-        regression_model,
-        list(
-          data = data[c(outcome.str, .var)],
-          outcome.str = outcome.str,
-          fun = fun.c,
-          formula.str = formula.str.c,
-          args.list = args.list.c
-        )
-      )
-    })
-
-
-  vars <- "."
-
-  code_raw <- glue::glue(
-    "{fun.c}({paste(Filter(length,list(glue::glue(formula.str.c),'data = .d',list2str(args.list.c))),collapse=', ')})"
+  parameters <- list(
+    outcome.str = outcome.str,
+    fun = fun.c,
+    formula.str = formula.str.c,
+    args.list = args.list.c
   )
 
-  code <- glue::glue("lapply(data,function(.d){code_raw})")
+  model <- vars |>
+    lapply(\(.var){
+      out <- do.call(
+        regression_model,
+        append_list(parameters,
+          data = data[c(outcome.str, .var)], "data"
+        )
+      )
+
+      ## This is the very long version
+      ## Handles deeply nested glue string
+      code <- glue::glue("dplyr::select(data,{paste0(paste(names(data[c(outcome.str, .var)]),collapse=','))})|>\nFreesearchR::regression_model({list2str(modifyList(parameters,list(formula.str = glue::glue(gsub('vars','.var',formula.str.c)))))})")
+      REDCapCAST::set_attr(out, code, "code")
+    })
+
+  # vars <- "."
+  #
+  # code_raw <- glue::glue(
+  #   "{fun.c}({paste(Filter(length,list(glue::glue(formula.str.c),'data = .d',list2str(args.list.c))),collapse=', ')})"
+  # )
+  # browser()
+  # code <- glue::glue("lapply(data,function(.d){code_raw})")
+
+  code <- model |>
+    lapply(\(.x)REDCapCAST::get_attr(.x, "code")) |>
+    purrr::reduce(c) |>
+    (\(.x){
+      paste0("list(\n", paste(.x, collapse = ",\n"), ")")
+    })()
+
 
   list(
     options = options,

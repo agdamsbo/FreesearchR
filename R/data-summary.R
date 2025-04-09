@@ -16,7 +16,7 @@ data_summary_ui <- function(id) {
 #' @param data data
 #' @param color.main main color
 #' @param color.sec secondary color
-#' @param ... arguments passed to toastui::datagrid
+#' @param ... arguments passed to create_overview_datagrid
 #'
 #' @name data-summary
 #' @returns shiny server module
@@ -37,7 +37,7 @@ data_summary_server <- function(id,
             shiny::req(data())
             data() |>
             overview_vars() |>
-            create_overview_datagrid() |>
+            create_overview_datagrid(...) |>
             add_sparkline(
               column = "vals",
               color.main = color.main,
@@ -176,7 +176,7 @@ overview_vars <- function(data) {
 #' mtcars |>
 #'   overview_vars() |>
 #'   create_overview_datagrid()
-create_overview_datagrid <- function(data) {
+create_overview_datagrid <- function(data,...) {
   # browser()
   gridTheme <- getOption("datagrid.theme")
   if (length(gridTheme) < 1) {
@@ -207,7 +207,8 @@ create_overview_datagrid <- function(data) {
   grid <- toastui::datagrid(
     data = data,
     theme = "default",
-    colwidths = "fit"
+    colwidths = "fit",
+    ...
   )
 
   grid <- toastui::grid_columns(

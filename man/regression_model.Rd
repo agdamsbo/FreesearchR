@@ -138,6 +138,7 @@ gtsummary::trial |>
   )
 ls <- regression_model_list(data = default_parsing(mtcars), outcome.str = "cyl", fun.descr = "Ordinal logistic regression model")
 summary(ls$model)
+ls <- regression_model_list(data = default_parsing(mtcars), outcome.str = "mpg", fun.descr = "Linear regression model")
 
 ls <- regression_model_list(data = default_parsing(gtsummary::trial), outcome.str = "trt", fun.descr = "Logistic regression model")
 tbl <- gtsummary::tbl_regression(ls$model, exponentiate = TRUE)
@@ -147,7 +148,7 @@ m <- gtsummary::trial |>
     outcome.str = "trt",
     fun = "stats::glm",
     formula.str = "{outcome.str}~.",
-    args.list = list(family = stats::binomial(link = "logit"))
+    args.list = list(family = "binomial")
   )
 tbl2 <- gtsummary::tbl_regression(m, exponentiate = TRUE)
 broom::tidy(ls$model)
@@ -163,6 +164,7 @@ gtsummary::trial |>
   lapply(broom::tidy) |>
   dplyr::bind_rows()
 ms <- regression_model_uv_list(data = default_parsing(mtcars), outcome.str = "mpg", fun.descr = "Linear regression model")
+ms$code
 lapply(ms$model, broom::tidy) |> dplyr::bind_rows()
 }
 }

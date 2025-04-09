@@ -86,7 +86,8 @@ c("continuous", "dichotomous", "ordinal", "categorical") |>
   setNames(c("Plot type","Description")))
   }) |> 
   dplyr::bind_rows() |> 
-  toastui::datagrid(filters=TRUE,theme="striped")
+  # toastui::datagrid(filters=TRUE,theme="striped") |> 
+  kableExtra::kable()
 ```
 
 ## Regression
