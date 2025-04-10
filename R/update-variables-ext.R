@@ -154,6 +154,7 @@ update_variables_server <- function(id,
           updated_data$list_select <- NULL
           updated_data$list_mutate <- NULL
           updated_data$list_relabel <- NULL
+          # shiny::req(updated_data$x)
           data <- data_r()
           new_selections <- input$row_selected
           if (length(new_selections) < 1) {
@@ -169,11 +170,14 @@ update_variables_server <- function(id,
           new_names[is.na(new_names)] <- old_names[is.na(new_names)]
           new_names[new_names == ""] <- old_names[new_names == ""]
 
+          # browser()
+
           old_label <- data_inputs$label
           new_label <- data_inputs$label_toset
           new_label[new_label == "New label"] <- ""
           new_label[is.na(new_label)] <- old_label[is.na(new_label)]
           new_label[new_label == ""] <- old_label[new_label == ""]
+          new_label <- setNames(new_label,new_names)
 
           new_classes <- data_inputs$class_toset
           new_classes[new_classes == "Select"] <- NA
@@ -247,6 +251,8 @@ update_variables_server <- function(id,
       # shiny::observeEvent(input$close,
       #                                         {
       return(shiny::reactive({
+        shiny::req(updated_data$x)
+        # browser()
         data <- updated_data$x
         code <- list()
         if (!is.null(data) && shiny::isTruthy(updated_data$list_mutate) && length(updated_data$list_mutate) > 0) {
@@ -259,10 +265,21 @@ update_variables_server <- function(id,
           code <- c(code, list(rlang::expr(select(-any_of(c(!!!updated_data$list_select))))))
         }
         if (!is.null(data) && shiny::isTruthy(updated_data$list_relabel) && length(updated_data$list_relabel) > 0) {
-          code <- c(code, list(rlang::call2("purrr::map2(list_relabel,
-                                                       function(.data,.label){
-                                                         REDCapCAST::set_attr(.data,.label,attr = 'label')
-                                                       }) |> dplyr::bind_cols(.name_repair = 'unique_quiet')")))
+          code <- c(
+            code,
+            list(
+              rlang::expr(purrr::imap(.f=function(.data, .name) {
+                ls <- !!updated_data$list_relabel
+                ls <- ls[!is.na(ls)]
+                  if (.name %in% names(ls)) {
+                    REDCapCAST::set_attr(.data, ls[.name], attr = "label")
+                  } else {
+                    .data
+                  }
+                }) %>% dplyr::bind_cols()
+                )
+            )
+          )
         }
         if (length(code) > 0) {
           attr(data, "code") <- Reduce(
@@ -272,7 +289,7 @@ update_variables_server <- function(id,
         }
         return(data)
       }))
-                                              # })
+      # })
 
       # shiny::reactive({
       #   data <- updated_data$x
@@ -309,7 +326,6 @@ update_variables_server <- function(id,
       #                         return(data)
       #                         }))
       #                     })
-
     }
   )
 }

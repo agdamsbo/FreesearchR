@@ -655,7 +655,7 @@ regression_model_uv_list <- function(data,
 
       ## This is the very long version
       ## Handles deeply nested glue string
-      code <- glue::glue("dplyr::select(data,{paste0(paste(names(data[c(outcome.str, .var)]),collapse=','))})|>\nFreesearchR::regression_model({list2str(modifyList(parameters,list(formula.str = glue::glue(gsub('vars','.var',formula.str.c)))))})")
+      code <- glue::glue("FreesearchR::regression_model({list2str(modifyList(parameters,list(formula.str = glue::glue(gsub('vars','.var',formula.str.c)))))})")
       REDCapCAST::set_attr(out, code, "code")
     })
 

@@ -59,11 +59,19 @@ This will unfold options to preview your data dictionary (the main database meta
 
 ### Local or sample data
 
+When opening the online hosted app, this is mainly for testing purposes. When running the app locally from *R* on your own computer, you will find all data.frames in the current environment here. This extends the possible uses of this app to allow for quick and easy data insights and code generation for basic plotting to fine tune.
+
 ## Evaluate
 
-### Baseline
+This panel allows for basic data evaluation.
+
+### Characteristics
+
+Create a classical baseline characteristics table with optional data stratification and comparisons.
 
 ### Correlation matrix
+
+Visualise variable correlations and get suggestions to exclude highly correlated variables.
 
 ## Visuals
 

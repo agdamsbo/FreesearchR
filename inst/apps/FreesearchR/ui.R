@@ -159,7 +159,12 @@ ui_elements <- list(
               IDEAFilter::IDEAFilter_ui("data_filter"),
               shiny::tags$br()
             )
-          )
+          ),
+          shiny::tags$br(),
+          shiny::tags$br(),
+          shiny::tags$br(),
+          shiny::tags$br(),
+          shiny::tags$br()
         ),
         bslib::nav_panel(
           title = "Modify",

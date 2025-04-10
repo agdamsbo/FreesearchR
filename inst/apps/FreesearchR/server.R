@@ -30,8 +30,10 @@ library(gtsummary)
 
 # source("functions.R")
 
+data(starwars)
 data(mtcars)
-trial <- gtsummary::trial |> default_parsing()
+data(trial)
+
 
 # light <- custom_theme()
 #
@@ -138,7 +140,7 @@ server <- function(input, output, session) {
     shiny::req(from_env$data())
 
     rv$data_temp <- from_env$data()
-    # rv$code <- append_list(data = from_env$code(),list = rv$code,index = "import")
+    rv$code <- append_list(data = from_env$name(),list = rv$code,index = "import")
   })
 
   output$import_var <- shiny::renderUI({
@@ -160,11 +162,11 @@ server <- function(input, output, session) {
 
   output$data_loaded <- shiny::reactive({
     !is.null(rv$data_temp)
-    })
+  })
 
-  shiny::observeEvent(input$source,{
+  shiny::observeEvent(input$source, {
     rv$data_temp <- NULL
-    })
+  })
 
   shiny::outputOptions(output, "data_loaded", suspendWhenHidden = FALSE)
 
@@ -179,7 +181,7 @@ server <- function(input, output, session) {
       shiny::req(input$import_var)
       # browser()
       temp_data <- rv$data_temp
-      if (all(input$import_var %in% names(temp_data))){
+      if (all(input$import_var %in% names(temp_data))) {
         temp_data <- temp_data |> dplyr::select(input$import_var)
       }
 
@@ -188,8 +190,8 @@ server <- function(input, output, session) {
 
       rv$code$import <- list(
         rv$code$import,
-        rlang::call2(.fn = "select",input$import_var,.ns = "dplyr"),
-        rlang::call2(.fn = "default_parsing",.ns = "FreesearchR")
+        rlang::call2(.fn = "select", input$import_var, .ns = "dplyr"),
+        rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
       ) |>
         merge_expression() |>
         expression_string()
@@ -207,7 +209,7 @@ server <- function(input, output, session) {
 
       rv$code$filter <- NULL
       rv$code$modify <- NULL
-    },ignoreNULL = FALSE
+    }, ignoreNULL = FALSE
   )
 
   output$data_info_import <- shiny::renderUI({
@@ -280,7 +282,8 @@ server <- function(input, output, session) {
       title = "Update and select variables",
       footer = tagList(
         actionButton("ok", "OK")
-      ))
+      )
+    )
   )
 
   output$data_info <- shiny::renderUI({
@@ -445,44 +448,54 @@ server <- function(input, output, session) {
 
   output$code_import <- shiny::renderPrint({
     shiny::req(rv$code$import)
-    cat(rv$code$import)
+    cat(c("#Data import\n",rv$code$import))
   })
 
   output$code_data <- shiny::renderPrint({
     shiny::req(rv$code$modify)
+    # browser()
     ls <- rv$code$modify |> unique()
-    out <- paste("data <- data |>",
-      sapply(ls, \(.x) paste(deparse(.x), collapse = ",")),
-      collapse = "|>"
-    ) |>
-      (\(.x){
-        gsub(
-          "\\|>", "\\|> \n",
-          gsub(
-            "%>%", "",
-            gsub(
-              "\\s{2,}", " ",
-              gsub(",\\s{,},", ", ", .x)
-            )
-          )
-        )
-      })()
-    cat(out)
+    out <- ls |>
+      merge_expression() |>
+      expression_string(assign.str = "data <- data |>\n")
+
+    # out <- paste("data <- data |>",
+    #   sapply(ls, \(.x) paste(deparse(.x), collapse = ",")),
+    #   collapse = "|>"
+    # ) |>
+    #   (\(.x){
+    #     gsub(
+    #       "\\|>", "\\|> \n",
+    #       gsub(
+    #         "%>%", "",
+    #         gsub(
+    #           "\\s{2,}", " ",
+    #           gsub(",\\s{,},", ", ", .x)
+    #         )
+    #       )
+    #     )
+    #   })()
+    cat(c("#Data modifications\n",out))
   })
 
   output$code_filter <- shiny::renderPrint({
-    cat(rv$code$filter)
+    cat(c("#Data filter\n",rv$code$filter))
   })
 
   output$code_table1 <- shiny::renderPrint({
     shiny::req(rv$code$table1)
-    cat(rv$code$table1)
+    cat(c("#Data characteristics table\n",rv$code$table1))
   })
 
+
+  ## Just a note to self
+  ## This is a very rewarding couple of lines marking new insights to dynamically rendering code
   shiny::observe({
-  rv$regression()$regression$models |> purrr::imap(\(.x,.i){
-    output[[paste0("code_",tolower(.i))]] <- shiny::renderPrint({cat(.x$code_table)})
-  })
+    rv$regression()$regression$models |> purrr::imap(\(.x, .i){
+      output[[paste0("code_", tolower(.i))]] <- shiny::renderPrint({
+        cat(.x$code_table)
+      })
+    })
   })
 
 
@@ -610,7 +623,7 @@ server <- function(input, output, session) {
       )
 
       shiny::withProgress(message = "Creating the table. Hold on for a moment..", {
-        rv$list$table1 <- rlang::exec(create_baseline, !!!append_list(rv$list$data,parameters,"data"))
+        rv$list$table1 <- rlang::exec(create_baseline, !!!append_list(rv$list$data, parameters, "data"))
 
         # rv$list$table1 <- create_baseline(
         #   data = rv$list$data,
@@ -629,7 +642,6 @@ server <- function(input, output, session) {
       # ) |>
       #   merge_expression() |>
       #   expression_string()
-
     }
   )
 

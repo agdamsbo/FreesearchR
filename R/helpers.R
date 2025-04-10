@@ -209,26 +209,37 @@ file_export <- function(data, output.format = c("df", "teal", "list"), filename,
 #' mtcars |>
 #'   default_parsing() |>
 #'   str()
+#' head(starwars,5) |> str()
+#' starwars |>
+#'   default_parsing() |>
+#'   head(5) |>
+#'   str()
 default_parsing <- function(data) {
   name_labels <- lapply(data, \(.x) REDCapCAST::get_attr(.x, attr = "label"))
 
   out <- data |>
-    setNames(make.names(names(data),unique = TRUE)) |>
+    setNames(make.names(names(data), unique = TRUE)) |>
+    ## Temporary step to avoid nested list and crashing
+    remove_nested_list() |>
     REDCapCAST::parse_data() |>
     REDCapCAST::as_factor() |>
     REDCapCAST::numchar2fct(numeric.threshold = 8, character.throshold = 10) |>
     REDCapCAST::as_logical() |>
     REDCapCAST::fct_drop()
 
-  purrr::map2(out, name_labels, \(.x, .l){
-    if (!(is.na(.l) | .l == "")) {
-      REDCapCAST::set_attr(.x, .l, attr = "label")
-    } else {
-      attr(x = .x, which = "label") <- NULL
-      .x
+  purrr::map2(
+    out,
+    name_labels[names(name_labels) %in% names(out)],
+    \(.x, .l){
+      if (!(is.na(.l) | .l == "")) {
+        REDCapCAST::set_attr(.x, .l, attr = "label")
+      } else {
+        attr(x = .x, which = "label") <- NULL
+        .x
+      }
+      # REDCapCAST::set_attr(data = .x, label = .l,attr = "label", overwrite = FALSE)
     }
-    # REDCapCAST::set_attr(data = .x, label = .l,attr = "label", overwrite = FALSE)
-  }) |> dplyr::bind_cols()
+  ) |> dplyr::bind_cols()
 }
 
 #' Remove NA labels
@@ -333,7 +344,7 @@ data_description <- function(data) {
   n <- nrow(data)
   n_var <- ncol(data)
   n_complete <- sum(complete.cases(data))
-  p_complete <- n_complete/n
+  p_complete <- n_complete / n
 
   sprintf(
     i18n("Data has %s observations and %s variables, with %s (%s%%) complete cases."),
@@ -355,10 +366,10 @@ data_description <- function(data) {
 #' @export
 #'
 #' @examples
-#' sort_by(c("Multivariable", "Univariable"),c("Univariable","Minimal","Multivariable"))
-sort_by <- function(x,y,na.rm=FALSE,...){
-  out <- base::sort_by(x,y,...)
-  if (na.rm==TRUE){
+#' sort_by(c("Multivariable", "Univariable"), c("Univariable", "Minimal", "Multivariable"))
+sort_by <- function(x, y, na.rm = FALSE, ...) {
+  out <- base::sort_by(x, y, ...)
+  if (na.rm == TRUE) {
     out[!is.na(out)]
   } else {
     out
@@ -366,7 +377,7 @@ sort_by <- function(x,y,na.rm=FALSE,...){
 }
 
 
-get_ggplot_label <- function(data,label){
+get_ggplot_label <- function(data, label) {
   assertthat::assert_that(ggplot2::is.ggplot(data))
   data$labels[[label]]
 }
@@ -382,12 +393,12 @@ get_ggplot_label <- function(data,label){
 #'
 #' @examples
 #' NULL |> if_not_missing("new")
-#' c(2,"a",NA) |> if_not_missing()
+#' c(2, "a", NA) |> if_not_missing()
 #' "See" |> if_not_missing()
-if_not_missing <- function(data,default=NULL){
-  if (length(data)>1){
-    Reduce(c,lapply(data,if_not_missing))
-  } else if (is.na(data) || is.null(data)){
+if_not_missing <- function(data, default = NULL) {
+  if (length(data) > 1) {
+    Reduce(c, lapply(data, if_not_missing))
+  } else if (is.na(data) || is.null(data)) {
     return(default)
   } else {
     return(data)
@@ -404,10 +415,10 @@ if_not_missing <- function(data,default=NULL){
 #'
 #' @examples
 #' list(
-#' rlang::call2(.fn = "select",!!!list(c("cyl","disp")),.ns = "dplyr"),
-#' rlang::call2(.fn = "default_parsing",.ns = "FreesearchR")
+#'   rlang::call2(.fn = "select", !!!list(c("cyl", "disp")), .ns = "dplyr"),
+#'   rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
 #' ) |> merge_expression()
-merge_expression <- function(data){
+merge_expression <- function(data) {
   Reduce(
     f = function(x, y) rlang::expr(!!x %>% !!y),
     x = data
@@ -423,11 +434,27 @@ merge_expression <- function(data){
 #'
 #' @examples
 #' list(
-#' rlang::call2(.fn = "select",!!!list(c("cyl","disp")),.ns = "dplyr"),
-#' rlang::call2(.fn = "default_parsing",.ns = "FreesearchR")
-#' ) |> merge_expression() |> expression_string()
-expression_string <- function(data,assign.str="data <- "){
-  out <- paste0(assign.str, gsub("%>%","|>\n",paste(gsub('"',"'",deparse(data)),collapse = "")))
-  gsub(" ","",out)
+#'   rlang::call2(.fn = "select", !!!list(c("cyl", "disp")), .ns = "dplyr"),
+#'   rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
+#' ) |>
+#'   merge_expression() |>
+#'   expression_string()
+expression_string <- function(data, assign.str = "data <- ") {
+  out <- paste0(assign.str, gsub("%>%", "|>\n", paste(gsub('"', "'", deparse(data)), collapse = "")))
+  gsub(" ", "", out)
 }
 
+
+#' Very simple function to remove nested lists, lik ewhen uploading .rds
+#'
+#' @param data data
+#'
+#' @returns data.frame
+#' @export
+#'
+#' @examples
+#' dplyr::tibble(a = 1:10, b = rep(list("a"), 10)) |> remove_nested_list()
+#' dplyr::tibble(a = 1:10, b = rep(list(c("a", "b")), 10)) |> as.data.frame()
+remove_nested_list <- function(data) {
+  data[!sapply(data, is.list)]
+}
