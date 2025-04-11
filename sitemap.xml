@@ -13,6 +13,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/add_sparkline.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/all_but.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/allign_axes.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/append_column.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/append_list.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/argsstring2list.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/baseline_table.html</loc></url>
@@ -26,7 +27,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/create_overview_datagrid.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/custom_theme.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/cut-variable.html</loc></url>
-<url><loc>https://agdamsbo.github.io/FreesearchR/reference/cut.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/cut_var.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/data-correlations.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/data-import.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/data-plots.html</loc></url>
@@ -62,12 +63,12 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/launch_FreesearchR.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/limit_log.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/line_break.html</loc></url>
-<url><loc>https://agdamsbo.github.io/FreesearchR/reference/m_datafileUI.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/merge_expression.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/merge_long.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/missing_fraction.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/modify_qmd.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/overview_vars.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/pipe_string.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/plot.tbl_regression.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/plot_euler.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/plot_euler_single.html</loc></url>
@@ -78,10 +79,13 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/redcap_read_shiny_module.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/regression_model.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/regression_table.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/remove_empty_attr.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/remove_empty_cols.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/remove_na_attr.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/remove_nested_list.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/repeated_instruments.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/selectInputIcon.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/set_column_label.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/sort_by.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/specify_qmd_format.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/subset_types.html</loc></url>
