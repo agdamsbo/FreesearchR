@@ -9,7 +9,7 @@
 \usage{
 regression_model(
   data,
-  outcome.str,
+  outcome.str = NULL,
   auto.mode = FALSE,
   formula.str = NULL,
   args.list = NULL,
@@ -165,6 +165,8 @@ gtsummary::trial |>
   dplyr::bind_rows()
 ms <- regression_model_uv_list(data = default_parsing(mtcars), outcome.str = "mpg", fun.descr = "Linear regression model")
 ms$code
+ls <- regression_model_uv_list(data = default_parsing(mtcars), outcome.str = "am", fun.descr = "Logistic regression model")
+ls$code
 lapply(ms$model, broom::tidy) |> dplyr::bind_rows()
 }
 }
