@@ -22,5 +22,5 @@ vector
 Drop-in replacement for the base::sort_by with option to remove NAs
 }
 \examples{
-sort_by(c("Multivariable", "Univariable"),c("Univariable","Minimal","Multivariable"))
+sort_by(c("Multivariable", "Univariable"), c("Univariable", "Minimal", "Multivariable"))
 }

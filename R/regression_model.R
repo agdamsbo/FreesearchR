@@ -46,7 +46,7 @@
 #'   )
 #' broom::tidy(m)
 regression_model <- function(data,
-                             outcome.str,
+                             outcome.str = NULL,
                              auto.mode = FALSE,
                              formula.str = NULL,
                              args.list = NULL,
@@ -60,27 +60,28 @@ regression_model <- function(data,
   }
 
   ## This will handle if outcome is not in data for nicer shiny behavior
-  if (!outcome.str %in% names(data)) {
+  if (isTRUE(!outcome.str %in% names(data))) {
     outcome.str <- names(data)[1]
-    print("outcome is not in data, first column is used")
-  }
-
-  if (is.null(vars)) {
-    vars <- names(data)[!names(data) %in% outcome.str]
-  } else {
-    if (outcome.str %in% vars) {
-      vars <- vars[!vars %in% outcome.str]
-    }
-    data <- data |> dplyr::select(dplyr::all_of(c(vars, outcome.str)))
+    print("Outcome variable is not in data, first column is used")
   }
 
   if (!is.null(formula.str)) {
     formula.glue <- glue::glue(formula.str)
+    outcome.str <- NULL
   } else {
     assertthat::assert_that(outcome.str %in% names(data),
       msg = "Outcome variable is not present in the provided dataset"
     )
     formula.glue <- glue::glue("{outcome.str}~{paste(vars,collapse='+')}")
+  }
+
+  if (is.null(vars)) {
+    vars <- names(data)[!names(data) %in% outcome.str]
+  } else if (!is.null(outcome.str)) {
+    if (outcome.str %in% vars) {
+      vars <- vars[!vars %in% outcome.str]
+    }
+    data <- data |> dplyr::select(dplyr::all_of(c(vars, outcome.str)))
   }
 
   # Formatting character variables as factor
@@ -122,7 +123,6 @@ regression_model <- function(data,
     msg = "Please provide the function as a character vector."
   )
 
-  # browser()
   out <- do.call(
     getfun(fun),
     c(
@@ -358,7 +358,7 @@ supported_functions <- function() {
 #'   dplyr::select("cyl") |>
 #'   possible_functions(design = "cross-sectional")
 possible_functions <- function(data, design = c("cross-sectional")) {
-  # browser()
+  #
   # data <- if (is.reactive(data)) data() else data
   if (is.data.frame(data)) {
     data <- data[[1]]
@@ -511,31 +511,36 @@ regression_model_list <- function(data,
   }
 
   parameters <- list(
-    outcome.str = outcome.str,
+    data = data,
     fun = fun.c,
-    formula.str = formula.str.c,
+    formula.str = glue::glue(formula.str.c),
     args.list = args.list.c
   )
 
   model <- do.call(
     regression_model,
-    append_list(parameters,
-      data = data, "data"
-    )
+    parameters
   )
 
-  parameters_print <- list2str(Filter(length,
-                                      modifyList(parameters, list(
-                                        formula.str = glue::glue(formula.str.c),
-                                        args.list = NULL
-                                      ))))
+  parameters_code <- Filter(
+    length,
+    modifyList(parameters, list(
+      data=as.symbol("df"),
+      formula.str = as.character(glue::glue(formula.str.c)),
+      outcome.str = NULL
+      # args.list = NULL,
+    )
+  ))
 
-  code <- glue::glue("FreesearchR::regression_model(data,{parameters_print}, args.list=list({list2str(args.list.c)}))",.null = "NULL")
+  ## The easiest solution was to simple paste as a string
+  ## The rlang::call2 or rlang::expr functions would probably work as well
+  # code <- glue::glue("FreesearchR::regression_model({parameters_print}, args.list=list({list2str(args.list.c)}))", .null = "NULL")
+  code <- rlang::call2("regression_model",!!!parameters_code,.ns = "FreesearchR")
 
   list(
     options = options,
     model = model,
-    code = code
+    code = expression_string(code)
   )
 }
 
@@ -575,6 +580,8 @@ list2str <- function(data) {
 #'   dplyr::bind_rows()
 #' ms <- regression_model_uv_list(data = default_parsing(mtcars), outcome.str = "mpg", fun.descr = "Linear regression model")
 #' ms$code
+#' ls <- regression_model_uv_list(data = default_parsing(mtcars), outcome.str = "am", fun.descr = "Logistic regression model")
+#' ls$code
 #' lapply(ms$model, broom::tidy) |> dplyr::bind_rows()
 #' }
 regression_model_uv_list <- function(data,
@@ -637,41 +644,35 @@ regression_model_uv_list <- function(data,
   #   )
   # )
 
-  parameters <- list(
-    outcome.str = outcome.str,
-    fun = fun.c,
-    formula.str = formula.str.c,
-    args.list = args.list.c
-  )
-
   model <- vars |>
     lapply(\(.var){
+
+      parameters <-
+        list(
+          fun = fun.c,
+          data = data[c(outcome.str, .var)],
+          formula.str = as.character(glue::glue(gsub("vars", ".var", formula.str.c))),
+          args.list = args.list.c
+        )
+
       out <- do.call(
         regression_model,
-        append_list(parameters,
-          data = data[c(outcome.str, .var)], "data"
-        )
+        parameters
       )
 
       ## This is the very long version
       ## Handles deeply nested glue string
-      code <- glue::glue("FreesearchR::regression_model({list2str(modifyList(parameters,list(formula.str = glue::glue(gsub('vars','.var',formula.str.c)))))})")
+      # code <- glue::glue("FreesearchR::regression_model(data=df,{list2str(modifyList(parameters,list(data=NULL,args.list=list2str(args.list.c))))})")
+      code <- rlang::call2("regression_model",!!!modifyList(parameters,list(data=as.symbol("df"),args.list=args.list.c)),.ns = "FreesearchR")
       REDCapCAST::set_attr(out, code, "code")
     })
 
-  # vars <- "."
-  #
-  # code_raw <- glue::glue(
-  #   "{fun.c}({paste(Filter(length,list(glue::glue(formula.str.c),'data = .d',list2str(args.list.c))),collapse=', ')})"
-  # )
-  # browser()
-  # code <- glue::glue("lapply(data,function(.d){code_raw})")
-
   code <- model |>
     lapply(\(.x)REDCapCAST::get_attr(.x, "code")) |>
-    purrr::reduce(c) |>
+    lapply(expression_string) |>
+    pipe_string(collapse = ",\n") |>
     (\(.x){
-      paste0("list(\n", paste(.x, collapse = ",\n"), ")")
+      paste0("list(\n", .x, ")")
     })()
 
 
@@ -681,3 +682,6 @@ regression_model_uv_list <- function(data,
     code = code
   )
 }
+
+
+# regression_model(mtcars, fun = "stats::lm", formula.str = "mpg~cyl")

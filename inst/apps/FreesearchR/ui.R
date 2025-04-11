@@ -70,37 +70,37 @@ ui_elements <- list(
         ),
         shiny::conditionalPanel(
           condition = "output.data_loaded == true",
-        shiny::br(),
-        shiny::br(),
-        shiny::h5("Specify variables to include"),
-        shiny::fluidRow(
-          shiny::column(
-            width = 6,
-            shiny::br(),
-            shiny::p("Filter by completeness threshold and manual selection:"),
-            shiny::br(),
-            shiny::br()
-          ),
-          shiny::column(
-            width = 6,
-            shinyWidgets::noUiSliderInput(
-              inputId = "complete_cutoff",
-              label = NULL,
-              update_on = "end",
-              min = 0,
-              max = 100,
-              step = 5,
-              value = 70,
-              format = shinyWidgets::wNumbFormat(decimals = 0),
-              color = datamods:::get_primary_color()
+          shiny::br(),
+          shiny::br(),
+          shiny::h5("Specify variables to include"),
+          shiny::fluidRow(
+            shiny::column(
+              width = 6,
+              shiny::br(),
+              shiny::p("Filter by completeness threshold and manual selection:"),
+              shiny::br(),
+              shiny::br()
             ),
-            shiny::helpText("Exclude variables with completeness below the specified percentage."),
-            shiny::br(),
-            shiny::br(),
-            shiny::uiOutput(outputId = "import_var"),
-            shiny::uiOutput(outputId = "data_info_import", inline = TRUE)
+            shiny::column(
+              width = 6,
+              shinyWidgets::noUiSliderInput(
+                inputId = "complete_cutoff",
+                label = NULL,
+                update_on = "end",
+                min = 0,
+                max = 100,
+                step = 5,
+                value = 70,
+                format = shinyWidgets::wNumbFormat(decimals = 0),
+                color = datamods:::get_primary_color()
+              ),
+              shiny::helpText("Exclude variables with completeness below the specified percentage."),
+              shiny::br(),
+              shiny::br(),
+              shiny::uiOutput(outputId = "import_var"),
+              shiny::uiOutput(outputId = "data_info_import", inline = TRUE)
+            )
           )
-        )
         ),
         shiny::br(),
         shiny::br(),
@@ -138,7 +138,7 @@ ui_elements <- list(
               width = 9,
               shiny::uiOutput(outputId = "data_info", inline = TRUE),
               shiny::tags$p(
-                "Below is a short summary table, on the right you can create data filters."
+                "Below is a short summary table, on the right you can click to browse data and create data filters."
               )
             )
           ),
@@ -152,7 +152,8 @@ ui_elements <- list(
               shiny::actionButton(
                 inputId = "modal_browse",
                 label = "Browse data",
-                width = "100%"
+                width = "100%",
+                disabled = TRUE
               ),
               shiny::tags$br(),
               shiny::tags$br(),
@@ -172,8 +173,10 @@ ui_elements <- list(
           fluidRow(
             shiny::column(
               width = 9,
-              shiny::tags$p(shiny::markdown("Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."),
-                            shiny::tags$p("There are also more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code. At the bottom you can restore the original data."))
+              shiny::tags$p(
+                shiny::markdown("Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."),
+                shiny::tags$p("There are also more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code. At the bottom you can restore the original data.")
+              )
             )
           ),
           # shiny::tags$br(),
@@ -291,7 +294,7 @@ ui_elements <- list(
                 label = "Evaluate",
                 width = "100%",
                 icon = shiny::icon("calculator"),
-                disabled = FALSE
+                disabled = TRUE
               )
             ),
             bslib::accordion_panel(
@@ -439,18 +442,16 @@ ui_elements <- list(
           shiny::br(),
           shiny::br(),
           shiny::h4("Code snippets"),
-          shiny::tags$p("Below are the code used to create the final data set. This can be saved for reproducibility. The code may not be 100 % correct, but kan be used for learning and example code to get started on coding yourself."),
-          shiny::tagAppendChildren(
-            shiny::tagList(
-            shiny::verbatimTextOutput(outputId = "code_import"),
-            shiny::verbatimTextOutput(outputId = "code_data"),
-            shiny::verbatimTextOutput(outputId = "code_filter"),
-            shiny::verbatimTextOutput(outputId = "code_table1")
+          shiny::tags$p("Below are the code bits used to create the final data set and the main analyses."),
+          shiny::tags$p("This can be used as a starting point for learning to code and for reproducibility."),
+          shiny::tagList(
+            lapply(
+              paste0("code_", c(
+                "import", "data", "filter", "table1", "univariable", "multivariable"
+              )),
+              \(.x)shiny::htmlOutput(outputId = .x)
+            )
           ),
-          lapply(paste0("code_",c("univariable","multivariable")),
-                 \(.x)shiny::verbatimTextOutput(outputId = .x))
-          )
-          ,
           shiny::tags$br(),
           shiny::br()
         ),
@@ -489,6 +490,8 @@ dark <- custom_theme(
 # https://webdesignerdepot.com/17-open-source-fonts-youll-actually-love/
 
 ui <- bslib::page_fixed(
+  prismDependencies,
+  prismRDependency,
   shiny::tags$head(includeHTML(("www/umami-app.html"))),
   shiny::tags$style(
     type = "text/css",

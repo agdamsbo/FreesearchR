@@ -19,6 +19,6 @@ Return if available
 }
 \examples{
 NULL |> if_not_missing("new")
-c(2,"a",NA) |> if_not_missing()
+c(2, "a", NA) |> if_not_missing()
 "See" |> if_not_missing()
 }

@@ -98,12 +98,36 @@ c("continuous", "dichotomous", "ordinal", "categorical") |>
   kableExtra::kable()
 ```
 
+Export the plots directly from the sidebar with easily adjusted plot dimensions for your next publication.
+
+Also copy the code to generate the plot in your own R-environment and fine tune all the small details.
+
 ## Regression
+
+This section is only intended for very simple explorative analyses and as a proof-of-concept for now. If you are doing complex regression analyses you should probably just write the code yourself.
+
+### Table
+
+Generate simple regression models and get the results in a nice table. This will also be included in the exported report.
+
+### Plots
+
+Plot the coefficients from the regression models in a forest plot. Choose which model(s) to include.
+
+### Checks
+
+Check model assumptions visually. Supported checks can be chosen.
 
 ## Download
 
 ### Report
 
+Download a nice report with baseline characteristics and regression model results. Choose between MS Word or LibreOffice format.
+
 ### Data
 
+Export the modified dataset in different formats.
+
 ### Code
+
+See all the code snippets from the different steps in your data evaluation.

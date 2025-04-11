@@ -4,125 +4,58 @@ library(phosphoricons)
 library(rlang)
 library(shiny)
 
-
-# old_deprecated_cut.hms <- function(x, breaks = "hour", ...) {
-#   # For now, this function will allways try to cut to hours
-#   # This limits time cutting to only do hour-binning, no matter the
-#
-#   breaks_o <- breaks
-#
-#   if (identical(breaks, "hour")) {
-#     # splitter <- match(
-#     #   num,
-#     #   levels(factor(num))
-#     # )
-#     breaks <- hms::as_hms(paste0(1:23, ":00:00"))
-#   }
-#
-#   # if (identical(breaks, "daynight")) {
-#   #   # splitter <- num %in% 8:20 + 1
-#   #   breaks <- hms::as_hms(c("08:00:00","20:00:00"))
-#   # }
-#
-#   if (length(breaks) != 1) {
-#     if ("hms" %in% class(breaks)) {
-#       splitter <- seq_along(breaks) |>
-#         purrr::map(\(.x){
-#           # browser()
-#           out <- x %in% x[x >= breaks[.x] & x < breaks[.x + 1]]
-#           if (.x == length(breaks)) {
-#             out[match(breaks[length(breaks)], x)] <- TRUE
-#           }
-#           ifelse(out, .x, 0)
-#         }) |>
-#         dplyr::bind_cols(.name_repair = "unique_quiet") |>
-#         rowSums()
-#       splitter[splitter == 0] <- NA
-#     } else {
-#       breaks <- "hour"
-#     }
-#   }
-#
-#   if (is.numeric(breaks)) {
-#     breaks_n <- quantile(x, probs = seq(0, 1, 1 / breaks))
-#     ## Use lapply or similar to go through levels two at a time
-#     splitter <- seq(breaks) |>
-#       purrr::map(\(.x){
-#         # browser()
-#         out <- x %in% x[x >= breaks_n[.x] & x < breaks_n[.x + 1]]
-#         if (.x == breaks) {
-#           out[match(breaks_n[length(breaks_n)], x)] <- TRUE
-#         }
-#         ifelse(out, .x, 0)
-#       }) |>
-#       dplyr::bind_cols(.name_repair = "unique_quiet") |>
-#       rowSums()
-#   }
-#
-#   # browser()
-#
-#   num <- strsplit(as.character(x), ":") |>
-#     lapply(\(.x).x[[1]]) |>
-#     unlist() |>
-#     as.numeric()
-#
-#   # browser()
-#   labs <- split(x, splitter) |>
-#     purrr::imap(\(.x, .i){
-#       # if (identical(breaks_o, "daynight") && .i == 1) {
-#       #   h <- hms::as_hms(hms::hms(hours = 24) - abs(.x - hms::hms(hours = 8)))
-#       #
-#       #   paste0("[", .x[match(sort(h)[1], h)], ",", .x[match(sort(h)[length(h)], h)], "]")
-#       # } else {
-#       .x <- sort(.x)
-#       paste0("[", .x[1], ",", .x[length(.x)], "]")
-#       # }
-#     }) |>
-#     unlist()
-#
-#   structure(match(splitter, names(labs)), levels = labs, class = "factor")
-# }
-
-#' Extended cutting function
+#' Extended cutting function with fall-back to the native base::cut
 #'
 #' @param x an object inheriting from class "hms"
 #' @param ... passed on
 #'
-#' @rdname cut
+#' @export
+#' @name cut_var
+cut_var <- function(x, ...) {
+  UseMethod("cut_var")
+}
+
+#' @export
+#' @name cut_var
+cut_var.default <- function(x, ...) {
+  base::cut.default(x, ...)
+}
+
+#' @name cut_var
 #'
 #' @return factor
 #' @export
 #'
 #' @examples
-#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "08:20:20", "21:20:20", "03:02:20")) |> cut(2)
-#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "08:20:20", "21:20:20", "03:02:20")) |> cut("min")
-#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "08:20:20", "21:20:20", "03:02:20")) |> cut(breaks = "hour")
-#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "08:20:20", "21:20:20", "03:02:20")) |> cut(breaks = hms::as_hms(c("01:00:00", "03:01:20", "9:20:20")))
+#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "08:20:20", "21:20:20", "03:02:20")) |> cut_var(2)
+#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "08:20:20", "21:20:20", "03:02:20")) |> cut_var("min")
+#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "08:20:20", "21:20:20", "03:02:20")) |> cut_var(breaks = "hour")
+#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "08:20:20", "21:20:20", "03:02:20")) |> cut_var(breaks = hms::as_hms(c("01:00:00", "03:01:20", "9:20:20")))
 #' d_t <- readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "03:02:20", NA))
-#' f <- d_t |> cut(2)
-#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "03:02:20", NA)) |> cut(breaks = lubridate::as_datetime(c(hms::as_hms(levels(f)), hms::as_hms(max(d_t, na.rm = TRUE) + 1))), right = FALSE)
-cut.hms <- function(x, breaks, ...) {
+#' f <- d_t |> cut_var(2)
+#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "03:02:20", NA)) |> cut_var(breaks = lubridate::as_datetime(c(hms::as_hms(levels(f)), hms::as_hms(max(d_t, na.rm = TRUE) + 1))), right = FALSE)
+cut_var.hms <- function(x, breaks, ...) {
   ## as_hms keeps returning warnings on tz(); ignored
   suppressWarnings({
     if (hms::is_hms(breaks)) {
       breaks <- lubridate::as_datetime(breaks)
     }
     x <- lubridate::as_datetime(x)
-    out <- cut.POSIXt(x, breaks = breaks, ...)
+    out <- cut_var.POSIXt(x, breaks = breaks, ...)
     attr(out, which = "brks") <- hms::as_hms(lubridate::as_datetime(attr(out, which = "brks")))
     attr(out, which = "levels") <- as.character(hms::as_hms(lubridate::as_datetime(attr(out, which = "levels"))))
   })
   out
 }
 
-#' @rdname cut
+#' @name cut_var
 #' @param x an object inheriting from class "POSIXt" or "Date"
 #'
 #' @examples
-#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut(2)
-#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut(breaks = "weekday")
-#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut(breaks = "month_only")
-cut.POSIXt <- function(x, breaks, right = FALSE, include.lowest = TRUE, start.on.monday = TRUE, ...) {
+#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(2)
+#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = "weekday")
+#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = "month_only")
+cut_var.POSIXt <- function(x, breaks, right = FALSE, include.lowest = TRUE, start.on.monday = TRUE, ...) {
   breaks_o <- breaks
   # browser()
   if (is.numeric(breaks)) {
@@ -174,17 +107,17 @@ cut.POSIXt <- function(x, breaks, right = FALSE, include.lowest = TRUE, start.on
   out
 }
 
-#' @rdname cut
+#' @name cut_var
 #' @param x an object inheriting from class "POSIXct"
-cut.POSIXct <- cut.POSIXt
+cut_var.POSIXct <- cut_var.POSIXt
 
-#' @rdname cut
+#' @name cut_var
 #' @param x an object inheriting from class "POSIXct"
 #'
 #' @examples
-#' as.Date(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut(2)
-#' as.Date(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut(breaks = "weekday")
-cut.Date <- function(x, breaks, start.on.monday = TRUE, ...) {
+#' as.Date(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(2)
+#' as.Date(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = "weekday")
+cut_var.Date <- function(x, breaks, start.on.monday = TRUE, ...) {
   if (identical(breaks, "weekday")) {
     days <- c(
       "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
@@ -329,7 +262,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
     id,
     function(input, output, session) {
-      rv <- reactiveValues(data = NULL)
+      rv <- reactiveValues(data = NULL, new_var_name = NULL)
 
       bindEvent(observe({
         data <- data_r()
@@ -351,7 +284,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         req(hasName(data, variable))
 
         if (is_datetime(data[[variable]])) {
-          brks <- cut(data[[variable]],
+          brks <- cut_var(data[[variable]],
             breaks = input$n_breaks
           )$brks
         } else {
@@ -444,8 +377,8 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         if (input$method == "fixed") {
           req(input$fixed_brks)
           if (any(c("hms", "POSIXt") %in% class(data[[variable]]))) {
-            cut.POSIXct <- cut.POSIXt
-            f <- cut(data[[variable]], breaks = input$fixed_brks)
+            # cut.POSIXct <- cut.POSIXt
+            f <- cut_var(data[[variable]], breaks = input$fixed_brks)
             list(var = f, brks = levels(f))
           } else {
             classInt::classIntervals(
@@ -458,8 +391,8 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         } else if (input$method == "quantile") {
           req(input$fixed_brks)
           if (any(c("hms", "POSIXt") %in% class(data[[variable]]))) {
-            cut.POSIXct <- cut.POSIXt
-            f <- cut(data[[variable]], breaks = input$n_breaks)
+            # cut.POSIXct <- cut.POSIXt
+            f <- cut_var(data[[variable]], breaks = input$n_breaks)
             list(var = f, brks = levels(f))
           } else {
             classInt::classIntervals(
@@ -478,13 +411,13 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           "year"
         )) {
           # To enable datetime cutting
-          cut.POSIXct <- cut.POSIXt
-          f <- cut(data[[variable]], breaks = input$method)
+          # cut.POSIXct <- cut.POSIXt
+          f <- cut_var(data[[variable]], breaks = input$method)
           list(var = f, brks = levels(f))
         } else if (input$method %in% c("hour")) {
           # To enable datetime cutting
-          cut.POSIXct <- cut.POSIXt
-          f <- cut(data[[variable]], breaks = "hour")
+          # cut.POSIXct <- cut.POSIXt
+          f <- cut_var(data[[variable]], breaks = "hour")
           list(var = f, brks = levels(f))
         } else {
           classInt::classIntervals(
@@ -503,43 +436,75 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
 
 
       data_cutted_r <- reactive({
+        req(input$method)
         data <- req(data_r())
         variable <- req(input$variable)
 
-        new_variable <- data.frame(cut(
+
+        if (input$method %in% c("day", "weekday", "week", "month", "month_only", "quarter", "year", "hour")) {
+          breaks <- input$method
+        } else {
+          breaks <- breaks_r()$brks
+        }
+
+        parameters <- list(
           x = data[[variable]],
-          breaks = if (input$method %in% c("day", "weekday", "week", "month", "month_only", "quarter", "year", "hour")) input$method else breaks_r()$brks,
+          breaks = breaks,
           include.lowest = input$include_lowest,
           right = input$right
-        )) |> setNames(paste0(variable, "_cut"))
-
-        data <- dplyr::bind_cols(data, new_variable, .name_repair = "unique_quiet")
-
-        code <- call2(
-          "mutate",
-          !!!set_names(
-            list(
-              expr(cut(
-                !!!syms(list(x = variable)),
-                !!!list(breaks = breaks_r()$brks, include.lowest = input$include_lowest, right = input$right)
-              ))
-            ),
-            paste0(variable, "_cut")
-          )
         )
-        attr(data, "code") <- Reduce(
-          f = function(x, y) expr(!!x %>% !!y),
-          x = c(attr(data, "code"), code)
+
+        new_variable <- tryCatch(
+          {
+            rlang::exec(cut_var, !!!parameters)
+          },
+          error = function(err) {
+            showNotification(paste0("We encountered the following error creating your report: ", err), type = "err")
+          }
         )
+
+        # new_variable <- do.call(
+        #   cut,
+        #   parameters
+        # )
+
+
+        data <- append_column(data, column = new_variable, name = paste0(variable, "_cut"), index = "right")
+
+        # setNames(paste0(variable, "_cut"))
+        #
+        #   data <- dplyr::bind_cols(data, new_variable, .name_repair = "unique_quiet")
+
+        # rv$new_var_name <- names(data)[length(data)]
+        # browser()
+
+        # browser()
+        code <- rlang::call2(
+          "append_column",
+          !!!list(
+            column = rlang::call2("cut_var",
+                                  !!!modifyList(parameters, list(x = as.symbol(paste0("data$", variable)))),
+                                  .ns = "FreesearchR"),
+            name = paste0(variable, "_cut"), index = "right"
+          ),
+          .ns = "FreesearchR"
+        )
+        attr(data, "code") <- code
+
+        # attr(data, "code") <- Reduce(
+        #   f = function(x, y) expr(!!x %>% !!y),
+        #   x = c(attr(data, "code"), code)
+        # )
         data
       })
 
       output$count <- renderDatagrid2({
+        # shiny::req(rv$new_var_name)
         data <- req(data_cutted_r())
-        variable <- req(input$variable)
+        # variable <- req(input$variable)
         count_data <- as.data.frame(
           table(
-            breaks = data[[paste0(variable, "_cut")]],
+            breaks = data[[length(data)]],
             useNA = "ifany"
           ),
           responseName = "count"

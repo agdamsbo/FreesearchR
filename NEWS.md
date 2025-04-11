@@ -4,7 +4,9 @@ Polished and simplified data import module including a much improved REDCap impo
 
 - *CHANGE* `default_parsing()` now ensure unique variable names.
 
-- *NEW* Working code output for all major modules including import, modifications, filter, evaluation, plotting and regression.
+- *NEW* Working code output for all major modules including import, modifications, filter, evaluation, plotting and regression. And it is nicely formatted!
+
+- *NEW* The basics of a "Getting started"-vignette is done, and can be expanded on later.
 
 # FreesearchR 25.4.1
 

@@ -106,7 +106,7 @@ server <- function(input, output, session) {
   shiny::observeEvent(data_file$data(), {
     shiny::req(data_file$data())
     rv$data_temp <- data_file$data()
-    rv$code <- append_list(data = data_file$code(), list = rv$code, index = "import")
+    rv$code <- modifyList(x = rv$code, list(import = data_file$code()))
   })
 
   from_redcap <- m_redcap_readServer(
@@ -116,9 +116,10 @@ server <- function(input, output, session) {
   shiny::observeEvent(from_redcap$data(), {
     # rv$data_original <- purrr::pluck(data_redcap(), "data")()
     rv$data_temp <- from_redcap$data()
-    rv$code <- append_list(data = from_redcap$code(), list = rv$code, index = "import")
+    rv$code <- modifyList(x = rv$code, list(import = from_redcap$code()))
   })
 
+  ## This is used to ensure the reactive data is retrieved
   output$redcap_prev <- DT::renderDT(
     {
       DT::datatable(head(from_redcap$data(), 5),
@@ -140,7 +141,7 @@ server <- function(input, output, session) {
     shiny::req(from_env$data())
 
     rv$data_temp <- from_env$data()
-    rv$code <- append_list(data = from_env$name(),list = rv$code,index = "import")
+    rv$code <- modifyList(x = rv$code, list(import = from_env$name()))
   })
 
   output$import_var <- shiny::renderUI({
@@ -190,11 +191,12 @@ server <- function(input, output, session) {
 
       rv$code$import <- list(
         rv$code$import,
-        rlang::call2(.fn = "select", input$import_var, .ns = "dplyr"),
+        rlang::expr(dplyr::select(dplyr::all_of(!!input$import_var))),
         rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
       ) |>
-        merge_expression() |>
-        expression_string()
+        lapply(expression_string) |>
+        pipe_string() |>
+        expression_string(assign.str = "df <-")
 
 
       # rv$code$import <- rv$code$import |>
@@ -217,12 +219,17 @@ server <- function(input, output, session) {
     data_description(rv$data_original)
   })
 
-
+  ## Activating action buttons on data imported
   shiny::observeEvent(rv$data_original, {
     if (is.null(rv$data_original) | NROW(rv$data_original) == 0) {
       shiny::updateActionButton(inputId = "act_start", disabled = TRUE)
+      shiny::updateActionButton(inputId = "modal_browse", disabled = TRUE)
+      shiny::updateActionButton(inputId = "act_eval", disabled = TRUE)
+
     } else {
       shiny::updateActionButton(inputId = "act_start", disabled = FALSE)
+      shiny::updateActionButton(inputId = "modal_browse", disabled = FALSE)
+      shiny::updateActionButton(inputId = "act_eval", disabled = FALSE)
     }
   })
 
@@ -386,6 +393,8 @@ server <- function(input, output, session) {
       rv$list$data <- data_filter() |>
         REDCapCAST::fct_drop()
 
+      ## This looks messy!! But it works as intended for now
+
       out <- gsub(
         "filter", "dplyr::filter",
         gsub(
@@ -400,7 +409,7 @@ server <- function(input, output, session) {
       out <- strsplit(out, "%>%") |>
         unlist() |>
         (\(.x){
-          paste(c("data <- data", .x[-1], "REDCapCAST::fct_drop()"),
+          paste(c("df <- df", .x[-1], "REDCapCAST::fct_drop()"),
             collapse = "|> \n "
           )
         })()
@@ -446,45 +455,37 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
-  output$code_import <- shiny::renderPrint({
-    shiny::req(rv$code$import)
-    cat(c("#Data import\n",rv$code$import))
+  ## This really should be collapsed to only one call, but I'll leave it for now
+  ## as a working example of dynamically defining outputs and rendering.
+
+  # output$code_import <- shiny::renderPrint({
+  #   shiny::req(rv$code$import)
+  #   cat(c("#Data import\n", rv$code$import))
+  # })
+
+  output$code_import <- shiny::renderUI({
+    prismCodeBlock(paste0("#Data import\n", rv$code$import))
   })
 
-  output$code_data <- shiny::renderPrint({
+  output$code_data <- shiny::renderUI({
     shiny::req(rv$code$modify)
     # browser()
     ls <- rv$code$modify |> unique()
     out <- ls |>
-      merge_expression() |>
-      expression_string(assign.str = "data <- data |>\n")
+      lapply(expression_string) |>
+      pipe_string() |>
+      expression_string(assign.str = "df <- df |>\n")
 
-    # out <- paste("data <- data |>",
-    #   sapply(ls, \(.x) paste(deparse(.x), collapse = ",")),
-    #   collapse = "|>"
-    # ) |>
-    #   (\(.x){
-    #     gsub(
-    #       "\\|>", "\\|> \n",
-    #       gsub(
-    #         "%>%", "",
-    #         gsub(
-    #           "\\s{2,}", " ",
-    #           gsub(",\\s{,},", ", ", .x)
-    #         )
-    #       )
-    #     )
-    #   })()
-    cat(c("#Data modifications\n",out))
+    prismCodeBlock(paste0("#Data modifications\n", out))
   })
 
-  output$code_filter <- shiny::renderPrint({
-    cat(c("#Data filter\n",rv$code$filter))
+  output$code_filter <- shiny::renderUI({
+    prismCodeBlock(paste0("#Data filter\n", rv$code$filter))
   })
 
-  output$code_table1 <- shiny::renderPrint({
+  output$code_table1 <- shiny::renderUI({
     shiny::req(rv$code$table1)
-    cat(c("#Data characteristics table\n",rv$code$table1))
+    prismCodeBlock(paste0("#Data characteristics table\n", rv$code$table1))
   })
 
 
@@ -492,8 +493,8 @@ server <- function(input, output, session) {
   ## This is a very rewarding couple of lines marking new insights to dynamically rendering code
   shiny::observe({
     rv$regression()$regression$models |> purrr::imap(\(.x, .i){
-      output[[paste0("code_", tolower(.i))]] <- shiny::renderPrint({
-        cat(.x$code_table)
+      output[[paste0("code_", tolower(.i))]] <- shiny::renderUI({
+        prismCodeBlock(paste0(paste("#",.i,"regression model\n"),.x$code_table))
       })
     })
   })

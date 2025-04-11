@@ -17,7 +17,7 @@ Merge list of expressions
 }
 \examples{
 list(
-rlang::call2(.fn = "select",!!!list(c("cyl","disp")),.ns = "dplyr"),
-rlang::call2(.fn = "default_parsing",.ns = "FreesearchR")
+  rlang::call2(.fn = "select", !!!list(c("cyl", "disp")), .ns = "dplyr"),
+  rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
 ) |> merge_expression()
 }

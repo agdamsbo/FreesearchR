@@ -22,6 +22,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
           title = "Creating plot",
           icon = bsicons::bs_icon("graph-up"),
           shiny::uiOutput(outputId = ns("primary")),
+          shiny::helpText('Only non-text variables are available for plotting. Go the "Data" to reclass data to plot.'),
           shiny::uiOutput(outputId = ns("type")),
           shiny::uiOutput(outputId = ns("secondary")),
           shiny::uiOutput(outputId = ns("tertiary")),
@@ -88,8 +89,8 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
       title = tab_title,
       shiny::plotOutput(ns("plot"),height = "70vh"),
       shiny::tags$br(),
-      shiny::h4("Plot code:"),
-      shiny::verbatimTextOutput(outputId = ns("code_plot"))
+      shiny::tags$br(),
+      shiny::htmlOutput(outputId = ns("code_plot"))
     )
   )
 }
@@ -209,9 +210,12 @@ data_visuals_server <- function(id,
       # })
       # )|> setNames(c("primary","type","secondary","tertiary")),keep.null = TRUE)
 
+
       output$primary <- shiny::renderUI({
+        shiny::req(data())
         columnSelectInput(
           inputId = ns("primary"),
+          col_subset=names(data())[sapply(data(),data_type)!="text"],
           data = data,
           placeholder = "Select variable",
           label = "Response variable",
@@ -219,9 +223,18 @@ data_visuals_server <- function(id,
         )
       })
 
+      # shiny::observeEvent(data, {
+      #   if (is.null(data()) | NROW(data()) == 0) {
+      #     shiny::updateActionButton(inputId = ns("act_plot"), disabled = TRUE)
+      #   } else {
+      #     shiny::updateActionButton(inputId = ns("act_plot"), disabled = FALSE)
+      #   }
+      # })
+
 
       output$type <- shiny::renderUI({
         shiny::req(input$primary)
+        shiny::req(data())
         # browser()
 
         if (!input$primary %in% names(data())) {
@@ -304,6 +317,7 @@ data_visuals_server <- function(id,
 
       shiny::observeEvent(input$act_plot,
         {
+          if (NROW(data())>0){
           tryCatch(
             {
               parameters <- list(
@@ -333,13 +347,14 @@ data_visuals_server <- function(id,
             error = function(err) {
               showNotification(paste0(err), type = "err")
             }
-          )
+          )}
         },
         ignoreInit = TRUE
       )
 
-      output$code_plot <- shiny::renderPrint({
-        cat(rv$code)
+      output$code_plot <- shiny::renderUI({
+        shiny::req(rv$code)
+        prismCodeBlock(paste0("#Plotting\n", rv$code))
       })
 
       output$plot <- shiny::renderPlot({

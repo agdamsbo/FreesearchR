@@ -209,14 +209,14 @@ file_export <- function(data, output.format = c("df", "teal", "list"), filename,
 #' mtcars |>
 #'   default_parsing() |>
 #'   str()
-#' head(starwars,5) |> str()
+#' head(starwars, 5) |> str()
 #' starwars |>
 #'   default_parsing() |>
 #'   head(5) |>
 #'   str()
 default_parsing <- function(data) {
   name_labels <- lapply(data, \(.x) REDCapCAST::get_attr(.x, attr = "label"))
-
+  # browser()
   out <- data |>
     setNames(make.names(names(data), unique = TRUE)) |>
     ## Temporary step to avoid nested list and crashing
@@ -227,19 +227,21 @@ default_parsing <- function(data) {
     REDCapCAST::as_logical() |>
     REDCapCAST::fct_drop()
 
-  purrr::map2(
-    out,
-    name_labels[names(name_labels) %in% names(out)],
-    \(.x, .l){
-      if (!(is.na(.l) | .l == "")) {
-        REDCapCAST::set_attr(.x, .l, attr = "label")
-      } else {
-        attr(x = .x, which = "label") <- NULL
-        .x
-      }
-      # REDCapCAST::set_attr(data = .x, label = .l,attr = "label", overwrite = FALSE)
-    }
-  ) |> dplyr::bind_cols()
+  set_column_label(out, setNames(name_labels, names(out)), overwrite = FALSE)
+
+  # purrr::map2(
+  #   out,
+  #   name_labels[names(name_labels) %in% names(out)],
+  #   \(.x, .l){
+  #     if (!(is.na(.l) | .l == "")) {
+  #       REDCapCAST::set_attr(.x, .l, attr = "label")
+  #     } else {
+  #       attr(x = .x, which = "label") <- NULL
+  #       .x
+  #     }
+  #     # REDCapCAST::set_attr(data = .x, label = .l,attr = "label", overwrite = FALSE)
+  #   }
+  # ) |> dplyr::bind_cols()
 }
 
 #' Remove NA labels
@@ -425,6 +427,33 @@ merge_expression <- function(data) {
   )
 }
 
+#' Reduce character vector with the native pipe operator or character string
+#'
+#' @param data list
+#'
+#' @returns character string
+#' @export
+#'
+#' @examples
+#' list(
+#'   "mtcars",
+#'   rlang::call2(.fn = "select", !!!list(c("cyl", "disp")), .ns = "dplyr"),
+#'   rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
+#' ) |>
+#'   lapply(expression_string) |>
+#'   pipe_string() |>
+#'   expression_string("data<-")
+pipe_string <- function(data, collapse = "|>\n") {
+  if (is.list(data)) {
+    Reduce(
+      f = function(x, y) glue::glue("{x}{collapse}{y}"),
+      x = data
+    )
+  } else {
+    data
+  }
+}
+
 #' Deparses expression as string, substitutes native pipe and adds assign
 #'
 #' @param data expression
@@ -434,14 +463,17 @@ merge_expression <- function(data) {
 #'
 #' @examples
 #' list(
+#' as.symbol(paste0("mtcars$","mpg")),
 #'   rlang::call2(.fn = "select", !!!list(c("cyl", "disp")), .ns = "dplyr"),
 #'   rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
 #' ) |>
 #'   merge_expression() |>
 #'   expression_string()
-expression_string <- function(data, assign.str = "data <- ") {
-  out <- paste0(assign.str, gsub("%>%", "|>\n", paste(gsub('"', "'", deparse(data)), collapse = "")))
-  gsub(" ", "", out)
+expression_string <- function(data, assign.str = "") {
+  exp.str <- if (is.call(data)) deparse(data) else data
+  # browser()
+  out <- paste0(assign.str, gsub("%>%", "|>\n", paste(gsub('"', "'", paste(exp.str, collapse = "")), collapse = "")))
+  gsub(" |`", "", out)
 }
 
 
@@ -457,4 +489,101 @@ expression_string <- function(data, assign.str = "data <- ") {
 #' dplyr::tibble(a = 1:10, b = rep(list(c("a", "b")), 10)) |> as.data.frame()
 remove_nested_list <- function(data) {
   data[!sapply(data, is.list)]
+}
+
+
+
+
+#' (Re)label columns in data.frame
+#'
+#' @param data data.frame to be labelled
+#' @param label named list or vector
+#'
+#' @returns data.frame
+#' @export
+#'
+#' @examples
+#' ls <- list("mpg" = "", "cyl" = "Cylinders", "disp" = "", "hp" = "", "drat" = "", "wt" = "", "qsec" = "", "vs" = "", "am" = "", "gear" = "", "carb" = "")
+#' ls2 <- c("mpg" = "", "cyl" = "Cylinders", "disp" = "", "hp" = "Horses", "drat" = "", "wt" = "", "qsec" = "", "vs" = "", "am" = "", "gear" = "", "carb" = "")
+#' ls3 <- c("mpg" = "", "cyl" = "", "disp" = "", "hp" = "Horses", "drat" = "", "wt" = "", "qsec" = "", "vs" = "", "am" = "", "gear" = "", "carb" = "")
+#' mtcars |>
+#'   set_column_label(ls) |>
+#'   set_column_label(ls2) |>
+#'   set_column_label(ls3)
+#' rlang::expr(FreesearchR::set_column_label(label = !!ls3)) |> expression_string()
+set_column_label <- function(data, label, overwrite = TRUE) {
+  purrr::imap(data, function(.data, .name) {
+    ls <- if (is.list(label)) unlist(label) else label
+    ls[ls == ""] <- NA
+    if (.name %in% names(ls)) {
+      out <- REDCapCAST::set_attr(.data, unname(ls[.name]), attr = "label", overwrite = overwrite)
+      remove_empty_attr(out)
+    } else {
+      .data
+    }
+  }) |> dplyr::bind_cols(.name_repair = "unique_quiet")
+}
+
+#' Remove empty/NA attributes
+#'
+#' @param data data
+#'
+#' @returns data of same class as input
+#' @export
+#'
+remove_empty_attr <- function(data) {
+  attributes(data)[is.na(attributes(data))] <- NULL
+  data
+}
+
+
+
+#' Append a column to a data.frame
+#'
+#' @param data data
+#' @param column new column (vector) or data.frame with 1 column
+#' @param name new name (pre-fix)
+#' @param index desired location. May be "left", "right" or numeric index.
+#'
+#' @returns data.frame
+#' @export
+#'
+#' @examples
+#' mtcars |>
+#'   dplyr::mutate(mpg_cut = mpg) |>
+#'   append_column(mtcars$mpg, "mpg_cutter")
+append_column <- function(data, column, name, index = "right") {
+  assertthat::assert_that(NCOL(column) == 1)
+  assertthat::assert_that(length(index) == 1)
+
+  if (index == "right") {
+    index <- ncol(data) + 1
+  } else if (index == "left") {
+    index <- 1
+  } else if (is.numeric(index)) {
+    if (index > ncol(data)) {
+      index <- ncol(data) + 1
+    }
+  } else {
+    index <- ncol(data) + 1
+  }
+
+  ## Identifying potential naming conflicts
+  nm_conflicts <- names(data)[startsWith(names(data), name)]
+  ## Simple attemt to create new unique name
+  if (length(nm_conflicts) > 0) {
+    name <- glue::glue("{name}_{length(nm_conflicts)+1}")
+  }
+  ## If the above not achieves a unique name, the generic approach is used
+  if (name %in% names(data)) {
+    name <- make.names(c(name, names(data)), unique = TRUE)[1]
+  }
+  new_df <- setNames(data.frame(column), name)
+
+  list(
+    data[seq_len(index - 1)],
+    new_df,
+    if (!index > ncol(data)) data[index:ncol(data)]
+  ) |>
+    dplyr::bind_cols()
 }

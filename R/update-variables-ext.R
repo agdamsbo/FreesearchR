@@ -174,10 +174,14 @@ update_variables_server <- function(id,
 
           old_label <- data_inputs$label
           new_label <- data_inputs$label_toset
-          new_label[new_label == "New label"] <- ""
-          new_label[is.na(new_label)] <- old_label[is.na(new_label)]
-          new_label[new_label == ""] <- old_label[new_label == ""]
-          new_label <- setNames(new_label,new_names)
+
+          new_label[new_label == "New label"] <- old_label[new_label == "New label"]
+
+          ## Later, "" will be interpreted as NA/empty and removed
+          new_label[is.na(new_label) | new_label %in% c('""',"''"," ")] <- ""
+
+          # new_label[is.na(new_label)] <- old_label[is.na(new_label)]
+          new_label <- setNames(new_label, new_names)
 
           new_classes <- data_inputs$class_toset
           new_classes[new_classes == "Select"] <- NA
@@ -210,17 +214,7 @@ update_variables_server <- function(id,
 
               # relabel
               list_relabel <- as.list(new_label)
-              data <- purrr::map2(
-                data, list_relabel,
-                \(.data, .label){
-                  if (!(is.na(.label) | .label == "")) {
-                    REDCapCAST::set_attr(.data, .label, attr = "label")
-                  } else {
-                    attr(x = .data, which = "label") <- NULL
-                    .data
-                  }
-                }
-              ) |> dplyr::bind_cols(.name_repair = "unique_quiet")
+              data <- set_column_label(data, list_relabel)
 
               # select
               list_select <- setdiff(names(data), names(data)[new_selections])
@@ -256,30 +250,16 @@ update_variables_server <- function(id,
         data <- updated_data$x
         code <- list()
         if (!is.null(data) && shiny::isTruthy(updated_data$list_mutate) && length(updated_data$list_mutate) > 0) {
-          code <- c(code, list(rlang::call2("mutate", !!!updated_data$list_mutate)))
+          code <- c(code, list(rlang::call2("mutate", !!!updated_data$list_mutate,.ns="dplyr")))
         }
         if (!is.null(data) && shiny::isTruthy(updated_data$list_rename) && length(updated_data$list_rename) > 0) {
-          code <- c(code, list(rlang::call2("rename", !!!updated_data$list_rename)))
+          code <- c(code, list(rlang::call2("rename", !!!updated_data$list_rename,.ns="dplyr")))
         }
         if (!is.null(data) && shiny::isTruthy(updated_data$list_select) && length(updated_data$list_select) > 0) {
-          code <- c(code, list(rlang::expr(select(-any_of(c(!!!updated_data$list_select))))))
+          code <- c(code, list(rlang::expr(dplyr::select(-dplyr::any_of(c(!!!updated_data$list_select))))))
         }
         if (!is.null(data) && shiny::isTruthy(updated_data$list_relabel) && length(updated_data$list_relabel) > 0) {
-          code <- c(
-            code,
-            list(
-              rlang::expr(purrr::imap(.f=function(.data, .name) {
-                ls <- !!updated_data$list_relabel
-                ls <- ls[!is.na(ls)]
-                  if (.name %in% names(ls)) {
-                    REDCapCAST::set_attr(.data, ls[.name], attr = "label")
-                  } else {
-                    .data
-                  }
-                }) %>% dplyr::bind_cols()
-                )
-            )
-          )
+          code <- c(code,list(rlang::call2("set_column_label",label=updated_data$list_relabel,.ns="FreesearchR")))
         }
         if (length(code) > 0) {
           attr(data, "code") <- Reduce(

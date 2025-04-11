@@ -1,20 +1,20 @@
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/inst/apps/FreesearchR/functions.R
+#### Current file: /Users/au301842/FreesearchR/inst/apps/FreesearchR/functions.R 
 ########
 
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//app_version.R
+#### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'Version: 25.4.1.250410_1545'
+app_version <- function()'Version: 25.4.1.250411_1313'
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//baseline_table.R
+#### Current file: /Users/au301842/FreesearchR/R//baseline_table.R 
 ########
 
 #' Print a flexible baseline characteristics table
@@ -97,7 +97,7 @@ create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALS
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//contrast_text.R
+#### Current file: /Users/au301842/FreesearchR/R//contrast_text.R 
 ########
 
 #' @title Contrast Text Color
@@ -154,7 +154,7 @@ contrast_text <- function(background,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//correlations-module.R
+#### Current file: /Users/au301842/FreesearchR/R//correlations-module.R 
 ########
 
 #' Data correlations evaluation module
@@ -297,7 +297,7 @@ sentence_paste <- function(data, and.str = "and") {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//custom_SelectInput.R
+#### Current file: /Users/au301842/FreesearchR/R//custom_SelectInput.R 
 ########
 
 #' A selectizeInput customized for data frames with column labels
@@ -491,7 +491,7 @@ vectorSelectInput <- function(inputId,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//cut-variable-dates.R
+#### Current file: /Users/au301842/FreesearchR/R//cut-variable-dates.R 
 ########
 
 library(datamods)
@@ -500,125 +500,58 @@ library(phosphoricons)
 library(rlang)
 library(shiny)
 
-
-# old_deprecated_cut.hms <- function(x, breaks = "hour", ...) {
-#   # For now, this function will allways try to cut to hours
-#   # This limits time cutting to only do hour-binning, no matter the
-#
-#   breaks_o <- breaks
-#
-#   if (identical(breaks, "hour")) {
-#     # splitter <- match(
-#     #   num,
-#     #   levels(factor(num))
-#     # )
-#     breaks <- hms::as_hms(paste0(1:23, ":00:00"))
-#   }
-#
-#   # if (identical(breaks, "daynight")) {
-#   #   # splitter <- num %in% 8:20 + 1
-#   #   breaks <- hms::as_hms(c("08:00:00","20:00:00"))
-#   # }
-#
-#   if (length(breaks) != 1) {
-#     if ("hms" %in% class(breaks)) {
-#       splitter <- seq_along(breaks) |>
-#         purrr::map(\(.x){
-#           # browser()
-#           out <- x %in% x[x >= breaks[.x] & x < breaks[.x + 1]]
-#           if (.x == length(breaks)) {
-#             out[match(breaks[length(breaks)], x)] <- TRUE
-#           }
-#           ifelse(out, .x, 0)
-#         }) |>
-#         dplyr::bind_cols(.name_repair = "unique_quiet") |>
-#         rowSums()
-#       splitter[splitter == 0] <- NA
-#     } else {
-#       breaks <- "hour"
-#     }
-#   }
-#
-#   if (is.numeric(breaks)) {
-#     breaks_n <- quantile(x, probs = seq(0, 1, 1 / breaks))
-#     ## Use lapply or similar to go through levels two at a time
-#     splitter <- seq(breaks) |>
-#       purrr::map(\(.x){
-#         # browser()
-#         out <- x %in% x[x >= breaks_n[.x] & x < breaks_n[.x + 1]]
-#         if (.x == breaks) {
-#           out[match(breaks_n[length(breaks_n)], x)] <- TRUE
-#         }
-#         ifelse(out, .x, 0)
-#       }) |>
-#       dplyr::bind_cols(.name_repair = "unique_quiet") |>
-#       rowSums()
-#   }
-#
-#   # browser()
-#
-#   num <- strsplit(as.character(x), ":") |>
-#     lapply(\(.x).x[[1]]) |>
-#     unlist() |>
-#     as.numeric()
-#
-#   # browser()
-#   labs <- split(x, splitter) |>
-#     purrr::imap(\(.x, .i){
-#       # if (identical(breaks_o, "daynight") && .i == 1) {
-#       #   h <- hms::as_hms(hms::hms(hours = 24) - abs(.x - hms::hms(hours = 8)))
-#       #
-#       #   paste0("[", .x[match(sort(h)[1], h)], ",", .x[match(sort(h)[length(h)], h)], "]")
-#       # } else {
-#       .x <- sort(.x)
-#       paste0("[", .x[1], ",", .x[length(.x)], "]")
-#       # }
-#     }) |>
-#     unlist()
-#
-#   structure(match(splitter, names(labs)), levels = labs, class = "factor")
-# }
-
-#' Extended cutting function
+#' Extended cutting function with fall-back to the native base::cut
 #'
 #' @param x an object inheriting from class "hms"
 #' @param ... passed on
 #'
-#' @rdname cut
+#' @export
+#' @name cut_var
+cut_var <- function(x, ...) {
+  UseMethod("cut_var")
+}
+
+#' @export
+#' @name cut_var
+cut_var.default <- function(x, ...) {
+  base::cut.default(x, ...)
+}
+
+#' @name cut_var
 #'
 #' @return factor
 #' @export
 #'
 #' @examples
-#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "08:20:20", "21:20:20", "03:02:20")) |> cut(2)
-#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "08:20:20", "21:20:20", "03:02:20")) |> cut("min")
-#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "08:20:20", "21:20:20", "03:02:20")) |> cut(breaks = "hour")
-#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "08:20:20", "21:20:20", "03:02:20")) |> cut(breaks = hms::as_hms(c("01:00:00", "03:01:20", "9:20:20")))
+#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "08:20:20", "21:20:20", "03:02:20")) |> cut_var(2)
+#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "08:20:20", "21:20:20", "03:02:20")) |> cut_var("min")
+#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "08:20:20", "21:20:20", "03:02:20")) |> cut_var(breaks = "hour")
+#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "08:20:20", "21:20:20", "03:02:20")) |> cut_var(breaks = hms::as_hms(c("01:00:00", "03:01:20", "9:20:20")))
 #' d_t <- readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "03:02:20", NA))
-#' f <- d_t |> cut(2)
-#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "03:02:20", NA)) |> cut(breaks = lubridate::as_datetime(c(hms::as_hms(levels(f)), hms::as_hms(max(d_t, na.rm = TRUE) + 1))), right = FALSE)
-cut.hms <- function(x, breaks, ...) {
+#' f <- d_t |> cut_var(2)
+#' readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "03:02:20", NA)) |> cut_var(breaks = lubridate::as_datetime(c(hms::as_hms(levels(f)), hms::as_hms(max(d_t, na.rm = TRUE) + 1))), right = FALSE)
+cut_var.hms <- function(x, breaks, ...) {
   ## as_hms keeps returning warnings on tz(); ignored
   suppressWarnings({
     if (hms::is_hms(breaks)) {
       breaks <- lubridate::as_datetime(breaks)
     }
     x <- lubridate::as_datetime(x)
-    out <- cut.POSIXt(x, breaks = breaks, ...)
+    out <- cut_var.POSIXt(x, breaks = breaks, ...)
     attr(out, which = "brks") <- hms::as_hms(lubridate::as_datetime(attr(out, which = "brks")))
     attr(out, which = "levels") <- as.character(hms::as_hms(lubridate::as_datetime(attr(out, which = "levels"))))
   })
   out
 }
 
-#' @rdname cut
+#' @name cut_var
 #' @param x an object inheriting from class "POSIXt" or "Date"
 #'
 #' @examples
-#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut(2)
-#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut(breaks = "weekday")
-#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut(breaks = "month_only")
-cut.POSIXt <- function(x, breaks, right = FALSE, include.lowest = TRUE, start.on.monday = TRUE, ...) {
+#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(2)
+#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = "weekday")
+#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = "month_only")
+cut_var.POSIXt <- function(x, breaks, right = FALSE, include.lowest = TRUE, start.on.monday = TRUE, ...) {
   breaks_o <- breaks
   # browser()
   if (is.numeric(breaks)) {
@@ -670,17 +603,17 @@ cut.POSIXt <- function(x, breaks, right = FALSE, include.lowest = TRUE, start.on
   out
 }
 
-#' @rdname cut
+#' @name cut_var
 #' @param x an object inheriting from class "POSIXct"
-cut.POSIXct <- cut.POSIXt
+cut_var.POSIXct <- cut_var.POSIXt
 
-#' @rdname cut
+#' @name cut_var
 #' @param x an object inheriting from class "POSIXct"
 #'
 #' @examples
-#' as.Date(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut(2)
-#' as.Date(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut(breaks = "weekday")
-cut.Date <- function(x, breaks, start.on.monday = TRUE, ...) {
+#' as.Date(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(2)
+#' as.Date(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = "weekday")
+cut_var.Date <- function(x, breaks, start.on.monday = TRUE, ...) {
   if (identical(breaks, "weekday")) {
     days <- c(
       "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
@@ -825,7 +758,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
     id,
     function(input, output, session) {
-      rv <- reactiveValues(data = NULL)
+      rv <- reactiveValues(data = NULL, new_var_name = NULL)
 
       bindEvent(observe({
         data <- data_r()
@@ -847,7 +780,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         req(hasName(data, variable))
 
         if (is_datetime(data[[variable]])) {
-          brks <- cut(data[[variable]],
+          brks <- cut_var(data[[variable]],
             breaks = input$n_breaks
           )$brks
         } else {
@@ -940,8 +873,8 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         if (input$method == "fixed") {
           req(input$fixed_brks)
           if (any(c("hms", "POSIXt") %in% class(data[[variable]]))) {
-            cut.POSIXct <- cut.POSIXt
-            f <- cut(data[[variable]], breaks = input$fixed_brks)
+            # cut.POSIXct <- cut.POSIXt
+            f <- cut_var(data[[variable]], breaks = input$fixed_brks)
             list(var = f, brks = levels(f))
           } else {
             classInt::classIntervals(
@@ -954,8 +887,8 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         } else if (input$method == "quantile") {
           req(input$fixed_brks)
           if (any(c("hms", "POSIXt") %in% class(data[[variable]]))) {
-            cut.POSIXct <- cut.POSIXt
-            f <- cut(data[[variable]], breaks = input$n_breaks)
+            # cut.POSIXct <- cut.POSIXt
+            f <- cut_var(data[[variable]], breaks = input$n_breaks)
             list(var = f, brks = levels(f))
           } else {
             classInt::classIntervals(
@@ -974,13 +907,13 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           "year"
         )) {
           # To enable datetime cutting
-          cut.POSIXct <- cut.POSIXt
-          f <- cut(data[[variable]], breaks = input$method)
+          # cut.POSIXct <- cut.POSIXt
+          f <- cut_var(data[[variable]], breaks = input$method)
           list(var = f, brks = levels(f))
         } else if (input$method %in% c("hour")) {
           # To enable datetime cutting
-          cut.POSIXct <- cut.POSIXt
-          f <- cut(data[[variable]], breaks = "hour")
+          # cut.POSIXct <- cut.POSIXt
+          f <- cut_var(data[[variable]], breaks = "hour")
           list(var = f, brks = levels(f))
         } else {
           classInt::classIntervals(
@@ -999,43 +932,75 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
 
 
       data_cutted_r <- reactive({
+        req(input$method)
         data <- req(data_r())
         variable <- req(input$variable)
 
-        new_variable <- data.frame(cut(
+
+        if (input$method %in% c("day", "weekday", "week", "month", "month_only", "quarter", "year", "hour")) {
+          breaks <- input$method
+        } else {
+          breaks <- breaks_r()$brks
+        }
+
+        parameters <- list(
           x = data[[variable]],
-          breaks = if (input$method %in% c("day", "weekday", "week", "month", "month_only", "quarter", "year", "hour")) input$method else breaks_r()$brks,
+          breaks = breaks,
           include.lowest = input$include_lowest,
           right = input$right
-        )) |> setNames(paste0(variable, "_cut"))
-
-        data <- dplyr::bind_cols(data, new_variable, .name_repair = "unique_quiet")
-
-        code <- call2(
-          "mutate",
-          !!!set_names(
-            list(
-              expr(cut(
-                !!!syms(list(x = variable)),
-                !!!list(breaks = breaks_r()$brks, include.lowest = input$include_lowest, right = input$right)
-              ))
-            ),
-            paste0(variable, "_cut")
-          )
         )
-        attr(data, "code") <- Reduce(
-          f = function(x, y) expr(!!x %>% !!y),
-          x = c(attr(data, "code"), code)
+
+        new_variable <- tryCatch(
+          {
+            rlang::exec(cut_var, !!!parameters)
+          },
+          error = function(err) {
+            showNotification(paste0("We encountered the following error creating your report: ", err), type = "err")
+          }
         )
+
+        # new_variable <- do.call(
+        #   cut,
+        #   parameters
+        # )
+
+
+        data <- append_column(data, column = new_variable, name = paste0(variable, "_cut"), index = "right")
+
+        # setNames(paste0(variable, "_cut"))
+        #
+        #   data <- dplyr::bind_cols(data, new_variable, .name_repair = "unique_quiet")
+
+        # rv$new_var_name <- names(data)[length(data)]
+        # browser()
+
+        # browser()
+        code <- rlang::call2(
+          "append_column",
+          !!!list(
+            column = rlang::call2("cut_var",
+                                  !!!modifyList(parameters, list(x = as.symbol(paste0("data$", variable)))),
+                                  .ns = "FreesearchR"),
+            name = paste0(variable, "_cut"), index = "right"
+          ),
+          .ns = "FreesearchR"
+        )
+        attr(data, "code") <- code
+
+        # attr(data, "code") <- Reduce(
+        #   f = function(x, y) expr(!!x %>% !!y),
+        #   x = c(attr(data, "code"), code)
+        # )
         data
       })
 
       output$count <- renderDatagrid2({
+        # shiny::req(rv$new_var_name)
         data <- req(data_cutted_r())
-        variable <- req(input$variable)
+        # variable <- req(input$variable)
         count_data <- as.data.frame(
           table(
-            breaks = data[[paste0(variable, "_cut")]],
+            breaks = data[[length(data)]],
             useNA = "ifany"
           ),
           responseName = "count"
@@ -1148,7 +1113,7 @@ plot_histogram <- function(data, column, bins = 30, breaks = NULL, color = "#112
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//data_plots.R
+#### Current file: /Users/au301842/FreesearchR/R//data_plots.R 
 ########
 
 # source(here::here("functions.R"))
@@ -1175,6 +1140,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
           title = "Creating plot",
           icon = bsicons::bs_icon("graph-up"),
           shiny::uiOutput(outputId = ns("primary")),
+          shiny::helpText('Only non-text variables are available for plotting. Go the "Data" to reclass data to plot.'),
           shiny::uiOutput(outputId = ns("type")),
           shiny::uiOutput(outputId = ns("secondary")),
           shiny::uiOutput(outputId = ns("tertiary")),
@@ -1241,8 +1207,8 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
       title = tab_title,
       shiny::plotOutput(ns("plot"),height = "70vh"),
       shiny::tags$br(),
-      shiny::h4("Plot code:"),
-      shiny::verbatimTextOutput(outputId = ns("code_plot"))
+      shiny::tags$br(),
+      shiny::htmlOutput(outputId = ns("code_plot"))
     )
   )
 }
@@ -1362,9 +1328,12 @@ data_visuals_server <- function(id,
       # })
       # )|> setNames(c("primary","type","secondary","tertiary")),keep.null = TRUE)
 
+
       output$primary <- shiny::renderUI({
+        shiny::req(data())
         columnSelectInput(
           inputId = ns("primary"),
+          col_subset=names(data())[sapply(data(),data_type)!="text"],
           data = data,
           placeholder = "Select variable",
           label = "Response variable",
@@ -1372,9 +1341,18 @@ data_visuals_server <- function(id,
         )
       })
 
+      # shiny::observeEvent(data, {
+      #   if (is.null(data()) | NROW(data()) == 0) {
+      #     shiny::updateActionButton(inputId = ns("act_plot"), disabled = TRUE)
+      #   } else {
+      #     shiny::updateActionButton(inputId = ns("act_plot"), disabled = FALSE)
+      #   }
+      # })
+
 
       output$type <- shiny::renderUI({
         shiny::req(input$primary)
+        shiny::req(data())
         # browser()
 
         if (!input$primary %in% names(data())) {
@@ -1457,6 +1435,7 @@ data_visuals_server <- function(id,
 
       shiny::observeEvent(input$act_plot,
         {
+          if (NROW(data())>0){
           tryCatch(
             {
               parameters <- list(
@@ -1486,13 +1465,14 @@ data_visuals_server <- function(id,
             error = function(err) {
               showNotification(paste0(err), type = "err")
             }
-          )
+          )}
         },
         ignoreInit = TRUE
       )
 
-      output$code_plot <- shiny::renderPrint({
-        cat(rv$code)
+      output$code_plot <- shiny::renderUI({
+        shiny::req(rv$code)
+        prismCodeBlock(paste0("#Plotting\n", rv$code))
       })
 
       output$plot <- shiny::renderPlot({
@@ -1900,7 +1880,7 @@ clean_common_axis <- function(p, axis) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//data-import.R
+#### Current file: /Users/au301842/FreesearchR/R//data-import.R 
 ########
 
 data_import_ui <- function(id) {
@@ -2057,7 +2037,7 @@ data_import_demo_app <- function() {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//data-summary.R
+#### Current file: /Users/au301842/FreesearchR/R//data-summary.R 
 ########
 
 #' Data summary module
@@ -2373,138 +2353,7 @@ add_class_icon <- function(grid, column = "class") {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//file-import-module.R
-########
-
-#' Shiny UI module to load a data file
-#'
-#' @param id id
-#'
-#' @return shiny UI
-#' @export
-#'
-m_datafileUI <- function(id) {
-  ns <- shiny::NS(id)
-  shiny::tagList(
-    shiny::fileInput(
-      inputId = ns("file"),
-      label = "Upload a file",
-      multiple = FALSE,
-      accept = c(
-        ".csv",
-        ".xlsx",
-        ".xls",
-        ".dta",
-        ".ods",
-        ".rds"
-      )
-    ),
-    shiny::h4("Parameter specifications"),
-    shiny::helpText(shiny::em("Select the desired variables and press 'Submit'")),
-    shiny::uiOutput(ns("include_vars")),
-    DT::DTOutput(ns("data_input")),
-    shiny::actionButton(ns("submit"), "Submit")
-  )
-}
-
-m_datafileServer <- function(id, output.format = "df") {
-  shiny::moduleServer(id, function(input, output, session, ...) {
-    ns <- shiny::NS(id)
-    ds <- shiny::reactive({
-      REDCapCAST::read_input(input$file$datapath) |> REDCapCAST::parse_data()
-    })
-
-    output$include_vars <- shiny::renderUI({
-      shiny::req(input$file)
-      shiny::selectizeInput(
-        inputId = ns("include_vars"),
-        selected = NULL,
-        label = "Covariables to include",
-        choices = colnames(ds()),
-        multiple = TRUE
-      )
-    })
-
-    base_vars <- shiny::reactive({
-      if (is.null(input$include_vars)) {
-        out <- colnames(ds())
-      } else {
-        out <- input$include_vars
-      }
-      out
-    })
-
-    output$data_input <-
-      DT::renderDT({
-        shiny::req(input$file)
-        ds()[base_vars()]
-      })
-
-    shiny::eventReactive(input$submit, {
-      # shiny::req(input$file)
-
-      data <- shiny::isolate({
-        ds()[base_vars()]
-      })
-
-      file_export(data,
-        output.format = output.format,
-        tools::file_path_sans_ext(input$file$name)
-      )
-    })
-  })
-}
-
-
-
-
-
-file_app <- function() {
-  ui <- shiny::fluidPage(
-    m_datafileUI("data"),
-    # DT::DTOutput(outputId = "redcap_prev")
-    toastui::datagridOutput2(outputId = "redcap_prev")
-  )
-  server <- function(input, output, session) {
-    m_datafileServer("data", output.format = "list")
-  }
-  shiny::shinyApp(ui, server)
-}
-
-file_app()
-
-# tdm_data_upload <- teal::teal_data_module(
-#   ui <- function(id) {
-#     shiny::fluidPage(
-#       m_datafileUI(id)
-#     )
-#   },
-#   server = function(id) {
-#     m_datafileServer(id, output.format = "teal")
-#   }
-# )
-#
-# tdm_data_read <- teal::teal_data_module(
-#   ui <- function(id) {
-#     shiny::fluidPage(
-#       m_redcap_readUI(id = "redcap")
-#     )
-#   },
-#   server = function(id) {
-#     moduleServer(
-#       id,
-#       function(input, output, session) {
-#         ns <- session$ns
-#
-#         m_redcap_readServer(id = "redcap", output.format = "teal")
-#       }
-#     )
-#   }
-# )
-
-
-########
-#### Current file: /Users/au301842/FreesearchR/R//helpers.R
+#### Current file: /Users/au301842/FreesearchR/R//helpers.R 
 ########
 
 #' Wrapper function to get function from character vector referring to function from namespace. Passed to 'do.call()'
@@ -2718,14 +2567,14 @@ file_export <- function(data, output.format = c("df", "teal", "list"), filename,
 #' mtcars |>
 #'   default_parsing() |>
 #'   str()
-#' head(starwars,5) |> str()
+#' head(starwars, 5) |> str()
 #' starwars |>
 #'   default_parsing() |>
 #'   head(5) |>
 #'   str()
 default_parsing <- function(data) {
   name_labels <- lapply(data, \(.x) REDCapCAST::get_attr(.x, attr = "label"))
-
+  # browser()
   out <- data |>
     setNames(make.names(names(data), unique = TRUE)) |>
     ## Temporary step to avoid nested list and crashing
@@ -2736,19 +2585,21 @@ default_parsing <- function(data) {
     REDCapCAST::as_logical() |>
     REDCapCAST::fct_drop()
 
-  purrr::map2(
-    out,
-    name_labels[names(name_labels) %in% names(out)],
-    \(.x, .l){
-      if (!(is.na(.l) | .l == "")) {
-        REDCapCAST::set_attr(.x, .l, attr = "label")
-      } else {
-        attr(x = .x, which = "label") <- NULL
-        .x
-      }
-      # REDCapCAST::set_attr(data = .x, label = .l,attr = "label", overwrite = FALSE)
-    }
-  ) |> dplyr::bind_cols()
+  set_column_label(out, setNames(name_labels, names(out)), overwrite = FALSE)
+
+  # purrr::map2(
+  #   out,
+  #   name_labels[names(name_labels) %in% names(out)],
+  #   \(.x, .l){
+  #     if (!(is.na(.l) | .l == "")) {
+  #       REDCapCAST::set_attr(.x, .l, attr = "label")
+  #     } else {
+  #       attr(x = .x, which = "label") <- NULL
+  #       .x
+  #     }
+  #     # REDCapCAST::set_attr(data = .x, label = .l,attr = "label", overwrite = FALSE)
+  #   }
+  # ) |> dplyr::bind_cols()
 }
 
 #' Remove NA labels
@@ -2934,6 +2785,33 @@ merge_expression <- function(data) {
   )
 }
 
+#' Reduce character vector with the native pipe operator or character string
+#'
+#' @param data list
+#'
+#' @returns character string
+#' @export
+#'
+#' @examples
+#' list(
+#'   "mtcars",
+#'   rlang::call2(.fn = "select", !!!list(c("cyl", "disp")), .ns = "dplyr"),
+#'   rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
+#' ) |>
+#'   lapply(expression_string) |>
+#'   pipe_string() |>
+#'   expression_string("data<-")
+pipe_string <- function(data, collapse = "|>\n") {
+  if (is.list(data)) {
+    Reduce(
+      f = function(x, y) glue::glue("{x}{collapse}{y}"),
+      x = data
+    )
+  } else {
+    data
+  }
+}
+
 #' Deparses expression as string, substitutes native pipe and adds assign
 #'
 #' @param data expression
@@ -2943,14 +2821,17 @@ merge_expression <- function(data) {
 #'
 #' @examples
 #' list(
+#' as.symbol(paste0("mtcars$","mpg")),
 #'   rlang::call2(.fn = "select", !!!list(c("cyl", "disp")), .ns = "dplyr"),
 #'   rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
 #' ) |>
 #'   merge_expression() |>
 #'   expression_string()
-expression_string <- function(data, assign.str = "data <- ") {
-  out <- paste0(assign.str, gsub("%>%", "|>\n", paste(gsub('"', "'", deparse(data)), collapse = "")))
-  gsub(" ", "", out)
+expression_string <- function(data, assign.str = "") {
+  exp.str <- if (is.call(data)) deparse(data) else data
+  # browser()
+  out <- paste0(assign.str, gsub("%>%", "|>\n", paste(gsub('"', "'", paste(exp.str, collapse = "")), collapse = "")))
+  gsub(" |`", "", out)
 }
 
 
@@ -2969,8 +2850,105 @@ remove_nested_list <- function(data) {
 }
 
 
+
+
+#' (Re)label columns in data.frame
+#'
+#' @param data data.frame to be labelled
+#' @param label named list or vector
+#'
+#' @returns data.frame
+#' @export
+#'
+#' @examples
+#' ls <- list("mpg" = "", "cyl" = "Cylinders", "disp" = "", "hp" = "", "drat" = "", "wt" = "", "qsec" = "", "vs" = "", "am" = "", "gear" = "", "carb" = "")
+#' ls2 <- c("mpg" = "", "cyl" = "Cylinders", "disp" = "", "hp" = "Horses", "drat" = "", "wt" = "", "qsec" = "", "vs" = "", "am" = "", "gear" = "", "carb" = "")
+#' ls3 <- c("mpg" = "", "cyl" = "", "disp" = "", "hp" = "Horses", "drat" = "", "wt" = "", "qsec" = "", "vs" = "", "am" = "", "gear" = "", "carb" = "")
+#' mtcars |>
+#'   set_column_label(ls) |>
+#'   set_column_label(ls2) |>
+#'   set_column_label(ls3)
+#' rlang::expr(FreesearchR::set_column_label(label = !!ls3)) |> expression_string()
+set_column_label <- function(data, label, overwrite = TRUE) {
+  purrr::imap(data, function(.data, .name) {
+    ls <- if (is.list(label)) unlist(label) else label
+    ls[ls == ""] <- NA
+    if (.name %in% names(ls)) {
+      out <- REDCapCAST::set_attr(.data, unname(ls[.name]), attr = "label", overwrite = overwrite)
+      remove_empty_attr(out)
+    } else {
+      .data
+    }
+  }) |> dplyr::bind_cols(.name_repair = "unique_quiet")
+}
+
+#' Remove empty/NA attributes
+#'
+#' @param data data
+#'
+#' @returns data of same class as input
+#' @export
+#'
+remove_empty_attr <- function(data) {
+  attributes(data)[is.na(attributes(data))] <- NULL
+  data
+}
+
+
+
+#' Append a column to a data.frame
+#'
+#' @param data data
+#' @param column new column (vector) or data.frame with 1 column
+#' @param name new name (pre-fix)
+#' @param index desired location. May be "left", "right" or numeric index.
+#'
+#' @returns data.frame
+#' @export
+#'
+#' @examples
+#' mtcars |>
+#'   dplyr::mutate(mpg_cut = mpg) |>
+#'   append_column(mtcars$mpg, "mpg_cutter")
+append_column <- function(data, column, name, index = "right") {
+  assertthat::assert_that(NCOL(column) == 1)
+  assertthat::assert_that(length(index) == 1)
+
+  if (index == "right") {
+    index <- ncol(data) + 1
+  } else if (index == "left") {
+    index <- 1
+  } else if (is.numeric(index)) {
+    if (index > ncol(data)) {
+      index <- ncol(data) + 1
+    }
+  } else {
+    index <- ncol(data) + 1
+  }
+
+  ## Identifying potential naming conflicts
+  nm_conflicts <- names(data)[startsWith(names(data), name)]
+  ## Simple attemt to create new unique name
+  if (length(nm_conflicts) > 0) {
+    name <- glue::glue("{name}_{length(nm_conflicts)+1}")
+  }
+  ## If the above not achieves a unique name, the generic approach is used
+  if (name %in% names(data)) {
+    name <- make.names(c(name, names(data)), unique = TRUE)[1]
+  }
+  new_df <- setNames(data.frame(column), name)
+
+  list(
+    data[seq_len(index - 1)],
+    new_df,
+    if (!index > ncol(data)) data[index:ncol(data)]
+  ) |>
+    dplyr::bind_cols()
+}
+
+
 ########
-#### Current file: /Users/au301842/FreesearchR/R//import-file-ext.R
+#### Current file: /Users/au301842/FreesearchR/R//import-file-ext.R 
 ########
 
 #' @title Import data from a file
@@ -3167,7 +3145,7 @@ import_file_server <- function(id,
   module <- function(input, output, session) {
     ns <- session$ns
     imported_rv <- shiny::reactiveValues(data = NULL, name = NULL)
-    temporary_rv <- shiny::reactiveValues(data = NULL, name = NULL, status = NULL)
+    temporary_rv <- shiny::reactiveValues(data = NULL, name = NULL, status = NULL, sheets = 1)
 
     shiny::observeEvent(reset(), {
       temporary_rv$data <- NULL
@@ -3182,19 +3160,21 @@ import_file_server <- function(id,
     })
 
     shiny::observeEvent(input$file, {
+      ## Several steps are taken to ensure no errors on changed input file
+      temporary_rv$sheets <- 1
       if (isTRUE(is_workbook(input$file$datapath))) {
         if (isTRUE(is_excel(input$file$datapath))) {
-          choices <- readxl::excel_sheets(input$file$datapath)
+          temporary_rv$sheets <- readxl::excel_sheets(input$file$datapath)
         } else if (isTRUE(is_ods(input$file$datapath))) {
-          choices <- readODS::ods_sheets(input$file$datapath)
+          temporary_rv$sheets <- readODS::ods_sheets(input$file$datapath)
         }
-        selected <- choices[1]
+        selected <- temporary_rv$sheets[1]
 
         shinyWidgets::updatePickerInput(
           session = session,
           inputId = "sheet",
           selected = selected,
-          choices = choices
+          choices = temporary_rv$sheets
         )
         datamods:::showUI(paste0("#", ns("sheet-container")))
       } else {
@@ -3213,13 +3193,18 @@ import_file_server <- function(id,
       ),
       {
         req(input$file)
-        if (is_workbook(input$file$datapath)) shiny::req(input$sheet)
+
+        if (!all(input$sheet %in% temporary_rv$sheets)) {
+          sheets <-  1
+        } else {
+          sheets <- input$sheet
+        }
 
         extension <- tools::file_ext(input$file$datapath)
 
         parameters <- list(
           file = input$file$datapath,
-          sheet = input$sheet,
+          sheet = sheets,
           skip = input$skip_rows,
           dec = input$dec,
           encoding = input$encoding,
@@ -3282,7 +3267,7 @@ import_file_server <- function(id,
       req(temporary_rv$data)
       tryCatch({
       toastui::datagrid(
-        data = setNames(head(temporary_rv$data, 5),make.names(names(temporary_rv$data))),
+        data = setNames(head(temporary_rv$data, 5),make.names(names(temporary_rv$data),unique = TRUE)),
         theme = "striped",
         colwidths = "guess",
         minBodyHeight = 250
@@ -3381,7 +3366,9 @@ import_delim <- function(file, skip, encoding, na.strings) {
 import_xls <- function(file, sheet, skip, na.strings) {
   tryCatch(
     {
-      # browser()
+      ## If sheet is null, this allows purrr::map to run
+      if (is.null(sheet)) sheet <- 1
+
       sheet |>
         purrr::map(\(.x){
           openxlsx2::read_xlsx(
@@ -3412,6 +3399,7 @@ import_xls <- function(file, sheet, skip, na.strings) {
 import_ods <- function(file, sheet, skip, na.strings) {
   tryCatch(
     {
+      if (is.null(sheet)) sheet <- 1
       sheet |>
         purrr::map(\(.x){
           readODS::read_ods(
@@ -3559,351 +3547,7 @@ import_file_demo_app <- function() {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//import-global-env-mod.R
-########
-
-
-#' @title Import data from an Environment
-#'
-#' @description Let the user select a dataset from its own environment or from a package's environment.
-#'
-#' @param id Module's ID.
-#' @param globalenv Search for data in Global environment.
-#' @param packages Name of packages in which to search data.
-#' @param title Module's title, if `TRUE` use the default title,
-#'  use `NULL` for no title or a `shiny.tag` for a custom one.
-#'
-#'
-#' @export
-#'
-#' @name import-globalenv
-#'
-#' @importFrom htmltools tags
-#' @importFrom shiny NS actionButton icon textInput
-#'
-#' @example examples/from-globalenv.R
-import_globalenv_ui <- function(id,
-                                globalenv = TRUE,
-                                packages = get_data_packages(),
-                                title = TRUE) {
-
-  ns <- NS(id)
-
-  choices <- list()
-  if (isTRUE(globalenv)) {
-    choices <- append(choices, "Global Environment")
-  }
-  if (!is.null(packages)) {
-    choices <- append(choices, list(Packages = as.character(packages)))
-  }
-
-  if (isTRUE(globalenv)) {
-    selected <- "Global Environment"
-  } else {
-    selected <- packages[1]
-  }
-
-  if (isTRUE(title)) {
-    title <- tags$h4(
-      i18n("Import a dataset from an environment"),
-      class = "datamods-title"
-    )
-  }
-
-  tags$div(
-    class = "datamods-import",
-    datamods:::html_dependency_datamods(),
-    title,
-    shinyWidgets::pickerInput(
-      inputId = ns("data"),
-      label = i18n("Select a data.frame:"),
-      choices = NULL,
-      options = list(title = i18n("List of data.frame...")),
-      width = "100%"
-    ),
-    shinyWidgets::pickerInput(
-      inputId = ns("env"),
-      label = i18n("Select an environment in which to search:"),
-      choices = choices,
-      selected = selected,
-      width = "100%",
-      options = list(
-        "title" = i18n("Select environment"),
-        "live-search" = TRUE,
-        "size" = 10
-      )
-    ),
-
-    tags$div(
-      id = ns("import-placeholder"),
-      alert(
-        id = ns("import-result"),
-        status = "info",
-        tags$b(i18n("No data selected!")),
-        i18n("Use a data.frame from your environment or from the environment of a package."),
-        dismissible = TRUE
-      )
-    ),
-    uiOutput(
-      outputId = ns("container_valid_btn"),
-      style = "margin-top: 20px;"
-    )
-  )
-}
-
-
-
-#' @param btn_show_data Display or not a button to display data in a modal window if import is successful.
-#' @param show_data_in Where to display data: in a `"popup"` or in a `"modal"` window.
-#' @param trigger_return When to update selected data:
-#'  `"button"` (when user click on button) or
-#'  `"change"` (each time user select a dataset in the list).
-#' @param return_class Class of returned data: `data.frame`, `data.table`, `tbl_df` (tibble) or `raw`.
-#' @param reset A `reactive` function that when triggered resets the data.
-#'
-#' @export
-#'
-#' @importFrom shiny moduleServer reactiveValues observeEvent reactive removeUI is.reactive icon actionLink isTruthy
-#' @importFrom htmltools tags tagList
-#'
-#' @rdname import-globalenv
-import_globalenv_server <- function(id,
-                                    btn_show_data = TRUE,
-                                    show_data_in = c("popup", "modal"),
-                                    trigger_return = c("button", "change"),
-                                    return_class = c("data.frame", "data.table", "tbl_df", "raw"),
-                                    reset = reactive(NULL)) {
-
-  trigger_return <- match.arg(trigger_return)
-  return_class <- match.arg(return_class)
-
-  module <- function(input, output, session) {
-
-    ns <- session$ns
-    imported_rv <- reactiveValues(data = NULL, name = NULL)
-    temporary_rv <- reactiveValues(data = NULL, name = NULL, status = NULL)
-
-    observeEvent(reset(), {
-      temporary_rv$data <- NULL
-      temporary_rv$name <- NULL
-      temporary_rv$status <- NULL
-    })
-
-    output$container_valid_btn <- renderUI({
-      if (identical(trigger_return, "button")) {
-        button_import()
-      }
-    })
-
-    observeEvent(input$env, {
-      if (identical(input$env, "Global Environment")) {
-        choices <- datamods:::search_obj("data.frame")
-      } else {
-        choices <- datamods:::list_pkg_data(input$env)
-      }
-      if (is.null(choices)) {
-        choices <- i18n("No data.frame here...")
-        choicesOpt <- list(disabled = TRUE)
-      } else {
-        choicesOpt <- list(
-          subtext = get_dimensions(choices)
-        )
-      }
-      temporary_rv$package <- attr(choices, "package")
-      shinyWidgets::updatePickerInput(
-        session = session,
-        inputId = ns("data"),
-        choices = choices,
-        choicesOpt = choicesOpt
-      )
-    })
-
-
-    observeEvent(input$trigger, {
-      if (identical(trigger_return, "change")) {
-        hideUI(selector = paste0("#", ns("container_valid_btn")))
-      }
-    })
-
-
-    observeEvent(input$data, {
-      if (!isTruthy(input$data)) {
-        toggle_widget(inputId = "confirm", enable = FALSE)
-        insert_alert(
-          selector = ns("import"),
-          status = "info",
-          tags$b(i18n("No data selected!")),
-          i18n("Use a data.frame from your environment or from the environment of a package.")
-        )
-      } else {
-        name_df <- input$data
-
-        if (!is.null(temporary_rv$package)) {
-          attr(name_df, "package") <- temporary_rv$package
-        }
-
-        imported <- try(get_env_data(name_df), silent = TRUE)
-
-        if (inherits(imported, "try-error") || NROW(imported) < 1) {
-          toggle_widget(inputId = "confirm", enable = FALSE)
-          insert_error(mssg = i18n(attr(imported, "condition")$message))
-          temporary_rv$status <- "error"
-          temporary_rv$data <- NULL
-          temporary_rv$name <- NULL
-        } else {
-          toggle_widget(inputId = "confirm", enable = TRUE)
-          insert_alert(
-            selector = ns("import"),
-            status = "success",
-            make_success_alert(
-              imported,
-              trigger_return = trigger_return,
-              btn_show_data = btn_show_data
-            )
-          )
-          pkg <- attr(name_df, "package")
-          if (!is.null(pkg)) {
-            name <- paste(pkg, input$data, sep = "::")
-          } else {
-            name <- input$data
-          }
-          name <- trimws(sub("\\(([^\\)]+)\\)", "", name))
-          temporary_rv$status <- "success"
-          temporary_rv$data <- imported
-          temporary_rv$name <- name
-        }
-      }
-    }, ignoreInit = TRUE, ignoreNULL = FALSE)
-
-
-    observeEvent(input$see_data, {
-      show_data(temporary_rv$data, title = i18n("Imported data"), type = show_data_in)
-    })
-
-    observeEvent(input$confirm, {
-      imported_rv$data <- temporary_rv$data
-      imported_rv$name <- temporary_rv$name
-    })
-
-
-    return(list(
-        status = reactive(temporary_rv$status),
-        name = reactive(temporary_rv$name),
-        data = reactive(datamods:::as_out(temporary_rv$data, return_class))
-      ))
-  }
-
-  moduleServer(
-    id = id,
-    module = module
-  )
-}
-
-
-
-
-
-
-
-# utils -------------------------------------------------------------------
-
-
-#' Get packages containing datasets
-#'
-#' @return a character vector of packages names
-#' @export
-#'
-#' @importFrom utils data
-#'
-#' @examples
-#' if (interactive()) {
-#'
-#'   get_data_packages()
-#'
-#' }
-get_data_packages <- function() {
-  suppressWarnings({
-    pkgs <- data(package = .packages(all.available = TRUE))
-  })
-  unique(pkgs$results[, 1])
-}
-
-
-#' List dataset contained in a package
-#'
-#' @param pkg Name of the package, must be installed.
-#'
-#' @return a \code{character} vector or \code{NULL}.
-#' @export
-#'
-#' @importFrom utils data
-#'
-#' @examples
-#'
-#' list_pkg_data("ggplot2")
-list_pkg_data <- function(pkg) {
-  if (isTRUE(requireNamespace(pkg, quietly = TRUE))) {
-    list_data <- data(package = pkg, envir = environment())$results[, "Item"]
-    list_data <- sort(list_data)
-    attr(list_data, "package") <- pkg
-    if (length(list_data) < 1) {
-      NULL
-    } else {
-      unname(list_data)
-    }
-  } else {
-    NULL
-  }
-}
-
-#' @importFrom utils data
-get_env_data <- function(obj, env = globalenv()) {
-  pkg <- attr(obj, "package")
-  re <- regexpr(pattern = "\\(([^\\)]+)\\)", text = obj)
-  obj_ <- substr(x = obj, start = re + 1, stop = re + attr(re, "match.length") - 2)
-  obj <- gsub(pattern = "\\s.*", replacement = "", x = obj)
-  if (obj %in% ls(name = env)) {
-    get(x = obj, envir = env)
-  } else if (!is.null(pkg) && !identical(pkg, "")) {
-    res <- suppressWarnings(try(
-      get(utils::data(list = obj, package = pkg, envir = environment())), silent = TRUE
-    ))
-    if (!inherits(res, "try-error"))
-      return(res)
-    data(list = obj_, package = pkg, envir = environment())
-    get(obj, envir = environment())
-  } else {
-    NULL
-  }
-}
-
-
-get_dimensions <- function(objs) {
-  if (is.null(objs))
-    return(NULL)
-  dataframes_dims <- Map(
-    f = function(name, pkg) {
-      attr(name, "package") <- pkg
-      tmp <- suppressWarnings(get_env_data(name))
-      if (is.data.frame(tmp)) {
-        sprintf("%d obs. of  %d variables", nrow(tmp), ncol(tmp))
-      } else {
-        i18n("Not a data.frame")
-      }
-    },
-    name = objs,
-    pkg = if (!is.null(attr(objs, "package"))) {
-      attr(objs, "package")
-    } else {
-      character(1)
-    }
-  )
-  unlist(dataframes_dims)
-}
-
-
-########
-#### Current file: /Users/au301842/FreesearchR/R//launch_FreesearchR.R
+#### Current file: /Users/au301842/FreesearchR/R//launch_FreesearchR.R 
 ########
 
 #' Easily launch the FreesearchR app
@@ -3933,7 +3577,7 @@ launch_FreesearchR <- function(...){
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_box.R
+#### Current file: /Users/au301842/FreesearchR/R//plot_box.R 
 ########
 
 #' Beautiful box plot(s)
@@ -4019,7 +3663,7 @@ plot_box_single <- function(data, x, y=NULL, seed = 2103) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_euler.R
+#### Current file: /Users/au301842/FreesearchR/R//plot_euler.R 
 ########
 
 #' Area proportional venn diagrams
@@ -4154,7 +3798,7 @@ plot_euler_single <- function(data) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_hbar.R
+#### Current file: /Users/au301842/FreesearchR/R//plot_hbar.R 
 ########
 
 #' Nice horizontal stacked bars (Grotta bars)
@@ -4255,7 +3899,7 @@ vertical_stacked_bars <- function(data,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_ridge.R
+#### Current file: /Users/au301842/FreesearchR/R//plot_ridge.R 
 ########
 
 #' Plot nice ridge plot
@@ -4289,7 +3933,7 @@ plot_ridge <- function(data, x, y, z = NULL, ...) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_sankey.R
+#### Current file: /Users/au301842/FreesearchR/R//plot_sankey.R 
 ########
 
 #' Readying data for sankey plot
@@ -4495,7 +4139,7 @@ plot_sankey_single <- function(data, x, y, color.group = c("x", "y"), colors = N
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_scatter.R
+#### Current file: /Users/au301842/FreesearchR/R//plot_scatter.R 
 ########
 
 #' Beautiful violin plot
@@ -4526,7 +4170,7 @@ plot_scatter <- function(data, x, y, z = NULL) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_violin.R
+#### Current file: /Users/au301842/FreesearchR/R//plot_violin.R 
 ########
 
 #' Beatiful violin plot
@@ -4559,7 +4203,7 @@ plot_violin <- function(data, x, y, z = NULL) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot-download-module.R
+#### Current file: /Users/au301842/FreesearchR/R//plot-download-module.R 
 ########
 
 plot_download_ui <- regression_ui <- function(id, ...) {
@@ -4640,7 +4284,7 @@ plot_download_server <- function(id,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//redcap_read_shiny_module.R
+#### Current file: /Users/au301842/FreesearchR/R//redcap_read_shiny_module.R 
 ########
 
 #' Shiny module to browser and export REDCap data
@@ -5298,14 +4942,14 @@ redcap_demo_app <- function() {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//redcap.R
+#### Current file: /Users/au301842/FreesearchR/R//redcap.R 
 ########
 
 
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//regression_model.R
+#### Current file: /Users/au301842/FreesearchR/R//regression_model.R 
 ########
 
 #' Create a regression model programatically
@@ -5356,7 +5000,7 @@ redcap_demo_app <- function() {
 #'   )
 #' broom::tidy(m)
 regression_model <- function(data,
-                             outcome.str,
+                             outcome.str = NULL,
                              auto.mode = FALSE,
                              formula.str = NULL,
                              args.list = NULL,
@@ -5370,27 +5014,28 @@ regression_model <- function(data,
   }
 
   ## This will handle if outcome is not in data for nicer shiny behavior
-  if (!outcome.str %in% names(data)) {
+  if (isTRUE(!outcome.str %in% names(data))) {
     outcome.str <- names(data)[1]
-    print("outcome is not in data, first column is used")
-  }
-
-  if (is.null(vars)) {
-    vars <- names(data)[!names(data) %in% outcome.str]
-  } else {
-    if (outcome.str %in% vars) {
-      vars <- vars[!vars %in% outcome.str]
-    }
-    data <- data |> dplyr::select(dplyr::all_of(c(vars, outcome.str)))
+    print("Outcome variable is not in data, first column is used")
   }
 
   if (!is.null(formula.str)) {
     formula.glue <- glue::glue(formula.str)
+    outcome.str <- NULL
   } else {
     assertthat::assert_that(outcome.str %in% names(data),
       msg = "Outcome variable is not present in the provided dataset"
     )
     formula.glue <- glue::glue("{outcome.str}~{paste(vars,collapse='+')}")
+  }
+
+  if (is.null(vars)) {
+    vars <- names(data)[!names(data) %in% outcome.str]
+  } else if (!is.null(outcome.str)) {
+    if (outcome.str %in% vars) {
+      vars <- vars[!vars %in% outcome.str]
+    }
+    data <- data |> dplyr::select(dplyr::all_of(c(vars, outcome.str)))
   }
 
   # Formatting character variables as factor
@@ -5432,7 +5077,6 @@ regression_model <- function(data,
     msg = "Please provide the function as a character vector."
   )
 
-  # browser()
   out <- do.call(
     getfun(fun),
     c(
@@ -5668,7 +5312,7 @@ supported_functions <- function() {
 #'   dplyr::select("cyl") |>
 #'   possible_functions(design = "cross-sectional")
 possible_functions <- function(data, design = c("cross-sectional")) {
-  # browser()
+  #
   # data <- if (is.reactive(data)) data() else data
   if (is.data.frame(data)) {
     data <- data[[1]]
@@ -5821,31 +5465,36 @@ regression_model_list <- function(data,
   }
 
   parameters <- list(
-    outcome.str = outcome.str,
+    data = data,
     fun = fun.c,
-    formula.str = formula.str.c,
+    formula.str = glue::glue(formula.str.c),
     args.list = args.list.c
   )
 
   model <- do.call(
     regression_model,
-    append_list(parameters,
-      data = data, "data"
-    )
+    parameters
   )
 
-  parameters_print <- list2str(Filter(length,
-                                      modifyList(parameters, list(
-                                        formula.str = glue::glue(formula.str.c),
-                                        args.list = NULL
-                                      ))))
+  parameters_code <- Filter(
+    length,
+    modifyList(parameters, list(
+      data=as.symbol("df"),
+      formula.str = as.character(glue::glue(formula.str.c)),
+      outcome.str = NULL
+      # args.list = NULL,
+    )
+  ))
 
-  code <- glue::glue("FreesearchR::regression_model(data,{parameters_print}, args.list=list({list2str(args.list.c)}))",.null = "NULL")
+  ## The easiest solution was to simple paste as a string
+  ## The rlang::call2 or rlang::expr functions would probably work as well
+  # code <- glue::glue("FreesearchR::regression_model({parameters_print}, args.list=list({list2str(args.list.c)}))", .null = "NULL")
+  code <- rlang::call2("regression_model",!!!parameters_code,.ns = "FreesearchR")
 
   list(
     options = options,
     model = model,
-    code = code
+    code = expression_string(code)
   )
 }
 
@@ -5885,6 +5534,8 @@ list2str <- function(data) {
 #'   dplyr::bind_rows()
 #' ms <- regression_model_uv_list(data = default_parsing(mtcars), outcome.str = "mpg", fun.descr = "Linear regression model")
 #' ms$code
+#' ls <- regression_model_uv_list(data = default_parsing(mtcars), outcome.str = "am", fun.descr = "Logistic regression model")
+#' ls$code
 #' lapply(ms$model, broom::tidy) |> dplyr::bind_rows()
 #' }
 regression_model_uv_list <- function(data,
@@ -5947,41 +5598,35 @@ regression_model_uv_list <- function(data,
   #   )
   # )
 
-  parameters <- list(
-    outcome.str = outcome.str,
-    fun = fun.c,
-    formula.str = formula.str.c,
-    args.list = args.list.c
-  )
-
   model <- vars |>
     lapply(\(.var){
+
+      parameters <-
+        list(
+          fun = fun.c,
+          data = data[c(outcome.str, .var)],
+          formula.str = as.character(glue::glue(gsub("vars", ".var", formula.str.c))),
+          args.list = args.list.c
+        )
+
       out <- do.call(
         regression_model,
-        append_list(parameters,
-          data = data[c(outcome.str, .var)], "data"
-        )
+        parameters
       )
 
       ## This is the very long version
       ## Handles deeply nested glue string
-      code <- glue::glue("FreesearchR::regression_model({list2str(modifyList(parameters,list(formula.str = glue::glue(gsub('vars','.var',formula.str.c)))))})")
+      # code <- glue::glue("FreesearchR::regression_model(data=df,{list2str(modifyList(parameters,list(data=NULL,args.list=list2str(args.list.c))))})")
+      code <- rlang::call2("regression_model",!!!modifyList(parameters,list(data=as.symbol("df"),args.list=args.list.c)),.ns = "FreesearchR")
       REDCapCAST::set_attr(out, code, "code")
     })
 
-  # vars <- "."
-  #
-  # code_raw <- glue::glue(
-  #   "{fun.c}({paste(Filter(length,list(glue::glue(formula.str.c),'data = .d',list2str(args.list.c))),collapse=', ')})"
-  # )
-  # browser()
-  # code <- glue::glue("lapply(data,function(.d){code_raw})")
-
   code <- model |>
     lapply(\(.x)REDCapCAST::get_attr(.x, "code")) |>
-    purrr::reduce(c) |>
+    lapply(expression_string) |>
+    pipe_string(collapse = ",\n") |>
     (\(.x){
-      paste0("list(\n", paste(.x, collapse = ",\n"), ")")
+      paste0("list(\n", .x, ")")
     })()
 
 
@@ -5993,8 +5638,11 @@ regression_model_uv_list <- function(data,
 }
 
 
+# regression_model(mtcars, fun = "stats::lm", formula.str = "mpg~cyl")
+
+
 ########
-#### Current file: /Users/au301842/FreesearchR/R//regression_plot.R
+#### Current file: /Users/au301842/FreesearchR/R//regression_plot.R 
 ########
 
 #' Regression coef plot from gtsummary. Slightly modified to pass on arguments
@@ -6160,7 +5808,7 @@ symmetrical_scale_x_log10 <- function(plot, breaks = c(1, 2, 3, 5, 10), ...) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//regression_table.R
+#### Current file: /Users/au301842/FreesearchR/R//regression_table.R 
 ########
 
 #' Create table of regression model
@@ -6329,8 +5977,50 @@ tbl_merge <- function(data) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//regression-module.R
+#### Current file: /Users/au301842/FreesearchR/R//regression-module.R 
 ########
+
+### On rewriting this module
+###
+### This module (and the plotting module) should be rewritten to allow for
+### dynamically defining variable-selection for model evaluation.
+### The principle of having a library of supported functions is fine, but should
+### be expanded.
+###
+###
+
+# list(
+#   lm = list(
+#     descr = "Linear regression model",
+#     design = "cross-sectional",
+#     parameters=list(
+#       fun = "stats::lm",
+#       args.list = NULL
+#     ),
+#     variables = list(
+#       outcome.str = list(
+#         fun = "columnSelectInput",
+#         multiple = FALSE,
+#         label = "Select the dependent/outcome variable."
+#       )
+#     ),
+#     out.type = "continuous",
+#     formula.str = "{outcome.str}~{paste(vars,collapse='+')}",
+#     table.fun = "gtsummary::tbl_regression",
+#     table.args.list = list(exponentiate = FALSE)
+#   ))
+#
+#   Regarding the regression model, it really should be the design selection,
+#   that holds the input selection information, as this is what is deciding
+#   the number and type of primary inputs.
+#
+#   Cross-sectional: outcome
+#   MMRM: outcome, random effect (id, time)
+#   Survival: time, status, strata(?)
+#
+#
+
+
 
 regression_ui <- function(id, ...) {
   ns <- shiny::NS(id)
@@ -6396,7 +6086,7 @@ regression_ui <- function(id, ...) {
             type = "secondary",
             auto_reset = TRUE
           ),
-          shiny::helpText("Press 'Analyse' again after changing parameters."),
+          shiny::helpText("Press 'Analyse' to create the regression model and after changing parameters."),
           shiny::tags$br()
         ),
         do.call(
@@ -6916,7 +6606,7 @@ regression_server <- function(id,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//report.R
+#### Current file: /Users/au301842/FreesearchR/R//report.R 
 ########
 
 #' Split vector by an index and embed addition
@@ -7004,7 +6694,38 @@ modify_qmd <- function(file, format) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//theme.R
+#### Current file: /Users/au301842/FreesearchR/R//syntax_highlight.R 
+########
+
+## Inpiration:
+##
+## https://stackoverflow.com/questions/47445260/how-to-enable-syntax-highlighting-in-r-shiny-app-with-htmloutput
+
+prismCodeBlock <- function(code) {
+  tagList(
+    HTML(html_code_wrap(code)),
+    tags$script("Prism.highlightAll()")
+  )
+}
+
+prismDependencies <- tags$head(
+  tags$script(src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.4/prism.min.js"),
+  tags$link(rel = "stylesheet", type = "text/css",
+            href = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.4/themes/prism.min.css")
+)
+
+prismRDependency <- tags$head(
+  tags$script(src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.4/components/prism-r.min.js")
+)
+
+html_code_wrap <- function(string,lang="r"){
+  glue::glue("<pre><code class='language-{lang}'>{string}
+  </code></pre>")
+}
+
+
+########
+#### Current file: /Users/au301842/FreesearchR/R//theme.R 
 ########
 
 #' Custom theme based on unity
@@ -7085,7 +6806,7 @@ gg_theme_export <- function(){
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//update-factor-ext.R
+#### Current file: /Users/au301842/FreesearchR/R//update-factor-ext.R 
 ########
 
 
@@ -7382,7 +7103,7 @@ winbox_update_factor <- function(id,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//update-variables-ext.R
+#### Current file: /Users/au301842/FreesearchR/R//update-variables-ext.R 
 ########
 
 library(data.table)
@@ -7561,10 +7282,14 @@ update_variables_server <- function(id,
 
           old_label <- data_inputs$label
           new_label <- data_inputs$label_toset
-          new_label[new_label == "New label"] <- ""
-          new_label[is.na(new_label)] <- old_label[is.na(new_label)]
-          new_label[new_label == ""] <- old_label[new_label == ""]
-          new_label <- setNames(new_label,new_names)
+
+          new_label[new_label == "New label"] <- old_label[new_label == "New label"]
+
+          ## Later, "" will be interpreted as NA/empty and removed
+          new_label[is.na(new_label) | new_label %in% c('""',"''"," ")] <- ""
+
+          # new_label[is.na(new_label)] <- old_label[is.na(new_label)]
+          new_label <- setNames(new_label, new_names)
 
           new_classes <- data_inputs$class_toset
           new_classes[new_classes == "Select"] <- NA
@@ -7597,17 +7322,7 @@ update_variables_server <- function(id,
 
               # relabel
               list_relabel <- as.list(new_label)
-              data <- purrr::map2(
-                data, list_relabel,
-                \(.data, .label){
-                  if (!(is.na(.label) | .label == "")) {
-                    REDCapCAST::set_attr(.data, .label, attr = "label")
-                  } else {
-                    attr(x = .data, which = "label") <- NULL
-                    .data
-                  }
-                }
-              ) |> dplyr::bind_cols(.name_repair = "unique_quiet")
+              data <- set_column_label(data, list_relabel)
 
               # select
               list_select <- setdiff(names(data), names(data)[new_selections])
@@ -7643,30 +7358,16 @@ update_variables_server <- function(id,
         data <- updated_data$x
         code <- list()
         if (!is.null(data) && shiny::isTruthy(updated_data$list_mutate) && length(updated_data$list_mutate) > 0) {
-          code <- c(code, list(rlang::call2("mutate", !!!updated_data$list_mutate)))
+          code <- c(code, list(rlang::call2("mutate", !!!updated_data$list_mutate,.ns="dplyr")))
         }
         if (!is.null(data) && shiny::isTruthy(updated_data$list_rename) && length(updated_data$list_rename) > 0) {
-          code <- c(code, list(rlang::call2("rename", !!!updated_data$list_rename)))
+          code <- c(code, list(rlang::call2("rename", !!!updated_data$list_rename,.ns="dplyr")))
         }
         if (!is.null(data) && shiny::isTruthy(updated_data$list_select) && length(updated_data$list_select) > 0) {
-          code <- c(code, list(rlang::expr(select(-any_of(c(!!!updated_data$list_select))))))
+          code <- c(code, list(rlang::expr(dplyr::select(-dplyr::any_of(c(!!!updated_data$list_select))))))
         }
         if (!is.null(data) && shiny::isTruthy(updated_data$list_relabel) && length(updated_data$list_relabel) > 0) {
-          code <- c(
-            code,
-            list(
-              rlang::expr(purrr::imap(.f=function(.data, .name) {
-                ls <- !!updated_data$list_relabel
-                ls <- ls[!is.na(ls)]
-                  if (.name %in% names(ls)) {
-                    REDCapCAST::set_attr(.data, ls[.name], attr = "label")
-                  } else {
-                    .data
-                  }
-                }) %>% dplyr::bind_cols()
-                )
-            )
-          )
+          code <- c(code,list(rlang::call2("set_column_label",label=updated_data$list_relabel,.ns="FreesearchR")))
         }
         if (length(code) > 0) {
           attr(data, "code") <- Reduce(
@@ -8218,7 +7919,7 @@ clean_date <- function(data) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//wide2long.R
+#### Current file: /Users/au301842/FreesearchR/R//wide2long.R 
 ########
 
 #' Alternative pivoting method for easily pivoting based on name pattern
@@ -8377,7 +8078,7 @@ grepl_fix <- function(data, pattern, type = c("prefix", "infix", "suffix")) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/inst/apps/FreesearchR/ui.R
+#### Current file: /Users/au301842/FreesearchR/inst/apps/FreesearchR/ui.R 
 ########
 
 # ns <- NS(id)
@@ -8452,37 +8153,37 @@ ui_elements <- list(
         ),
         shiny::conditionalPanel(
           condition = "output.data_loaded == true",
-        shiny::br(),
-        shiny::br(),
-        shiny::h5("Specify variables to include"),
-        shiny::fluidRow(
-          shiny::column(
-            width = 6,
-            shiny::br(),
-            shiny::p("Filter by completeness threshold and manual selection:"),
-            shiny::br(),
-            shiny::br()
-          ),
-          shiny::column(
-            width = 6,
-            shinyWidgets::noUiSliderInput(
-              inputId = "complete_cutoff",
-              label = NULL,
-              update_on = "end",
-              min = 0,
-              max = 100,
-              step = 5,
-              value = 70,
-              format = shinyWidgets::wNumbFormat(decimals = 0),
-              color = datamods:::get_primary_color()
+          shiny::br(),
+          shiny::br(),
+          shiny::h5("Specify variables to include"),
+          shiny::fluidRow(
+            shiny::column(
+              width = 6,
+              shiny::br(),
+              shiny::p("Filter by completeness threshold and manual selection:"),
+              shiny::br(),
+              shiny::br()
             ),
-            shiny::helpText("Exclude variables with completeness below the specified percentage."),
-            shiny::br(),
-            shiny::br(),
-            shiny::uiOutput(outputId = "import_var"),
-            shiny::uiOutput(outputId = "data_info_import", inline = TRUE)
+            shiny::column(
+              width = 6,
+              shinyWidgets::noUiSliderInput(
+                inputId = "complete_cutoff",
+                label = NULL,
+                update_on = "end",
+                min = 0,
+                max = 100,
+                step = 5,
+                value = 70,
+                format = shinyWidgets::wNumbFormat(decimals = 0),
+                color = datamods:::get_primary_color()
+              ),
+              shiny::helpText("Exclude variables with completeness below the specified percentage."),
+              shiny::br(),
+              shiny::br(),
+              shiny::uiOutput(outputId = "import_var"),
+              shiny::uiOutput(outputId = "data_info_import", inline = TRUE)
+            )
           )
-        )
         ),
         shiny::br(),
         shiny::br(),
@@ -8520,7 +8221,7 @@ ui_elements <- list(
               width = 9,
               shiny::uiOutput(outputId = "data_info", inline = TRUE),
               shiny::tags$p(
-                "Below is a short summary table, on the right you can create data filters."
+                "Below is a short summary table, on the right you can click to browse data and create data filters."
               )
             )
           ),
@@ -8534,7 +8235,8 @@ ui_elements <- list(
               shiny::actionButton(
                 inputId = "modal_browse",
                 label = "Browse data",
-                width = "100%"
+                width = "100%",
+                disabled = TRUE
               ),
               shiny::tags$br(),
               shiny::tags$br(),
@@ -8554,8 +8256,10 @@ ui_elements <- list(
           fluidRow(
             shiny::column(
               width = 9,
-              shiny::tags$p(shiny::markdown("Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."),
-                            shiny::tags$p("There are also more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code. At the bottom you can restore the original data."))
+              shiny::tags$p(
+                shiny::markdown("Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."),
+                shiny::tags$p("There are also more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code. At the bottom you can restore the original data.")
+              )
             )
           ),
           # shiny::tags$br(),
@@ -8673,7 +8377,7 @@ ui_elements <- list(
                 label = "Evaluate",
                 width = "100%",
                 icon = shiny::icon("calculator"),
-                disabled = FALSE
+                disabled = TRUE
               )
             ),
             bslib::accordion_panel(
@@ -8821,18 +8525,16 @@ ui_elements <- list(
           shiny::br(),
           shiny::br(),
           shiny::h4("Code snippets"),
-          shiny::tags$p("Below are the code used to create the final data set. This can be saved for reproducibility. The code may not be 100 % correct, but kan be used for learning and example code to get started on coding yourself."),
-          shiny::tagAppendChildren(
-            shiny::tagList(
-            shiny::verbatimTextOutput(outputId = "code_import"),
-            shiny::verbatimTextOutput(outputId = "code_data"),
-            shiny::verbatimTextOutput(outputId = "code_filter"),
-            shiny::verbatimTextOutput(outputId = "code_table1")
+          shiny::tags$p("Below are the code bits used to create the final data set and the main analyses."),
+          shiny::tags$p("This can be used as a starting point for learning to code and for reproducibility."),
+          shiny::tagList(
+            lapply(
+              paste0("code_", c(
+                "import", "data", "filter", "table1", "univariable", "multivariable"
+              )),
+              \(.x)shiny::htmlOutput(outputId = .x)
+            )
           ),
-          lapply(paste0("code_",c("univariable","multivariable")),
-                 \(.x)shiny::verbatimTextOutput(outputId = .x))
-          )
-          ,
           shiny::tags$br(),
           shiny::br()
         ),
@@ -8871,6 +8573,8 @@ dark <- custom_theme(
 # https://webdesignerdepot.com/17-open-source-fonts-youll-actually-love/
 
 ui <- bslib::page_fixed(
+  prismDependencies,
+  prismRDependency,
   shiny::tags$head(includeHTML(("www/umami-app.html"))),
   shiny::tags$style(
     type = "text/css",
@@ -8911,7 +8615,7 @@ ui <- bslib::page_fixed(
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/inst/apps/FreesearchR/server.R
+#### Current file: /Users/au301842/FreesearchR/inst/apps/FreesearchR/server.R 
 ########
 
 library(readr)
@@ -9022,7 +8726,7 @@ server <- function(input, output, session) {
   shiny::observeEvent(data_file$data(), {
     shiny::req(data_file$data())
     rv$data_temp <- data_file$data()
-    rv$code <- append_list(data = data_file$code(), list = rv$code, index = "import")
+    rv$code <- modifyList(x = rv$code, list(import = data_file$code()))
   })
 
   from_redcap <- m_redcap_readServer(
@@ -9032,9 +8736,10 @@ server <- function(input, output, session) {
   shiny::observeEvent(from_redcap$data(), {
     # rv$data_original <- purrr::pluck(data_redcap(), "data")()
     rv$data_temp <- from_redcap$data()
-    rv$code <- append_list(data = from_redcap$code(), list = rv$code, index = "import")
+    rv$code <- modifyList(x = rv$code, list(import = from_redcap$code()))
   })
 
+  ## This is used to ensure the reactive data is retrieved
   output$redcap_prev <- DT::renderDT(
     {
       DT::datatable(head(from_redcap$data(), 5),
@@ -9054,9 +8759,9 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(from_env$data(), {
     shiny::req(from_env$data())
-    browser()
+
     rv$data_temp <- from_env$data()
-    rv$code <- append_list(data = from_env$name(),list = rv$code,index = "import")
+    rv$code <- modifyList(x = rv$code, list(import = from_env$name()))
   })
 
   output$import_var <- shiny::renderUI({
@@ -9106,11 +8811,12 @@ server <- function(input, output, session) {
 
       rv$code$import <- list(
         rv$code$import,
-        rlang::call2(.fn = "select", input$import_var, .ns = "dplyr"),
+        rlang::expr(dplyr::select(dplyr::all_of(!!input$import_var))),
         rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
       ) |>
-        merge_expression() |>
-        expression_string()
+        lapply(expression_string) |>
+        pipe_string() |>
+        expression_string(assign.str = "df <-")
 
 
       # rv$code$import <- rv$code$import |>
@@ -9133,12 +8839,17 @@ server <- function(input, output, session) {
     data_description(rv$data_original)
   })
 
-
+  ## Activating action buttons on data imported
   shiny::observeEvent(rv$data_original, {
     if (is.null(rv$data_original) | NROW(rv$data_original) == 0) {
       shiny::updateActionButton(inputId = "act_start", disabled = TRUE)
+      shiny::updateActionButton(inputId = "modal_browse", disabled = TRUE)
+      shiny::updateActionButton(inputId = "act_eval", disabled = TRUE)
+
     } else {
       shiny::updateActionButton(inputId = "act_start", disabled = FALSE)
+      shiny::updateActionButton(inputId = "modal_browse", disabled = FALSE)
+      shiny::updateActionButton(inputId = "act_eval", disabled = FALSE)
     }
   })
 
@@ -9302,6 +9013,8 @@ server <- function(input, output, session) {
       rv$list$data <- data_filter() |>
         REDCapCAST::fct_drop()
 
+      ## This looks messy!! But it works as intended for now
+
       out <- gsub(
         "filter", "dplyr::filter",
         gsub(
@@ -9316,7 +9029,7 @@ server <- function(input, output, session) {
       out <- strsplit(out, "%>%") |>
         unlist() |>
         (\(.x){
-          paste(c("data <- data", .x[-1], "REDCapCAST::fct_drop()"),
+          paste(c("df <- df", .x[-1], "REDCapCAST::fct_drop()"),
             collapse = "|> \n "
           )
         })()
@@ -9362,45 +9075,37 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
-  output$code_import <- shiny::renderPrint({
-    shiny::req(rv$code$import)
-    cat(c("#Data import\n",rv$code$import))
+  ## This really should be collapsed to only one call, but I'll leave it for now
+  ## as a working example of dynamically defining outputs and rendering.
+
+  # output$code_import <- shiny::renderPrint({
+  #   shiny::req(rv$code$import)
+  #   cat(c("#Data import\n", rv$code$import))
+  # })
+
+  output$code_import <- shiny::renderUI({
+    prismCodeBlock(paste0("#Data import\n", rv$code$import))
   })
 
-  output$code_data <- shiny::renderPrint({
+  output$code_data <- shiny::renderUI({
     shiny::req(rv$code$modify)
     # browser()
     ls <- rv$code$modify |> unique()
     out <- ls |>
-      merge_expression() |>
-      expression_string(assign.str = "data <- data |>\n")
+      lapply(expression_string) |>
+      pipe_string() |>
+      expression_string(assign.str = "df <- df |>\n")
 
-    # out <- paste("data <- data |>",
-    #   sapply(ls, \(.x) paste(deparse(.x), collapse = ",")),
-    #   collapse = "|>"
-    # ) |>
-    #   (\(.x){
-    #     gsub(
-    #       "\\|>", "\\|> \n",
-    #       gsub(
-    #         "%>%", "",
-    #         gsub(
-    #           "\\s{2,}", " ",
-    #           gsub(",\\s{,},", ", ", .x)
-    #         )
-    #       )
-    #     )
-    #   })()
-    cat(c("#Data modifications\n",out))
+    prismCodeBlock(paste0("#Data modifications\n", out))
   })
 
-  output$code_filter <- shiny::renderPrint({
-    cat(c("#Data filter\n",rv$code$filter))
+  output$code_filter <- shiny::renderUI({
+    prismCodeBlock(paste0("#Data filter\n", rv$code$filter))
   })
 
-  output$code_table1 <- shiny::renderPrint({
+  output$code_table1 <- shiny::renderUI({
     shiny::req(rv$code$table1)
-    cat(c("#Data characteristics table\n",rv$code$table1))
+    prismCodeBlock(paste0("#Data characteristics table\n", rv$code$table1))
   })
 
 
@@ -9408,8 +9113,8 @@ server <- function(input, output, session) {
   ## This is a very rewarding couple of lines marking new insights to dynamically rendering code
   shiny::observe({
     rv$regression()$regression$models |> purrr::imap(\(.x, .i){
-      output[[paste0("code_", tolower(.i))]] <- shiny::renderPrint({
-        cat(.x$code_table)
+      output[[paste0("code_", tolower(.i))]] <- shiny::renderUI({
+        prismCodeBlock(paste0(paste("#",.i,"regression model\n"),.x$code_table))
       })
     })
   })
@@ -9928,7 +9633,7 @@ server <- function(input, output, session) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/inst/apps/FreesearchR/launch.R
+#### Current file: /Users/au301842/FreesearchR/inst/apps/FreesearchR/launch.R 
 ########
 
 shinyApp(ui, server)

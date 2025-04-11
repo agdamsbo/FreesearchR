@@ -1,3 +1,45 @@
+### On rewriting this module
+###
+### This module (and the plotting module) should be rewritten to allow for
+### dynamically defining variable-selection for model evaluation.
+### The principle of having a library of supported functions is fine, but should
+### be expanded.
+###
+###
+
+# list(
+#   lm = list(
+#     descr = "Linear regression model",
+#     design = "cross-sectional",
+#     parameters=list(
+#       fun = "stats::lm",
+#       args.list = NULL
+#     ),
+#     variables = list(
+#       outcome.str = list(
+#         fun = "columnSelectInput",
+#         multiple = FALSE,
+#         label = "Select the dependent/outcome variable."
+#       )
+#     ),
+#     out.type = "continuous",
+#     formula.str = "{outcome.str}~{paste(vars,collapse='+')}",
+#     table.fun = "gtsummary::tbl_regression",
+#     table.args.list = list(exponentiate = FALSE)
+#   ))
+#
+#   Regarding the regression model, it really should be the design selection,
+#   that holds the input selection information, as this is what is deciding
+#   the number and type of primary inputs.
+#
+#   Cross-sectional: outcome
+#   MMRM: outcome, random effect (id, time)
+#   Survival: time, status, strata(?)
+#
+#
+
+
+
 regression_ui <- function(id, ...) {
   ns <- shiny::NS(id)
 
@@ -62,7 +104,7 @@ regression_ui <- function(id, ...) {
             type = "secondary",
             auto_reset = TRUE
           ),
-          shiny::helpText("Press 'Analyse' again after changing parameters."),
+          shiny::helpText("Press 'Analyse' to create the regression model and after changing parameters."),
           shiny::tags$br()
         ),
         do.call(

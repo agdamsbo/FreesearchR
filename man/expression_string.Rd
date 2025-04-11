@@ -4,7 +4,7 @@
 \alias{expression_string}
 \title{Deparses expression as string, substitutes native pipe and adds assign}
 \usage{
-expression_string(data, assign.str = "data <- ")
+expression_string(data, assign.str = "")
 }
 \arguments{
 \item{data}{expression}
@@ -17,7 +17,9 @@ Deparses expression as string, substitutes native pipe and adds assign
 }
 \examples{
 list(
-rlang::call2(.fn = "select",!!!list(c("cyl","disp")),.ns = "dplyr"),
-rlang::call2(.fn = "default_parsing",.ns = "FreesearchR")
-) |> merge_expression() |> expression_string()
+  rlang::call2(.fn = "select", !!!list(c("cyl", "disp")), .ns = "dplyr"),
+  rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
+) |>
+  merge_expression() |>
+  expression_string()
 }

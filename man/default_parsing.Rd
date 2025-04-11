@@ -20,4 +20,9 @@ mtcars |> str()
 mtcars |>
   default_parsing() |>
   str()
+head(starwars, 5) |> str()
+starwars |>
+  default_parsing() |>
+  head(5) |>
+  str()
 }

@@ -192,7 +192,7 @@ import_file_server <- function(id,
   module <- function(input, output, session) {
     ns <- session$ns
     imported_rv <- shiny::reactiveValues(data = NULL, name = NULL)
-    temporary_rv <- shiny::reactiveValues(data = NULL, name = NULL, status = NULL)
+    temporary_rv <- shiny::reactiveValues(data = NULL, name = NULL, status = NULL, sheets = 1)
 
     shiny::observeEvent(reset(), {
       temporary_rv$data <- NULL
@@ -207,19 +207,21 @@ import_file_server <- function(id,
     })
 
     shiny::observeEvent(input$file, {
+      ## Several steps are taken to ensure no errors on changed input file
+      temporary_rv$sheets <- 1
       if (isTRUE(is_workbook(input$file$datapath))) {
         if (isTRUE(is_excel(input$file$datapath))) {
-          choices <- readxl::excel_sheets(input$file$datapath)
+          temporary_rv$sheets <- readxl::excel_sheets(input$file$datapath)
         } else if (isTRUE(is_ods(input$file$datapath))) {
-          choices <- readODS::ods_sheets(input$file$datapath)
+          temporary_rv$sheets <- readODS::ods_sheets(input$file$datapath)
         }
-        selected <- choices[1]
+        selected <- temporary_rv$sheets[1]
 
         shinyWidgets::updatePickerInput(
           session = session,
           inputId = "sheet",
           selected = selected,
-          choices = choices
+          choices = temporary_rv$sheets
         )
         datamods:::showUI(paste0("#", ns("sheet-container")))
       } else {
@@ -238,13 +240,18 @@ import_file_server <- function(id,
       ),
       {
         req(input$file)
-        if (is_workbook(input$file$datapath)) shiny::req(input$sheet)
+
+        if (!all(input$sheet %in% temporary_rv$sheets)) {
+          sheets <-  1
+        } else {
+          sheets <- input$sheet
+        }
 
         extension <- tools::file_ext(input$file$datapath)
 
         parameters <- list(
           file = input$file$datapath,
-          sheet = input$sheet,
+          sheet = sheets,
           skip = input$skip_rows,
           dec = input$dec,
           encoding = input$encoding,
@@ -307,7 +314,7 @@ import_file_server <- function(id,
       req(temporary_rv$data)
       tryCatch({
       toastui::datagrid(
-        data = setNames(head(temporary_rv$data, 5),make.names(names(temporary_rv$data))),
+        data = setNames(head(temporary_rv$data, 5),make.names(names(temporary_rv$data),unique = TRUE)),
         theme = "striped",
         colwidths = "guess",
         minBodyHeight = 250
@@ -406,7 +413,9 @@ import_delim <- function(file, skip, encoding, na.strings) {
 import_xls <- function(file, sheet, skip, na.strings) {
   tryCatch(
     {
-      # browser()
+      ## If sheet is null, this allows purrr::map to run
+      if (is.null(sheet)) sheet <- 1
+
       sheet |>
         purrr::map(\(.x){
           openxlsx2::read_xlsx(
@@ -437,6 +446,7 @@ import_xls <- function(file, sheet, skip, na.strings) {
 import_ods <- function(file, sheet, skip, na.strings) {
   tryCatch(
     {
+      if (is.null(sheet)) sheet <- 1
       sheet |>
         purrr::map(\(.x){
           readODS::read_ods(
