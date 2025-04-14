@@ -10,7 +10,7 @@
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'Version: 25.4.2.250414_1007'
+app_version <- function()'Version: 25.4.3.250414_1045'
 
 
 ########
@@ -2737,9 +2737,7 @@ data_type_filter <- function(data,type){
 
   out <- data[data_type(data) %in% type]
   code <- rlang::call2("data_type_filter",!!!list(type=type),.ns = "FreesearchR")
-  if (!is.null(code)){
-    attr(out, "code") <- code
-  }
+  attr(out, "code") <- code
   out
 }
 
@@ -8293,8 +8291,12 @@ ui_elements <- list(
               shiny::tags$br(),
               shiny::tags$br(),
               shiny::uiOutput(outputId = "column_filter"),
+              shiny::helpText("Variable data type filtering."),
+              shiny::tags$br(),
               shiny::tags$br(),
               IDEAFilter::IDEAFilter_ui("data_filter"),
+              shiny::helpText("Observations level filtering."),
+              shiny::tags$br(),
               shiny::tags$br()
             )
           ),
@@ -8312,8 +8314,8 @@ ui_elements <- list(
               width = 9,
               shiny::tags$p(
                 shiny::markdown("Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."),
-                shiny::tags$p("There are also more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code. At the bottom you can restore the original data."),
-                shiny::tags$p("Please note that data modifications are applied before any data or variable filtering is applied.")
+                shiny::markdown("There are also more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code. At the bottom you can restore the original data."),
+                shiny::markdown("Please note that data modifications are applied before any data or variable filtering is applied.")
               )
             )
           ),
@@ -8334,6 +8336,7 @@ ui_elements <- list(
               ),
               shiny::tags$br(),
               shiny::helpText("Reorder the levels of factor/categorical variables."),
+              shiny::tags$br()
             ),
             shiny::column(
               width = 4,
@@ -8343,7 +8346,8 @@ ui_elements <- list(
                 width = "100%"
               ),
               shiny::tags$br(),
-              shiny::helpText("Create factor/categorical variable from a continous variable (number/date/time).")
+              shiny::helpText("Create factor/categorical variable from a continous variable (number/date/time)."),
+              shiny::tags$br()
             ),
             shiny::column(
               width = 4,
@@ -8353,10 +8357,10 @@ ui_elements <- list(
                 width = "100%"
               ),
               shiny::tags$br(),
-              shiny::helpText(shiny::markdown("Create a new variable/column based on an *R*-expression."))
+              shiny::helpText(shiny::markdown("Create a new variable/column based on an *R*-expression.")),
+              shiny::tags$br()
             )
           ),
-          shiny::tags$br(),
           shiny::tags$br(),
           tags$h4("Compare modified data to original"),
           shiny::tags$br(),
@@ -8949,7 +8953,7 @@ server <- function(input, output, session) {
 
   output$data_info <- shiny::renderUI({
     shiny::req(data_filter())
-    data_description(data_filter(),"The filtered data")
+    data_description(data_filter(), "The filtered data")
   })
 
   #########  Create factor
@@ -9043,12 +9047,13 @@ server <- function(input, output, session) {
   })
 
   shiny::observeEvent(list(
-    input$column_filter#,
+    input$column_filter # ,
     # rv$data
   ), {
     shiny::req(input$column_filter)
-    rv$data_variables <- data_type_filter(rv$data, input$column_filter)
-    rv$code <- modifyList(rv$code,list(variable=attr(rv$data_variables, "code")))
+    out <- data_type_filter(rv$data, input$column_filter)
+    rv$data_variables <- out
+    rv$code$variables <- attr(out, "code")
     # rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
   })
 
@@ -9167,10 +9172,13 @@ server <- function(input, output, session) {
   })
 
   output$code_variables <- shiny::renderUI({
-    prismCodeBlock(paste0("#Variables filter\n", rv$code$variables))
+    shiny::req(rv$code$variables)
+    out <- expression_string(rv$code$variables, assign.str = "df <- df |>\n")
+    prismCodeBlock(paste0("#Variables filter\n", out))
   })
 
   output$code_filter <- shiny::renderUI({
+    shiny::req(rv$code$filter)
     prismCodeBlock(paste0("#Data filter\n", rv$code$filter))
   })
 

@@ -158,8 +158,12 @@ ui_elements <- list(
               shiny::tags$br(),
               shiny::tags$br(),
               shiny::uiOutput(outputId = "column_filter"),
+              shiny::helpText("Variable data type filtering."),
+              shiny::tags$br(),
               shiny::tags$br(),
               IDEAFilter::IDEAFilter_ui("data_filter"),
+              shiny::helpText("Observations level filtering."),
+              shiny::tags$br(),
               shiny::tags$br()
             )
           ),
@@ -177,8 +181,8 @@ ui_elements <- list(
               width = 9,
               shiny::tags$p(
                 shiny::markdown("Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."),
-                shiny::tags$p("There are also more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code. At the bottom you can restore the original data."),
-                shiny::tags$p("Please note that data modifications are applied before any data or variable filtering is applied.")
+                shiny::markdown("There are also more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code. At the bottom you can restore the original data."),
+                shiny::markdown("Please note that data modifications are applied before any data or variable filtering is applied.")
               )
             )
           ),
@@ -199,6 +203,7 @@ ui_elements <- list(
               ),
               shiny::tags$br(),
               shiny::helpText("Reorder the levels of factor/categorical variables."),
+              shiny::tags$br()
             ),
             shiny::column(
               width = 4,
@@ -208,7 +213,8 @@ ui_elements <- list(
                 width = "100%"
               ),
               shiny::tags$br(),
-              shiny::helpText("Create factor/categorical variable from a continous variable (number/date/time).")
+              shiny::helpText("Create factor/categorical variable from a continous variable (number/date/time)."),
+              shiny::tags$br()
             ),
             shiny::column(
               width = 4,
@@ -218,10 +224,10 @@ ui_elements <- list(
                 width = "100%"
               ),
               shiny::tags$br(),
-              shiny::helpText(shiny::markdown("Create a new variable/column based on an *R*-expression."))
+              shiny::helpText(shiny::markdown("Create a new variable/column based on an *R*-expression.")),
+              shiny::tags$br()
             )
           ),
-          shiny::tags$br(),
           shiny::tags$br(),
           tags$h4("Compare modified data to original"),
           shiny::tags$br(),

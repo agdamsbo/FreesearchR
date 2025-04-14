@@ -273,7 +273,7 @@ server <- function(input, output, session) {
 
   output$data_info <- shiny::renderUI({
     shiny::req(data_filter())
-    data_description(data_filter(),"The filtered data")
+    data_description(data_filter(), "The filtered data")
   })
 
   #########  Create factor
@@ -367,12 +367,13 @@ server <- function(input, output, session) {
   })
 
   shiny::observeEvent(list(
-    input$column_filter#,
+    input$column_filter # ,
     # rv$data
   ), {
     shiny::req(input$column_filter)
-    rv$data_variables <- data_type_filter(rv$data, input$column_filter)
-    rv$code <- modifyList(rv$code,list(variable=attr(rv$data_variables, "code")))
+    out <- data_type_filter(rv$data, input$column_filter)
+    rv$data_variables <- out
+    rv$code$variables <- attr(out, "code")
     # rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
   })
 
@@ -491,10 +492,13 @@ server <- function(input, output, session) {
   })
 
   output$code_variables <- shiny::renderUI({
-    prismCodeBlock(paste0("#Variables filter\n", rv$code$variables))
+    shiny::req(rv$code$variables)
+    out <- expression_string(rv$code$variables, assign.str = "df <- df |>\n")
+    prismCodeBlock(paste0("#Variables filter\n", out))
   })
 
   output$code_filter <- shiny::renderUI({
+    shiny::req(rv$code$filter)
     prismCodeBlock(paste0("#Data filter\n", rv$code$filter))
   })
 

@@ -378,9 +378,7 @@ data_type_filter <- function(data,type){
 
   out <- data[data_type(data) %in% type]
   code <- rlang::call2("data_type_filter",!!!list(type=type),.ns = "FreesearchR")
-  if (!is.null(code)){
-    attr(out, "code") <- code
-  }
+  attr(out, "code") <- code
   out
 }
 
