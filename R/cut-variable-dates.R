@@ -55,8 +55,10 @@ cut_var.hms <- function(x, breaks, ...) {
 #' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(2)
 #' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = "weekday")
 #' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = "month_only")
+#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks=NULL,format = "%A-%H")
 cut_var.POSIXt <- function(x, breaks, right = FALSE, include.lowest = TRUE, start.on.monday = TRUE, ...) {
   breaks_o <- breaks
+  args <- list(...)
   # browser()
   if (is.numeric(breaks)) {
     breaks <- quantile(
@@ -68,16 +70,23 @@ cut_var.POSIXt <- function(x, breaks, right = FALSE, include.lowest = TRUE, star
     )
   }
 
-  if (identical(breaks, "weekday")) {
-    days <- c(
-      "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
-      "Sunday"
-    )
-    if (!start.on.monday) {
-      days <- days[c(7, 1:6)]
+  if ("format" %in% names(args)){
+    assertthat::assert_that(is.character(args$format))
+    out <- forcats::as_factor(format(x,format=args$format))
+  } else if (identical(breaks, "weekday")) {
+    ## This is
+    ds <- as.Date(1:7) |>
+      (\(.x){
+        sort_by(format(.x,"%A"),as.numeric(format(.x,"%w")))
+      })()
+
+    if (start.on.monday) {
+      ds <- ds[c(7, 1:6)]
     }
-    out <- factor(weekdays(x), levels = days) |> forcats::fct_drop()
+    out <- factor(weekdays(x), levels = ds) |> forcats::fct_drop()
   } else if (identical(breaks, "month_only")) {
+    ## Simplest way to create a vector of all months in order
+    ## which will also follow the locale of the machine
     ms <- paste0("1970-", 1:12, "-01") |>
       as.Date() |>
       months()
@@ -118,15 +127,19 @@ cut_var.POSIXct <- cut_var.POSIXt
 #' as.Date(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(2)
 #' as.Date(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = "weekday")
 cut_var.Date <- function(x, breaks, start.on.monday = TRUE, ...) {
-  if (identical(breaks, "weekday")) {
-    days <- c(
-      "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
-      "Sunday"
-    )
-    if (!start.on.monday) {
-      days <- days[c(7, 1:6)]
+  if ("format" %in% names(args)){
+    assertthat::assert_that(is.character(args$format))
+    out <- forcats::as_factor(format(x,format=args$format))
+  } else if (identical(breaks, "weekday")) {
+    ds <- as.Date(1:7) |>
+      (\(.x){
+        sort_by(format(.x,"%A"),as.numeric(format(.x,"%w")))
+      })()
+
+    if (start.on.monday) {
+      ds <- ds[c(7, 1:6)]
     }
-    out <- factor(weekdays(x), levels = days) |> forcats::fct_drop()
+    out <- factor(weekdays(x), levels = ds) |> forcats::fct_drop()
   } else if (identical(breaks, "month_only")) {
     ms <- paste0("1970-", 1:12, "-01") |>
       as.Date() |>

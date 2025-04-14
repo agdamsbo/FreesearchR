@@ -2,26 +2,31 @@
 % Please edit documentation in R/regression_model.R
 \name{data_type}
 \alias{data_type}
-\title{Data type assessment}
+\title{Data type assessment.}
 \usage{
 data_type(data)
 }
 \arguments{
-\item{data}{data}
+\item{data}{vector or data.frame. if data frame, each column is evaluated.}
 }
 \value{
 outcome type
 }
 \description{
-Data type assessment
+These are more overall than the native typeof. This is used to assess a more
+meaningful "clinical" data type.
 }
 \examples{
 mtcars |>
   default_parsing() |>
   lapply(data_type)
+mtcars |>
+  default_parsing() |>
+  data_type()
 c(1, 2) |> data_type()
 1 |> data_type()
 c(rep(NA, 10)) |> data_type()
 sample(1:100, 50) |> data_type()
 factor(letters[1:20]) |> data_type()
+as.Date(1:20) |> data_type()
 }
