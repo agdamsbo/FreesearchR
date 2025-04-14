@@ -157,6 +157,8 @@ ui_elements <- list(
               ),
               shiny::tags$br(),
               shiny::tags$br(),
+              shiny::uiOutput(outputId = "column_filter"),
+              shiny::tags$br(),
               IDEAFilter::IDEAFilter_ui("data_filter"),
               shiny::tags$br()
             )
@@ -175,7 +177,8 @@ ui_elements <- list(
               width = 9,
               shiny::tags$p(
                 shiny::markdown("Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."),
-                shiny::tags$p("There are also more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code. At the bottom you can restore the original data.")
+                shiny::tags$p("There are also more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code. At the bottom you can restore the original data."),
+                shiny::tags$p("Please note that data modifications are applied before any data or variable filtering is applied.")
               )
             )
           ),
@@ -264,6 +267,7 @@ ui_elements <- list(
       bslib::navset_bar(
         title = "",
         sidebar = bslib::sidebar(
+            shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
           bslib::accordion(
             open = "acc_chars",
             multiple = FALSE,
@@ -447,7 +451,7 @@ ui_elements <- list(
           shiny::tagList(
             lapply(
               paste0("code_", c(
-                "import", "data", "filter", "table1", "univariable", "multivariable"
+                "import", "data", "variables", "filter", "table1", "univariable", "multivariable"
               )),
               \(.x)shiny::htmlOutput(outputId = .x)
             )

@@ -4,7 +4,7 @@
 \alias{data_description}
 \title{Ultra short data dascription}
 \usage{
-data_description(data)
+data_description(data, data_text = "Data")
 }
 \arguments{
 \item{data}{}

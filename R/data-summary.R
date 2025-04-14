@@ -156,7 +156,7 @@ overview_vars <- function(data) {
 
   dplyr::tibble(
     class = get_classes(data),
-    type = get_classes(data),
+    type = data_type(data),
     name = names(data),
     n_missing = unname(colSums(is.na(data))),
     p_complete = 1 - n_missing / nrow(data),

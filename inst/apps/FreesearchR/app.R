@@ -10,7 +10,7 @@
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'Version: 25.4.1.250411_1313'
+app_version <- function()'Version: 25.4.2.250414_1007'
 
 
 ########
@@ -1141,6 +1141,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
           icon = bsicons::bs_icon("graph-up"),
           shiny::uiOutput(outputId = ns("primary")),
           shiny::helpText('Only non-text variables are available for plotting. Go the "Data" to reclass data to plot.'),
+          shiny::tags$br(),
           shiny::uiOutput(outputId = ns("type")),
           shiny::uiOutput(outputId = ns("secondary")),
           shiny::uiOutput(outputId = ns("tertiary")),
@@ -1577,7 +1578,7 @@ supported_plots <- function() {
       fun = "plot_violin",
       descr = "Violin plot",
       note = "A modern alternative to the classic boxplot to visualise data distribution",
-      primary.type = c("continuous", "dichotomous", "ordinal" ,"categorical"),
+      primary.type = c("datatime","continuous", "dichotomous", "ordinal" ,"categorical"),
       secondary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.multi = FALSE,
       secondary.extra = "none",
@@ -1605,8 +1606,8 @@ supported_plots <- function() {
       fun = "plot_scatter",
       descr = "Scatter plot",
       note = "A classic way of showing the association between to variables",
-      primary.type = "continuous",
-      secondary.type = c("continuous", "ordinal" ,"categorical"),
+      primary.type = c("datatime","continuous"),
+      secondary.type = c("datatime","continuous", "ordinal" ,"categorical"),
       secondary.multi = FALSE,
       tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.extra = NULL
@@ -1615,7 +1616,7 @@ supported_plots <- function() {
       fun = "plot_box",
       descr = "Box plot",
       note = "A classic way to plot data distribution by groups",
-      primary.type = c("continuous", "dichotomous", "ordinal" ,"categorical"),
+      primary.type = c("datatime","continuous", "dichotomous", "ordinal" ,"categorical"),
       secondary.type = c("dichotomous", "ordinal" ,"categorical"),
       secondary.multi = FALSE,
       tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
@@ -2198,7 +2199,7 @@ overview_vars <- function(data) {
 
   dplyr::tibble(
     class = get_classes(data),
-    type = get_classes(data),
+    type = data_type(data),
     name = names(data),
     n_missing = unname(colSums(is.na(data))),
     p_complete = 1 - n_missing / nrow(data),
@@ -2698,7 +2699,7 @@ missing_fraction <- function(data) {
 #'   sample(1:8, 20, TRUE),
 #'   sample(c(1:8, NA), 20, TRUE)
 #' ) |> data_description()
-data_description <- function(data) {
+data_description <- function(data, data_text = "Data") {
   data <- if (shiny::is.reactive(data)) data() else data
 
   n <- nrow(data)
@@ -2707,12 +2708,39 @@ data_description <- function(data) {
   p_complete <- n_complete / n
 
   sprintf(
-    i18n("Data has %s observations and %s variables, with %s (%s%%) complete cases."),
+    i18n("%s has %s observations and %s variables, with %s (%s%%) complete cases."),
+    data_text,
     n,
     n_var,
     n_complete,
     signif(100 * p_complete, 3)
   )
+}
+
+
+#' Filter function to filter data set by variable type
+#'
+#' @param data data frame
+#' @param type vector of data types (recognised: data_types)
+#'
+#' @returns data.frame
+#' @export
+#'
+#' @examples
+#' default_parsing(mtcars) |> data_type_filter(type=c("categorical","continuous")) |> attributes()
+#' \dontrun{
+#' default_parsing(mtcars) |> data_type_filter(type=c("test","categorical","continuous"))
+#' }
+data_type_filter <- function(data,type){
+  ## Please ensure to only provide recognised data types
+  assertthat::assert_that(all(type %in% data_types()))
+
+  out <- data[data_type(data) %in% type]
+  code <- rlang::call2("data_type_filter",!!!list(type=type),.ns = "FreesearchR")
+  if (!is.null(code)){
+    attr(out, "code") <- code
+  }
+  out
 }
 
 #' Drop-in replacement for the base::sort_by with option to remove NAs
@@ -5196,9 +5224,13 @@ regression_model_uv <- function(data,
 
 ### HELPERS
 
-#' Data type assessment
+#' Data type assessment.
 #'
-#' @param data data
+#' @description
+#' These are more overall than the native typeof. This is used to assess a more
+#' meaningful "clinical" data type.
+#'
+#' @param data vector or data.frame. if data frame, each column is evaluated.
 #'
 #' @returns outcome type
 #' @export
@@ -5207,39 +5239,60 @@ regression_model_uv <- function(data,
 #' mtcars |>
 #'   default_parsing() |>
 #'   lapply(data_type)
+#' mtcars |>
+#'   default_parsing() |>
+#'   data_type()
 #' c(1, 2) |> data_type()
 #' 1 |> data_type()
 #' c(rep(NA, 10)) |> data_type()
 #' sample(1:100, 50) |> data_type()
 #' factor(letters[1:20]) |> data_type()
+#' as.Date(1:20) |> data_type()
 data_type <- function(data) {
-  cl_d <- class(data)
-  if (all(is.na(data))) {
-    out <- "empty"
-  } else if (length(unique(data)) < 2) {
-    out <- "monotone"
-  } else if (any(c("factor", "logical") %in% cl_d) | length(unique(data)) == 2) {
-    if (identical("logical", cl_d) | length(unique(data)) == 2) {
-      out <- "dichotomous"
-    } else {
-      if (is.ordered(data)) {
-        out <- "ordinal"
-      } else {
-        out <- "categorical"
-      }
-    }
-  } else if (identical(cl_d, "character")) {
-    out <- "text"
-  } else if (!length(unique(data)) == 2) {
-    ## Previously had all thinkable classes
-    ## Now just assumes the class has not been defined above
-    ## any(c("numeric", "integer", "hms", "Date", "timediff") %in% cl_d) &
-    out <- "continuous"
+  if (is.data.frame(data)) {
+    sapply(data, data_type)
   } else {
-    out <- "unknown"
-  }
+    cl_d <- class(data)
+    if (all(is.na(data))) {
+      out <- "empty"
+    } else if (length(unique(data)) < 2) {
+      out <- "monotone"
+    } else if (any(c("factor", "logical") %in% cl_d) | length(unique(data)) == 2) {
+      if (identical("logical", cl_d) | length(unique(data)) == 2) {
+        out <- "dichotomous"
+      } else {
+        if (is.ordered(data)) {
+          out <- "ordinal"
+        } else {
+          out <- "categorical"
+        }
+      }
+    } else if (identical(cl_d, "character")) {
+      out <- "text"
+    } else if (any(c("hms", "Date", "POSIXct", "POSIXt") %in% cl_d)) {
+      out <- "datetime"
+    } else if (!length(unique(data)) == 2) {
+      ## Previously had all thinkable classes
+      ## Now just assumes the class has not been defined above
+      ## any(c("numeric", "integer", "hms", "Date", "timediff") %in% cl_d) &
+      out <- "continuous"
+    } else {
+      out <- "unknown"
+    }
 
-  out
+    out
+  }
+}
+
+#' Recognised data types from data_type
+#'
+#' @returns vector
+#' @export
+#'
+#' @examples
+#' data_types()
+data_types <- function() {
+  c("dichotomous", "ordinal", "categorical", "datatime", "continuous", "text", "empty", "monotone", "unknown")
 }
 
 
@@ -5479,17 +5532,17 @@ regression_model_list <- function(data,
   parameters_code <- Filter(
     length,
     modifyList(parameters, list(
-      data=as.symbol("df"),
+      data = as.symbol("df"),
       formula.str = as.character(glue::glue(formula.str.c)),
       outcome.str = NULL
       # args.list = NULL,
-    )
-  ))
+    ))
+  )
 
   ## The easiest solution was to simple paste as a string
   ## The rlang::call2 or rlang::expr functions would probably work as well
   # code <- glue::glue("FreesearchR::regression_model({parameters_print}, args.list=list({list2str(args.list.c)}))", .null = "NULL")
-  code <- rlang::call2("regression_model",!!!parameters_code,.ns = "FreesearchR")
+  code <- rlang::call2("regression_model", !!!parameters_code, .ns = "FreesearchR")
 
   list(
     options = options,
@@ -5600,7 +5653,6 @@ regression_model_uv_list <- function(data,
 
   model <- vars |>
     lapply(\(.var){
-
       parameters <-
         list(
           fun = fun.c,
@@ -5617,7 +5669,7 @@ regression_model_uv_list <- function(data,
       ## This is the very long version
       ## Handles deeply nested glue string
       # code <- glue::glue("FreesearchR::regression_model(data=df,{list2str(modifyList(parameters,list(data=NULL,args.list=list2str(args.list.c))))})")
-      code <- rlang::call2("regression_model",!!!modifyList(parameters,list(data=as.symbol("df"),args.list=args.list.c)),.ns = "FreesearchR")
+      code <- rlang::call2("regression_model", !!!modifyList(parameters, list(data = as.symbol("df"), args.list = args.list.c)), .ns = "FreesearchR")
       REDCapCAST::set_attr(out, code, "code")
     })
 
@@ -8240,6 +8292,8 @@ ui_elements <- list(
               ),
               shiny::tags$br(),
               shiny::tags$br(),
+              shiny::uiOutput(outputId = "column_filter"),
+              shiny::tags$br(),
               IDEAFilter::IDEAFilter_ui("data_filter"),
               shiny::tags$br()
             )
@@ -8258,7 +8312,8 @@ ui_elements <- list(
               width = 9,
               shiny::tags$p(
                 shiny::markdown("Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."),
-                shiny::tags$p("There are also more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code. At the bottom you can restore the original data.")
+                shiny::tags$p("There are also more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code. At the bottom you can restore the original data."),
+                shiny::tags$p("Please note that data modifications are applied before any data or variable filtering is applied.")
               )
             )
           ),
@@ -8347,6 +8402,7 @@ ui_elements <- list(
       bslib::navset_bar(
         title = "",
         sidebar = bslib::sidebar(
+            shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
           bslib::accordion(
             open = "acc_chars",
             multiple = FALSE,
@@ -8530,7 +8586,7 @@ ui_elements <- list(
           shiny::tagList(
             lapply(
               paste0("code_", c(
-                "import", "data", "filter", "table1", "univariable", "multivariable"
+                "import", "data", "variables", "filter", "table1", "univariable", "multivariable"
               )),
               \(.x)shiny::htmlOutput(outputId = .x)
             )
@@ -8652,6 +8708,7 @@ library(gtsummary)
 
 data(starwars)
 data(mtcars)
+mtcars <- mtcars |> append_column(as.Date(sample(1:365, nrow(mtcars))), "rand_dates")
 data(trial)
 
 
@@ -8705,6 +8762,7 @@ server <- function(input, output, session) {
     data_original = NULL,
     data_temp = NULL,
     data = NULL,
+    data_variables = NULL,
     data_filtered = NULL,
     models = NULL,
     code = list()
@@ -8734,7 +8792,6 @@ server <- function(input, output, session) {
   )
 
   shiny::observeEvent(from_redcap$data(), {
-    # rv$data_original <- purrr::pluck(data_redcap(), "data")()
     rv$data_temp <- from_redcap$data()
     rv$code <- modifyList(x = rv$code, list(import = from_redcap$code()))
   })
@@ -8743,7 +8800,6 @@ server <- function(input, output, session) {
   output$redcap_prev <- DT::renderDT(
     {
       DT::datatable(head(from_redcap$data(), 5),
-        # DT::datatable(head(purrr::pluck(data_redcap(), "data")(), 5),
         caption = "First 5 observations"
       )
     },
@@ -8818,17 +8874,6 @@ server <- function(input, output, session) {
         pipe_string() |>
         expression_string(assign.str = "df <-")
 
-
-      # rv$code$import <- rv$code$import |>
-      #   deparse() |>
-      #   paste(collapse = "") |>
-      #   paste("|>
-      #   dplyr::select(", paste(input$import_var, collapse = ","), ") |>
-      #   FreesearchR::default_parsing()") |>
-      #   (\(.x){
-      #     paste0("data <- ", .x)
-      #   })()
-
       rv$code$filter <- NULL
       rv$code$modify <- NULL
     }, ignoreNULL = FALSE
@@ -8845,7 +8890,6 @@ server <- function(input, output, session) {
       shiny::updateActionButton(inputId = "act_start", disabled = TRUE)
       shiny::updateActionButton(inputId = "modal_browse", disabled = TRUE)
       shiny::updateActionButton(inputId = "act_eval", disabled = TRUE)
-
     } else {
       shiny::updateActionButton(inputId = "act_start", disabled = FALSE)
       shiny::updateActionButton(inputId = "modal_browse", disabled = FALSE)
@@ -8877,6 +8921,7 @@ server <- function(input, output, session) {
         shiny::req(rv$data_original)
         rv$data <- rv$data_original
         rv$code$filter <- NULL
+        rv$code$variables <- NULL
         rv$code$modify <- NULL
       }
     },
@@ -8902,22 +8947,10 @@ server <- function(input, output, session) {
   ## Further modifications are needed to have cut/bin options based on class of variable
   ## Could be defined server-side
 
-  shiny::observeEvent(
-    input$modal_variables,
-    modal_update_variables(
-      id = "modal_variables",
-      title = "Update and select variables",
-      footer = tagList(
-        actionButton("ok", "OK")
-      )
-    )
-  )
-
   output$data_info <- shiny::renderUI({
     shiny::req(data_filter())
-    data_description(data_filter())
+    data_description(data_filter(),"The filtered data")
   })
-
 
   #########  Create factor
 
@@ -8989,16 +9022,47 @@ server <- function(input, output, session) {
     rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
   })
 
+  ### Column filter
+  ### Completely implemented, but it takes a little considering where in the
+  ### data flow to implement, as it will act destructively on previous
+  ### manipulations
+
+  output$column_filter <- shiny::renderUI({
+    shiny::req(rv$data)
+    # c("dichotomous", "ordinal", "categorical", "datatime", "continuous")
+    shinyWidgets::virtualSelectInput(
+      inputId = "column_filter",
+      label = "Select variable types to include",
+      selected = unique(data_type(rv$data)),
+      choices = unique(data_type(rv$data)),
+      updateOn = "change",
+      multiple = TRUE,
+      search = FALSE,
+      showValueAsTags = TRUE
+    )
+  })
+
+  shiny::observeEvent(list(
+    input$column_filter#,
+    # rv$data
+  ), {
+    shiny::req(input$column_filter)
+    rv$data_variables <- data_type_filter(rv$data, input$column_filter)
+    rv$code <- modifyList(rv$code,list(variable=attr(rv$data_variables, "code")))
+    # rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
+  })
+
+
   #########  Data filter
   # IDEAFilter has the least cluttered UI, but might have a License issue
   data_filter <- IDEAFilter::IDEAFilter("data_filter",
-    data = shiny::reactive(rv$data),
+    data = shiny::reactive(rv$data_variables),
     verbose = TRUE
   )
 
   shiny::observeEvent(
     list(
-      shiny::reactive(rv$data),
+      shiny::reactive(rv$data_variables),
       shiny::reactive(rv$data_original),
       data_filter(),
       # regression_vars(),
@@ -9011,7 +9075,10 @@ server <- function(input, output, session) {
       ###  Save filtered data
       ###  without empty factor levels
       rv$list$data <- data_filter() |>
-        REDCapCAST::fct_drop()
+        REDCapCAST::fct_drop() |>
+        (\(.x){
+          .x[!sapply(.x, is.character)]
+        })()
 
       ## This looks messy!! But it works as intended for now
 
@@ -9099,6 +9166,10 @@ server <- function(input, output, session) {
     prismCodeBlock(paste0("#Data modifications\n", out))
   })
 
+  output$code_variables <- shiny::renderUI({
+    prismCodeBlock(paste0("#Variables filter\n", rv$code$variables))
+  })
+
   output$code_filter <- shiny::renderUI({
     prismCodeBlock(paste0("#Data filter\n", rv$code$filter))
   })
@@ -9114,7 +9185,7 @@ server <- function(input, output, session) {
   shiny::observe({
     rv$regression()$regression$models |> purrr::imap(\(.x, .i){
       output[[paste0("code_", tolower(.i))]] <- shiny::renderUI({
-        prismCodeBlock(paste0(paste("#",.i,"regression model\n"),.x$code_table))
+        prismCodeBlock(paste0(paste("#", .i, "regression model\n"), .x$code_table))
       })
     })
   })
@@ -9126,68 +9197,6 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
-  ## Keep these "old" selection options as a simple alternative to the modification pane
-
-
-  # output$regression_vars <- shiny::renderUI({
-  #   columnSelectInput(
-  #     inputId = "regression_vars",
-  #     selected = NULL,
-  #     label = "Covariables to include",
-  #     data = rv$data_filtered,
-  #     multiple = TRUE,
-  #   )
-  # })
-  #
-  # output$outcome_var <- shiny::renderUI({
-  #   columnSelectInput(
-  #     inputId = "outcome_var",
-  #     selected = NULL,
-  #     label = "Select outcome variable",
-  #     data = rv$data_filtered,
-  #     multiple = FALSE
-  #   )
-  # })
-  #
-  # output$regression_type <- shiny::renderUI({
-  #   shiny::req(input$outcome_var)
-  #   shiny::selectizeInput(
-  #     inputId = "regression_type",
-  #     label = "Choose regression analysis",
-  #     ## The below ifelse statement handles the case of loading a new dataset
-  #     choices = possible_functions(
-  #       data = dplyr::select(
-  #         rv$data_filtered,
-  #         ifelse(input$outcome_var %in% names(rv$data_filtered),
-  #           input$outcome_var,
-  #           names(rv$data_filtered)[1]
-  #         )
-  #       ), design = "cross-sectional"
-  #     ),
-  #     multiple = FALSE
-  #   )
-  # })
-  #
-  # output$factor_vars <- shiny::renderUI({
-  #   shiny::selectizeInput(
-  #     inputId = "factor_vars",
-  #     selected = colnames(rv$data_filtered)[sapply(rv$data_filtered, is.factor)],
-  #     label = "Covariables to format as categorical",
-  #     choices = colnames(rv$data_filtered),
-  #     multiple = TRUE
-  #   )
-  # })
-  #
-  # ## Collected regression variables
-  # regression_vars <- shiny::reactive({
-  #   if (is.null(input$regression_vars)) {
-  #     out <- colnames(rv$data_filtered)
-  #   } else {
-  #     out <- unique(c(input$regression_vars, input$outcome_var))
-  #   }
-  #   return(out)
-  # })
-  #
   output$strat_var <- shiny::renderUI({
     columnSelectInput(
       inputId = "strat_var",
@@ -9200,19 +9209,6 @@ server <- function(input, output, session) {
       )
     )
   })
-  #
-  #
-  # output$plot_model <- shiny::renderUI({
-  #   shiny::req(rv$list$regression$tables)
-  #   shiny::selectInput(
-  #     inputId = "plot_model",
-  #     selected = "none",
-  #     label = "Select models to plot",
-  #     choices = names(rv$list$regression$tables),
-  #     multiple = TRUE
-  #   )
-  # })
-
 
   ##############################################################################
   #########
@@ -9220,17 +9216,14 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
+
+  output$data_info_nochar <- shiny::renderUI({
+    shiny::req(rv$list$data)
+    data_description(rv$list$data, data_text = "The dataset without text variables")
+  })
+
   shiny::observeEvent(
-    # ignoreInit = TRUE,
     list(
-      # shiny::reactive(rv$list$data),
-      # shiny::reactive(rv$data),
-      # shiny::reactive(rv$data_original),
-      # data_filter(),
-      # input$strat_var,
-      # input$regression_vars,
-      # input$complete_cutoff,
-      # input$add_p
       input$act_eval
     ),
     {
@@ -9245,24 +9238,9 @@ server <- function(input, output, session) {
 
       shiny::withProgress(message = "Creating the table. Hold on for a moment..", {
         rv$list$table1 <- rlang::exec(create_baseline, !!!append_list(rv$list$data, parameters, "data"))
-
-        # rv$list$table1 <- create_baseline(
-        #   data = rv$list$data,
-        #   by.var = input$strat_var,
-        #   add.p = input$add_p == "yes",
-        #   add.overall = TRUE
-        # )
       })
 
       rv$code$table1 <- glue::glue("FreesearchR::create_baseline(data,{list2str(parameters)})")
-
-      #   list(
-      #   rv$code$import,
-      #   rlang::call2(.fn = "select",!!!list(input$import_var),.ns = "dplyr"),
-      #   rlang::call2(.fn = "default_parsing",.ns = "FreesearchR")
-      # ) |>
-      #   merge_expression() |>
-      #   expression_string()
     }
   )
 
@@ -9307,7 +9285,7 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
-  pl <- data_visuals_server("visuals", data = shiny::reactive(rv$data))
+  pl <- data_visuals_server("visuals", data = shiny::reactive(rv$list$data))
 
   ##############################################################################
   #########
@@ -9315,201 +9293,7 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
-  rv$regression <- regression_server("regression", data = shiny::reactive(rv$data_filtered))
-
-  # rv$list$regression <- regression_server("regression", data = shiny::reactive(rv$data_filtered))
-
-  # shiny::observeEvent(
-  #   input$load,
-  #   {
-  #     shiny::req(input$outcome_var)
-  #     # browser()
-  #     # Assumes all character variables can be formatted as factors
-  #     # data <- data_filter$filtered() |>
-  #     tryCatch(
-  #       {
-  #         ## Which models to create should be decided by input
-  #         ## Could also include
-  #         ##   imputed or
-  #         ##   minimally adjusted
-  #         model_lists <- list(
-  #           "Univariable" = regression_model_uv_list,
-  #           "Multivariable" = regression_model_list
-  #         ) |>
-  #           lapply(\(.fun){
-  #             ls <- do.call(
-  #               .fun,
-  #               c(
-  #                 list(data = rv$list$data |>
-  #                   (\(.x){
-  #                     .x[regression_vars()]
-  #                   })()),
-  #                 list(outcome.str = input$outcome_var),
-  #                 list(fun.descr = input$regression_type)
-  #               )
-  #             )
-  #           })
-  #
-  #         # browser()
-  #
-  #         rv$list$regression$params <- get_fun_options(input$regression_type) |>
-  #           (\(.x){
-  #             .x[[1]]
-  #           })()
-  #
-  #         rv$list$regression$models <- model_lists
-  #
-  #         # names(rv$list$regression)
-  #
-  #         # rv$models <- lapply(model_lists, \(.x){
-  #         #   .x$model
-  #         # })
-  #       },
-  #       # warning = function(warn) {
-  #       #   showNotification(paste0(warn), type = "warning")
-  #       # },
-  #       error = function(err) {
-  #         showNotification(paste0("Creating regression models failed with the following error: ", err), type = "err")
-  #       }
-  #     )
-  #   }
-  # )
-  #
-  # shiny::observeEvent(
-  #   ignoreInit = TRUE,
-  #   list(
-  #     rv$list$regression$models
-  #   ),
-  #   {
-  #     shiny::req(rv$list$regression$models)
-  #     tryCatch(
-  #       {
-  #         rv$check <- lapply(rv$list$regression$models, \(.x){
-  #           .x$model
-  #         }) |>
-  #           purrr::pluck("Multivariable") |>
-  #           performance::check_model()
-  #       },
-  #       # warning = function(warn) {
-  #       #   showNotification(paste0(warn), type = "warning")
-  #       # },
-  #       error = function(err) {
-  #         showNotification(paste0("Running model assumptions checks failed with the following error: ", err), type = "err")
-  #       }
-  #     )
-  #   }
-  # )
-  #
-  # output$check <- shiny::renderPlot(
-  #   {
-  #     shiny::req(rv$check)
-  #     # browser()
-  #     # p <- plot(rv$check) +
-  #     #   patchwork::plot_annotation(title = "Multivariable regression model checks")
-  #
-  #     p <- plot(rv$check) +
-  #       patchwork::plot_annotation(title = "Multivariable regression model checks")
-  #
-  #     for (i in seq_len(length(p))) {
-  #       p[[i]] <- p[[i]] + gg_theme_shiny()
-  #     }
-  #
-  #     p
-  #
-  #     # p + patchwork::plot_layout(ncol = 1, design = ggplot2::waiver())
-  #
-  #     # Generate checks in one column
-  #     # layout <- sapply(seq_len(length(p)), \(.x){
-  #     #   patchwork::area(.x, 1)
-  #     # })
-  #     #
-  #     # p + patchwork::plot_layout(design = Reduce(c, layout))
-  #
-  #     # patchwork::wrap_plots(ncol=1) +
-  #     # patchwork::plot_annotation(title = 'Multivariable regression model checks')
-  #   },
-  #   height = 600,
-  #   alt = "Assumptions testing of the multivariable regression model"
-  # )
-  #
-  #
-  # shiny::observeEvent(
-  #   input$load,
-  #   {
-  #     shiny::req(rv$list$regression$models)
-  #     tryCatch(
-  #       {
-  #         out <- lapply(rv$list$regression$models, \(.x){
-  #           .x$model
-  #         }) |>
-  #           purrr::map(regression_table)
-  #
-  #         if (input$add_regression_p == "no") {
-  #           out <- out |>
-  #             lapply(\(.x){
-  #               .x |>
-  #                 gtsummary::modify_column_hide(
-  #                   column = "p.value"
-  #                 )
-  #             })
-  #         }
-  #
-  #         rv$list$regression$tables <- out
-  #
-  #         # rv$list$regression$table <- out |>
-  #         #   tbl_merge()
-  #
-  #         # gtsummary::as_kable(rv$list$regression$table) |>
-  #         #   readr::write_lines(file="./www/_regression_table.md")
-  #
-  #         rv$list$input <- input
-  #       },
-  #       warning = function(warn) {
-  #         showNotification(paste0(warn), type = "warning")
-  #       },
-  #       error = function(err) {
-  #         showNotification(paste0("Creating a regression table failed with the following error: ", err), type = "err")
-  #       }
-  #     )
-  #     rv$ready <- "ready"
-  #   }
-  # )
-  #
-  # output$table2 <- gt::render_gt({
-  #   shiny::req(rv$list$regression$tables)
-  #   rv$list$regression$tables |>
-  #     tbl_merge() |>
-  #     gtsummary::as_gt() |>
-  #     gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$params$descr}**")))
-  # })
-  #
-  # output$regression_plot <- shiny::renderPlot(
-  #   {
-  #     # shiny::req(rv$list$regression$plot)
-  #     shiny::req(input$plot_model)
-  #
-  #     out <- merge_long(rv$list$regression, input$plot_model) |>
-  #       plot.tbl_regression(
-  #         colour = "variable",
-  #         facet_col = "model"
-  #       )
-  #
-  #     out +
-  #       ggplot2::scale_y_discrete(labels = scales::label_wrap(15)) +
-  #       gg_theme_shiny()
-  #
-  #     # rv$list$regression$tables$Multivariable |>
-  #     #   plot(colour = "variable") +
-  #     #   ggplot2::scale_y_discrete(labels = scales::label_wrap(15)) +
-  #     #   gg_theme_shiny()
-  #   },
-  #   height = 500,
-  #   alt = "Regression coefficient plot"
-  # )
-
-  # shiny::conditionalPanel(
-  #   condition = "output.uploaded == 'yes'",
-  # )
+  rv$regression <- regression_server("regression", data = shiny::reactive(rv$list$data))
 
   ##############################################################################
   #########
@@ -9546,17 +9330,6 @@ server <- function(input, output, session) {
   })
 
   shiny::outputOptions(output, "ready", suspendWhenHidden = FALSE)
-
-  # Reimplement from environment at later time
-  # output$has_input <- shiny::reactive({
-  #   if (rv$input) {
-  #     "yes"
-  #   } else {
-  #     "no"
-  #   }
-  # })
-
-  # shiny::outputOptions(output, "has_input", suspendWhenHidden = FALSE)
 
   ##############################################################################
   #########

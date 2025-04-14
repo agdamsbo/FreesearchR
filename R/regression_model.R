@@ -242,9 +242,13 @@ regression_model_uv <- function(data,
 
 ### HELPERS
 
-#' Data type assessment
+#' Data type assessment.
 #'
-#' @param data data
+#' @description
+#' These are more overall than the native typeof. This is used to assess a more
+#' meaningful "clinical" data type.
+#'
+#' @param data vector or data.frame. if data frame, each column is evaluated.
 #'
 #' @returns outcome type
 #' @export
@@ -253,39 +257,60 @@ regression_model_uv <- function(data,
 #' mtcars |>
 #'   default_parsing() |>
 #'   lapply(data_type)
+#' mtcars |>
+#'   default_parsing() |>
+#'   data_type()
 #' c(1, 2) |> data_type()
 #' 1 |> data_type()
 #' c(rep(NA, 10)) |> data_type()
 #' sample(1:100, 50) |> data_type()
 #' factor(letters[1:20]) |> data_type()
+#' as.Date(1:20) |> data_type()
 data_type <- function(data) {
-  cl_d <- class(data)
-  if (all(is.na(data))) {
-    out <- "empty"
-  } else if (length(unique(data)) < 2) {
-    out <- "monotone"
-  } else if (any(c("factor", "logical") %in% cl_d) | length(unique(data)) == 2) {
-    if (identical("logical", cl_d) | length(unique(data)) == 2) {
-      out <- "dichotomous"
-    } else {
-      if (is.ordered(data)) {
-        out <- "ordinal"
-      } else {
-        out <- "categorical"
-      }
-    }
-  } else if (identical(cl_d, "character")) {
-    out <- "text"
-  } else if (!length(unique(data)) == 2) {
-    ## Previously had all thinkable classes
-    ## Now just assumes the class has not been defined above
-    ## any(c("numeric", "integer", "hms", "Date", "timediff") %in% cl_d) &
-    out <- "continuous"
+  if (is.data.frame(data)) {
+    sapply(data, data_type)
   } else {
-    out <- "unknown"
-  }
+    cl_d <- class(data)
+    if (all(is.na(data))) {
+      out <- "empty"
+    } else if (length(unique(data)) < 2) {
+      out <- "monotone"
+    } else if (any(c("factor", "logical") %in% cl_d) | length(unique(data)) == 2) {
+      if (identical("logical", cl_d) | length(unique(data)) == 2) {
+        out <- "dichotomous"
+      } else {
+        if (is.ordered(data)) {
+          out <- "ordinal"
+        } else {
+          out <- "categorical"
+        }
+      }
+    } else if (identical(cl_d, "character")) {
+      out <- "text"
+    } else if (any(c("hms", "Date", "POSIXct", "POSIXt") %in% cl_d)) {
+      out <- "datetime"
+    } else if (!length(unique(data)) == 2) {
+      ## Previously had all thinkable classes
+      ## Now just assumes the class has not been defined above
+      ## any(c("numeric", "integer", "hms", "Date", "timediff") %in% cl_d) &
+      out <- "continuous"
+    } else {
+      out <- "unknown"
+    }
 
-  out
+    out
+  }
+}
+
+#' Recognised data types from data_type
+#'
+#' @returns vector
+#' @export
+#'
+#' @examples
+#' data_types()
+data_types <- function() {
+  c("dichotomous", "ordinal", "categorical", "datatime", "continuous", "text", "empty", "monotone", "unknown")
 }
 
 
@@ -525,17 +550,17 @@ regression_model_list <- function(data,
   parameters_code <- Filter(
     length,
     modifyList(parameters, list(
-      data=as.symbol("df"),
+      data = as.symbol("df"),
       formula.str = as.character(glue::glue(formula.str.c)),
       outcome.str = NULL
       # args.list = NULL,
-    )
-  ))
+    ))
+  )
 
   ## The easiest solution was to simple paste as a string
   ## The rlang::call2 or rlang::expr functions would probably work as well
   # code <- glue::glue("FreesearchR::regression_model({parameters_print}, args.list=list({list2str(args.list.c)}))", .null = "NULL")
-  code <- rlang::call2("regression_model",!!!parameters_code,.ns = "FreesearchR")
+  code <- rlang::call2("regression_model", !!!parameters_code, .ns = "FreesearchR")
 
   list(
     options = options,
@@ -646,7 +671,6 @@ regression_model_uv_list <- function(data,
 
   model <- vars |>
     lapply(\(.var){
-
       parameters <-
         list(
           fun = fun.c,
@@ -663,7 +687,7 @@ regression_model_uv_list <- function(data,
       ## This is the very long version
       ## Handles deeply nested glue string
       # code <- glue::glue("FreesearchR::regression_model(data=df,{list2str(modifyList(parameters,list(data=NULL,args.list=list2str(args.list.c))))})")
-      code <- rlang::call2("regression_model",!!!modifyList(parameters,list(data=as.symbol("df"),args.list=args.list.c)),.ns = "FreesearchR")
+      code <- rlang::call2("regression_model", !!!modifyList(parameters, list(data = as.symbol("df"), args.list = args.list.c)), .ns = "FreesearchR")
       REDCapCAST::set_attr(out, code, "code")
     })
 

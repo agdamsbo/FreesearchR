@@ -340,7 +340,7 @@ missing_fraction <- function(data) {
 #'   sample(1:8, 20, TRUE),
 #'   sample(c(1:8, NA), 20, TRUE)
 #' ) |> data_description()
-data_description <- function(data) {
+data_description <- function(data, data_text = "Data") {
   data <- if (shiny::is.reactive(data)) data() else data
 
   n <- nrow(data)
@@ -349,12 +349,39 @@ data_description <- function(data) {
   p_complete <- n_complete / n
 
   sprintf(
-    i18n("Data has %s observations and %s variables, with %s (%s%%) complete cases."),
+    i18n("%s has %s observations and %s variables, with %s (%s%%) complete cases."),
+    data_text,
     n,
     n_var,
     n_complete,
     signif(100 * p_complete, 3)
   )
+}
+
+
+#' Filter function to filter data set by variable type
+#'
+#' @param data data frame
+#' @param type vector of data types (recognised: data_types)
+#'
+#' @returns data.frame
+#' @export
+#'
+#' @examples
+#' default_parsing(mtcars) |> data_type_filter(type=c("categorical","continuous")) |> attributes()
+#' \dontrun{
+#' default_parsing(mtcars) |> data_type_filter(type=c("test","categorical","continuous"))
+#' }
+data_type_filter <- function(data,type){
+  ## Please ensure to only provide recognised data types
+  assertthat::assert_that(all(type %in% data_types()))
+
+  out <- data[data_type(data) %in% type]
+  code <- rlang::call2("data_type_filter",!!!list(type=type),.ns = "FreesearchR")
+  if (!is.null(code)){
+    attr(out, "code") <- code
+  }
+  out
 }
 
 #' Drop-in replacement for the base::sort_by with option to remove NAs
