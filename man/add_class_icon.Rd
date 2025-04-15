@@ -4,7 +4,7 @@
 \alias{add_class_icon}
 \title{Convert class grid column to icon}
 \usage{
-add_class_icon(grid, column = "class")
+add_class_icon(grid, column = "class", fun = class_icons)
 }
 \arguments{
 \item{grid}{grid}

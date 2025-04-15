@@ -5,7 +5,6 @@
 \alias{cut_variable_ui}
 \alias{cut_variable_server}
 \alias{modal_cut_variable}
-\alias{winbox_cut_variable}
 \title{Module to Convert Numeric to Factor}
 \usage{
 cut_variable_ui(id)
@@ -18,13 +17,6 @@ modal_cut_variable(
   easyClose = TRUE,
   size = "l",
   footer = NULL
-)
-
-winbox_cut_variable(
-  id,
-  title = i18n("Convert Numeric to Factor"),
-  options = shinyWidgets::wbOptions(),
-  controls = shinyWidgets::wbControls()
 )
 }
 \arguments{
@@ -47,10 +39,6 @@ pass \code{\link[bslib:bs_theme]{bslib::bs_theme()}} to the \code{theme} argumen
 like \code{\link[shiny:fluidPage]{fluidPage()}}).}
 
 \item{footer}{UI for footer. Use \code{NULL} for no footer.}
-
-\item{options}{List of options, see \code{\link[shinyWidgets:wbOptions]{wbOptions()}}.}
-
-\item{controls}{List of controls, see \code{\link[shinyWidgets:wbControls]{wbControls()}}.}
 }
 \value{
 A \code{\link[shiny:reactive]{shiny::reactive()}} function returning the data.

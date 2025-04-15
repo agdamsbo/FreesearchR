@@ -297,15 +297,15 @@ add_class_icon <- function(grid, column = "class", fun=class_icons) {
 #'
 #' @param x character vector of data classes
 #'
-#' @returns
+#' @returns list
 #' @export
 #'
 #' @examples
-#' "numeric" |> class_icons()
-#' default_parsing(mtcars) |> sapply(class) |> class_icons()
+#' "numeric" |> class_icons()|> str()
+#' mtcars |> sapply(class) |> class_icons() |> str()
 class_icons <- function(x) {
   if (length(x)>1){
-    sapply(x,class_icons)
+    lapply(x,class_icons)
   } else {
   if (identical(x, "numeric")) {
     shiny::icon("calculator")
@@ -330,7 +330,7 @@ class_icons <- function(x) {
 #'
 #' @param x character vector of data classes
 #'
-#' @returns
+#' @returns list
 #' @export
 #'
 #' @examples
@@ -338,7 +338,7 @@ class_icons <- function(x) {
 #' default_parsing(mtcars) |> sapply(data_type) |> type_icons()
 type_icons <- function(x) {
   if (length(x)>1){
-    sapply(x,class_icons)
+    lapply(x,class_icons)
   } else {
     if (identical(x, "continuous")) {
       shiny::icon("calculator")
