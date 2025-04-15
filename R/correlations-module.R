@@ -47,7 +47,7 @@ data_correlations_server <- function(id,
           out <- data()
         }
         # out |> dplyr::mutate(dplyr::across(tidyselect::everything(),as.numeric))
-        sapply(data,as.numeric)
+        sapply(out,as.numeric)
         # as.numeric()
       })
 

@@ -10,7 +10,7 @@
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'Version: 25.4.3.250415_1539'
+app_version <- function()'Version: 25.4.3.250415_1627'
 
 
 ########
@@ -208,7 +208,7 @@ data_correlations_server <- function(id,
           out <- data()
         }
         # out |> dplyr::mutate(dplyr::across(tidyselect::everything(),as.numeric))
-        sapply(data,as.numeric)
+        sapply(out,as.numeric)
         # as.numeric()
       })
 
@@ -2394,9 +2394,12 @@ type_icons <- function(x) {
       shiny::icon("toggle-off")
     } else if (identical(x,"datetime")) {
       shiny::icon("calendar-days")
+    } else if (identical(x,"id")) {
+      shiny::icon("id-card")
     } else {
       shiny::icon("table")
-    }}
+    }
+    }
 }
 
 
