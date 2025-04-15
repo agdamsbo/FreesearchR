@@ -2,7 +2,11 @@
 ##
 
 test_that("Creates correct table",{
+  ## This is by far the easiest way to test all functions. Based on examples.
   expect_snapshot(create_baseline(mtcars,by.var = "gear", add.p = "yes" == "yes",add.overall = TRUE, theme = "lancet"))
+  expect_snapshot(create_baseline(mtcars,by.var = "none", add.p = FALSE,add.overall = FALSE, theme = "lancet"))
+  expect_snapshot(create_baseline(mtcars,by.var = "test", add.p = FALSE,add.overall = FALSE, theme = "jama"))
+  expect_snapshot(create_baseline(default_parsing(mtcars),by.var = "am", add.p = FALSE,add.overall = FALSE, theme = "nejm"))
 })
 
 test_that("Creates table", {

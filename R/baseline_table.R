@@ -12,9 +12,6 @@
 #' mtcars |> baseline_table()
 #' mtcars |> baseline_table(fun.args = list(by = "gear"))
 baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, vars = NULL) {
-  if (!is.null(vars)) {
-    data <- data |> dplyr::select(dplyr::all_of(vars))
-  }
 
   out <- do.call(fun, c(list(data = data), fun.args))
   return(out)
@@ -35,7 +32,8 @@ baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, 
 #'
 #' @examples
 #' mtcars |> create_baseline(by.var = "gear", add.p = "yes" == "yes")
-create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALSE, theme=c("jama", "lancet", "nejm", "qjecon")) {
+#' create_baseline(default_parsing(mtcars), by.var = "am", add.p = FALSE, add.overall = FALSE, theme = "lancet")
+create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALSE, theme = c("jama", "lancet", "nejm", "qjecon")) {
   theme <- match.arg(theme)
 
   if (by.var == "none" | !by.var %in% names(data)) {
@@ -53,14 +51,18 @@ create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALS
 
   gtsummary::theme_gtsummary_journal(journal = theme)
 
-  out <- data |>
-    baseline_table(
-      fun.args =
-        list(
-          by = by.var,
-          ...
-        )
-    )
+  args <- list(...)
+
+  parameters <- list(
+    data = data,
+    fun.args = list(by = by.var, ...)
+  )
+
+  out <- do.call(
+    baseline_table,
+    parameters
+  )
+
 
   if (!is.null(by.var)) {
     if (isTRUE(add.overall)) {

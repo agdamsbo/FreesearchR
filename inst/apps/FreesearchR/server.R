@@ -366,14 +366,13 @@ server <- function(input, output, session) {
     )
   })
 
-  shiny::observeEvent(list(
-    input$column_filter # ,
-    # rv$data
-  ), {
-    shiny::req(input$column_filter)
+  shiny::observe({
+    # shiny::req(input$column_filter)
     out <- data_type_filter(rv$data, input$column_filter)
     rv$data_variables <- out
-    rv$code$variables <- attr(out, "code")
+    if (!is.null(input$column_filter)) {
+      rv$code$variables <- attr(out, "code")
+    }
     # rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
   })
 
@@ -530,7 +529,7 @@ server <- function(input, output, session) {
       inputId = "strat_var",
       selected = "none",
       label = "Select variable to stratify baseline",
-      data = rv$data_filtered,
+      data = shiny::reactive(rv$data_filtered)(),
       col_subset = c(
         "none",
         names(rv$data_filtered)[unlist(lapply(rv$data_filtered, data_type)) %in% c("dichotomous", "categorical", "ordinal")]

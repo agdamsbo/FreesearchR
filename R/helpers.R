@@ -112,6 +112,9 @@ read_input <- function(file, consider.na = c("NA", '""', "")) {
 #' @return list
 #' @export
 #'
+#' @examples
+#' argsstring2list("A=1:5,b=2:4")
+#'
 argsstring2list <- function(string) {
   eval(parse(text = paste0("list(", string, ")")))
 }
@@ -124,6 +127,9 @@ argsstring2list <- function(string) {
 #'
 #' @return data.frame
 #' @export
+#'
+#' @examples
+#' factorize(mtcars,names(mtcars))
 factorize <- function(data, vars) {
   if (!is.null(vars)) {
     data |>
@@ -244,28 +250,30 @@ default_parsing <- function(data) {
   # ) |> dplyr::bind_cols()
 }
 
-#' Remove NA labels
+#' Remove empty/NA attributes
 #'
 #' @param data data
 #'
-#' @returns data.frame
+#' @returns data of same class as input
 #' @export
 #'
 #' @examples
-#' ds <- mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label"))
+#' ds <- mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label")) |> dplyr::bind_cols()
 #' ds |>
-#'   remove_na_attr() |>
+#'   remove_empty_attr() |>
 #'   str()
-remove_na_attr <- function(data, attr = "label") {
-  out <- data |> lapply(\(.x){
-    ls <- REDCapCAST::get_attr(data = .x, attr = attr)
-    if (is.na(ls) | ls == "") {
-      attr(x = .x, which = attr) <- NULL
-    }
-    .x
-  })
-
-  dplyr::bind_cols(out)
+#'  mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label")) |> remove_empty_attr() |>
+#'   str()
+#'
+remove_empty_attr <- function(data) {
+  if (is.data.frame(data)){
+    data |> lapply(remove_empty_attr) |> dplyr::bind_cols()
+  } else if (is.list(data)){
+    data |> lapply(remove_empty_attr)
+  }else{
+  attributes(data)[is.na(attributes(data))] <- NULL
+  data
+  }
 }
 
 #' Removes columns with completenes below cutoff
@@ -368,17 +376,26 @@ data_description <- function(data, data_text = "Data") {
 #' @export
 #'
 #' @examples
-#' default_parsing(mtcars) |> data_type_filter(type=c("categorical","continuous")) |> attributes()
+#' default_parsing(mtcars) |>
+#'   data_type_filter(type = c("categorical", "continuous")) |>
+#'   attributes()
+#' default_parsing(mtcars) |>
+#'   data_type_filter(type = NULL) |>
+#'   attributes()
 #' \dontrun{
-#' default_parsing(mtcars) |> data_type_filter(type=c("test","categorical","continuous"))
+#' default_parsing(mtcars) |> data_type_filter(type = c("test", "categorical", "continuous"))
 #' }
-data_type_filter <- function(data,type){
+data_type_filter <- function(data, type) {
   ## Please ensure to only provide recognised data types
   assertthat::assert_that(all(type %in% data_types()))
 
-  out <- data[data_type(data) %in% type]
-  code <- rlang::call2("data_type_filter",!!!list(type=type),.ns = "FreesearchR")
-  attr(out, "code") <- code
+  if (!is.null(type)) {
+    out <- data[data_type(data) %in% type]
+    code <- rlang::call2("data_type_filter", !!!list(type = type), .ns = "FreesearchR")
+    attr(out, "code") <- code
+  } else {
+    out <- data
+  }
   out
 }
 
@@ -488,7 +505,7 @@ pipe_string <- function(data, collapse = "|>\n") {
 #'
 #' @examples
 #' list(
-#' as.symbol(paste0("mtcars$","mpg")),
+#'   as.symbol(paste0("mtcars$", "mpg")),
 #'   rlang::call2(.fn = "select", !!!list(c("cyl", "disp")), .ns = "dplyr"),
 #'   rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
 #' ) |>
@@ -502,7 +519,7 @@ expression_string <- function(data, assign.str = "") {
 }
 
 
-#' Very simple function to remove nested lists, lik ewhen uploading .rds
+#' Very simple function to remove nested lists, like when uploading .rds
 #'
 #' @param data data
 #'
@@ -548,19 +565,6 @@ set_column_label <- function(data, label, overwrite = TRUE) {
     }
   }) |> dplyr::bind_cols(.name_repair = "unique_quiet")
 }
-
-#' Remove empty/NA attributes
-#'
-#' @param data data
-#'
-#' @returns data of same class as input
-#' @export
-#'
-remove_empty_attr <- function(data) {
-  attributes(data)[is.na(attributes(data))] <- NULL
-  data
-}
-
 
 
 #' Append a column to a data.frame

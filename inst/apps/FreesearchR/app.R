@@ -10,7 +10,7 @@
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'Version: 25.4.3.250414_1045'
+app_version <- function()'Version: 25.4.3.250414_1342'
 
 
 ########
@@ -31,9 +31,6 @@ app_version <- function()'Version: 25.4.3.250414_1045'
 #' mtcars |> baseline_table()
 #' mtcars |> baseline_table(fun.args = list(by = "gear"))
 baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, vars = NULL) {
-  if (!is.null(vars)) {
-    data <- data |> dplyr::select(dplyr::all_of(vars))
-  }
 
   out <- do.call(fun, c(list(data = data), fun.args))
   return(out)
@@ -54,7 +51,8 @@ baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, 
 #'
 #' @examples
 #' mtcars |> create_baseline(by.var = "gear", add.p = "yes" == "yes")
-create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALSE, theme=c("jama", "lancet", "nejm", "qjecon")) {
+#' create_baseline(default_parsing(mtcars), by.var = "am", add.p = FALSE, add.overall = FALSE, theme = "lancet")
+create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALSE, theme = c("jama", "lancet", "nejm", "qjecon")) {
   theme <- match.arg(theme)
 
   if (by.var == "none" | !by.var %in% names(data)) {
@@ -72,14 +70,18 @@ create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALS
 
   gtsummary::theme_gtsummary_journal(journal = theme)
 
-  out <- data |>
-    baseline_table(
-      fun.args =
-        list(
-          by = by.var,
-          ...
-        )
-    )
+  args <- list(...)
+
+  parameters <- list(
+    data = data,
+    fun.args = list(by = by.var, ...)
+  )
+
+  out <- do.call(
+    baseline_table,
+    parameters
+  )
+
 
   if (!is.null(by.var)) {
     if (isTRUE(add.overall)) {
@@ -551,8 +553,10 @@ cut_var.hms <- function(x, breaks, ...) {
 #' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(2)
 #' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = "weekday")
 #' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = "month_only")
+#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks=NULL,format = "%A-%H")
 cut_var.POSIXt <- function(x, breaks, right = FALSE, include.lowest = TRUE, start.on.monday = TRUE, ...) {
   breaks_o <- breaks
+  args <- list(...)
   # browser()
   if (is.numeric(breaks)) {
     breaks <- quantile(
@@ -564,16 +568,23 @@ cut_var.POSIXt <- function(x, breaks, right = FALSE, include.lowest = TRUE, star
     )
   }
 
-  if (identical(breaks, "weekday")) {
-    days <- c(
-      "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
-      "Sunday"
-    )
-    if (!start.on.monday) {
-      days <- days[c(7, 1:6)]
+  if ("format" %in% names(args)){
+    assertthat::assert_that(is.character(args$format))
+    out <- forcats::as_factor(format(x,format=args$format))
+  } else if (identical(breaks, "weekday")) {
+    ## This is
+    ds <- as.Date(1:7) |>
+      (\(.x){
+        sort_by(format(.x,"%A"),as.numeric(format(.x,"%w")))
+      })()
+
+    if (start.on.monday) {
+      ds <- ds[c(7, 1:6)]
     }
-    out <- factor(weekdays(x), levels = days) |> forcats::fct_drop()
+    out <- factor(weekdays(x), levels = ds) |> forcats::fct_drop()
   } else if (identical(breaks, "month_only")) {
+    ## Simplest way to create a vector of all months in order
+    ## which will also follow the locale of the machine
     ms <- paste0("1970-", 1:12, "-01") |>
       as.Date() |>
       months()
@@ -614,15 +625,19 @@ cut_var.POSIXct <- cut_var.POSIXt
 #' as.Date(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(2)
 #' as.Date(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = "weekday")
 cut_var.Date <- function(x, breaks, start.on.monday = TRUE, ...) {
-  if (identical(breaks, "weekday")) {
-    days <- c(
-      "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
-      "Sunday"
-    )
-    if (!start.on.monday) {
-      days <- days[c(7, 1:6)]
+  if ("format" %in% names(args)){
+    assertthat::assert_that(is.character(args$format))
+    out <- forcats::as_factor(format(x,format=args$format))
+  } else if (identical(breaks, "weekday")) {
+    ds <- as.Date(1:7) |>
+      (\(.x){
+        sort_by(format(.x,"%A"),as.numeric(format(.x,"%w")))
+      })()
+
+    if (start.on.monday) {
+      ds <- ds[c(7, 1:6)]
     }
-    out <- factor(weekdays(x), levels = days) |> forcats::fct_drop()
+    out <- factor(weekdays(x), levels = ds) |> forcats::fct_drop()
   } else if (identical(breaks, "month_only")) {
     ms <- paste0("1970-", 1:12, "-01") |>
       as.Date() |>
@@ -2471,6 +2486,9 @@ read_input <- function(file, consider.na = c("NA", '""', "")) {
 #' @return list
 #' @export
 #'
+#' @examples
+#' argsstring2list("A=1:5,b=2:4")
+#'
 argsstring2list <- function(string) {
   eval(parse(text = paste0("list(", string, ")")))
 }
@@ -2483,6 +2501,9 @@ argsstring2list <- function(string) {
 #'
 #' @return data.frame
 #' @export
+#'
+#' @examples
+#' factorize(mtcars,names(mtcars))
 factorize <- function(data, vars) {
   if (!is.null(vars)) {
     data |>
@@ -2603,28 +2624,30 @@ default_parsing <- function(data) {
   # ) |> dplyr::bind_cols()
 }
 
-#' Remove NA labels
+#' Remove empty/NA attributes
 #'
 #' @param data data
 #'
-#' @returns data.frame
+#' @returns data of same class as input
 #' @export
 #'
 #' @examples
-#' ds <- mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label"))
+#' ds <- mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label")) |> dplyr::bind_cols()
 #' ds |>
-#'   remove_na_attr() |>
+#'   remove_empty_attr() |>
 #'   str()
-remove_na_attr <- function(data, attr = "label") {
-  out <- data |> lapply(\(.x){
-    ls <- REDCapCAST::get_attr(data = .x, attr = attr)
-    if (is.na(ls) | ls == "") {
-      attr(x = .x, which = attr) <- NULL
-    }
-    .x
-  })
-
-  dplyr::bind_cols(out)
+#'  mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label")) |> remove_empty_attr() |>
+#'   str()
+#'
+remove_empty_attr <- function(data) {
+  if (is.data.frame(data)){
+    data |> lapply(remove_empty_attr) |> dplyr::bind_cols()
+  } else if (is.list(data)){
+    data |> lapply(remove_empty_attr)
+  }else{
+  attributes(data)[is.na(attributes(data))] <- NULL
+  data
+  }
 }
 
 #' Removes columns with completenes below cutoff
@@ -2727,17 +2750,26 @@ data_description <- function(data, data_text = "Data") {
 #' @export
 #'
 #' @examples
-#' default_parsing(mtcars) |> data_type_filter(type=c("categorical","continuous")) |> attributes()
+#' default_parsing(mtcars) |>
+#'   data_type_filter(type = c("categorical", "continuous")) |>
+#'   attributes()
+#' default_parsing(mtcars) |>
+#'   data_type_filter(type = NULL) |>
+#'   attributes()
 #' \dontrun{
-#' default_parsing(mtcars) |> data_type_filter(type=c("test","categorical","continuous"))
+#' default_parsing(mtcars) |> data_type_filter(type = c("test", "categorical", "continuous"))
 #' }
-data_type_filter <- function(data,type){
+data_type_filter <- function(data, type) {
   ## Please ensure to only provide recognised data types
   assertthat::assert_that(all(type %in% data_types()))
 
-  out <- data[data_type(data) %in% type]
-  code <- rlang::call2("data_type_filter",!!!list(type=type),.ns = "FreesearchR")
-  attr(out, "code") <- code
+  if (!is.null(type)) {
+    out <- data[data_type(data) %in% type]
+    code <- rlang::call2("data_type_filter", !!!list(type = type), .ns = "FreesearchR")
+    attr(out, "code") <- code
+  } else {
+    out <- data
+  }
   out
 }
 
@@ -2847,7 +2879,7 @@ pipe_string <- function(data, collapse = "|>\n") {
 #'
 #' @examples
 #' list(
-#' as.symbol(paste0("mtcars$","mpg")),
+#'   as.symbol(paste0("mtcars$", "mpg")),
 #'   rlang::call2(.fn = "select", !!!list(c("cyl", "disp")), .ns = "dplyr"),
 #'   rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
 #' ) |>
@@ -2861,7 +2893,7 @@ expression_string <- function(data, assign.str = "") {
 }
 
 
-#' Very simple function to remove nested lists, lik ewhen uploading .rds
+#' Very simple function to remove nested lists, like when uploading .rds
 #'
 #' @param data data
 #'
@@ -2907,19 +2939,6 @@ set_column_label <- function(data, label, overwrite = TRUE) {
     }
   }) |> dplyr::bind_cols(.name_repair = "unique_quiet")
 }
-
-#' Remove empty/NA attributes
-#'
-#' @param data data
-#'
-#' @returns data of same class as input
-#' @export
-#'
-remove_empty_attr <- function(data) {
-  attributes(data)[is.na(attributes(data))] <- NULL
-  data
-}
-
 
 
 #' Append a column to a data.frame
@@ -9046,14 +9065,13 @@ server <- function(input, output, session) {
     )
   })
 
-  shiny::observeEvent(list(
-    input$column_filter # ,
-    # rv$data
-  ), {
-    shiny::req(input$column_filter)
+  shiny::observe({
+    # shiny::req(input$column_filter)
     out <- data_type_filter(rv$data, input$column_filter)
     rv$data_variables <- out
-    rv$code$variables <- attr(out, "code")
+    if (!is.null(input$column_filter)) {
+      rv$code$variables <- attr(out, "code")
+    }
     # rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
   })
 
@@ -9210,7 +9228,7 @@ server <- function(input, output, session) {
       inputId = "strat_var",
       selected = "none",
       label = "Select variable to stratify baseline",
-      data = rv$data_filtered,
+      data = shiny::reactive(rv$data_filtered)(),
       col_subset = c(
         "none",
         names(rv$data_filtered)[unlist(lapply(rv$data_filtered, data_type)) %in% c("dichotomous", "categorical", "ordinal")]
