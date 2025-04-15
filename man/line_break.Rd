@@ -4,7 +4,7 @@
 \alias{line_break}
 \title{Line breaking at given number of characters for nicely plotting labels}
 \usage{
-line_break(data, lineLength = 20, fixed = FALSE)
+line_break(data, lineLength = 20, force = FALSE)
 }
 \arguments{
 \item{data}{string}
@@ -22,5 +22,5 @@ Line breaking at given number of characters for nicely plotting labels
 }
 \examples{
 "Lorem ipsum... you know the routine" |> line_break()
-paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(fixed = TRUE)
+paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(force = TRUE)
 }

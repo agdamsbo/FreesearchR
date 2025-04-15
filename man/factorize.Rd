@@ -17,3 +17,6 @@ data.frame
 \description{
 Factorize variables in data.frame
 }
+\examples{
+factorize(mtcars,names(mtcars))
+}

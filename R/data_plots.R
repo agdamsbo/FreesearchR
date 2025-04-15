@@ -88,7 +88,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
     ),
     bslib::nav_panel(
       title = tab_title,
-      shiny::plotOutput(ns("plot"),height = "70vh"),
+      shiny::plotOutput(ns("plot"), height = "70vh"),
       shiny::tags$br(),
       shiny::tags$br(),
       shiny::htmlOutput(outputId = ns("code_plot"))
@@ -115,7 +115,7 @@ data_visuals_server <- function(id,
       rv <- shiny::reactiveValues(
         plot.params = NULL,
         plot = NULL,
-        code=NULL
+        code = NULL
       )
 
       # ## --- New attempt
@@ -216,7 +216,7 @@ data_visuals_server <- function(id,
         shiny::req(data())
         columnSelectInput(
           inputId = ns("primary"),
-          col_subset=names(data())[sapply(data(),data_type)!="text"],
+          col_subset = names(data())[sapply(data(), data_type) != "text"],
           data = data,
           placeholder = "Select variable",
           label = "Response variable",
@@ -318,37 +318,30 @@ data_visuals_server <- function(id,
 
       shiny::observeEvent(input$act_plot,
         {
-          if (NROW(data())>0){
-          tryCatch(
-            {
-              parameters <- list(
-                type = rv$plot.params()[["fun"]],
-                x = input$primary,
-                y = input$secondary,
-                z = input$tertiary
-              )
+          if (NROW(data()) > 0) {
+            tryCatch(
+              {
+                parameters <- list(
+                  type = rv$plot.params()[["fun"]],
+                  pri = input$primary,
+                  sec = input$secondary,
+                  ter = input$tertiary
+                )
 
-              shiny::withProgress(message = "Drawing the plot. Hold tight for a moment..", {
-                rv$plot <- rlang::exec(create_plot, !!!append_list(data(),parameters,"data"))
-              # rv$plot <- create_plot(
-              #   data = data(),
-              #   type = rv$plot.params()[["fun"]],
-              #   x = input$primary,
-              #   y = input$secondary,
-              #   z = input$tertiary
-              # )
-              })
+                shiny::withProgress(message = "Drawing the plot. Hold tight for a moment..", {
+                  rv$plot <- rlang::exec(create_plot, !!!append_list(data(), parameters, "data"))
+                })
 
-              rv$code <- glue::glue("FreesearchR::create_plot(data,{list2str(parameters)})")
-
-            },
-            # warning = function(warn) {
-            #   showNotification(paste0(warn), type = "warning")
-            # },
-            error = function(err) {
-              showNotification(paste0(err), type = "err")
-            }
-          )}
+                rv$code <- glue::glue("FreesearchR::create_plot(data,{list2str(parameters)})")
+              },
+              # warning = function(warn) {
+              #   showNotification(paste0(warn), type = "warning")
+              # },
+              error = function(err) {
+                showNotification(paste0(err), type = "err")
+              }
+            )
+          }
         },
         ignoreInit = TRUE
       )
@@ -415,7 +408,7 @@ all_but <- function(data, ...) {
 #'
 #' @examples
 #' default_parsing(mtcars) |> subset_types("ordinal")
-#' default_parsing(mtcars) |> subset_types(c("dichotomous", "ordinal" ,"categorical"))
+#' default_parsing(mtcars) |> subset_types(c("dichotomous", "ordinal", "categorical"))
 #' #' default_parsing(mtcars) |> subset_types("factor",class)
 subset_types <- function(data, types, type.fun = data_type) {
   data[sapply(data, type.fun) %in% types]
@@ -450,21 +443,21 @@ supported_plots <- function() {
       fun = "plot_hbars",
       descr = "Stacked horizontal bars",
       note = "A classical way of visualising the distribution of an ordinal scale like the modified Ranking Scale and known as Grotta bars",
-      primary.type = c("dichotomous", "ordinal" ,"categorical"),
-      secondary.type = c("dichotomous", "ordinal" ,"categorical"),
+      primary.type = c("dichotomous", "ordinal", "categorical"),
+      secondary.type = c("dichotomous", "ordinal", "categorical"),
       secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
+      tertiary.type = c("dichotomous", "ordinal", "categorical"),
       secondary.extra = "none"
     ),
     plot_violin = list(
       fun = "plot_violin",
       descr = "Violin plot",
       note = "A modern alternative to the classic boxplot to visualise data distribution",
-      primary.type = c("datatime","continuous", "dichotomous", "ordinal" ,"categorical"),
-      secondary.type = c("dichotomous", "ordinal" ,"categorical"),
+      primary.type = c("datatime", "continuous", "dichotomous", "ordinal", "categorical"),
+      secondary.type = c("dichotomous", "ordinal", "categorical"),
       secondary.multi = FALSE,
       secondary.extra = "none",
-      tertiary.type = c("dichotomous", "ordinal" ,"categorical")
+      tertiary.type = c("dichotomous", "ordinal", "categorical")
     ),
     # plot_ridge = list(
     #   descr = "Ridge plot",
@@ -478,30 +471,30 @@ supported_plots <- function() {
       fun = "plot_sankey",
       descr = "Sankey plot",
       note = "A way of visualising change between groups",
-      primary.type = c("dichotomous", "ordinal" ,"categorical"),
-      secondary.type = c("dichotomous", "ordinal" ,"categorical"),
+      primary.type = c("dichotomous", "ordinal", "categorical"),
+      secondary.type = c("dichotomous", "ordinal", "categorical"),
       secondary.multi = FALSE,
       secondary.extra = NULL,
-      tertiary.type = c("dichotomous", "ordinal" ,"categorical")
+      tertiary.type = c("dichotomous", "ordinal", "categorical")
     ),
     plot_scatter = list(
       fun = "plot_scatter",
       descr = "Scatter plot",
       note = "A classic way of showing the association between to variables",
-      primary.type = c("datatime","continuous"),
-      secondary.type = c("datatime","continuous", "ordinal" ,"categorical"),
+      primary.type = c("datatime", "continuous"),
+      secondary.type = c("datatime", "continuous", "ordinal", "categorical"),
       secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
+      tertiary.type = c("dichotomous", "ordinal", "categorical"),
       secondary.extra = NULL
     ),
     plot_box = list(
       fun = "plot_box",
       descr = "Box plot",
       note = "A classic way to plot data distribution by groups",
-      primary.type = c("datatime","continuous", "dichotomous", "ordinal" ,"categorical"),
-      secondary.type = c("dichotomous", "ordinal" ,"categorical"),
+      primary.type = c("datatime", "continuous", "dichotomous", "ordinal", "categorical"),
+      secondary.type = c("dichotomous", "ordinal", "categorical"),
       secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
+      tertiary.type = c("dichotomous", "ordinal", "categorical"),
       secondary.extra = "none"
     ),
     plot_euler = list(
@@ -512,7 +505,7 @@ supported_plots <- function() {
       secondary.type = "dichotomous",
       secondary.multi = TRUE,
       secondary.max = 4,
-      tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
+      tertiary.type = c("dichotomous", "ordinal", "categorical"),
       secondary.extra = NULL
     )
   )
@@ -591,9 +584,9 @@ get_plot_options <- function(data) {
 #' Wrapper to create plot based on provided type
 #'
 #' @param data data.frame
-#' @param x primary variable
-#' @param y secondary variable
-#' @param z tertiary variable
+#' @param pri primary variable
+#' @param sec secondary variable
+#' @param ter tertiary variable
 #' @param type plot type (derived from possible_plots() and matches custom function)
 #' @param ... ignored for now
 #'
@@ -603,20 +596,36 @@ get_plot_options <- function(data) {
 #' @export
 #'
 #' @examples
-#' create_plot(mtcars, "plot_violin", "mpg", "cyl")
-create_plot <- function(data, type, x, y, z = NULL, ...) {
-  if (!any(y %in% names(data))) {
-    y <- NULL
+#' create_plot(mtcars, "plot_violin", "mpg", "cyl") |> attributes()
+create_plot <- function(data, type, pri, sec, ter = NULL, ...) {
+  if (!is.null(sec)) {
+    if (!any(sec %in% names(data))) {
+      sec <- NULL
+    }
   }
 
-  if (!z %in% names(data)) {
-    z <- NULL
+  if (!is.null(ter)) {
+    if (!ter %in% names(data)) {
+      ter <- NULL
+    }
   }
 
-  do.call(
-    type,
-    list(data, x, y, z, ...)
+  parameters <- list(
+    pri = pri,
+    sec = sec,
+    ter = ter,
+    ...
   )
+
+  out <- do.call(
+    type,
+    modifyList(parameters,list(data=data))
+  )
+
+  code <- rlang::call2(type,!!!parameters,.ns = "FreesearchR")
+
+  attr(out,"code") <- code
+  out
 }
 
 #' Print label, and if missing print variable name
@@ -666,8 +675,8 @@ get_label <- function(data, var = NULL) {
 #'
 #' @examples
 #' "Lorem ipsum... you know the routine" |> line_break()
-#' paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(fixed = TRUE)
-line_break <- function(data, lineLength = 20, fixed = FALSE) {
+#' paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(force = TRUE)
+line_break <- function(data, lineLength = 20, force = FALSE) {
   if (isTRUE(force)) {
     gsub(paste0("(.{1,", lineLength, "})(\\s|[[:alnum:]])"), "\\1\n", data)
   } else {
@@ -698,7 +707,7 @@ wrap_plot_list <- function(data, tag_levels = NULL) {
             .x
           }
         })() |>
-        allign_axes() |>
+        align_axes() |>
         patchwork::wrap_plots(guides = "collect", axes = "collect", axis_titles = "collect")
       if (!is.null(tag_levels)) {
         out <- out + patchwork::plot_annotation(tag_levels = tag_levels)
@@ -713,19 +722,21 @@ wrap_plot_list <- function(data, tag_levels = NULL) {
 }
 
 
-#' Alligns axes between plots
+#' Aligns axes between plots
 #'
 #' @param ... ggplot2 objects or list of ggplot2 objects
 #'
 #' @returns list of ggplot2 objects
 #' @export
 #'
-allign_axes <- function(...) {
+align_axes <- function(...) {
   # https://stackoverflow.com/questions/62818776/get-axis-limits-from-ggplot-object
   # https://github.com/thomasp85/patchwork/blob/main/R/plot_multipage.R#L150
   if (ggplot2::is.ggplot(..1)) {
+    ## Assumes list of ggplots
     p <- list(...)
   } else if (is.list(..1)) {
+    ## Assumes list with list of ggplots
     p <- ..1
   } else {
     cli::cli_abort("Can only align {.cls ggplot} objects or a list of them")
@@ -737,7 +748,7 @@ allign_axes <- function(...) {
 
   suppressWarnings({
     p |> purrr::map(~ .x + ggplot2::xlim(xr) + ggplot2::ylim(yr))
-    })
+  })
 }
 
 #' Extract and clean axis ranges

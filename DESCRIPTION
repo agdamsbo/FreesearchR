@@ -80,7 +80,8 @@ Suggests:
     rsconnect,
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    shinytest
 URL: https://github.com/agdamsbo/FreesearchR, https://agdamsbo.github.io/FreesearchR/
 BugReports: https://github.com/agdamsbo/FreesearchR/issues
 VignetteBuilder: knitr

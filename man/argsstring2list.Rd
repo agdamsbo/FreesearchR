@@ -15,3 +15,7 @@ list
 \description{
 Idea from the answer: https://stackoverflow.com/a/62979238
 }
+\examples{
+argsstring2list("A=1:5,b=2:4")
+
+}

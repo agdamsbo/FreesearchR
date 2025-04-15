@@ -6,20 +6,24 @@
 #' @name data-plots
 #'
 #' @examples
-#' mtcars |> plot_scatter(x = "mpg", y = "wt")
-plot_scatter <- function(data, x, y, z = NULL) {
-  if (is.null(z)) {
+#' mtcars |> plot_scatter(pri = "mpg", sec = "wt")
+plot_scatter <- function(data, pri, sec, ter = NULL) {
+  if (is.null(ter)) {
     rempsyc::nice_scatter(
       data = data,
-      predictor = y,
-      response = x, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
+      predictor = sec,
+      response = pri,
+      xtitle = get_label(data, var = sec),
+      ytitle = get_label(data, var = pri)
     )
   } else {
     rempsyc::nice_scatter(
       data = data,
-      predictor = y,
-      response = x,
-      group = z, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
+      predictor = sec,
+      response = pri,
+      group = ter,
+      xtitle = get_label(data, var = sec),
+      ytitle = get_label(data, var = pri)
     )
   }
 }

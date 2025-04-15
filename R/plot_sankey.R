@@ -15,42 +15,42 @@
 #'   last = sample(c(TRUE, FALSE, FALSE), 100, TRUE)
 #' ) |>
 #'   sankey_ready("first", "last")
-sankey_ready <- function(data, x, y, numbers = "count", ...) {
+sankey_ready <- function(data, pri, sec, numbers = "count", ...) {
   ## TODO: Ensure ordering x and y
 
   ## Ensure all are factors
-  data[c(x, y)] <- data[c(x, y)] |>
+  data[c(pri, sec)] <- data[c(pri, sec)] |>
     dplyr::mutate(dplyr::across(!dplyr::where(is.factor), forcats::as_factor))
 
-  out <- dplyr::count(data, !!dplyr::sym(x), !!dplyr::sym(y))
+  out <- dplyr::count(data, !!dplyr::sym(pri), !!dplyr::sym(sec))
 
   out <- out |>
-    dplyr::group_by(!!dplyr::sym(x)) |>
+    dplyr::group_by(!!dplyr::sym(pri)) |>
     dplyr::mutate(gx.sum = sum(n)) |>
     dplyr::ungroup() |>
-    dplyr::group_by(!!dplyr::sym(y)) |>
+    dplyr::group_by(!!dplyr::sym(sec)) |>
     dplyr::mutate(gy.sum = sum(n)) |>
     dplyr::ungroup()
 
   if (numbers == "count") {
     out <- out |> dplyr::mutate(
-      lx = factor(paste0(!!dplyr::sym(x), "\n(n=", gx.sum, ")")),
-      ly = factor(paste0(!!dplyr::sym(y), "\n(n=", gy.sum, ")"))
+      lx = factor(paste0(!!dplyr::sym(pri), "\n(n=", gx.sum, ")")),
+      ly = factor(paste0(!!dplyr::sym(sec), "\n(n=", gy.sum, ")"))
     )
   } else if (numbers == "percentage") {
     out <- out |> dplyr::mutate(
-      lx = factor(paste0(!!dplyr::sym(x), "\n(", round((gx.sum / sum(n)) * 100, 1), "%)")),
-      ly = factor(paste0(!!dplyr::sym(y), "\n(", round((gy.sum / sum(n)) * 100, 1), "%)"))
+      lx = factor(paste0(!!dplyr::sym(pri), "\n(", round((gx.sum / sum(n)) * 100, 1), "%)")),
+      ly = factor(paste0(!!dplyr::sym(sec), "\n(", round((gy.sum / sum(n)) * 100, 1), "%)"))
     )
   }
 
-  if (is.factor(data[[x]])) {
-    index <- match(levels(data[[x]]), str_remove_last(levels(out$lx), "\n"))
+  if (is.factor(data[[pri]])) {
+    index <- match(levels(data[[pri]]), str_remove_last(levels(out$lx), "\n"))
     out$lx <- factor(out$lx, levels = levels(out$lx)[index])
   }
 
-  if (is.factor(data[[y]])) {
-    index <- match(levels(data[[y]]), str_remove_last(levels(out$ly), "\n"))
+  if (is.factor(data[[sec]])) {
+    index <- match(levels(data[[sec]]), str_remove_last(levels(out$ly), "\n"))
     out$ly <- factor(out$ly, levels = levels(out$ly)[index])
   }
 
@@ -75,15 +75,15 @@ str_remove_last <- function(data, pattern = "\n") {
 #' ds |> plot_sankey("first", "last")
 #' ds |> plot_sankey("first", "last", color.group = "y")
 #' ds |> plot_sankey("first", "last", z = "g", color.group = "y")
-plot_sankey <- function(data, x, y, z = NULL, color.group = "x", colors = NULL) {
-  if (!is.null(z)) {
-    ds <- split(data, data[z])
+plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "x", colors = NULL) {
+  if (!is.null(ter)) {
+    ds <- split(data, data[ter])
   } else {
     ds <- list(data)
   }
 
   out <- lapply(ds, \(.ds){
-    plot_sankey_single(.ds, x = x, y = y, color.group = color.group, colors = colors)
+    plot_sankey_single(.ds, x = pri, y = sec, color.group = color.group, colors = colors)
   })
 
   patchwork::wrap_plots(out)
@@ -112,10 +112,10 @@ default_theme <- function() {
 #'   first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)),
 #'   last = sample(c(TRUE, FALSE, FALSE), 100, TRUE)
 #' ) |>
-#'   plot_sankey_single("first", "last", color.group = "x")
-plot_sankey_single <- function(data, x, y, color.group = c("x", "y"), colors = NULL, ...) {
+#'   plot_sankey_single("first", "last", color.group = "pri")
+plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), colors = NULL, ...) {
   color.group <- match.arg(color.group)
-  data <- data |> sankey_ready(x = x, y = y, ...)
+  data <- data |> sankey_ready(pri = pri, sec = sec, ...)
 
   library(ggalluvial)
 
@@ -123,13 +123,13 @@ plot_sankey_single <- function(data, x, y, color.group = c("x", "y"), colors = N
   box.color <- "#1E4B66"
 
   if (is.null(colors)) {
-    if (color.group == "y") {
-      main.colors <- viridisLite::viridis(n = length(levels(data[[y]])))
-      secondary.colors <- rep(na.color, length(levels(data[[x]])))
+    if (color.group == "sec") {
+      main.colors <- viridisLite::viridis(n = length(levels(data[[sec]])))
+      secondary.colors <- rep(na.color, length(levels(data[[pri]])))
       label.colors <- Reduce(c, lapply(list(secondary.colors, rev(main.colors)), contrast_text))
     } else {
-      main.colors <- viridisLite::viridis(n = length(levels(data[[x]])))
-      secondary.colors <- rep(na.color, length(levels(data[[y]])))
+      main.colors <- viridisLite::viridis(n = length(levels(data[[pri]])))
+      secondary.colors <- rep(na.color, length(levels(data[[sec]])))
       label.colors <- Reduce(c, lapply(list(rev(main.colors), secondary.colors), contrast_text))
     }
     colors <- c(na.color, main.colors, secondary.colors)
@@ -137,33 +137,33 @@ plot_sankey_single <- function(data, x, y, color.group = c("x", "y"), colors = N
     label.colors <- contrast_text(colors)
   }
 
-  group_labels <- c(get_label(data, x), get_label(data, y)) |>
+  group_labels <- c(get_label(data, pri), get_label(data, sec)) |>
     sapply(line_break) |>
     unname()
 
   p <- ggplot2::ggplot(data, ggplot2::aes(y = n, axis1 = lx, axis2 = ly))
 
-  if (color.group == "y") {
+  if (color.group == "sec") {
     p <- p +
       ggalluvial::geom_alluvium(
-        ggplot2::aes(fill = !!dplyr::sym(y), color = !!dplyr::sym(y)),
+        ggplot2::aes(fill = !!dplyr::sym(sec), color = !!dplyr::sym(sec)),
         width = 1 / 16,
         alpha = .8,
         knot.pos = 0.4,
         curve_type = "sigmoid"
-      ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(y)),
+      ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(sec)),
         size = 2,
         width = 1 / 3.4
       )
   } else {
     p <- p +
       ggalluvial::geom_alluvium(
-        ggplot2::aes(fill = !!dplyr::sym(x), color = !!dplyr::sym(x)),
+        ggplot2::aes(fill = !!dplyr::sym(pri), color = !!dplyr::sym(pri)),
         width = 1 / 16,
         alpha = .8,
         knot.pos = 0.4,
         curve_type = "sigmoid"
-      ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(x)),
+      ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(pri)),
         size = 2,
         width = 1 / 3.4
       )

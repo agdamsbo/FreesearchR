@@ -6,13 +6,13 @@
 #' @name data-plots
 #'
 #' @examples
-#' mtcars |> plot_box(x = "mpg", y = "cyl", z = "gear")
+#' mtcars |> plot_box(pri = "mpg", sec = "cyl", ter = "gear")
 #' mtcars |>
 #'   default_parsing() |>
-#'   plot_box(x = "mpg", y = "cyl", z = "gear")
-plot_box <- function(data, x, y, z = NULL) {
-  if (!is.null(z)) {
-    ds <- split(data, data[z])
+#'   plot_box(pri = "mpg", sec = "cyl", ter = "gear")
+plot_box <- function(data, pri, sec, ter = NULL) {
+  if (!is.null(ter)) {
+    ds <- split(data, data[ter])
   } else {
     ds <- list(data)
   }
@@ -20,13 +20,12 @@ plot_box <- function(data, x, y, z = NULL) {
   out <- lapply(ds, \(.ds){
     plot_box_single(
       data = .ds,
-      x = x,
-      y = y
+      pri = pri,
+      sec = sec
     )
   })
 
   wrap_plot_list(out)
-  # patchwork::wrap_plots(out,guides = "collect")
 }
 
 
@@ -41,18 +40,18 @@ plot_box <- function(data, x, y, z = NULL) {
 #'
 #' @examples
 #' mtcars |> plot_box_single("mpg","cyl")
-plot_box_single <- function(data, x, y=NULL, seed = 2103) {
+plot_box_single <- function(data, pri, sec=NULL, seed = 2103) {
   set.seed(seed)
 
-  if (is.null(y)) {
-    y <- "All"
-    data[[y]] <- y
+  if (is.null(sec)) {
+    sec <- "All"
+    data[[y]] <- sec
   }
 
-  discrete <- !data_type(data[[y]]) %in% "continuous"
+  discrete <- !data_type(data[[sec]]) %in% "continuous"
 
   data |>
-    ggplot2::ggplot(ggplot2::aes(x = !!dplyr::sym(x), y = !!dplyr::sym(y), fill = !!dplyr::sym(y), group = !!dplyr::sym(y))) +
+    ggplot2::ggplot(ggplot2::aes(x = !!dplyr::sym(pri), y = !!dplyr::sym(sec), fill = !!dplyr::sym(sec), group = !!dplyr::sym(sec))) +
     ggplot2::geom_boxplot(linewidth = 1.8, outliers = FALSE) +
     ## THis could be optional in future
     ggplot2::geom_jitter(color = "black", size = 2, alpha = 0.9, width = 0.1, height = .5) +

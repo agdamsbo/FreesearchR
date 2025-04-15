@@ -15,3 +15,12 @@ data of same class as input
 \description{
 Remove empty/NA attributes
 }
+\examples{
+ds <- mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label")) |> dplyr::bind_cols()
+ds |>
+  remove_empty_attr() |>
+  str()
+ mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label")) |> remove_empty_attr() |>
+  str()
+
+}

@@ -6,10 +6,10 @@
 #' @name data-plots
 #'
 #' @examples
-#' mtcars |> plot_violin(x = "mpg", y = "cyl", z = "gear")
-plot_violin <- function(data, x, y, z = NULL) {
-  if (!is.null(z)) {
-    ds <- split(data, data[z])
+#' mtcars |> plot_violin(pri = "mpg", sec = "cyl", ter = "gear")
+plot_violin <- function(data, pri, sec, ter = NULL) {
+  if (!is.null(ter)) {
+    ds <- split(data, data[ter])
   } else {
     ds <- list(data)
   }
@@ -17,8 +17,10 @@ plot_violin <- function(data, x, y, z = NULL) {
   out <- lapply(ds, \(.ds){
     rempsyc::nice_violin(
       data = .ds,
-      group = y,
-      response = x, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
+      group = sec,
+      response = pri,
+      xtitle = get_label(data, var = sec),
+      ytitle = get_label(data, var = pri)
     )
   })
 

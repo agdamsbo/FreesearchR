@@ -18,8 +18,13 @@ data.frame
 Filter function to filter data set by variable type
 }
 \examples{
-default_parsing(mtcars) |> data_type_filter(type=c("categorical","continuous")) |> attributes()
+default_parsing(mtcars) |>
+  data_type_filter(type = c("categorical", "continuous")) |>
+  attributes()
+default_parsing(mtcars) |>
+  data_type_filter(type = NULL) |>
+  attributes()
 \dontrun{
-default_parsing(mtcars) |> data_type_filter(type=c("test","categorical","continuous"))
+default_parsing(mtcars) |> data_type_filter(type = c("test", "categorical", "continuous"))
 }
 }

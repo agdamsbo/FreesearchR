@@ -76,16 +76,16 @@ ggeulerr <- function(
 #'   D = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE)
 #' ) |> plot_euler("A", c("B", "C"), "D", seed = 4)
 #' mtcars |> plot_euler("vs", "am", seed = 1)
-plot_euler <- function(data, x, y, z = NULL, seed = 2103) {
+plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
   set.seed(seed = seed)
-  if (!is.null(z)) {
-    ds <- split(data, data[z])
+  if (!is.null(ter)) {
+    ds <- split(data, data[ter])
   } else {
     ds <- list(data)
   }
 
   out <- lapply(ds, \(.x){
-    .x[c(x, y)] |>
+    .x[c(pri, sec)] |>
       as.data.frame() |>
       plot_euler_single()
   })
@@ -95,7 +95,6 @@ plot_euler <- function(data, x, y, z = NULL, seed = 2103) {
   # patchwork::wrap_plots(out, guides = "collect")
 }
 
-?withCallingHandlers()
 #' Easily plot single euler diagrams
 #'
 #' @returns ggplot2 object

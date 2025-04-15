@@ -6,10 +6,10 @@
 #' @name data-plots
 #'
 #' @examples
-#' mtcars |> plot_hbars(x = "carb", y = "cyl")
-#' mtcars |> plot_hbars(x = "carb", y = NULL)
-plot_hbars <- function(data, x, y, z = NULL) {
-  out <- vertical_stacked_bars(data = data, score = x, group = y, strata = z)
+#' mtcars |> plot_hbars(pri = "carb", sec = "cyl")
+#' mtcars |> plot_hbars(pri = "carb", sec = NULL)
+plot_hbars <- function(data, pri, sec, ter = NULL) {
+  out <- vertical_stacked_bars(data = data, score = pri, group = sec, strata = ter)
 
   out
 }

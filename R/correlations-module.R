@@ -46,7 +46,8 @@ data_correlations_server <- function(id,
         } else {
           out <- data()
         }
-        out |> dplyr::mutate(dplyr::across(tidyselect::everything(),as.numeric))
+        # out |> dplyr::mutate(dplyr::across(tidyselect::everything(),as.numeric))
+        sapply(data,as.numeric)
         # as.numeric()
       })
 
@@ -100,8 +101,9 @@ data_correlations_server <- function(id,
 }
 
 correlation_pairs <- function(data, threshold = .8) {
-  data <- data[!sapply(data, is.character)]
-  data <- data |> dplyr::mutate(dplyr::across(dplyr::where(is.factor), as.numeric))
+  data <- as.data.frame(data)[!sapply(as.data.frame(data), is.character)]
+  data <- sapply(data,\(.x)if (is.factor(.x)) as.numeric(.x) else .x) |> as.data.frame()
+  # data <- data |> dplyr::mutate(dplyr::across(dplyr::where(is.factor), as.numeric))
   cor <- Hmisc::rcorr(as.matrix(data))
   r <- cor$r %>% as.table()
   d <- r |>

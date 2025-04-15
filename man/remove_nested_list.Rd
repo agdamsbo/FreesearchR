@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{remove_nested_list}
 \alias{remove_nested_list}
-\title{Very simple function to remove nested lists, lik ewhen uploading .rds}
+\title{Very simple function to remove nested lists, like when uploading .rds}
 \usage{
 remove_nested_list(data)
 }
@@ -13,7 +13,7 @@ remove_nested_list(data)
 data.frame
 }
 \description{
-Very simple function to remove nested lists, lik ewhen uploading .rds
+Very simple function to remove nested lists, like when uploading .rds
 }
 \examples{
 dplyr::tibble(a = 1:10, b = rep(list("a"), 10)) |> remove_nested_list()

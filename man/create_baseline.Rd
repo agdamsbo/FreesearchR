@@ -32,4 +32,5 @@ Create a baseline table
 }
 \examples{
 mtcars |> create_baseline(by.var = "gear", add.p = "yes" == "yes")
+create_baseline(default_parsing(mtcars), by.var = "am", add.p = FALSE, add.overall = FALSE, theme = "lancet")
 }
