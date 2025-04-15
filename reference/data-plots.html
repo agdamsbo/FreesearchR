@@ -142,32 +142,28 @@ Beatiful violin plot"></head><body>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">create_plot</span><span class="op">(</span><span class="va">mtcars</span>, <span class="st">"plot_violin"</span>, <span class="st">"mpg"</span>, <span class="st">"cyl"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in if (!z %in% names(data)) {    z &lt;- NULL}:</span> argument is of length zero</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
+<span class="r-plt img"><img src="data-plots-1.png" alt="" width="700" height="433"></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"code")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> FreesearchR::plot_violin(pri = "mpg", sec = "cyl", ter = NULL)</span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_box</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"mpg"</span>, y <span class="op">=</span> <span class="st">"cyl"</span>, z <span class="op">=</span> <span class="st">"gear"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in purrr::map(p, ~ggplot2::layer_scales(.x)[[axis]]$get_limits()):</span> <span style="color: #00BBBB;">ℹ</span> In index: 2.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> With name: 4.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `viridis::scale_fill_viridis()`:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Continuous values supplied to discrete scale.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Example values: <span style="color: #0000BB;">4</span> and <span style="color: #0000BB;">6</span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in plot_box(mtcars, x = "mpg", y = "cyl", z = "gear"):</span> unused arguments (x = "mpg", y = "cyl", z = "gear")</span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="default_parsing.html">default_parsing</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">plot_box</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"mpg"</span>, y <span class="op">=</span> <span class="st">"cyl"</span>, z <span class="op">=</span> <span class="st">"gear"</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="data-plots-1.png" alt="" width="700" height="433"></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in plot_box(default_parsing(mtcars), x = "mpg", y = "cyl", z = "gear"):</span> unused arguments (x = "mpg", y = "cyl", z = "gear")</span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_box_single</span><span class="op">(</span><span class="st">"mpg"</span>,<span class="st">"cyl"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="data-plots-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_hbars</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"carb"</span>, y <span class="op">=</span> <span class="st">"cyl"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Scale for <span style="color: #00BB00;">fill</span> is already present.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Adding another scale for <span style="color: #00BB00;">fill</span>, which will replace the existing scale.</span>
-<span class="r-plt img"><img src="data-plots-3.png" alt="" width="700" height="433"></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in plot_hbars(mtcars, x = "carb", y = "cyl"):</span> unused arguments (x = "carb", y = "cyl")</span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_hbars</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"carb"</span>, y <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Scale for <span style="color: #00BB00;">fill</span> is already present.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Adding another scale for <span style="color: #00BB00;">fill</span>, which will replace the existing scale.</span>
-<span class="r-plt img"><img src="data-plots-4.png" alt="" width="700" height="433"></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in plot_hbars(mtcars, x = "carb", y = NULL):</span> unused arguments (x = "carb", y = NULL)</span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="default_parsing.html">default_parsing</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">plot_ridge</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"mpg"</span>, y <span class="op">=</span> <span class="st">"cyl"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Picking joint bandwidth of 1.38</span>
-<span class="r-plt img"><img src="data-plots-5.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_ridge</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"mpg"</span>, y <span class="op">=</span> <span class="st">"cyl"</span>, z <span class="op">=</span> <span class="st">"gear"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Picking joint bandwidth of 1.52</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The following aesthetics were dropped during statistical transformation: <span style="color: #00BB00;">y</span> and</span>
@@ -246,51 +242,15 @@ Beatiful violin plot"></head><body>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">8</span> c     TRUE      7     26     34 <span style="color: #949494;">"</span>c\n(n=26)<span style="color: #949494;">"</span> <span style="color: #949494;">"</span>TRUE\n(n=34)<span style="color: #949494;">"</span> </span>
 <span class="r-in"><span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>g <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>, <span class="fl">100</span>, <span class="cn">TRUE</span><span class="op">)</span>, first <span class="op">=</span> <span class="fu">REDCapCAST</span><span class="fu">::</span><span class="fu">as_factor</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="fl">100</span>, <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>, last <span class="op">=</span> <span class="fu">REDCapCAST</span><span class="fu">::</span><span class="fu">as_factor</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="fl">100</span>, <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ds</span> <span class="op">|&gt;</span> <span class="fu">plot_sankey</span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"last"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: ggplot2</span>
-<span class="r-plt img"><img src="data-plots-6.png" alt="" width="700" height="433"></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in match.arg(color.group):</span> 'arg' should be one of “pri”, “sec”</span>
 <span class="r-in"><span><span class="va">ds</span> <span class="op">|&gt;</span> <span class="fu">plot_sankey</span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"last"</span>, color.group <span class="op">=</span> <span class="st">"y"</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="data-plots-7.png" alt="" width="700" height="433"></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in match.arg(color.group):</span> 'arg' should be one of “pri”, “sec”</span>
 <span class="r-in"><span><span class="va">ds</span> <span class="op">|&gt;</span> <span class="fu">plot_sankey</span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"last"</span>, z <span class="op">=</span> <span class="st">"g"</span>, color.group <span class="op">=</span> <span class="st">"y"</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
-<span class="r-plt img"><img src="data-plots-8.png" alt="" width="700" height="433"></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in plot_sankey(ds, "first", "last", z = "g", color.group = "y"):</span> unused argument (z = "g")</span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_scatter</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"mpg"</span>, y <span class="op">=</span> <span class="st">"wt"</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="data-plots-9.png" alt="" width="700" height="433"></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in plot_scatter(mtcars, x = "mpg", y = "wt"):</span> unused arguments (x = "mpg", y = "wt")</span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_violin</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"mpg"</span>, y <span class="op">=</span> <span class="st">"cyl"</span>, z <span class="op">=</span> <span class="st">"gear"</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>There was 1 warning in `summarize()`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In argument: `V1 = .fun(as.data.frame(pick(everything())), var)`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In group 1: `cyl = 4`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> Caused by warning in `stats::qt()`:</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> NaNs produced</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>There was 1 warning in `summarize()`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In argument: `V1 = .fun(as.data.frame(pick(everything())), var)`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In group 1: `cyl = 4`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> Caused by warning in `stats::qt()`:</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> NaNs produced</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>There was 1 warning in `summarize()`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In argument: `V1 = .fun(as.data.frame(pick(everything())), var)`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In group 2: `cyl = 6`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> Caused by warning in `stats::qt()`:</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> NaNs produced</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>There was 1 warning in `summarize()`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In argument: `V1 = .fun(as.data.frame(pick(everything())), var)`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In group 2: `cyl = 6`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> Caused by warning in `stats::qt()`:</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> NaNs produced</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Groups with fewer than two datapoints have been dropped.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Set `drop = FALSE` to consider such groups for position adjustment purposes.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Groups with fewer than two datapoints have been dropped.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Set `drop = FALSE` to consider such groups for position adjustment purposes.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Groups with fewer than two datapoints have been dropped.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Set `drop = FALSE` to consider such groups for position adjustment purposes.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Groups with fewer than two datapoints have been dropped.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Set `drop = FALSE` to consider such groups for position adjustment purposes.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Groups with fewer than two datapoints have been dropped.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Set `drop = FALSE` to consider such groups for position adjustment purposes.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Groups with fewer than two datapoints have been dropped.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Set `drop = FALSE` to consider such groups for position adjustment purposes.</span>
-<span class="r-plt img"><img src="data-plots-10.png" alt="" width="700" height="433"></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in plot_violin(mtcars, x = "mpg", y = "cyl", z = "gear"):</span> unused arguments (x = "mpg", y = "cyl", z = "gear")</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
