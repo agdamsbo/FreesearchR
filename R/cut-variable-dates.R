@@ -18,7 +18,7 @@ cut_var <- function(x, ...) {
 #' @export
 #' @name cut_var
 cut_var.default <- function(x, ...) {
-  base::cut.default(x, ...)
+  base::cut(x, ...)
 }
 
 #' @name cut_var
@@ -581,36 +581,6 @@ modal_cut_variable <- function(id,
 }
 
 
-#' @inheritParams shinyWidgets::WinBox
-#' @export
-#'
-#' @importFrom shinyWidgets WinBox wbOptions wbControls
-#' @importFrom htmltools tagList
-#' @rdname cut-variable
-winbox_cut_variable <- function(id,
-                                title = i18n("Convert Numeric to Factor"),
-                                options = shinyWidgets::wbOptions(),
-                                controls = shinyWidgets::wbControls()) {
-  ns <- NS(id)
-  WinBox(
-    title = title,
-    ui = tagList(
-      cut_variable_ui(id),
-      tags$div(
-        style = "display: none;",
-        textInput(inputId = ns("hidden"), label = NULL, value = genId())
-      )
-    ),
-    options = modifyList(
-      shinyWidgets::wbOptions(height = "750px", modal = TRUE),
-      options
-    ),
-    controls = controls,
-    auto_height = FALSE
-  )
-}
-
-
 #' @importFrom graphics abline axis hist par plot.new plot.window
 plot_histogram <- function(data, column, bins = 30, breaks = NULL, color = "#112466") {
   x <- data[[column]]
@@ -627,3 +597,4 @@ plot_histogram <- function(data, column, bins = 30, breaks = NULL, color = "#112
   abline(v = breaks, col = "#FFFFFF", lty = 1, lwd = 1.5)
   abline(v = breaks, col = "#2E2E2E", lty = 2, lwd = 1.5)
 }
+

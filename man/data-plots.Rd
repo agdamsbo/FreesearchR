@@ -20,23 +20,23 @@ data_visuals_ui(id, tab_title = "Plots", ...)
 
 data_visuals_server(id, data, ...)
 
-create_plot(data, type, x, y, z = NULL, ...)
+create_plot(data, type, pri, sec, ter = NULL, ...)
 
-plot_box(data, x, y, z = NULL)
+plot_box(data, pri, sec, ter = NULL)
 
-plot_box_single(data, x, y = NULL, seed = 2103)
+plot_box_single(data, pri, sec = NULL, seed = 2103)
 
-plot_hbars(data, x, y, z = NULL)
+plot_hbars(data, pri, sec, ter = NULL)
 
 plot_ridge(data, x, y, z = NULL, ...)
 
-sankey_ready(data, x, y, numbers = "count", ...)
+sankey_ready(data, pri, sec, numbers = "count", ...)
 
-plot_sankey(data, x, y, z = NULL, color.group = "x", colors = NULL)
+plot_sankey(data, pri, sec, ter = NULL, color.group = "x", colors = NULL)
 
-plot_scatter(data, x, y, z = NULL)
+plot_scatter(data, pri, sec, ter = NULL)
 
-plot_violin(data, x, y, z = NULL)
+plot_violin(data, pri, sec, ter = NULL)
 }
 \arguments{
 \item{id}{Module id. (Use 'ns("id")')}
@@ -47,11 +47,11 @@ plot_violin(data, x, y, z = NULL)
 
 \item{type}{plot type (derived from possible_plots() and matches custom function)}
 
-\item{x}{primary variable}
+\item{pri}{primary variable}
 
-\item{y}{secondary variable}
+\item{sec}{secondary variable}
 
-\item{z}{tertiary variable}
+\item{ter}{tertiary variable}
 }
 \value{
 Shiny ui module
@@ -98,14 +98,14 @@ Beautiful violin plot
 Beatiful violin plot
 }
 \examples{
-create_plot(mtcars, "plot_violin", "mpg", "cyl")
-mtcars |> plot_box(x = "mpg", y = "cyl", z = "gear")
+create_plot(mtcars, "plot_violin", "mpg", "cyl") |> attributes()
+mtcars |> plot_box(pri = "mpg", sec = "cyl", ter = "gear")
 mtcars |>
   default_parsing() |>
-  plot_box(x = "mpg", y = "cyl", z = "gear")
+  plot_box(pri = "mpg", sec = "cyl", ter = "gear")
 mtcars |> plot_box_single("mpg","cyl")
-mtcars |> plot_hbars(x = "carb", y = "cyl")
-mtcars |> plot_hbars(x = "carb", y = NULL)
+mtcars |> plot_hbars(pri = "carb", sec = "cyl")
+mtcars |> plot_hbars(pri = "carb", sec = NULL)
 mtcars |>
   default_parsing() |>
   plot_ridge(x = "mpg", y = "cyl")
@@ -123,6 +123,6 @@ ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_fac
 ds |> plot_sankey("first", "last")
 ds |> plot_sankey("first", "last", color.group = "y")
 ds |> plot_sankey("first", "last", z = "g", color.group = "y")
-mtcars |> plot_scatter(x = "mpg", y = "wt")
-mtcars |> plot_violin(x = "mpg", y = "cyl", z = "gear")
+mtcars |> plot_scatter(pri = "mpg", sec = "wt")
+mtcars |> plot_violin(pri = "mpg", sec = "cyl", ter = "gear")
 }

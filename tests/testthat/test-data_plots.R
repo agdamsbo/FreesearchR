@@ -41,7 +41,6 @@ test_that("get_plot_options works", {
 
 ## create_plot and friends
 test_that("create_plot works", {
-
   ## Violin
   p_list <- create_plot(mtcars, type = "plot_violin", pri = "mpg", sec = "cyl", ter = "am")
   p <- p_list[[1]] + ggplot2::labs(title = "Test plot")
@@ -81,6 +80,6 @@ test_that("get_label works", {
 ## line_break
 test_that("line_break works", {
   expect_snapshot("Lorem ipsum... you know the routine" |> line_break())
-  expect_snapshot(paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(force = TRUE, lineLength = 5))
-  expect_snapshot(paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(force = FALSE))
+  expect_snapshot(paste(rep(letters, 5), collapse = "") |> line_break(force = TRUE, lineLength = 5))
+  expect_snapshot(paste(rep(letters, 5), collapse = "") |> line_break(force = FALSE))
 })

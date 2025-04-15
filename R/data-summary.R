@@ -155,8 +155,8 @@ overview_vars <- function(data) {
   data <- as.data.frame(data)
 
   dplyr::tibble(
-    class = get_classes(data),
-    type = data_type(data),
+    icon = data_type(data),
+    type = icon,
     name = names(data),
     n_missing = unname(colSums(is.na(data))),
     p_complete = 1 - n_missing / nrow(data),
@@ -188,7 +188,7 @@ create_overview_datagrid <- function(data,...) {
 
   std_names <- c(
     "Name" = "name",
-    "Class" = "class",
+    "Icon" = "icon",
     "Type" = "type",
     "Missings" = "n_missing",
     "Complete" = "p_complete",
@@ -226,7 +226,7 @@ create_overview_datagrid <- function(data,...) {
 
   grid <- toastui::grid_columns(
     grid = grid,
-    columns = "class",
+    columns = "icon",
     header = " ",
     align = "center",sortable = FALSE,
     width = 40
@@ -234,7 +234,8 @@ create_overview_datagrid <- function(data,...) {
 
   grid <- add_class_icon(
     grid = grid,
-    column = "class"
+    column = "icon",
+    fun = type_icons
   )
 
   grid <- toastui::grid_format(
@@ -271,32 +272,14 @@ create_overview_datagrid <- function(data,...) {
 #'   overview_vars() |>
 #'   toastui::datagrid() |>
 #'   add_class_icon()
-add_class_icon <- function(grid, column = "class") {
+add_class_icon <- function(grid, column = "class", fun=class_icons) {
   out <- toastui::grid_format(
     grid = grid,
     column = column,
     formatter = function(value) {
       lapply(
         X = value,
-        FUN = function(x) {
-          if (identical(x, "numeric")) {
-            shiny::icon("calculator")
-          } else if (identical(x, "factor")) {
-            shiny::icon("chart-simple")
-          } else if (identical(x, "integer")) {
-            shiny::icon("arrow-down-1-9")
-          } else if (identical(x, "character")) {
-            shiny::icon("arrow-down-a-z")
-          } else if (identical(x, "logical")) {
-            shiny::icon("toggle-off")
-          } else if (any(c("Date", "POSIXct", "POSIXt") %in% x)) {
-            shiny::icon("calendar-days")
-          } else if ("hms" %in% x) {
-            shiny::icon("clock")
-          } else {
-            shiny::icon("table")
-          }
-        }
+        FUN = fun
       )
     }
   )
@@ -307,4 +290,72 @@ add_class_icon <- function(grid, column = "class") {
     columns = column,
     width = 60
   )
+}
+
+
+#' Get data class icons
+#'
+#' @param x character vector of data classes
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+#' "numeric" |> class_icons()
+#' default_parsing(mtcars) |> sapply(class) |> class_icons()
+class_icons <- function(x) {
+  if (length(x)>1){
+    sapply(x,class_icons)
+  } else {
+  if (identical(x, "numeric")) {
+    shiny::icon("calculator")
+  } else if (identical(x, "factor")) {
+    shiny::icon("chart-simple")
+  } else if (identical(x, "integer")) {
+    shiny::icon("arrow-down-1-9")
+  } else if (identical(x, "character")) {
+    shiny::icon("arrow-down-a-z")
+  } else if (identical(x, "logical")) {
+    shiny::icon("toggle-off")
+  } else if (any(c("Date", "POSIXct", "POSIXt") %in% x)) {
+    shiny::icon("calendar-days")
+  } else if ("hms" %in% x) {
+    shiny::icon("clock")
+  } else {
+    shiny::icon("table")
+  }}
+}
+
+#' Get data type icons
+#'
+#' @param x character vector of data classes
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+#' "ordinal" |> type_icons()
+#' default_parsing(mtcars) |> sapply(data_type) |> type_icons()
+type_icons <- function(x) {
+  if (length(x)>1){
+    sapply(x,class_icons)
+  } else {
+    if (identical(x, "continuous")) {
+      shiny::icon("calculator")
+    } else if (identical(x, "categorical")) {
+      shiny::icon("chart-simple")
+    } else if (identical(x, "ordinal")) {
+      shiny::icon("arrow-down-1-9")
+    } else if (identical(x, "text")) {
+      shiny::icon("arrow-down-a-z")
+    } else if (identical(x, "dichotomous")) {
+      shiny::icon("toggle-off")
+    } else if (identical(x,"datetime")) {
+      shiny::icon("calendar-days")
+    } else if (identical(x,"id")) {
+      shiny::icon("id-card")
+    } else {
+      shiny::icon("table")
+    }
+    }
 }

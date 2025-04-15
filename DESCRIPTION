@@ -81,7 +81,8 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    shinytest
+    shinytest,
+    covr
 URL: https://github.com/agdamsbo/FreesearchR, https://agdamsbo.github.io/FreesearchR/
 BugReports: https://github.com/agdamsbo/FreesearchR/issues
 VignetteBuilder: knitr

@@ -4,18 +4,18 @@
 \alias{plot_euler}
 \title{Easily plot euler diagrams}
 \usage{
-plot_euler(data, x, y, z = NULL, seed = 2103)
+plot_euler(data, pri, sec, ter = NULL, seed = 2103)
 }
 \arguments{
 \item{data}{data}
+
+\item{seed}{seed}
 
 \item{x}{name of main variable}
 
 \item{y}{name of secondary variables}
 
 \item{z}{grouping variable}
-
-\item{seed}{seed}
 }
 \value{
 patchwork object

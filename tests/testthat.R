@@ -8,5 +8,6 @@
 
 library(testthat)
 library(FreesearchR)
+library(shiny)
 
 test_check("FreesearchR")

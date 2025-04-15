@@ -10,7 +10,7 @@
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'Version: 25.4.3.250414_1342'
+app_version <- function()'Version: 25.4.3.250415_1539'
 
 
 ########
@@ -68,7 +68,7 @@ create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALS
     }
   }
 
-  gtsummary::theme_gtsummary_journal(journal = theme)
+  suppressMessages(gtsummary::theme_gtsummary_journal(journal = theme))
 
   args <- list(...)
 
@@ -207,7 +207,8 @@ data_correlations_server <- function(id,
         } else {
           out <- data()
         }
-        out |> dplyr::mutate(dplyr::across(tidyselect::everything(),as.numeric))
+        # out |> dplyr::mutate(dplyr::across(tidyselect::everything(),as.numeric))
+        sapply(data,as.numeric)
         # as.numeric()
       })
 
@@ -261,8 +262,9 @@ data_correlations_server <- function(id,
 }
 
 correlation_pairs <- function(data, threshold = .8) {
-  data <- data[!sapply(data, is.character)]
-  data <- data |> dplyr::mutate(dplyr::across(dplyr::where(is.factor), as.numeric))
+  data <- as.data.frame(data)[!sapply(as.data.frame(data), is.character)]
+  data <- sapply(data,\(.x)if (is.factor(.x)) as.numeric(.x) else .x) |> as.data.frame()
+  # data <- data |> dplyr::mutate(dplyr::across(dplyr::where(is.factor), as.numeric))
   cor <- Hmisc::rcorr(as.matrix(data))
   r <- cor$r %>% as.table()
   d <- r |>
@@ -516,7 +518,7 @@ cut_var <- function(x, ...) {
 #' @export
 #' @name cut_var
 cut_var.default <- function(x, ...) {
-  base::cut.default(x, ...)
+  base::cut(x, ...)
 }
 
 #' @name cut_var
@@ -1079,36 +1081,6 @@ modal_cut_variable <- function(id,
 }
 
 
-#' @inheritParams shinyWidgets::WinBox
-#' @export
-#'
-#' @importFrom shinyWidgets WinBox wbOptions wbControls
-#' @importFrom htmltools tagList
-#' @rdname cut-variable
-winbox_cut_variable <- function(id,
-                                title = i18n("Convert Numeric to Factor"),
-                                options = shinyWidgets::wbOptions(),
-                                controls = shinyWidgets::wbControls()) {
-  ns <- NS(id)
-  WinBox(
-    title = title,
-    ui = tagList(
-      cut_variable_ui(id),
-      tags$div(
-        style = "display: none;",
-        textInput(inputId = ns("hidden"), label = NULL, value = genId())
-      )
-    ),
-    options = modifyList(
-      shinyWidgets::wbOptions(height = "750px", modal = TRUE),
-      options
-    ),
-    controls = controls,
-    auto_height = FALSE
-  )
-}
-
-
 #' @importFrom graphics abline axis hist par plot.new plot.window
 plot_histogram <- function(data, column, bins = 30, breaks = NULL, color = "#112466") {
   x <- data[[column]]
@@ -1125,6 +1097,7 @@ plot_histogram <- function(data, column, bins = 30, breaks = NULL, color = "#112
   abline(v = breaks, col = "#FFFFFF", lty = 1, lwd = 1.5)
   abline(v = breaks, col = "#2E2E2E", lty = 2, lwd = 1.5)
 }
+
 
 
 ########
@@ -1221,7 +1194,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
     ),
     bslib::nav_panel(
       title = tab_title,
-      shiny::plotOutput(ns("plot"),height = "70vh"),
+      shiny::plotOutput(ns("plot"), height = "70vh"),
       shiny::tags$br(),
       shiny::tags$br(),
       shiny::htmlOutput(outputId = ns("code_plot"))
@@ -1248,7 +1221,7 @@ data_visuals_server <- function(id,
       rv <- shiny::reactiveValues(
         plot.params = NULL,
         plot = NULL,
-        code=NULL
+        code = NULL
       )
 
       # ## --- New attempt
@@ -1349,7 +1322,7 @@ data_visuals_server <- function(id,
         shiny::req(data())
         columnSelectInput(
           inputId = ns("primary"),
-          col_subset=names(data())[sapply(data(),data_type)!="text"],
+          col_subset = names(data())[sapply(data(), data_type) != "text"],
           data = data,
           placeholder = "Select variable",
           label = "Response variable",
@@ -1451,37 +1424,30 @@ data_visuals_server <- function(id,
 
       shiny::observeEvent(input$act_plot,
         {
-          if (NROW(data())>0){
-          tryCatch(
-            {
-              parameters <- list(
-                type = rv$plot.params()[["fun"]],
-                x = input$primary,
-                y = input$secondary,
-                z = input$tertiary
-              )
+          if (NROW(data()) > 0) {
+            tryCatch(
+              {
+                parameters <- list(
+                  type = rv$plot.params()[["fun"]],
+                  pri = input$primary,
+                  sec = input$secondary,
+                  ter = input$tertiary
+                )
 
-              shiny::withProgress(message = "Drawing the plot. Hold tight for a moment..", {
-                rv$plot <- rlang::exec(create_plot, !!!append_list(data(),parameters,"data"))
-              # rv$plot <- create_plot(
-              #   data = data(),
-              #   type = rv$plot.params()[["fun"]],
-              #   x = input$primary,
-              #   y = input$secondary,
-              #   z = input$tertiary
-              # )
-              })
+                shiny::withProgress(message = "Drawing the plot. Hold tight for a moment..", {
+                  rv$plot <- rlang::exec(create_plot, !!!append_list(data(), parameters, "data"))
+                })
 
-              rv$code <- glue::glue("FreesearchR::create_plot(data,{list2str(parameters)})")
-
-            },
-            # warning = function(warn) {
-            #   showNotification(paste0(warn), type = "warning")
-            # },
-            error = function(err) {
-              showNotification(paste0(err), type = "err")
-            }
-          )}
+                rv$code <- glue::glue("FreesearchR::create_plot(data,{list2str(parameters)})")
+              },
+              # warning = function(warn) {
+              #   showNotification(paste0(warn), type = "warning")
+              # },
+              error = function(err) {
+                showNotification(paste0(err), type = "err")
+              }
+            )
+          }
         },
         ignoreInit = TRUE
       )
@@ -1548,7 +1514,7 @@ all_but <- function(data, ...) {
 #'
 #' @examples
 #' default_parsing(mtcars) |> subset_types("ordinal")
-#' default_parsing(mtcars) |> subset_types(c("dichotomous", "ordinal" ,"categorical"))
+#' default_parsing(mtcars) |> subset_types(c("dichotomous", "ordinal", "categorical"))
 #' #' default_parsing(mtcars) |> subset_types("factor",class)
 subset_types <- function(data, types, type.fun = data_type) {
   data[sapply(data, type.fun) %in% types]
@@ -1583,21 +1549,21 @@ supported_plots <- function() {
       fun = "plot_hbars",
       descr = "Stacked horizontal bars",
       note = "A classical way of visualising the distribution of an ordinal scale like the modified Ranking Scale and known as Grotta bars",
-      primary.type = c("dichotomous", "ordinal" ,"categorical"),
-      secondary.type = c("dichotomous", "ordinal" ,"categorical"),
+      primary.type = c("dichotomous", "ordinal", "categorical"),
+      secondary.type = c("dichotomous", "ordinal", "categorical"),
       secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
+      tertiary.type = c("dichotomous", "ordinal", "categorical"),
       secondary.extra = "none"
     ),
     plot_violin = list(
       fun = "plot_violin",
       descr = "Violin plot",
       note = "A modern alternative to the classic boxplot to visualise data distribution",
-      primary.type = c("datatime","continuous", "dichotomous", "ordinal" ,"categorical"),
-      secondary.type = c("dichotomous", "ordinal" ,"categorical"),
+      primary.type = c("datatime", "continuous", "dichotomous", "ordinal", "categorical"),
+      secondary.type = c("dichotomous", "ordinal", "categorical"),
       secondary.multi = FALSE,
       secondary.extra = "none",
-      tertiary.type = c("dichotomous", "ordinal" ,"categorical")
+      tertiary.type = c("dichotomous", "ordinal", "categorical")
     ),
     # plot_ridge = list(
     #   descr = "Ridge plot",
@@ -1611,30 +1577,30 @@ supported_plots <- function() {
       fun = "plot_sankey",
       descr = "Sankey plot",
       note = "A way of visualising change between groups",
-      primary.type = c("dichotomous", "ordinal" ,"categorical"),
-      secondary.type = c("dichotomous", "ordinal" ,"categorical"),
+      primary.type = c("dichotomous", "ordinal", "categorical"),
+      secondary.type = c("dichotomous", "ordinal", "categorical"),
       secondary.multi = FALSE,
       secondary.extra = NULL,
-      tertiary.type = c("dichotomous", "ordinal" ,"categorical")
+      tertiary.type = c("dichotomous", "ordinal", "categorical")
     ),
     plot_scatter = list(
       fun = "plot_scatter",
       descr = "Scatter plot",
       note = "A classic way of showing the association between to variables",
-      primary.type = c("datatime","continuous"),
-      secondary.type = c("datatime","continuous", "ordinal" ,"categorical"),
+      primary.type = c("datatime", "continuous"),
+      secondary.type = c("datatime", "continuous", "ordinal", "categorical"),
       secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
+      tertiary.type = c("dichotomous", "ordinal", "categorical"),
       secondary.extra = NULL
     ),
     plot_box = list(
       fun = "plot_box",
       descr = "Box plot",
       note = "A classic way to plot data distribution by groups",
-      primary.type = c("datatime","continuous", "dichotomous", "ordinal" ,"categorical"),
-      secondary.type = c("dichotomous", "ordinal" ,"categorical"),
+      primary.type = c("datatime", "continuous", "dichotomous", "ordinal", "categorical"),
+      secondary.type = c("dichotomous", "ordinal", "categorical"),
       secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
+      tertiary.type = c("dichotomous", "ordinal", "categorical"),
       secondary.extra = "none"
     ),
     plot_euler = list(
@@ -1645,7 +1611,7 @@ supported_plots <- function() {
       secondary.type = "dichotomous",
       secondary.multi = TRUE,
       secondary.max = 4,
-      tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
+      tertiary.type = c("dichotomous", "ordinal", "categorical"),
       secondary.extra = NULL
     )
   )
@@ -1724,9 +1690,9 @@ get_plot_options <- function(data) {
 #' Wrapper to create plot based on provided type
 #'
 #' @param data data.frame
-#' @param x primary variable
-#' @param y secondary variable
-#' @param z tertiary variable
+#' @param pri primary variable
+#' @param sec secondary variable
+#' @param ter tertiary variable
 #' @param type plot type (derived from possible_plots() and matches custom function)
 #' @param ... ignored for now
 #'
@@ -1736,20 +1702,36 @@ get_plot_options <- function(data) {
 #' @export
 #'
 #' @examples
-#' create_plot(mtcars, "plot_violin", "mpg", "cyl")
-create_plot <- function(data, type, x, y, z = NULL, ...) {
-  if (!any(y %in% names(data))) {
-    y <- NULL
+#' create_plot(mtcars, "plot_violin", "mpg", "cyl") |> attributes()
+create_plot <- function(data, type, pri, sec, ter = NULL, ...) {
+  if (!is.null(sec)) {
+    if (!any(sec %in% names(data))) {
+      sec <- NULL
+    }
   }
 
-  if (!z %in% names(data)) {
-    z <- NULL
+  if (!is.null(ter)) {
+    if (!ter %in% names(data)) {
+      ter <- NULL
+    }
   }
 
-  do.call(
-    type,
-    list(data, x, y, z, ...)
+  parameters <- list(
+    pri = pri,
+    sec = sec,
+    ter = ter,
+    ...
   )
+
+  out <- do.call(
+    type,
+    modifyList(parameters,list(data=data))
+  )
+
+  code <- rlang::call2(type,!!!parameters,.ns = "FreesearchR")
+
+  attr(out,"code") <- code
+  out
 }
 
 #' Print label, and if missing print variable name
@@ -1799,8 +1781,8 @@ get_label <- function(data, var = NULL) {
 #'
 #' @examples
 #' "Lorem ipsum... you know the routine" |> line_break()
-#' paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(fixed = TRUE)
-line_break <- function(data, lineLength = 20, fixed = FALSE) {
+#' paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(force = TRUE)
+line_break <- function(data, lineLength = 20, force = FALSE) {
   if (isTRUE(force)) {
     gsub(paste0("(.{1,", lineLength, "})(\\s|[[:alnum:]])"), "\\1\n", data)
   } else {
@@ -1831,7 +1813,7 @@ wrap_plot_list <- function(data, tag_levels = NULL) {
             .x
           }
         })() |>
-        allign_axes() |>
+        align_axes() |>
         patchwork::wrap_plots(guides = "collect", axes = "collect", axis_titles = "collect")
       if (!is.null(tag_levels)) {
         out <- out + patchwork::plot_annotation(tag_levels = tag_levels)
@@ -1846,19 +1828,21 @@ wrap_plot_list <- function(data, tag_levels = NULL) {
 }
 
 
-#' Alligns axes between plots
+#' Aligns axes between plots
 #'
 #' @param ... ggplot2 objects or list of ggplot2 objects
 #'
 #' @returns list of ggplot2 objects
 #' @export
 #'
-allign_axes <- function(...) {
+align_axes <- function(...) {
   # https://stackoverflow.com/questions/62818776/get-axis-limits-from-ggplot-object
   # https://github.com/thomasp85/patchwork/blob/main/R/plot_multipage.R#L150
   if (ggplot2::is.ggplot(..1)) {
+    ## Assumes list of ggplots
     p <- list(...)
   } else if (is.list(..1)) {
+    ## Assumes list with list of ggplots
     p <- ..1
   } else {
     cli::cli_abort("Can only align {.cls ggplot} objects or a list of them")
@@ -1870,7 +1854,7 @@ allign_axes <- function(...) {
 
   suppressWarnings({
     p |> purrr::map(~ .x + ggplot2::xlim(xr) + ggplot2::ylim(yr))
-    })
+  })
 }
 
 #' Extract and clean axis ranges
@@ -2213,8 +2197,8 @@ overview_vars <- function(data) {
   data <- as.data.frame(data)
 
   dplyr::tibble(
-    class = get_classes(data),
-    type = data_type(data),
+    icon = data_type(data),
+    type = icon,
     name = names(data),
     n_missing = unname(colSums(is.na(data))),
     p_complete = 1 - n_missing / nrow(data),
@@ -2246,7 +2230,7 @@ create_overview_datagrid <- function(data,...) {
 
   std_names <- c(
     "Name" = "name",
-    "Class" = "class",
+    "Icon" = "icon",
     "Type" = "type",
     "Missings" = "n_missing",
     "Complete" = "p_complete",
@@ -2284,7 +2268,7 @@ create_overview_datagrid <- function(data,...) {
 
   grid <- toastui::grid_columns(
     grid = grid,
-    columns = "class",
+    columns = "icon",
     header = " ",
     align = "center",sortable = FALSE,
     width = 40
@@ -2292,7 +2276,8 @@ create_overview_datagrid <- function(data,...) {
 
   grid <- add_class_icon(
     grid = grid,
-    column = "class"
+    column = "icon",
+    fun = type_icons
   )
 
   grid <- toastui::grid_format(
@@ -2329,32 +2314,14 @@ create_overview_datagrid <- function(data,...) {
 #'   overview_vars() |>
 #'   toastui::datagrid() |>
 #'   add_class_icon()
-add_class_icon <- function(grid, column = "class") {
+add_class_icon <- function(grid, column = "class", fun=class_icons) {
   out <- toastui::grid_format(
     grid = grid,
     column = column,
     formatter = function(value) {
       lapply(
         X = value,
-        FUN = function(x) {
-          if (identical(x, "numeric")) {
-            shiny::icon("calculator")
-          } else if (identical(x, "factor")) {
-            shiny::icon("chart-simple")
-          } else if (identical(x, "integer")) {
-            shiny::icon("arrow-down-1-9")
-          } else if (identical(x, "character")) {
-            shiny::icon("arrow-down-a-z")
-          } else if (identical(x, "logical")) {
-            shiny::icon("toggle-off")
-          } else if (any(c("Date", "POSIXct", "POSIXt") %in% x)) {
-            shiny::icon("calendar-days")
-          } else if ("hms" %in% x) {
-            shiny::icon("clock")
-          } else {
-            shiny::icon("table")
-          }
-        }
+        FUN = fun
       )
     }
   )
@@ -2365,6 +2332,71 @@ add_class_icon <- function(grid, column = "class") {
     columns = column,
     width = 60
   )
+}
+
+
+#' Get data class icons
+#'
+#' @param x character vector of data classes
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+#' "numeric" |> class_icons()
+#' default_parsing(mtcars) |> sapply(class) |> class_icons()
+class_icons <- function(x) {
+  if (length(x)>1){
+    sapply(x,class_icons)
+  } else {
+  if (identical(x, "numeric")) {
+    shiny::icon("calculator")
+  } else if (identical(x, "factor")) {
+    shiny::icon("chart-simple")
+  } else if (identical(x, "integer")) {
+    shiny::icon("arrow-down-1-9")
+  } else if (identical(x, "character")) {
+    shiny::icon("arrow-down-a-z")
+  } else if (identical(x, "logical")) {
+    shiny::icon("toggle-off")
+  } else if (any(c("Date", "POSIXct", "POSIXt") %in% x)) {
+    shiny::icon("calendar-days")
+  } else if ("hms" %in% x) {
+    shiny::icon("clock")
+  } else {
+    shiny::icon("table")
+  }}
+}
+
+#' Get data type icons
+#'
+#' @param x character vector of data classes
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+#' "ordinal" |> type_icons()
+#' default_parsing(mtcars) |> sapply(data_type) |> type_icons()
+type_icons <- function(x) {
+  if (length(x)>1){
+    sapply(x,class_icons)
+  } else {
+    if (identical(x, "continuous")) {
+      shiny::icon("calculator")
+    } else if (identical(x, "categorical")) {
+      shiny::icon("chart-simple")
+    } else if (identical(x, "ordinal")) {
+      shiny::icon("arrow-down-1-9")
+    } else if (identical(x, "text")) {
+      shiny::icon("arrow-down-a-z")
+    } else if (identical(x, "dichotomous")) {
+      shiny::icon("toggle-off")
+    } else if (identical(x,"datetime")) {
+      shiny::icon("calendar-days")
+    } else {
+      shiny::icon("table")
+    }}
 }
 
 
@@ -2731,7 +2763,7 @@ data_description <- function(data, data_text = "Data") {
   p_complete <- n_complete / n
 
   sprintf(
-    i18n("%s has %s observations and %s variables, with %s (%s%%) complete cases."),
+    "%s has %s observations and %s variables, with %s (%s%%) complete cases.",
     data_text,
     n,
     n_var,
@@ -3633,13 +3665,13 @@ launch_FreesearchR <- function(...){
 #' @name data-plots
 #'
 #' @examples
-#' mtcars |> plot_box(x = "mpg", y = "cyl", z = "gear")
+#' mtcars |> plot_box(pri = "mpg", sec = "cyl", ter = "gear")
 #' mtcars |>
 #'   default_parsing() |>
-#'   plot_box(x = "mpg", y = "cyl", z = "gear")
-plot_box <- function(data, x, y, z = NULL) {
-  if (!is.null(z)) {
-    ds <- split(data, data[z])
+#'   plot_box(pri = "mpg", sec = "cyl", ter = "gear")
+plot_box <- function(data, pri, sec, ter = NULL) {
+  if (!is.null(ter)) {
+    ds <- split(data, data[ter])
   } else {
     ds <- list(data)
   }
@@ -3647,13 +3679,12 @@ plot_box <- function(data, x, y, z = NULL) {
   out <- lapply(ds, \(.ds){
     plot_box_single(
       data = .ds,
-      x = x,
-      y = y
+      pri = pri,
+      sec = sec
     )
   })
 
   wrap_plot_list(out)
-  # patchwork::wrap_plots(out,guides = "collect")
 }
 
 
@@ -3668,18 +3699,18 @@ plot_box <- function(data, x, y, z = NULL) {
 #'
 #' @examples
 #' mtcars |> plot_box_single("mpg","cyl")
-plot_box_single <- function(data, x, y=NULL, seed = 2103) {
+plot_box_single <- function(data, pri, sec=NULL, seed = 2103) {
   set.seed(seed)
 
-  if (is.null(y)) {
-    y <- "All"
-    data[[y]] <- y
+  if (is.null(sec)) {
+    sec <- "All"
+    data[[y]] <- sec
   }
 
-  discrete <- !data_type(data[[y]]) %in% "continuous"
+  discrete <- !data_type(data[[sec]]) %in% "continuous"
 
   data |>
-    ggplot2::ggplot(ggplot2::aes(x = !!dplyr::sym(x), y = !!dplyr::sym(y), fill = !!dplyr::sym(y), group = !!dplyr::sym(y))) +
+    ggplot2::ggplot(ggplot2::aes(x = !!dplyr::sym(pri), y = !!dplyr::sym(sec), fill = !!dplyr::sym(sec), group = !!dplyr::sym(sec))) +
     ggplot2::geom_boxplot(linewidth = 1.8, outliers = FALSE) +
     ## THis could be optional in future
     ggplot2::geom_jitter(color = "black", size = 2, alpha = 0.9, width = 0.1, height = .5) +
@@ -3789,16 +3820,16 @@ ggeulerr <- function(
 #'   D = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE)
 #' ) |> plot_euler("A", c("B", "C"), "D", seed = 4)
 #' mtcars |> plot_euler("vs", "am", seed = 1)
-plot_euler <- function(data, x, y, z = NULL, seed = 2103) {
+plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
   set.seed(seed = seed)
-  if (!is.null(z)) {
-    ds <- split(data, data[z])
+  if (!is.null(ter)) {
+    ds <- split(data, data[ter])
   } else {
     ds <- list(data)
   }
 
   out <- lapply(ds, \(.x){
-    .x[c(x, y)] |>
+    .x[c(pri, sec)] |>
       as.data.frame() |>
       plot_euler_single()
   })
@@ -3808,7 +3839,6 @@ plot_euler <- function(data, x, y, z = NULL, seed = 2103) {
   # patchwork::wrap_plots(out, guides = "collect")
 }
 
-?withCallingHandlers()
 #' Easily plot single euler diagrams
 #'
 #' @returns ggplot2 object
@@ -3854,10 +3884,10 @@ plot_euler_single <- function(data) {
 #' @name data-plots
 #'
 #' @examples
-#' mtcars |> plot_hbars(x = "carb", y = "cyl")
-#' mtcars |> plot_hbars(x = "carb", y = NULL)
-plot_hbars <- function(data, x, y, z = NULL) {
-  out <- vertical_stacked_bars(data = data, score = x, group = y, strata = z)
+#' mtcars |> plot_hbars(pri = "carb", sec = "cyl")
+#' mtcars |> plot_hbars(pri = "carb", sec = NULL)
+plot_hbars <- function(data, pri, sec, ter = NULL) {
+  out <- vertical_stacked_bars(data = data, score = pri, group = sec, strata = ter)
 
   out
 }
@@ -3998,42 +4028,42 @@ plot_ridge <- function(data, x, y, z = NULL, ...) {
 #'   last = sample(c(TRUE, FALSE, FALSE), 100, TRUE)
 #' ) |>
 #'   sankey_ready("first", "last")
-sankey_ready <- function(data, x, y, numbers = "count", ...) {
+sankey_ready <- function(data, pri, sec, numbers = "count", ...) {
   ## TODO: Ensure ordering x and y
 
   ## Ensure all are factors
-  data[c(x, y)] <- data[c(x, y)] |>
+  data[c(pri, sec)] <- data[c(pri, sec)] |>
     dplyr::mutate(dplyr::across(!dplyr::where(is.factor), forcats::as_factor))
 
-  out <- dplyr::count(data, !!dplyr::sym(x), !!dplyr::sym(y))
+  out <- dplyr::count(data, !!dplyr::sym(pri), !!dplyr::sym(sec))
 
   out <- out |>
-    dplyr::group_by(!!dplyr::sym(x)) |>
+    dplyr::group_by(!!dplyr::sym(pri)) |>
     dplyr::mutate(gx.sum = sum(n)) |>
     dplyr::ungroup() |>
-    dplyr::group_by(!!dplyr::sym(y)) |>
+    dplyr::group_by(!!dplyr::sym(sec)) |>
     dplyr::mutate(gy.sum = sum(n)) |>
     dplyr::ungroup()
 
   if (numbers == "count") {
     out <- out |> dplyr::mutate(
-      lx = factor(paste0(!!dplyr::sym(x), "\n(n=", gx.sum, ")")),
-      ly = factor(paste0(!!dplyr::sym(y), "\n(n=", gy.sum, ")"))
+      lx = factor(paste0(!!dplyr::sym(pri), "\n(n=", gx.sum, ")")),
+      ly = factor(paste0(!!dplyr::sym(sec), "\n(n=", gy.sum, ")"))
     )
   } else if (numbers == "percentage") {
     out <- out |> dplyr::mutate(
-      lx = factor(paste0(!!dplyr::sym(x), "\n(", round((gx.sum / sum(n)) * 100, 1), "%)")),
-      ly = factor(paste0(!!dplyr::sym(y), "\n(", round((gy.sum / sum(n)) * 100, 1), "%)"))
+      lx = factor(paste0(!!dplyr::sym(pri), "\n(", round((gx.sum / sum(n)) * 100, 1), "%)")),
+      ly = factor(paste0(!!dplyr::sym(sec), "\n(", round((gy.sum / sum(n)) * 100, 1), "%)"))
     )
   }
 
-  if (is.factor(data[[x]])) {
-    index <- match(levels(data[[x]]), str_remove_last(levels(out$lx), "\n"))
+  if (is.factor(data[[pri]])) {
+    index <- match(levels(data[[pri]]), str_remove_last(levels(out$lx), "\n"))
     out$lx <- factor(out$lx, levels = levels(out$lx)[index])
   }
 
-  if (is.factor(data[[y]])) {
-    index <- match(levels(data[[y]]), str_remove_last(levels(out$ly), "\n"))
+  if (is.factor(data[[sec]])) {
+    index <- match(levels(data[[sec]]), str_remove_last(levels(out$ly), "\n"))
     out$ly <- factor(out$ly, levels = levels(out$ly)[index])
   }
 
@@ -4058,15 +4088,15 @@ str_remove_last <- function(data, pattern = "\n") {
 #' ds |> plot_sankey("first", "last")
 #' ds |> plot_sankey("first", "last", color.group = "y")
 #' ds |> plot_sankey("first", "last", z = "g", color.group = "y")
-plot_sankey <- function(data, x, y, z = NULL, color.group = "x", colors = NULL) {
-  if (!is.null(z)) {
-    ds <- split(data, data[z])
+plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "x", colors = NULL) {
+  if (!is.null(ter)) {
+    ds <- split(data, data[ter])
   } else {
     ds <- list(data)
   }
 
   out <- lapply(ds, \(.ds){
-    plot_sankey_single(.ds, x = x, y = y, color.group = color.group, colors = colors)
+    plot_sankey_single(.ds, x = pri, y = sec, color.group = color.group, colors = colors)
   })
 
   patchwork::wrap_plots(out)
@@ -4095,10 +4125,10 @@ default_theme <- function() {
 #'   first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)),
 #'   last = sample(c(TRUE, FALSE, FALSE), 100, TRUE)
 #' ) |>
-#'   plot_sankey_single("first", "last", color.group = "x")
-plot_sankey_single <- function(data, x, y, color.group = c("x", "y"), colors = NULL, ...) {
+#'   plot_sankey_single("first", "last", color.group = "pri")
+plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), colors = NULL, ...) {
   color.group <- match.arg(color.group)
-  data <- data |> sankey_ready(x = x, y = y, ...)
+  data <- data |> sankey_ready(pri = pri, sec = sec, ...)
 
   library(ggalluvial)
 
@@ -4106,13 +4136,13 @@ plot_sankey_single <- function(data, x, y, color.group = c("x", "y"), colors = N
   box.color <- "#1E4B66"
 
   if (is.null(colors)) {
-    if (color.group == "y") {
-      main.colors <- viridisLite::viridis(n = length(levels(data[[y]])))
-      secondary.colors <- rep(na.color, length(levels(data[[x]])))
+    if (color.group == "sec") {
+      main.colors <- viridisLite::viridis(n = length(levels(data[[sec]])))
+      secondary.colors <- rep(na.color, length(levels(data[[pri]])))
       label.colors <- Reduce(c, lapply(list(secondary.colors, rev(main.colors)), contrast_text))
     } else {
-      main.colors <- viridisLite::viridis(n = length(levels(data[[x]])))
-      secondary.colors <- rep(na.color, length(levels(data[[y]])))
+      main.colors <- viridisLite::viridis(n = length(levels(data[[pri]])))
+      secondary.colors <- rep(na.color, length(levels(data[[sec]])))
       label.colors <- Reduce(c, lapply(list(rev(main.colors), secondary.colors), contrast_text))
     }
     colors <- c(na.color, main.colors, secondary.colors)
@@ -4120,33 +4150,33 @@ plot_sankey_single <- function(data, x, y, color.group = c("x", "y"), colors = N
     label.colors <- contrast_text(colors)
   }
 
-  group_labels <- c(get_label(data, x), get_label(data, y)) |>
+  group_labels <- c(get_label(data, pri), get_label(data, sec)) |>
     sapply(line_break) |>
     unname()
 
   p <- ggplot2::ggplot(data, ggplot2::aes(y = n, axis1 = lx, axis2 = ly))
 
-  if (color.group == "y") {
+  if (color.group == "sec") {
     p <- p +
       ggalluvial::geom_alluvium(
-        ggplot2::aes(fill = !!dplyr::sym(y), color = !!dplyr::sym(y)),
+        ggplot2::aes(fill = !!dplyr::sym(sec), color = !!dplyr::sym(sec)),
         width = 1 / 16,
         alpha = .8,
         knot.pos = 0.4,
         curve_type = "sigmoid"
-      ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(y)),
+      ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(sec)),
         size = 2,
         width = 1 / 3.4
       )
   } else {
     p <- p +
       ggalluvial::geom_alluvium(
-        ggplot2::aes(fill = !!dplyr::sym(x), color = !!dplyr::sym(x)),
+        ggplot2::aes(fill = !!dplyr::sym(pri), color = !!dplyr::sym(pri)),
         width = 1 / 16,
         alpha = .8,
         knot.pos = 0.4,
         curve_type = "sigmoid"
-      ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(x)),
+      ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(pri)),
         size = 2,
         width = 1 / 3.4
       )
@@ -4195,20 +4225,24 @@ plot_sankey_single <- function(data, x, y, color.group = c("x", "y"), colors = N
 #' @name data-plots
 #'
 #' @examples
-#' mtcars |> plot_scatter(x = "mpg", y = "wt")
-plot_scatter <- function(data, x, y, z = NULL) {
-  if (is.null(z)) {
+#' mtcars |> plot_scatter(pri = "mpg", sec = "wt")
+plot_scatter <- function(data, pri, sec, ter = NULL) {
+  if (is.null(ter)) {
     rempsyc::nice_scatter(
       data = data,
-      predictor = y,
-      response = x, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
+      predictor = sec,
+      response = pri,
+      xtitle = get_label(data, var = sec),
+      ytitle = get_label(data, var = pri)
     )
   } else {
     rempsyc::nice_scatter(
       data = data,
-      predictor = y,
-      response = x,
-      group = z, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
+      predictor = sec,
+      response = pri,
+      group = ter,
+      xtitle = get_label(data, var = sec),
+      ytitle = get_label(data, var = pri)
     )
   }
 }
@@ -4226,10 +4260,10 @@ plot_scatter <- function(data, x, y, z = NULL) {
 #' @name data-plots
 #'
 #' @examples
-#' mtcars |> plot_violin(x = "mpg", y = "cyl", z = "gear")
-plot_violin <- function(data, x, y, z = NULL) {
-  if (!is.null(z)) {
-    ds <- split(data, data[z])
+#' mtcars |> plot_violin(pri = "mpg", sec = "cyl", ter = "gear")
+plot_violin <- function(data, pri, sec, ter = NULL) {
+  if (!is.null(ter)) {
+    ds <- split(data, data[ter])
   } else {
     ds <- list(data)
   }
@@ -4237,8 +4271,10 @@ plot_violin <- function(data, x, y, z = NULL) {
   out <- lapply(ds, \(.ds){
     rempsyc::nice_violin(
       data = .ds,
-      group = y,
-      response = x, xtitle = get_label(data, var = y), ytitle = get_label(data, var = x)
+      group = sec,
+      response = pri,
+      xtitle = get_label(data, var = sec),
+      ytitle = get_label(data, var = pri)
     )
   })
 

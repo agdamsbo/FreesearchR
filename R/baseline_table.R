@@ -49,7 +49,7 @@ create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALS
     }
   }
 
-  gtsummary::theme_gtsummary_journal(journal = theme)
+  suppressMessages(gtsummary::theme_gtsummary_journal(journal = theme))
 
   args <- list(...)
 
