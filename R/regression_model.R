@@ -279,11 +279,11 @@ data_type <- function(data) {
       if (identical("logical", cl_d) | length(unique(data)) == 2) {
         out <- "dichotomous"
       } else {
-        if (is.ordered(data)) {
-          out <- "ordinal"
-        } else {
+        # if (is.ordered(data)) {
+        #   out <- "ordinal"
+        # } else {
           out <- "categorical"
-        }
+        # }
       }
     } else if (identical(cl_d, "character")) {
       out <- "text"
@@ -310,7 +310,16 @@ data_type <- function(data) {
 #' @examples
 #' data_types()
 data_types <- function() {
-  c("dichotomous", "ordinal", "categorical", "datatime", "continuous", "text", "empty", "monotone", "unknown")
+  list(
+    "empty" = list(descr="Variable of all NAs",classes="Any class"),
+    "monotone" = list(descr="Variable with only one unique value",classes="Any class"),
+    "dichotomous" = list(descr="Variable with only two unique values",classes="Any class"),
+    "categorical"= list(descr="Factor variable",classes="factor (ordered or unordered)"),
+    "text"= list(descr="Character variable",classes="character"),
+    "datetime"= list(descr="Variable of time, date or datetime values",classes="hms, Date, POSIXct and POSIXt"),
+    "continuous"= list(descr="Numeric variable",classes="numeric, integer or double"),
+    "unknown"= list(descr="Anything not falling within the previous",classes="Any other class")
+    )
 }
 
 
@@ -351,7 +360,7 @@ supported_functions <- function() {
     polr = list(
       descr = "Ordinal logistic regression model",
       design = "cross-sectional",
-      out.type = c("ordinal", "categorical"),
+      out.type = c("categorical"),
       fun = "MASS::polr",
       args.list = list(
         Hess = TRUE,

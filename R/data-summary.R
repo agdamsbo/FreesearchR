@@ -155,8 +155,8 @@ overview_vars <- function(data) {
   data <- as.data.frame(data)
 
   dplyr::tibble(
-    icon = data_type(data),
-    type = icon,
+    icon = get_classes(data),
+    class = icon,
     name = names(data),
     n_missing = unname(colSums(is.na(data))),
     p_complete = 1 - n_missing / nrow(data),
@@ -189,6 +189,7 @@ create_overview_datagrid <- function(data,...) {
   std_names <- c(
     "Name" = "name",
     "Icon" = "icon",
+    "Class" = "class",
     "Type" = "type",
     "Missings" = "n_missing",
     "Complete" = "p_complete",
@@ -235,7 +236,7 @@ create_overview_datagrid <- function(data,...) {
   grid <- add_class_icon(
     grid = grid,
     column = "icon",
-    fun = type_icons
+    fun = class_icons
   )
 
   grid <- toastui::grid_format(

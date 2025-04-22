@@ -129,7 +129,7 @@ argsstring2list <- function(string) {
 #' @export
 #'
 #' @examples
-#' factorize(mtcars,names(mtcars))
+#' factorize(mtcars, names(mtcars))
 factorize <- function(data, vars) {
   if (!is.null(vars)) {
     data |>
@@ -258,21 +258,27 @@ default_parsing <- function(data) {
 #' @export
 #'
 #' @examples
-#' ds <- mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label")) |> dplyr::bind_cols()
+#' ds <- mtcars |>
+#'   lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label")) |>
+#'   dplyr::bind_cols()
 #' ds |>
 #'   remove_empty_attr() |>
 #'   str()
-#'  mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label")) |> remove_empty_attr() |>
+#' mtcars |>
+#'   lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label")) |>
+#'   remove_empty_attr() |>
 #'   str()
 #'
 remove_empty_attr <- function(data) {
-  if (is.data.frame(data)){
-    data |> lapply(remove_empty_attr) |> dplyr::bind_cols()
-  } else if (is.list(data)){
+  if (is.data.frame(data)) {
+    data |>
+      lapply(remove_empty_attr) |>
+      dplyr::bind_cols()
+  } else if (is.list(data)) {
     data |> lapply(remove_empty_attr)
-  }else{
-  attributes(data)[is.na(attributes(data))] <- NULL
-  data
+  } else {
+    attributes(data)[is.na(attributes(data))] <- NULL
+    data
   }
 }
 
@@ -387,7 +393,7 @@ data_description <- function(data, data_text = "Data") {
 #' }
 data_type_filter <- function(data, type) {
   ## Please ensure to only provide recognised data types
-  assertthat::assert_that(all(type %in% data_types()))
+  assertthat::assert_that(all(type %in% names(data_types())))
 
   if (!is.null(type)) {
     out <- data[data_type(data) %in% type]
@@ -615,4 +621,34 @@ append_column <- function(data, column, name, index = "right") {
     if (!index > ncol(data)) data[index:ncol(data)]
   ) |>
     dplyr::bind_cols()
+}
+
+
+
+#' Test if element is identical to the previous
+#'
+#' @param data data. vector, data.frame or list
+#' @param no.name logical to remove names attribute before testing
+#'
+#' @returns logical vector
+#' @export
+#'
+#' @examples
+#' c(1, 1, 2, 3, 3, 2, 4, 4) |> is_identical_to_previous()
+#' mtcars[c(1, 1, 2, 3, 3, 2, 4, 4)] |> is_identical_to_previous()
+#' list(1, 1, list(2), "A", "a", "a") |> is_identical_to_previous()
+is_identical_to_previous <- function(data, no.name = TRUE) {
+  if (is.data.frame(data)) {
+    lagged <- data.frame(FALSE, data[seq_len(length(data) - 1)])
+  } else {
+    lagged <- c(FALSE, data[seq_len(length(data) - 1)])
+  }
+
+  vapply(seq_len(length(data)), \(.x){
+    if (isTRUE(no.name)) {
+      identical(unname(lagged[.x]), unname(data[.x]))
+    } else {
+      identical(lagged[.x], data[.x])
+    }
+  }, FUN.VALUE = logical(1))
 }
