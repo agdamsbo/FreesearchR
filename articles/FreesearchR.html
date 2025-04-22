@@ -138,6 +138,21 @@ data insights and code generation for basic plotting to fine tune.</p>
 </div>
 </div>
 <div class="section level3">
+<h3 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
+</h3>
+<p>This is the panel to get a good overview of your data, check data is
+classed and formatted correctly, perform simple modifications and filter
+data.</p>
+<div class="section level4">
+<h4 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
+</h4>
+</div>
+<div class="section level4">
+<h4 id="modify">Modify<a class="anchor" aria-label="anchor" href="#modify"></a>
+</h4>
+</div>
+</div>
+<div class="section level3">
 <h3 id="evaluate">Evaluate<a class="anchor" aria-label="anchor" href="#evaluate"></a>
 </h3>
 <p>This panel allows for basic data evaluation.</p>
@@ -219,29 +234,6 @@ visualise data distribution</td>
 set relationships</td>
 </tr>
 <tr class="odd">
-<td align="left">ordinal</td>
-<td align="left">Stacked horizontal bars</td>
-<td align="left">A classical way of visualising the distribution of an
-ordinal scale like the modified Ranking Scale and known as Grotta
-bars</td>
-</tr>
-<tr class="even">
-<td align="left">ordinal</td>
-<td align="left">Violin plot</td>
-<td align="left">A modern alternative to the classic boxplot to
-visualise data distribution</td>
-</tr>
-<tr class="odd">
-<td align="left">ordinal</td>
-<td align="left">Sankey plot</td>
-<td align="left">A way of visualising change between groups</td>
-</tr>
-<tr class="even">
-<td align="left">ordinal</td>
-<td align="left">Box plot</td>
-<td align="left">A classic way to plot data distribution by groups</td>
-</tr>
-<tr class="odd">
 <td align="left">categorical</td>
 <td align="left">Stacked horizontal bars</td>
 <td align="left">A classical way of visualising the distribution of an
@@ -277,6 +269,41 @@ fine tune all the small details.</p>
 <p>This section is only intended for very simple explorative analyses
 and as a proof-of-concept for now. If you are doing complex regression
 analyses you should probably just write the code yourself.</p>
+<p>Below are the available regression types listed.</p>
+<table class="table">
+<colgroup>
+<col width="16%">
+<col width="46%">
+<col width="15%">
+<col width="21%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">Data type</th>
+<th align="left">Regression model</th>
+<th align="left">Function</th>
+<th align="left">Study design</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">continuous</td>
+<td align="left">Linear regression model</td>
+<td align="left">stats::lm</td>
+<td align="left">cross-sectional</td>
+</tr>
+<tr class="even">
+<td align="left">dichotomous</td>
+<td align="left">Logistic regression model</td>
+<td align="left">stats::glm</td>
+<td align="left">cross-sectional</td>
+</tr>
+<tr class="odd">
+<td align="left">categorical</td>
+<td align="left">Ordinal logistic regression model</td>
+<td align="left">MASS::polr</td>
+<td align="left">cross-sectional</td>
+</tr>
+</tbody>
+</table>
 <div class="section level4">
 <h4 id="table">Table<a class="anchor" aria-label="anchor" href="#table"></a>
 </h4>
@@ -305,7 +332,7 @@ Choose which model(s) to include.</p>
 model results. Choose between MS Word or LibreOffice format.</p>
 </div>
 <div class="section level4">
-<h4 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
+<h4 id="data-1">Data<a class="anchor" aria-label="anchor" href="#data-1"></a>
 </h4>
 <p>Export the modified dataset in different formats.</p>
 </div>

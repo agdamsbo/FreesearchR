@@ -53,8 +53,70 @@
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">data_types</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "dichotomous" "ordinal"     "categorical" "datatime"    "continuous" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6] "text"        "empty"       "monotone"    "unknown"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $empty</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $empty$descr</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Variable of all NAs"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $empty$classes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Any class"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $monotone</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $monotone$descr</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Variable with only one unique value"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $monotone$classes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Any class"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $dichotomous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $dichotomous$descr</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Variable with only two unique values"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $dichotomous$classes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Any class"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $categorical</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $categorical$descr</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Factor variable"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $categorical$classes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "factor (ordered or unordered)"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $text</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $text$descr</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Character variable"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $text$classes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "character"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $datetime</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $datetime$descr</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Variable of time, date or datetime values"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $datetime$classes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "hms, Date, POSIXct and POSIXt"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $continuous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $continuous$descr</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Numeric variable"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $continuous$classes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "numeric, integer or double"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $unknown</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $unknown$descr</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Anything not falling within the previous"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $unknown$classes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Any other class"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
