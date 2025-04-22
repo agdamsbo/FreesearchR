@@ -17,6 +17,10 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/FreesearchR.html">Get started</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/data-types.html">Data types</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="../ROADMAP.html">Roadmap</a></li>
 <li class="nav-item"><a class="nav-link" href="../QA.html">Q&amp;A</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -64,7 +68,7 @@
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">factorize</span><span class="op">(</span><span class="va">mtcars</span>,<span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">factorize</span><span class="op">(</span><span class="va">mtcars</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                      mpg cyl  disp  hp drat    wt  qsec vs am gear carb</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Mazda RX4             21   6   160 110  3.9  2.62 16.46  0  1    4    4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Mazda RX4 Wag         21   6   160 110  3.9 2.875 17.02  0  1    4    4</span>
