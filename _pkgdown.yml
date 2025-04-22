@@ -14,7 +14,7 @@ navbar:
   bg: primary
   structure:
     left:  [intro, reference, articles, roadmap, q_a, news]
-    right: [search, github, lightswitch]
+    right: [search, github]
   components:
     roadmap:
       text: Roadmap
