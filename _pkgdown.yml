@@ -13,8 +13,8 @@ template:
 navbar:
   bg: primary
   structure:
-    left:  [intro, reference, roadmap, q_a, news]
-    right: [search, github]
+    left:  [intro, reference, articles, roadmap, q_a, news]
+    right: [search, github, lightswitch]
   components:
     roadmap:
       text: Roadmap

@@ -39,6 +39,7 @@ plot_box <- function(data, pri, sec, ter = NULL) {
 #' @export
 #'
 #' @examples
+#' mtcars |> plot_box_single("mpg")
 #' mtcars |> plot_box_single("mpg","cyl")
 plot_box_single <- function(data, pri, sec=NULL, seed = 2103) {
   set.seed(seed)

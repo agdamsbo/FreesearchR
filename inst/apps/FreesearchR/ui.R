@@ -162,7 +162,7 @@ ui_elements <- list(
               shiny::uiOutput(outputId = "column_filter"),
               shiny::helpText("Variable ", tags$a(
                 "data type",
-                href = "https://agdamsbo.github.io/FreesearchR/articles/FreesearchR.html",
+                href = "https://agdamsbo.github.io/FreesearchR/articles/data-types.html",
                 target = "_blank",
                 rel = "noopener noreferrer"
               ), " filtering."),

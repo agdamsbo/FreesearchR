@@ -67,6 +67,12 @@ This is the panel to get a good overview of your data, check data is classed and
 
 ### Summary
 
+Here, the data variables can be inspected with a simple visualisation and a few key measures. Also, data filtering is available at two levels: 
+
+   - Data type filtering allows to filter by variable [data type]()
+   
+   - Observations level filtering allow to filter data by variable
+
 ### Modify
 
 

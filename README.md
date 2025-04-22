@@ -38,3 +38,13 @@ launch_FreesearchR()
 ## Code of Conduct
 
 Please note that the ***FreesearchR*** project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
+
+## Acknowledgements
+
+Like any other project, this project was never possible without the great work of others. These are some of the sources and packages I have used:
+
+-   The ***FreesearchR*** app is build with [Shiny](https://shiny.posit.co/) and based on (*R*)[https://www.r-project.org/].
+
+-   [gtsummary](https://www.danieldsjoberg.com/gtsummary/): superb and flexible way to create publication-ready analytical and summary tables.
+
+-   [dreamRs](https://github.com/dreamRs): maintainers of a broad selection of great extensions and tools for [Shiny](https://shiny.posit.co/).

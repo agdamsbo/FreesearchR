@@ -18,5 +18,5 @@ data.frame
 Factorize variables in data.frame
 }
 \examples{
-factorize(mtcars,names(mtcars))
+factorize(mtcars, names(mtcars))
 }

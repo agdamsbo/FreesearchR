@@ -21,6 +21,6 @@ Easily subset by data type function
 }
 \examples{
 default_parsing(mtcars) |> subset_types("ordinal")
-default_parsing(mtcars) |> subset_types(c("dichotomous", "ordinal", "categorical"))
+default_parsing(mtcars) |> subset_types(c("dichotomous", "categorical"))
 #' default_parsing(mtcars) |> subset_types("factor",class)
 }
