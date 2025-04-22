@@ -10,7 +10,7 @@
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'Version: 25.4.3.250415_1627'
+app_version <- function()'Version: 25.4.3.250422'
 
 
 ########
@@ -1514,7 +1514,7 @@ all_but <- function(data, ...) {
 #'
 #' @examples
 #' default_parsing(mtcars) |> subset_types("ordinal")
-#' default_parsing(mtcars) |> subset_types(c("dichotomous", "ordinal", "categorical"))
+#' default_parsing(mtcars) |> subset_types(c("dichotomous", "categorical"))
 #' #' default_parsing(mtcars) |> subset_types("factor",class)
 subset_types <- function(data, types, type.fun = data_type) {
   data[sapply(data, type.fun) %in% types]
@@ -1549,58 +1549,58 @@ supported_plots <- function() {
       fun = "plot_hbars",
       descr = "Stacked horizontal bars",
       note = "A classical way of visualising the distribution of an ordinal scale like the modified Ranking Scale and known as Grotta bars",
-      primary.type = c("dichotomous", "ordinal", "categorical"),
-      secondary.type = c("dichotomous", "ordinal", "categorical"),
+      primary.type = c("dichotomous", "categorical"),
+      secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "ordinal", "categorical"),
+      tertiary.type = c("dichotomous", "categorical"),
       secondary.extra = "none"
     ),
     plot_violin = list(
       fun = "plot_violin",
       descr = "Violin plot",
       note = "A modern alternative to the classic boxplot to visualise data distribution",
-      primary.type = c("datatime", "continuous", "dichotomous", "ordinal", "categorical"),
-      secondary.type = c("dichotomous", "ordinal", "categorical"),
+      primary.type = c("datatime", "continuous", "dichotomous", "categorical"),
+      secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
       secondary.extra = "none",
-      tertiary.type = c("dichotomous", "ordinal", "categorical")
+      tertiary.type = c("dichotomous", "categorical")
     ),
     # plot_ridge = list(
     #   descr = "Ridge plot",
     #   note = "An alternative option to visualise data distribution",
     #   primary.type = "continuous",
-    #   secondary.type = c("dichotomous", "ordinal" ,"categorical"),
-    #   tertiary.type = c("dichotomous", "ordinal" ,"categorical"),
+    #   secondary.type = c("dichotomous" ,"categorical"),
+    #   tertiary.type = c("dichotomous" ,"categorical"),
     #   secondary.extra = NULL
     # ),
     plot_sankey = list(
       fun = "plot_sankey",
       descr = "Sankey plot",
       note = "A way of visualising change between groups",
-      primary.type = c("dichotomous", "ordinal", "categorical"),
-      secondary.type = c("dichotomous", "ordinal", "categorical"),
+      primary.type = c("dichotomous", "categorical"),
+      secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
       secondary.extra = NULL,
-      tertiary.type = c("dichotomous", "ordinal", "categorical")
+      tertiary.type = c("dichotomous", "categorical")
     ),
     plot_scatter = list(
       fun = "plot_scatter",
       descr = "Scatter plot",
       note = "A classic way of showing the association between to variables",
       primary.type = c("datatime", "continuous"),
-      secondary.type = c("datatime", "continuous", "ordinal", "categorical"),
+      secondary.type = c("datatime", "continuous", "categorical"),
       secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "ordinal", "categorical"),
+      tertiary.type = c("dichotomous", "categorical"),
       secondary.extra = NULL
     ),
     plot_box = list(
       fun = "plot_box",
       descr = "Box plot",
       note = "A classic way to plot data distribution by groups",
-      primary.type = c("datatime", "continuous", "dichotomous", "ordinal", "categorical"),
-      secondary.type = c("dichotomous", "ordinal", "categorical"),
+      primary.type = c("datatime", "continuous", "dichotomous", "categorical"),
+      secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "ordinal", "categorical"),
+      tertiary.type = c("dichotomous", "categorical"),
       secondary.extra = "none"
     ),
     plot_euler = list(
@@ -1611,7 +1611,7 @@ supported_plots <- function() {
       secondary.type = "dichotomous",
       secondary.multi = TRUE,
       secondary.max = 4,
-      tertiary.type = c("dichotomous", "ordinal", "categorical"),
+      tertiary.type = c("dichotomous", "categorical"),
       secondary.extra = NULL
     )
   )
@@ -2197,8 +2197,8 @@ overview_vars <- function(data) {
   data <- as.data.frame(data)
 
   dplyr::tibble(
-    icon = data_type(data),
-    type = icon,
+    icon = get_classes(data),
+    class = icon,
     name = names(data),
     n_missing = unname(colSums(is.na(data))),
     p_complete = 1 - n_missing / nrow(data),
@@ -2231,6 +2231,7 @@ create_overview_datagrid <- function(data,...) {
   std_names <- c(
     "Name" = "name",
     "Icon" = "icon",
+    "Class" = "class",
     "Type" = "type",
     "Missings" = "n_missing",
     "Complete" = "p_complete",
@@ -2277,7 +2278,7 @@ create_overview_datagrid <- function(data,...) {
   grid <- add_class_icon(
     grid = grid,
     column = "icon",
-    fun = type_icons
+    fun = class_icons
   )
 
   grid <- toastui::grid_format(
@@ -2339,15 +2340,15 @@ add_class_icon <- function(grid, column = "class", fun=class_icons) {
 #'
 #' @param x character vector of data classes
 #'
-#' @returns
+#' @returns list
 #' @export
 #'
 #' @examples
-#' "numeric" |> class_icons()
-#' default_parsing(mtcars) |> sapply(class) |> class_icons()
+#' "numeric" |> class_icons()|> str()
+#' mtcars |> sapply(class) |> class_icons() |> str()
 class_icons <- function(x) {
   if (length(x)>1){
-    sapply(x,class_icons)
+    lapply(x,class_icons)
   } else {
   if (identical(x, "numeric")) {
     shiny::icon("calculator")
@@ -2372,7 +2373,7 @@ class_icons <- function(x) {
 #'
 #' @param x character vector of data classes
 #'
-#' @returns
+#' @returns list
 #' @export
 #'
 #' @examples
@@ -2380,7 +2381,7 @@ class_icons <- function(x) {
 #' default_parsing(mtcars) |> sapply(data_type) |> type_icons()
 type_icons <- function(x) {
   if (length(x)>1){
-    sapply(x,class_icons)
+    lapply(x,class_icons)
   } else {
     if (identical(x, "continuous")) {
       shiny::icon("calculator")
@@ -2538,7 +2539,7 @@ argsstring2list <- function(string) {
 #' @export
 #'
 #' @examples
-#' factorize(mtcars,names(mtcars))
+#' factorize(mtcars, names(mtcars))
 factorize <- function(data, vars) {
   if (!is.null(vars)) {
     data |>
@@ -2667,21 +2668,27 @@ default_parsing <- function(data) {
 #' @export
 #'
 #' @examples
-#' ds <- mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label")) |> dplyr::bind_cols()
+#' ds <- mtcars |>
+#'   lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label")) |>
+#'   dplyr::bind_cols()
 #' ds |>
 #'   remove_empty_attr() |>
 #'   str()
-#'  mtcars |> lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label")) |> remove_empty_attr() |>
+#' mtcars |>
+#'   lapply(\(.x) REDCapCAST::set_attr(.x, label = NA, attr = "label")) |>
+#'   remove_empty_attr() |>
 #'   str()
 #'
 remove_empty_attr <- function(data) {
-  if (is.data.frame(data)){
-    data |> lapply(remove_empty_attr) |> dplyr::bind_cols()
-  } else if (is.list(data)){
+  if (is.data.frame(data)) {
+    data |>
+      lapply(remove_empty_attr) |>
+      dplyr::bind_cols()
+  } else if (is.list(data)) {
     data |> lapply(remove_empty_attr)
-  }else{
-  attributes(data)[is.na(attributes(data))] <- NULL
-  data
+  } else {
+    attributes(data)[is.na(attributes(data))] <- NULL
+    data
   }
 }
 
@@ -2796,7 +2803,7 @@ data_description <- function(data, data_text = "Data") {
 #' }
 data_type_filter <- function(data, type) {
   ## Please ensure to only provide recognised data types
-  assertthat::assert_that(all(type %in% data_types()))
+  assertthat::assert_that(all(type %in% names(data_types())))
 
   if (!is.null(type)) {
     out <- data[data_type(data) %in% type]
@@ -3024,6 +3031,36 @@ append_column <- function(data, column, name, index = "right") {
     if (!index > ncol(data)) data[index:ncol(data)]
   ) |>
     dplyr::bind_cols()
+}
+
+
+
+#' Test if element is identical to the previous
+#'
+#' @param data data. vector, data.frame or list
+#' @param no.name logical to remove names attribute before testing
+#'
+#' @returns logical vector
+#' @export
+#'
+#' @examples
+#' c(1, 1, 2, 3, 3, 2, 4, 4) |> is_identical_to_previous()
+#' mtcars[c(1, 1, 2, 3, 3, 2, 4, 4)] |> is_identical_to_previous()
+#' list(1, 1, list(2), "A", "a", "a") |> is_identical_to_previous()
+is_identical_to_previous <- function(data, no.name = TRUE) {
+  if (is.data.frame(data)) {
+    lagged <- data.frame(FALSE, data[seq_len(length(data) - 1)])
+  } else {
+    lagged <- c(FALSE, data[seq_len(length(data) - 1)])
+  }
+
+  vapply(seq_len(length(data)), \(.x){
+    if (isTRUE(no.name)) {
+      identical(unname(lagged[.x]), unname(data[.x]))
+    } else {
+      identical(lagged[.x], data[.x])
+    }
+  }, FUN.VALUE = logical(1))
 }
 
 
@@ -5317,11 +5354,11 @@ data_type <- function(data) {
       if (identical("logical", cl_d) | length(unique(data)) == 2) {
         out <- "dichotomous"
       } else {
-        if (is.ordered(data)) {
-          out <- "ordinal"
-        } else {
+        # if (is.ordered(data)) {
+        #   out <- "ordinal"
+        # } else {
           out <- "categorical"
-        }
+        # }
       }
     } else if (identical(cl_d, "character")) {
       out <- "text"
@@ -5348,7 +5385,16 @@ data_type <- function(data) {
 #' @examples
 #' data_types()
 data_types <- function() {
-  c("dichotomous", "ordinal", "categorical", "datatime", "continuous", "text", "empty", "monotone", "unknown")
+  list(
+    "empty" = list(descr="Variable of all NAs",classes="Any class"),
+    "monotone" = list(descr="Variable with only one unique value",classes="Any class"),
+    "dichotomous" = list(descr="Variable with only two unique values",classes="Any class"),
+    "categorical"= list(descr="Factor variable",classes="factor (ordered or unordered)"),
+    "text"= list(descr="Character variable",classes="character"),
+    "datetime"= list(descr="Variable of time, date or datetime values",classes="hms, Date, POSIXct and POSIXt"),
+    "continuous"= list(descr="Numeric variable",classes="numeric, integer or double"),
+    "unknown"= list(descr="Anything not falling within the previous",classes="Any other class")
+    )
 }
 
 
@@ -5389,7 +5435,7 @@ supported_functions <- function() {
     polr = list(
       descr = "Ordinal logistic regression model",
       design = "cross-sectional",
-      out.type = c("ordinal", "categorical"),
+      out.type = c("categorical"),
       fun = "MASS::polr",
       args.list = list(
         Hess = TRUE,
@@ -8191,6 +8237,8 @@ grepl_fix <- function(data, pattern, type = c("prefix", "infix", "suffix")) {
 
 # ns <- NS(id)
 
+
+
 ui_elements <- list(
   ##############################################################################
   #########
@@ -8349,7 +8397,12 @@ ui_elements <- list(
               shiny::tags$br(),
               shiny::tags$br(),
               shiny::uiOutput(outputId = "column_filter"),
-              shiny::helpText("Variable data type filtering."),
+              shiny::helpText("Variable ", tags$a(
+                "data type",
+                href = "https://agdamsbo.github.io/FreesearchR/articles/FreesearchR.html",
+                target = "_blank",
+                rel = "noopener noreferrer"
+              ), " filtering."),
               shiny::tags$br(),
               shiny::tags$br(),
               IDEAFilter::IDEAFilter_ui("data_filter"),
@@ -8464,7 +8517,7 @@ ui_elements <- list(
       bslib::navset_bar(
         title = "",
         sidebar = bslib::sidebar(
-            shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
+          shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
           bslib::accordion(
             open = "acc_chars",
             multiple = FALSE,
@@ -9219,7 +9272,13 @@ server <- function(input, output, session) {
   output$code_data <- shiny::renderUI({
     shiny::req(rv$code$modify)
     # browser()
-    ls <- rv$code$modify |> unique()
+    ## This will create three lines for each modification
+    # ls <- rv$code$modify
+    ## This will remove all non-unique entries
+    # ls <- rv$code$modify |> unique()
+    ## This will only remove all non-repeating entries
+    ls <- rv$code$modify[!is_identical_to_previous(rv$code$modify)]
+
     out <- ls |>
       lapply(expression_string) |>
       pipe_string() |>

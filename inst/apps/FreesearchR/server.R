@@ -481,7 +481,13 @@ server <- function(input, output, session) {
   output$code_data <- shiny::renderUI({
     shiny::req(rv$code$modify)
     # browser()
-    ls <- rv$code$modify |> unique()
+    ## This will create three lines for each modification
+    # ls <- rv$code$modify
+    ## This will remove all non-unique entries
+    # ls <- rv$code$modify |> unique()
+    ## This will only remove all non-repeating entries
+    ls <- rv$code$modify[!is_identical_to_previous(rv$code$modify)]
+
     out <- ls |>
       lapply(expression_string) |>
       pipe_string() |>

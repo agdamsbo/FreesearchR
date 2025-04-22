@@ -1,5 +1,7 @@
 # ns <- NS(id)
 
+
+
 ui_elements <- list(
   ##############################################################################
   #########
@@ -158,7 +160,12 @@ ui_elements <- list(
               shiny::tags$br(),
               shiny::tags$br(),
               shiny::uiOutput(outputId = "column_filter"),
-              shiny::helpText("Variable data type filtering."),
+              shiny::helpText("Variable ", tags$a(
+                "data type",
+                href = "https://agdamsbo.github.io/FreesearchR/articles/FreesearchR.html",
+                target = "_blank",
+                rel = "noopener noreferrer"
+              ), " filtering."),
               shiny::tags$br(),
               shiny::tags$br(),
               IDEAFilter::IDEAFilter_ui("data_filter"),
@@ -273,7 +280,7 @@ ui_elements <- list(
       bslib::navset_bar(
         title = "",
         sidebar = bslib::sidebar(
-            shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
+          shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
           bslib::accordion(
             open = "acc_chars",
             multiple = FALSE,
