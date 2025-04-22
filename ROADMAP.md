@@ -1,55 +1,47 @@
 # Project roadmap
 
-The current state of the app is considered experimental, and a lot of things are still changing. It is, however, in a usable state, with basic functions available to the user.
+The current state of the app is considered experimental, however, from version 25.4.2, the ***FreesearchR*** app is considered functional and can be used for data evaluation and analyses.
 
-Below are some (the actual list is quite long and growing) of the planned features and improvements:
+Below are some (the actual list is quite long and growing) of the planned new features and improvements:
 
--   Additional study designs in regression models (expansion of the regression analysis functionality have been put on hold for now to focus on the more basic use-cases):
+### Implementation in real world clinical studies and projects
 
-    -   [x] Cross-sectional data analyses
+This really is the main goal of the whole project.
 
-    -   [ ] Longitudinal data analyses
+### New features:
 
-    -   [ ] Survival analysis
+-   [ ] Merge data from multiple sources (you can merge sheets from a workbook (xls or ods), but this would allow merging several files and/or REDcap data)
+
+-   [ ] Additional plot types (bar plots, *others...*)
+
+-   [ ] Missingness analysis panel
+
+### Expanded options for regression models:
+
+Expansion of the regression analysis functionality have been put on hold for now to focus on the more basic use-cases):
+
+More study designs
+
+-   [x] Cross-sectional data analyses
+
+-   [ ] Longitudinal data analyses
+
+-   [ ] Survival analysis
+
+Other regression models
+
+-   [ ] Stratified analyses
     
-    -   [ ] Stratified analyses
-
--   More detailed variable browser
-
-    -   [x] Add histograms for data distribution. 2025-01-16
-
-    -   [x] Option to edit labels. 2025-01-16
+-   [ ] Mixed models of repeated measures
     
--   More output controls
+-   [ ] Cox regression analyses
 
-    -   [x] ~~Theming output tables~~ The "JAMA" theme is the new standard.
+Data handling
 
-    -   [x] ~~Select analyses to include in report.~~ Includes characteristics table and regression table if present. No other analyses are intended for the report as of now.
+-   [ ] Transforming data (transpose and pivoting)
 
--   [x] Export modified data. 2025-01-16
+### Improved documentation:
 
--   [x] Include reproducible code for all steps (maybe not all, but most steps, and the final dataset can be exported) 2025-04-10
+-   [ ] Video walk-through of central functions
 
--   [x] ~~Modify factor levels~~ Factor level modifications is possible through converting factors to numeric > cutting numeric with desired fixed values. 2024-12-12
 
--   [x] More options for date/datetime/time grouping/factoring. Included weekday and month-only options. 2024-12-12
-
--   Graphs and plots
-
-    - [x] Correlation matrix plot for data exploration 2025-2-20
-    
-    - [x] Grotta bars for ordianl outcomes (and sankey) 2025-3-17
-    
-    - [x] Coefficient plotting for regression analyses (forest plot) 2025-2-20
-
-Documentation:
-
--   [ ] Complete getting started page describing all functionality.
-
--   [ ] Streamlined functions documentation
-
-New features:
-
--   [ ] Merge data from multiple sources (this would in itself be a great feature, but not of highest importance)
-
--   [ ] Additional plot types (missingness, *others...*)

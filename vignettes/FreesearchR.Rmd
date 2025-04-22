@@ -61,6 +61,16 @@ This will unfold options to preview your data dictionary (the main database meta
 
 When opening the online hosted app, this is mainly for testing purposes. When running the app locally from *R* on your own computer, you will find all data.frames in the current environment here. This extends the possible uses of this app to allow for quick and easy data insights and code generation for basic plotting to fine tune.
 
+## Data
+
+This is the panel to get a good overview of your data, check data is classed and formatted correctly, perform simple modifications and filter data. 
+
+### Summary
+
+### Modify
+
+
+
 ## Evaluate
 
 This panel allows for basic data evaluation.
@@ -80,7 +90,7 @@ There are a number of plotting options to visualise different aspects of the dat
 Below are the available plot types listed.
 
 ```{r echo = FALSE, eval = TRUE}
-c("continuous", "dichotomous", "ordinal", "categorical") |> 
+c("continuous", "dichotomous", "categorical") |> 
   lapply(\(.x){
     dplyr::bind_cols(
       dplyr::tibble("Data type"=.x),
@@ -105,6 +115,27 @@ Also copy the code to generate the plot in your own R-environment and fine tune 
 ## Regression
 
 This section is only intended for very simple explorative analyses and as a proof-of-concept for now. If you are doing complex regression analyses you should probably just write the code yourself.
+
+Below are the available regression types listed.
+
+```{r echo = FALSE, eval = TRUE}
+c("continuous", "dichotomous", "categorical") |> 
+  lapply(\(.x){
+    dplyr::bind_cols(
+      dplyr::tibble("Data type"=.x),
+      supported_functions()|> 
+      lapply(\(.y){
+        if (.x %in% .y$out.type){
+          .y[c("descr","fun","design")]|> dplyr::bind_cols()
+        }
+})|> 
+  dplyr::bind_rows() |> 
+  setNames(c("Regression model","Function","Study design")))
+  }) |> 
+  dplyr::bind_rows() |> 
+  # toastui::datagrid(filters=TRUE,theme="striped") |> 
+  kableExtra::kable()
+```
 
 ### Table
 
