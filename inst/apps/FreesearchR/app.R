@@ -9018,7 +9018,7 @@ server <- function(input, output, session) {
       rv$data_original <- temp_data |>
         default_parsing()
 
-      rv$code$import <- list(
+      rv$code$import_print <- list(
         rv$code$import,
         rlang::expr(dplyr::select(dplyr::all_of(!!input$import_var))),
         rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
@@ -9304,7 +9304,7 @@ server <- function(input, output, session) {
   # })
 
   output$code_import <- shiny::renderUI({
-    prismCodeBlock(paste0("#Data import\n", rv$code$import))
+    prismCodeBlock(paste0("#Data import\n", rv$code$import_print))
   })
 
   output$code_data <- shiny::renderUI({
