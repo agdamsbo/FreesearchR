@@ -30,11 +30,15 @@ Beautiful sankey plot
 \examples{
 ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)))
 ds |> plot_sankey_single("first", "last")
-ds |> plot_sankey_single("first", "last", color.group = "y")
+ds |> plot_sankey_single("first", "last", color.group = "sec")
 data.frame(
   g = sample(LETTERS[1:2], 100, TRUE),
   first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)),
   last = sample(c(TRUE, FALSE, FALSE), 100, TRUE)
 ) |>
   plot_sankey_single("first", "last", color.group = "pri")
+mtcars |>
+  default_parsing() |>
+  str()
+plot_sankey_single("cyl", "vs", color.group = "pri")
 }

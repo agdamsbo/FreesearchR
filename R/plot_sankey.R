@@ -22,7 +22,7 @@ sankey_ready <- function(data, pri, sec, numbers = "count", ...) {
   data[c(pri, sec)] <- data[c(pri, sec)] |>
     dplyr::mutate(dplyr::across(!dplyr::where(is.factor), forcats::as_factor))
 
-  out <- dplyr::count(data, !!dplyr::sym(pri), !!dplyr::sym(sec))
+  out <- dplyr::count(data, !!dplyr::sym(pri), !!dplyr::sym(sec), .drop = FALSE)
 
   out <- out |>
     dplyr::group_by(!!dplyr::sym(pri)) |>
@@ -73,9 +73,17 @@ str_remove_last <- function(data, pattern = "\n") {
 #' @examples
 #' ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)))
 #' ds |> plot_sankey("first", "last")
-#' ds |> plot_sankey("first", "last", color.group = "y")
-#' ds |> plot_sankey("first", "last", z = "g", color.group = "y")
-plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "x", colors = NULL) {
+#' ds |> plot_sankey("first", "last", color.group = "sec")
+#' ds |> plot_sankey("first", "last", ter = "g", color.group = "sec")
+#' mtcars |>
+#'   default_parsing() |>
+#'   plot_sankey("cyl", "gear", "am", color.group = "pri")
+#' ## In this case, the last plot as the secondary variable in wrong order
+#' ## Dont know why...
+#' mtcars |>
+#'   default_parsing() |>
+#'   plot_sankey("cyl", "gear", "vs", color.group = "pri")
+plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors = NULL) {
   if (!is.null(ter)) {
     ds <- split(data, data[ter])
   } else {
@@ -83,14 +91,10 @@ plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "x", colors = 
   }
 
   out <- lapply(ds, \(.ds){
-    plot_sankey_single(.ds, x = pri, y = sec, color.group = color.group, colors = colors)
+    plot_sankey_single(.ds, pri = pri, sec = sec, color.group = color.group, colors = colors)
   })
 
   patchwork::wrap_plots(out)
-}
-
-default_theme <- function() {
-  theme_void()
 }
 
 #' Beautiful sankey plot
@@ -106,15 +110,26 @@ default_theme <- function() {
 #' @examples
 #' ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)))
 #' ds |> plot_sankey_single("first", "last")
-#' ds |> plot_sankey_single("first", "last", color.group = "y")
+#' ds |> plot_sankey_single("first", "last", color.group = "sec")
 #' data.frame(
 #'   g = sample(LETTERS[1:2], 100, TRUE),
 #'   first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)),
 #'   last = sample(c(TRUE, FALSE, FALSE), 100, TRUE)
 #' ) |>
 #'   plot_sankey_single("first", "last", color.group = "pri")
+#' mtcars |>
+#'   default_parsing() |>
+#'   str()
+#' plot_sankey_single("cyl", "vs", color.group = "pri")
 plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), colors = NULL, ...) {
   color.group <- match.arg(color.group)
+
+  data_orig <- data
+  data[c(pri, sec)] <- data[c(pri, sec)] |>
+    dplyr::mutate(dplyr::across(dplyr::where(is.factor), forcats::fct_drop))
+
+  # browser()
+
   data <- data |> sankey_ready(pri = pri, sec = sec, ...)
 
   library(ggalluvial)
@@ -124,11 +139,17 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
 
   if (is.null(colors)) {
     if (color.group == "sec") {
-      main.colors <- viridisLite::viridis(n = length(levels(data[[sec]])))
+      main.colors <- viridisLite::viridis(n = length(levels(data_orig[[sec]])))
+      ## Only keep colors for included levels
+      main.colors <- main.colors[match(levels(data[[sec]]), levels(data_orig[[sec]]))]
+
       secondary.colors <- rep(na.color, length(levels(data[[pri]])))
       label.colors <- Reduce(c, lapply(list(secondary.colors, rev(main.colors)), contrast_text))
     } else {
-      main.colors <- viridisLite::viridis(n = length(levels(data[[pri]])))
+      main.colors <- viridisLite::viridis(n = length(levels(data_orig[[pri]])))
+      ## Only keep colors for included levels
+      main.colors <- main.colors[match(levels(data[[pri]]), levels(data_orig[[pri]]))]
+
       secondary.colors <- rep(na.color, length(levels(data[[sec]])))
       label.colors <- Reduce(c, lapply(list(rev(main.colors), secondary.colors), contrast_text))
     }
@@ -146,7 +167,11 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
   if (color.group == "sec") {
     p <- p +
       ggalluvial::geom_alluvium(
-        ggplot2::aes(fill = !!dplyr::sym(sec), color = !!dplyr::sym(sec)),
+        ggplot2::aes(
+          fill = !!dplyr::sym(sec) # ,
+          ## Including will print strings when levels are empty
+          # color = !!dplyr::sym(sec)
+        ),
         width = 1 / 16,
         alpha = .8,
         knot.pos = 0.4,
@@ -158,7 +183,10 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
   } else {
     p <- p +
       ggalluvial::geom_alluvium(
-        ggplot2::aes(fill = !!dplyr::sym(pri), color = !!dplyr::sym(pri)),
+        ggplot2::aes(
+          fill = !!dplyr::sym(pri) # ,
+          # color = !!dplyr::sym(pri)
+        ),
         width = 1 / 16,
         alpha = .8,
         knot.pos = 0.4,
@@ -182,7 +210,7 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
       labels = group_labels
     ) +
     ggplot2::scale_fill_manual(values = colors[-1], na.value = colors[1]) +
-    ggplot2::scale_color_manual(values = main.colors) +
+    # ggplot2::scale_color_manual(values = main.colors) +
     ggplot2::theme_void() +
     ggplot2::theme(
       legend.position = "none",
