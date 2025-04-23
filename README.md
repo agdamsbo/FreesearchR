@@ -1,4 +1,4 @@
-# FreesearchR
+# FreesearchR <img style="float: right;" src="logo-text-white-250.png">
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
@@ -48,3 +48,5 @@ Like any other project, this project was never possible without the great work o
 -   [gtsummary](https://www.danieldsjoberg.com/gtsummary/): superb and flexible way to create publication-ready analytical and summary tables.
 
 -   [dreamRs](https://github.com/dreamRs): maintainers of a broad selection of great extensions and tools for [Shiny](https://shiny.posit.co/).
+
+This project was all written by a human and not by any AI-based tools.
