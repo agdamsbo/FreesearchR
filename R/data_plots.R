@@ -695,7 +695,7 @@ line_break <- function(data, lineLength = 20, force = FALSE) {
 #' @export
 #'
 wrap_plot_list <- function(data, tag_levels = NULL) {
-  if (ggplot2::is.ggplot(data[[1]])) {
+  if (ggplot2::is_ggplot(data[[1]])) {
     if (length(data) > 1) {
       out <- data |>
         (\(.x){
@@ -732,7 +732,7 @@ wrap_plot_list <- function(data, tag_levels = NULL) {
 align_axes <- function(...) {
   # https://stackoverflow.com/questions/62818776/get-axis-limits-from-ggplot-object
   # https://github.com/thomasp85/patchwork/blob/main/R/plot_multipage.R#L150
-  if (ggplot2::is.ggplot(..1)) {
+  if (ggplot2::is_ggplot(..1)) {
     ## Assumes list of ggplots
     p <- list(...)
   } else if (is.list(..1)) {

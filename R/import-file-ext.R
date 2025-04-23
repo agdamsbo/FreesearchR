@@ -242,7 +242,7 @@ import_file_server <- function(id,
         req(input$file)
 
         if (!all(input$sheet %in% temporary_rv$sheets)) {
-          sheets <-  1
+          sheets <- 1
         } else {
           sheets <- input$sheet
         }
@@ -298,31 +298,33 @@ import_file_server <- function(id,
     )
 
     observeEvent(input$see_data, {
-      tryCatch({
-      datamods:::show_data(default_parsing(temporary_rv$data), title = datamods:::i18n("Imported data"), type = show_data_in)
-      },
-      # warning = function(warn) {
-      #     showNotification(warn, type = "warning")
-      # },
-      error = function(err) {
-        showNotification(err, type = "err")
-      }
+      tryCatch(
+        {
+          datamods:::show_data(default_parsing(temporary_rv$data), title = datamods:::i18n("Imported data"), type = show_data_in)
+        },
+        # warning = function(warn) {
+        #     showNotification(warn, type = "warning")
+        # },
+        error = function(err) {
+          showNotification(err, type = "err")
+        }
       )
     })
 
     output$table <- toastui::renderDatagrid2({
       req(temporary_rv$data)
-      tryCatch({
-      toastui::datagrid(
-        data = setNames(head(temporary_rv$data, 5),make.names(names(temporary_rv$data),unique = TRUE)),
-        theme = "striped",
-        colwidths = "guess",
-        minBodyHeight = 250
-      )
-      },
-      error = function(err) {
-        showNotification(err, type = "err")
-      }
+      tryCatch(
+        {
+          toastui::datagrid(
+            data = setNames(head(temporary_rv$data, 5), make.names(names(temporary_rv$data), unique = TRUE)),
+            theme = "striped",
+            colwidths = "guess",
+            minBodyHeight = 250
+          )
+        },
+        error = function(err) {
+          showNotification(err, type = "err")
+        }
       )
     })
 
@@ -418,13 +420,22 @@ import_xls <- function(file, sheet, skip, na.strings) {
 
       sheet |>
         purrr::map(\(.x){
-          openxlsx2::read_xlsx(
-            file = file,
+          readxl::read_excel(
+            path = file,
             sheet = .x,
-            skip_empty_rows = TRUE,
-            start_row = skip - 1,
-            na.strings = na.strings
+            na = na.strings,
+            skip = skip,
+            .name_repair = "unique_quiet",
+            trim_ws = TRUE
           )
+
+          # openxlsx2::read_xlsx(
+          #   file = file,
+          #   sheet = .x,
+          #   skip_empty_rows = TRUE,
+          #   start_row = skip - 1,
+          #   na.strings = na.strings
+          # )
         }) |>
         purrr::reduce(dplyr::full_join)
     },

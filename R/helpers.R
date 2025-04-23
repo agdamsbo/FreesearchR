@@ -87,7 +87,7 @@ read_input <- function(file, consider.na = c("NA", '""', "")) {
   if (ext == "csv") {
     df <- readr::read_csv(file = file, na = consider.na)
   } else if (ext %in% c("xls", "xlsx")) {
-    df <- openxlsx2::read_xlsx(file = file, na.strings = consider.na)
+    df <- readxl::read_excel(file = file, na.strings = consider.na)
   } else if (ext == "dta") {
     df <- haven::read_dta(file = file)
   } else if (ext == "ods") {
@@ -428,7 +428,7 @@ sort_by <- function(x, y, na.rm = FALSE, ...) {
 
 
 get_ggplot_label <- function(data, label) {
-  assertthat::assert_that(ggplot2::is.ggplot(data))
+  assertthat::assert_that(ggplot2::is_ggplot(data))
   data$labels[[label]]
 }
 
