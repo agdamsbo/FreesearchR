@@ -46,7 +46,7 @@ plot_box_single <- function(data, pri, sec=NULL, seed = 2103) {
 
   if (is.null(sec)) {
     sec <- "All"
-    data[[y]] <- sec
+    data[[sec]] <- sec
   }
 
   discrete <- !data_type(data[[sec]]) %in% "continuous"
