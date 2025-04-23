@@ -49,4 +49,6 @@ Like any other project, this project was never possible without the great work o
 
 -   [dreamRs](https://github.com/dreamRs): maintainers of a broad selection of great extensions and tools for [Shiny](https://shiny.posit.co/).
 
+-   [easystats](https://easystats.github.io/easystats/): the [`performance::check_model()`](https://easystats.github.io/performance/articles/check_model.html) function was central in sparking the idea to create a data analysis tool.
+
 This project was all written by a human and not by any AI-based tools.
