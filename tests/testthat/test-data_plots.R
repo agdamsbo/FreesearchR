@@ -46,7 +46,7 @@ test_that("create_plot works", {
   p <- p_list[[1]] + ggplot2::labs(title = "Test plot")
 
   expect_equal(length(p_list), 2)
-  expect_true(ggplot2::is.ggplot(p))
+  expect_true(ggplot2::is_ggplot(p))
 
   # Includes helper functions
   #   wrap_plot_list
@@ -60,7 +60,7 @@ test_that("create_plot works", {
   )
 
   lapply(p_list, \(.x){
-    expect_true(ggplot2::is.ggplot(.x))
+    expect_true(ggplot2::is_ggplot(.x))
   })
 
   purrr::map2(p_list, list(11, 11), \(.x, .y){

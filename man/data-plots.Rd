@@ -32,7 +32,7 @@ plot_ridge(data, x, y, z = NULL, ...)
 
 sankey_ready(data, pri, sec, numbers = "count", ...)
 
-plot_sankey(data, pri, sec, ter = NULL, color.group = "x", colors = NULL)
+plot_sankey(data, pri, sec, ter = NULL, color.group = "pri", colors = NULL)
 
 plot_scatter(data, pri, sec, ter = NULL)
 
@@ -103,6 +103,7 @@ mtcars |> plot_box(pri = "mpg", sec = "cyl", ter = "gear")
 mtcars |>
   default_parsing() |>
   plot_box(pri = "mpg", sec = "cyl", ter = "gear")
+mtcars |> plot_box_single("mpg")
 mtcars |> plot_box_single("mpg","cyl")
 mtcars |> plot_hbars(pri = "carb", sec = "cyl")
 mtcars |> plot_hbars(pri = "carb", sec = NULL)
@@ -121,8 +122,16 @@ data.frame(
   sankey_ready("first", "last")
 ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)))
 ds |> plot_sankey("first", "last")
-ds |> plot_sankey("first", "last", color.group = "y")
-ds |> plot_sankey("first", "last", z = "g", color.group = "y")
+ds |> plot_sankey("first", "last", color.group = "sec")
+ds |> plot_sankey("first", "last", ter = "g", color.group = "sec")
+mtcars |>
+  default_parsing() |>
+  plot_sankey("cyl", "gear", "am", color.group = "pri")
+## In this case, the last plot as the secondary variable in wrong order
+## Dont know why...
+mtcars |>
+  default_parsing() |>
+  plot_sankey("cyl", "gear", "vs", color.group = "pri")
 mtcars |> plot_scatter(pri = "mpg", sec = "wt")
 mtcars |> plot_violin(pri = "mpg", sec = "cyl", ter = "gear")
 }

@@ -10,7 +10,7 @@
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'Version: 25.4.3.250422'
+app_version <- function()'v25.4.3.250423'
 
 
 ########
@@ -1801,7 +1801,7 @@ line_break <- function(data, lineLength = 20, force = FALSE) {
 #' @export
 #'
 wrap_plot_list <- function(data, tag_levels = NULL) {
-  if (ggplot2::is.ggplot(data[[1]])) {
+  if (ggplot2::is_ggplot(data[[1]])) {
     if (length(data) > 1) {
       out <- data |>
         (\(.x){
@@ -1838,7 +1838,7 @@ wrap_plot_list <- function(data, tag_levels = NULL) {
 align_axes <- function(...) {
   # https://stackoverflow.com/questions/62818776/get-axis-limits-from-ggplot-object
   # https://github.com/thomasp85/patchwork/blob/main/R/plot_multipage.R#L150
-  if (ggplot2::is.ggplot(..1)) {
+  if (ggplot2::is_ggplot(..1)) {
     ## Assumes list of ggplots
     p <- list(...)
   } else if (is.list(..1)) {
@@ -2497,7 +2497,7 @@ read_input <- function(file, consider.na = c("NA", '""', "")) {
   if (ext == "csv") {
     df <- readr::read_csv(file = file, na = consider.na)
   } else if (ext %in% c("xls", "xlsx")) {
-    df <- openxlsx2::read_xlsx(file = file, na.strings = consider.na)
+    df <- readxl::read_excel(file = file, na.strings = consider.na)
   } else if (ext == "dta") {
     df <- haven::read_dta(file = file)
   } else if (ext == "ods") {
@@ -2838,7 +2838,7 @@ sort_by <- function(x, y, na.rm = FALSE, ...) {
 
 
 get_ggplot_label <- function(data, label) {
-  assertthat::assert_that(ggplot2::is.ggplot(data))
+  assertthat::assert_that(ggplot2::is_ggplot(data))
   data$labels[[label]]
 }
 
@@ -3312,7 +3312,7 @@ import_file_server <- function(id,
         req(input$file)
 
         if (!all(input$sheet %in% temporary_rv$sheets)) {
-          sheets <-  1
+          sheets <- 1
         } else {
           sheets <- input$sheet
         }
@@ -3368,31 +3368,33 @@ import_file_server <- function(id,
     )
 
     observeEvent(input$see_data, {
-      tryCatch({
-      datamods:::show_data(default_parsing(temporary_rv$data), title = datamods:::i18n("Imported data"), type = show_data_in)
-      },
-      # warning = function(warn) {
-      #     showNotification(warn, type = "warning")
-      # },
-      error = function(err) {
-        showNotification(err, type = "err")
-      }
+      tryCatch(
+        {
+          datamods:::show_data(default_parsing(temporary_rv$data), title = datamods:::i18n("Imported data"), type = show_data_in)
+        },
+        # warning = function(warn) {
+        #     showNotification(warn, type = "warning")
+        # },
+        error = function(err) {
+          showNotification(err, type = "err")
+        }
       )
     })
 
     output$table <- toastui::renderDatagrid2({
       req(temporary_rv$data)
-      tryCatch({
-      toastui::datagrid(
-        data = setNames(head(temporary_rv$data, 5),make.names(names(temporary_rv$data),unique = TRUE)),
-        theme = "striped",
-        colwidths = "guess",
-        minBodyHeight = 250
-      )
-      },
-      error = function(err) {
-        showNotification(err, type = "err")
-      }
+      tryCatch(
+        {
+          toastui::datagrid(
+            data = setNames(head(temporary_rv$data, 5), make.names(names(temporary_rv$data), unique = TRUE)),
+            theme = "striped",
+            colwidths = "guess",
+            minBodyHeight = 250
+          )
+        },
+        error = function(err) {
+          showNotification(err, type = "err")
+        }
       )
     })
 
@@ -3488,13 +3490,22 @@ import_xls <- function(file, sheet, skip, na.strings) {
 
       sheet |>
         purrr::map(\(.x){
-          openxlsx2::read_xlsx(
-            file = file,
+          readxl::read_excel(
+            path = file,
             sheet = .x,
-            skip_empty_rows = TRUE,
-            start_row = skip - 1,
-            na.strings = na.strings
+            na = na.strings,
+            skip = skip,
+            .name_repair = "unique_quiet",
+            trim_ws = TRUE
           )
+
+          # openxlsx2::read_xlsx(
+          #   file = file,
+          #   sheet = .x,
+          #   skip_empty_rows = TRUE,
+          #   start_row = skip - 1,
+          #   na.strings = na.strings
+          # )
         }) |>
         purrr::reduce(dplyr::full_join)
     },
@@ -3738,13 +3749,14 @@ plot_box <- function(data, pri, sec, ter = NULL) {
 #' @export
 #'
 #' @examples
+#' mtcars |> plot_box_single("mpg")
 #' mtcars |> plot_box_single("mpg","cyl")
 plot_box_single <- function(data, pri, sec=NULL, seed = 2103) {
   set.seed(seed)
 
   if (is.null(sec)) {
     sec <- "All"
-    data[[y]] <- sec
+    data[[sec]] <- sec
   }
 
   discrete <- !data_type(data[[sec]]) %in% "continuous"
@@ -4075,7 +4087,7 @@ sankey_ready <- function(data, pri, sec, numbers = "count", ...) {
   data[c(pri, sec)] <- data[c(pri, sec)] |>
     dplyr::mutate(dplyr::across(!dplyr::where(is.factor), forcats::as_factor))
 
-  out <- dplyr::count(data, !!dplyr::sym(pri), !!dplyr::sym(sec))
+  out <- dplyr::count(data, !!dplyr::sym(pri), !!dplyr::sym(sec), .drop = FALSE)
 
   out <- out |>
     dplyr::group_by(!!dplyr::sym(pri)) |>
@@ -4126,9 +4138,17 @@ str_remove_last <- function(data, pattern = "\n") {
 #' @examples
 #' ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)))
 #' ds |> plot_sankey("first", "last")
-#' ds |> plot_sankey("first", "last", color.group = "y")
-#' ds |> plot_sankey("first", "last", z = "g", color.group = "y")
-plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "x", colors = NULL) {
+#' ds |> plot_sankey("first", "last", color.group = "sec")
+#' ds |> plot_sankey("first", "last", ter = "g", color.group = "sec")
+#' mtcars |>
+#'   default_parsing() |>
+#'   plot_sankey("cyl", "gear", "am", color.group = "pri")
+#' ## In this case, the last plot as the secondary variable in wrong order
+#' ## Dont know why...
+#' mtcars |>
+#'   default_parsing() |>
+#'   plot_sankey("cyl", "gear", "vs", color.group = "pri")
+plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors = NULL) {
   if (!is.null(ter)) {
     ds <- split(data, data[ter])
   } else {
@@ -4136,14 +4156,10 @@ plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "x", colors = 
   }
 
   out <- lapply(ds, \(.ds){
-    plot_sankey_single(.ds, x = pri, y = sec, color.group = color.group, colors = colors)
+    plot_sankey_single(.ds, pri = pri, sec = sec, color.group = color.group, colors = colors)
   })
 
   patchwork::wrap_plots(out)
-}
-
-default_theme <- function() {
-  theme_void()
 }
 
 #' Beautiful sankey plot
@@ -4159,15 +4175,26 @@ default_theme <- function() {
 #' @examples
 #' ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)))
 #' ds |> plot_sankey_single("first", "last")
-#' ds |> plot_sankey_single("first", "last", color.group = "y")
+#' ds |> plot_sankey_single("first", "last", color.group = "sec")
 #' data.frame(
 #'   g = sample(LETTERS[1:2], 100, TRUE),
 #'   first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)),
 #'   last = sample(c(TRUE, FALSE, FALSE), 100, TRUE)
 #' ) |>
 #'   plot_sankey_single("first", "last", color.group = "pri")
+#' mtcars |>
+#'   default_parsing() |>
+#'   str()
+#' plot_sankey_single("cyl", "vs", color.group = "pri")
 plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), colors = NULL, ...) {
   color.group <- match.arg(color.group)
+
+  data_orig <- data
+  data[c(pri, sec)] <- data[c(pri, sec)] |>
+    dplyr::mutate(dplyr::across(dplyr::where(is.factor), forcats::fct_drop))
+
+  # browser()
+
   data <- data |> sankey_ready(pri = pri, sec = sec, ...)
 
   library(ggalluvial)
@@ -4177,11 +4204,17 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
 
   if (is.null(colors)) {
     if (color.group == "sec") {
-      main.colors <- viridisLite::viridis(n = length(levels(data[[sec]])))
+      main.colors <- viridisLite::viridis(n = length(levels(data_orig[[sec]])))
+      ## Only keep colors for included levels
+      main.colors <- main.colors[match(levels(data[[sec]]), levels(data_orig[[sec]]))]
+
       secondary.colors <- rep(na.color, length(levels(data[[pri]])))
       label.colors <- Reduce(c, lapply(list(secondary.colors, rev(main.colors)), contrast_text))
     } else {
-      main.colors <- viridisLite::viridis(n = length(levels(data[[pri]])))
+      main.colors <- viridisLite::viridis(n = length(levels(data_orig[[pri]])))
+      ## Only keep colors for included levels
+      main.colors <- main.colors[match(levels(data[[pri]]), levels(data_orig[[pri]]))]
+
       secondary.colors <- rep(na.color, length(levels(data[[sec]])))
       label.colors <- Reduce(c, lapply(list(rev(main.colors), secondary.colors), contrast_text))
     }
@@ -4199,7 +4232,11 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
   if (color.group == "sec") {
     p <- p +
       ggalluvial::geom_alluvium(
-        ggplot2::aes(fill = !!dplyr::sym(sec), color = !!dplyr::sym(sec)),
+        ggplot2::aes(
+          fill = !!dplyr::sym(sec) # ,
+          ## Including will print strings when levels are empty
+          # color = !!dplyr::sym(sec)
+        ),
         width = 1 / 16,
         alpha = .8,
         knot.pos = 0.4,
@@ -4211,7 +4248,10 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
   } else {
     p <- p +
       ggalluvial::geom_alluvium(
-        ggplot2::aes(fill = !!dplyr::sym(pri), color = !!dplyr::sym(pri)),
+        ggplot2::aes(
+          fill = !!dplyr::sym(pri) # ,
+          # color = !!dplyr::sym(pri)
+        ),
         width = 1 / 16,
         alpha = .8,
         knot.pos = 0.4,
@@ -4235,7 +4275,7 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
       labels = group_labels
     ) +
     ggplot2::scale_fill_manual(values = colors[-1], na.value = colors[1]) +
-    ggplot2::scale_color_manual(values = main.colors) +
+    # ggplot2::scale_color_manual(values = main.colors) +
     ggplot2::theme_void() +
     ggplot2::theme(
       legend.position = "none",
@@ -8399,7 +8439,7 @@ ui_elements <- list(
               shiny::uiOutput(outputId = "column_filter"),
               shiny::helpText("Variable ", tags$a(
                 "data type",
-                href = "https://agdamsbo.github.io/FreesearchR/articles/FreesearchR.html",
+                href = "https://agdamsbo.github.io/FreesearchR/articles/data-types.html",
                 target = "_blank",
                 rel = "noopener noreferrer"
               ), " filtering."),
@@ -8596,15 +8636,13 @@ ui_elements <- list(
         data_visuals_ui("visuals"),
         shiny::tagList(
           bslib::nav_spacer(),
-          bslib::nav_panel(
-            title = "Notes",
-            shiny::fluidRow(
-              shiny::column(width = 2),
-              shiny::column(
-                width = 8,
-                shiny::markdown(readLines("www/notes_visuals.md")),
-                shiny::column(width = 2)
-              )
+          bslib::nav_item(
+            # shiny::img(shiny::icon("book")),
+            shiny::tags$a(
+              href = "https://agdamsbo.github.io/FreesearchR/articles/visuals.html",
+              "Notes (external)",
+              target = "_blank",
+              rel = "noopener noreferrer"
             )
           )
         )
@@ -8774,11 +8812,11 @@ ui <- bslib::page_fixed(
       style = "background-color: #14131326; padding: 4px; text-align: center; bottom: 0; width: 100%;",
       shiny::p(
         style = "margin: 1",
-        "Data is only stored for analyses and deleted immediately afterwards."
+        "Data is only stored for analyses and deleted when the app is closed."
       ),
       shiny::p(
         style = "margin: 1; color: #888;",
-        "AG Damsbo | v", app_version(), " | ", shiny::tags$a("AGPLv3 license", href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Source on Github", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer")
+        shiny::tags$a("AG Damsbo", href = "https://andreas.gdamsbo.dk/", target = "_blank", rel = "noopener noreferrer")," | ", app_version(), " | ", shiny::tags$a("License: AGPLv3", href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Source", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer")
       ),
     )
   )

@@ -359,15 +359,13 @@ ui_elements <- list(
         data_visuals_ui("visuals"),
         shiny::tagList(
           bslib::nav_spacer(),
-          bslib::nav_panel(
-            title = "Notes",
-            shiny::fluidRow(
-              shiny::column(width = 2),
-              shiny::column(
-                width = 8,
-                shiny::markdown(readLines("www/notes_visuals.md")),
-                shiny::column(width = 2)
-              )
+          bslib::nav_item(
+            # shiny::img(shiny::icon("book")),
+            shiny::tags$a(
+              href = "https://agdamsbo.github.io/FreesearchR/articles/visuals.html",
+              "Notes (external)",
+              target = "_blank",
+              rel = "noopener noreferrer"
             )
           )
         )
@@ -537,11 +535,11 @@ ui <- bslib::page_fixed(
       style = "background-color: #14131326; padding: 4px; text-align: center; bottom: 0; width: 100%;",
       shiny::p(
         style = "margin: 1",
-        "Data is only stored for analyses and deleted immediately afterwards."
+        "Data is only stored for analyses and deleted when the app is closed."
       ),
       shiny::p(
         style = "margin: 1; color: #888;",
-        "AG Damsbo | v", app_version(), " | ", shiny::tags$a("AGPLv3 license", href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Source on Github", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer")
+        shiny::tags$a("AG Damsbo", href = "https://andreas.gdamsbo.dk/", target = "_blank", rel = "noopener noreferrer")," | ", app_version(), " | ", shiny::tags$a("License: AGPLv3", href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Source", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer")
       ),
     )
   )

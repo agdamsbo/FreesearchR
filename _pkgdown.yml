@@ -8,6 +8,7 @@ template:
     base_font: {google: "Montserrat"}
     heading_font: {google: "Public Sans"}
     # code_font: {google: "Open Sans"}
+  # Adding the switch destroys the theme colors
   light-switch: false
 
 navbar:
