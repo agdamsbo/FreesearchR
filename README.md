@@ -1,4 +1,4 @@
-# FreesearchR <img style="float: right;" src="logo-text-white-250.png">
+# FreesearchR <a href="https://agdamsbo.github.io/FreesearchR/"><img src="man/figures/logo.png" align="right" height="70" alt="FreesearchR website" /></a>
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)

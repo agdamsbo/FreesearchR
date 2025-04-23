@@ -69,13 +69,13 @@ This is the panel to get a good overview of your data, check data is classed and
 
 Here, the data variables can be inspected with a simple visualisation and a few key measures. Also, data filtering is available at two levels: 
 
-   - Data type filtering allows to filter by variable [data type]()
+   - Data type filtering allows to filter by variable [data type](https://agdamsbo.github.io/FreesearchR/articles/data-types.html)
    
    - Observations level filtering allow to filter data by variable
 
 ### Modify
 
-
+Re-class, rename, and relabel variables. Subset data, create new variables and reorder factor levels. Also, compare the modified dataset to the original and restore the original data.
 
 ## Evaluate
 
