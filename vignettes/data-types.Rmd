@@ -28,7 +28,7 @@ data_types() |> purrr::imap(\(.x,.i){
   dplyr::bind_cols("type"=.i,.x,.name_repair = "unique_quiet")
   }) |> dplyr::bind_rows() |> 
   setNames(c("Data type","Description","Data classes included")) |> 
-  kableExtra::kable()
+  knitr::kable()
 ```
 
 Categorising data in this way makes sense when making choices on how to evaluate and analyse data. This is used throughout the ***FreesearchR*** app to simplify data handling.

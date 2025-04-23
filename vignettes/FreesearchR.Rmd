@@ -111,7 +111,7 @@ c("continuous", "dichotomous", "categorical") |>
   }) |> 
   dplyr::bind_rows() |> 
   # toastui::datagrid(filters=TRUE,theme="striped") |> 
-  kableExtra::kable()
+  knitr::kable()
 ```
 
 Export the plots directly from the sidebar with easily adjusted plot dimensions for your next publication.
@@ -140,7 +140,7 @@ c("continuous", "dichotomous", "categorical") |>
   }) |> 
   dplyr::bind_rows() |> 
   # toastui::datagrid(filters=TRUE,theme="striped") |> 
-  kableExtra::kable()
+  knitr::kable()
 ```
 
 ### Table
