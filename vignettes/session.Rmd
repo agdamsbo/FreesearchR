@@ -1,0 +1,35 @@
+---
+title: "Session info"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{session}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(rmarkdown.html_vignette.check_title = FALSE)
+```
+
+```{r setup}
+library(FreesearchR)
+```
+
+This is the session info on the primary build machine. Inspect loaded packages and the latest build info.
+
+## Platform info
+
+```{r}
+FreesearchR:::session_data$platform |> knitr::kable()
+```
+
+
+## Libraries
+
+```{r}
+FreesearchR:::session_data$libs|> knitr::kable()
+```
