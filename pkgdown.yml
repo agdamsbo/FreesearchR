@@ -4,7 +4,9 @@ pkgdown_sha: ~
 articles:
   data-types: data-types.html
   FreesearchR: FreesearchR.html
-last_built: 2025-04-22T12:15Z
+  session: session.html
+  visuals: visuals.html
+last_built: 2025-04-23T13:35Z
 urls:
   reference: https://agdamsbo.github.io/FreesearchR/reference
   article: https://agdamsbo.github.io/FreesearchR/articles

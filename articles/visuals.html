@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Data types • FreesearchR</title>
+<title>On visuals • FreesearchR</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Montserrat-0.4.10/font.css" rel="stylesheet">
@@ -13,7 +13,7 @@
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<meta property="og:title" content="Data types">
+<meta property="og:title" content="On visuals">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -64,11 +64,11 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Data types</h1>
+      <h1>On visuals</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/agdamsbo/FreesearchR/blob/main/vignettes/data-types.Rmd" class="external-link"><code>vignettes/data-types.Rmd</code></a></small>
-      <div class="d-none name"><code>data-types.Rmd</code></div>
+      <small class="dont-index">Source: <a href="https://github.com/agdamsbo/FreesearchR/blob/main/vignettes/visuals.Rmd" class="external-link"><code>vignettes/visuals.Rmd</code></a></small>
+      <div class="d-none name"><code>visuals.Rmd</code></div>
     </div>
 
     
@@ -81,73 +81,114 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     sort_by</span></span></code></pre></div>
 <div class="section level2">
-<h2 id="a-clinical-data-class">A clinical data class<a class="anchor" aria-label="anchor" href="#a-clinical-data-class"></a>
+<h2 id="basic-visualisations">Basic visualisations<a class="anchor" aria-label="anchor" href="#basic-visualisations"></a>
 </h2>
-<p>Traditionally in <em>R</em>, data is identified by classes, like
-numeric, integer, double, logical, factor etc. These classes can be a
-little confusing from a clinical or operational standpoint. In the
-<strong><em>FreesearchR</em></strong> app, these classes has been
-simplified and modified to the following data types, that are assigned
-on a prioritised order like the following:</p>
+<p>The goal of <strong><em>FreesearchR</em></strong> is to keep things
+simple. Visuals can get very complicated. We provide a selection of
+plots, that helps visualise typical clinical and will be enough for most
+use cases, and for publishing to most journals.</p>
+<p>If you want to go further, have a look at these sites with
+suggestions and sample code for data plotting:</p>
+<ul>
+<li><p><a href="https://r-charts.com/" class="external-link"><em>R</em> Charts</a>: Extensive
+gallery with great plots</p></li>
+<li><p><a href="https://r-graph-gallery.com/" class="external-link"><em>R</em> Graph
+gallery</a>: Another gallery with great graphs</p></li>
+<li><p><a href="https://graphicsprinciples.github.io/" class="external-link">graphics
+principles</a>: Easy to follow recommendations for clear
+visuals.</p></li>
+</ul>
+<div class="section level3">
+<h3 id="available-plots">Available plots<a class="anchor" aria-label="anchor" href="#available-plots"></a>
+</h3>
+<p>Below are the available plot types listed.</p>
 <table class="table">
 <colgroup>
+<col width="7%">
 <col width="14%">
-<col width="50%">
-<col width="35%">
+<col width="77%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">Data type</th>
+<th align="left">Plot type</th>
 <th align="left">Description</th>
-<th align="left">Data classes included</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left">empty</td>
-<td align="left">Variable of all NAs</td>
-<td align="left">Any class</td>
+<td align="left">continuous</td>
+<td align="left">Violin plot</td>
+<td align="left">A modern alternative to the classic boxplot to
+visualise data distribution</td>
 </tr>
 <tr class="even">
-<td align="left">monotone</td>
-<td align="left">Variable with only one unique value</td>
-<td align="left">Any class</td>
-</tr>
-<tr class="odd">
-<td align="left">dichotomous</td>
-<td align="left">Variable with only two unique values</td>
-<td align="left">Any class</td>
-</tr>
-<tr class="even">
-<td align="left">categorical</td>
-<td align="left">Factor variable</td>
-<td align="left">factor (ordered or unordered)</td>
-</tr>
-<tr class="odd">
-<td align="left">text</td>
-<td align="left">Character variable</td>
-<td align="left">character</td>
-</tr>
-<tr class="even">
-<td align="left">datetime</td>
-<td align="left">Variable of time, date or datetime values</td>
-<td align="left">hms, Date, POSIXct and POSIXt</td>
+<td align="left">continuous</td>
+<td align="left">Scatter plot</td>
+<td align="left">A classic way of showing the association between to
+variables</td>
 </tr>
 <tr class="odd">
 <td align="left">continuous</td>
-<td align="left">Numeric variable</td>
-<td align="left">numeric, integer or double</td>
+<td align="left">Box plot</td>
+<td align="left">A classic way to plot data distribution by groups</td>
 </tr>
 <tr class="even">
-<td align="left">unknown</td>
-<td align="left">Anything not falling within the previous</td>
-<td align="left">Any other class</td>
+<td align="left">dichotomous</td>
+<td align="left">Stacked horizontal bars</td>
+<td align="left">A classical way of visualising the distribution of an
+ordinal scale like the modified Ranking Scale and known as Grotta
+bars</td>
+</tr>
+<tr class="odd">
+<td align="left">dichotomous</td>
+<td align="left">Violin plot</td>
+<td align="left">A modern alternative to the classic boxplot to
+visualise data distribution</td>
+</tr>
+<tr class="even">
+<td align="left">dichotomous</td>
+<td align="left">Sankey plot</td>
+<td align="left">A way of visualising change between groups</td>
+</tr>
+<tr class="odd">
+<td align="left">dichotomous</td>
+<td align="left">Box plot</td>
+<td align="left">A classic way to plot data distribution by groups</td>
+</tr>
+<tr class="even">
+<td align="left">dichotomous</td>
+<td align="left">Euler diagram</td>
+<td align="left">Generate area-proportional Euler diagrams to display
+set relationships</td>
+</tr>
+<tr class="odd">
+<td align="left">categorical</td>
+<td align="left">Stacked horizontal bars</td>
+<td align="left">A classical way of visualising the distribution of an
+ordinal scale like the modified Ranking Scale and known as Grotta
+bars</td>
+</tr>
+<tr class="even">
+<td align="left">categorical</td>
+<td align="left">Violin plot</td>
+<td align="left">A modern alternative to the classic boxplot to
+visualise data distribution</td>
+</tr>
+<tr class="odd">
+<td align="left">categorical</td>
+<td align="left">Sankey plot</td>
+<td align="left">A way of visualising change between groups</td>
+</tr>
+<tr class="even">
+<td align="left">categorical</td>
+<td align="left">Box plot</td>
+<td align="left">A classic way to plot data distribution by groups</td>
 </tr>
 </tbody>
 </table>
-<p>Categorising data in this way makes sense when making choices on how
-to evaluate and analyse data. This is used throughout the
-<strong><em>FreesearchR</em></strong> app to simplify data handling.</p>
 </div>
-  </main>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
