@@ -2,6 +2,9 @@
 
 - *NEW*: Added a variables type filter to easily exclude unwanted types. This also includes having data type rather than data class in the summary table. Will evaluate. Types are a simpler, more practical version of the *R* data class to easy interpretation.
 
+- *NEW*: A logo is here! It should emphasize the underlying reliance on *R* while also inspire to explore.
+
+- *IMPROVED*: docs are updated and much more comprehensive. They will be continuously updated.
 
 # FreesearchR 25.4.2
 
