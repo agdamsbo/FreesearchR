@@ -9351,7 +9351,8 @@ ui_elements <- list(
           update_variables_ui("modal_variables"),
           shiny::tags$br(),
           shiny::tags$br(),
-          tags$h4("Advanced data manipulation"),
+          shiny::tags$h4("Advanced data manipulation"),
+          shiny::tags$p("Below options allow more advanced varaible manipulations."),
           shiny::tags$br(),
           shiny::tags$br(),
           shiny::fluidRow(
@@ -9364,6 +9365,7 @@ ui_elements <- list(
               ),
               shiny::tags$br(),
               shiny::helpText("Reorder the levels of factor/categorical variables."),
+              shiny::tags$br(),
               shiny::tags$br()
             ),
             shiny::column(
@@ -9375,6 +9377,7 @@ ui_elements <- list(
               ),
               shiny::tags$br(),
               shiny::helpText("Create factor/categorical variable from a continous variable (number/date/time)."),
+              shiny::tags$br(),
               shiny::tags$br()
             ),
             shiny::column(
@@ -9386,10 +9389,10 @@ ui_elements <- list(
               ),
               shiny::tags$br(),
               shiny::helpText(shiny::markdown("Create a new variable/column based on an *R*-expression.")),
+              shiny::tags$br(),
               shiny::tags$br()
             )
           ),
-          shiny::tags$br(),
           tags$h4("Compare modified data to original"),
           shiny::tags$br(),
           shiny::tags$p(
@@ -10021,7 +10024,7 @@ server <- function(input, output, session) {
     input$modal_column,
     modal_create_column(
       id = "modal_column",
-      footer = "This window is aimed at advanced users and require some R-experience!",
+      footer = shiny::markdown("This window is aimed at advanced users and require some *R*-experience!"),
       title = "Create new variables"
     )
   )

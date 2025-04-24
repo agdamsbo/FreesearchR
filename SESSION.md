@@ -24,6 +24,7 @@
 |package       |loadedversion |date       |source         |
 |:-------------|:-------------|:----------|:--------------|
 |apexcharter   |0.4.4         |2024-09-06 |CRAN (R 4.4.1) |
+|askpass       |1.2.1         |2024-10-04 |CRAN (R 4.4.1) |
 |assertthat    |0.2.1         |2019-03-21 |CRAN (R 4.4.1) |
 |backports     |1.5.0         |2024-05-23 |CRAN (R 4.4.1) |
 |bayestestR    |0.15.2        |2025-02-07 |CRAN (R 4.4.1) |
@@ -44,6 +45,7 @@
 |correlation   |0.8.7         |2025-03-03 |CRAN (R 4.4.1) |
 |crayon        |1.5.3         |2024-06-20 |CRAN (R 4.4.1) |
 |crosstalk     |1.2.1         |2023-11-23 |CRAN (R 4.4.0) |
+|curl          |6.2.2         |2025-03-24 |CRAN (R 4.4.1) |
 |data.table    |1.17.0        |2025-02-22 |CRAN (R 4.4.1) |
 |datamods      |1.5.3         |2024-10-02 |CRAN (R 4.4.1) |
 |datawizard    |1.0.2         |2025-03-24 |CRAN (R 4.4.1) |
@@ -97,6 +99,7 @@
 |munsell       |0.5.1         |2024-04-01 |CRAN (R 4.4.1) |
 |nlme          |3.1-168       |2025-03-31 |CRAN (R 4.4.1) |
 |nloptr        |2.2.1         |2025-03-17 |CRAN (R 4.4.1) |
+|openssl       |2.3.2         |2025-02-03 |CRAN (R 4.4.1) |
 |openxlsx2     |1.14          |2025-03-20 |CRAN (R 4.4.1) |
 |parameters    |0.24.2        |2025-03-04 |CRAN (R 4.4.1) |
 |patchwork     |1.3.0         |2024-09-16 |CRAN (R 4.4.1) |

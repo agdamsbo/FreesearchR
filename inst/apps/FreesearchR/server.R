@@ -321,7 +321,7 @@ server <- function(input, output, session) {
     input$modal_column,
     modal_create_column(
       id = "modal_column",
-      footer = "This window is aimed at advanced users and require some R-experience!",
+      footer = shiny::markdown("This window is aimed at advanced users and require some *R*-experience!"),
       title = "Create new variables"
     )
   )
