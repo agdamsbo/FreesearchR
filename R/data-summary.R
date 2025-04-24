@@ -318,9 +318,9 @@ class_icons <- function(x) {
     shiny::icon("arrow-down-a-z")
   } else if (identical(x, "logical")) {
     shiny::icon("toggle-off")
-  } else if (any(c("Date", "POSIXct", "POSIXt") %in% x)) {
+  } else if (any(c("Date", "POSIXt") %in% x)) {
     shiny::icon("calendar-days")
-  } else if ("hms" %in% x) {
+  } else if (any("POSIXct", "hms") %in% x) {
     shiny::icon("clock")
   } else {
     shiny::icon("table")
@@ -359,4 +359,34 @@ type_icons <- function(x) {
       shiny::icon("table")
     }
     }
+}
+
+#' Easily get variable icon based on data type or class
+#'
+#' @param data variable or data frame
+#' @param class.type "type" or "class". Default is "class"
+#'
+#' @returns svg icon
+#' @export
+#'
+#' @examples
+#' mtcars[1] |> get_var_icon("class")
+#' default_parsing(mtcars) |> get_var_icon()
+get_var_icon <- function(data,class.type=c("class","type")){
+  if (is.data.frame(data)){
+    lapply(data,get_var_icon)
+  } else {
+
+  class.type <- match.arg(class.type)
+
+  switch(class.type,
+         type = {
+           type_icons(data_type(data))
+         },
+         class = {
+           class(data)[1] |> class_icons()
+         }
+  )
+}
+
 }
