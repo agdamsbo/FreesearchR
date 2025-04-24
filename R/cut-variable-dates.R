@@ -56,6 +56,7 @@ cut_var.hms <- function(x, breaks, ...) {
 #' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = "weekday")
 #' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = "month_only")
 #' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks=NULL,format = "%A-%H")
+#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks=NULL,format = "%W")
 cut_var.POSIXt <- function(x, breaks, right = FALSE, include.lowest = TRUE, start.on.monday = TRUE, ...) {
   breaks_o <- breaks
   args <- list(...)
@@ -126,7 +127,10 @@ cut_var.POSIXct <- cut_var.POSIXt
 #' @examples
 #' as.Date(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(2)
 #' as.Date(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = "weekday")
-cut_var.Date <- function(x, breaks, start.on.monday = TRUE, ...) {
+#' as.Date(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(format = "%W")
+cut_var.Date <- function(x, breaks=NULL, start.on.monday = TRUE, ...) {
+  args <- list(...)
+
   if ("format" %in% names(args)){
     assertthat::assert_that(is.character(args$format))
     out <- forcats::as_factor(format(x,format=args$format))
@@ -337,10 +341,11 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         variable <- req(input$variable)
 
         choices <- c(
+          # "fixed",
           # "quantile"
         )
 
-        if ("hms" %in% class(data[[variable]])) {
+        if (any(c("hms","POSIXct") %in% class(data[[variable]]))) {
           choices <- c(choices, "hour")
         } else if (any(c("POSIXt", "Date") %in% class(data[[variable]]))) {
           choices <- c(
@@ -348,6 +353,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
             "day",
             "weekday",
             "week",
+            # "week_only",
             "month",
             "month_only",
             "quarter",
@@ -372,6 +378,8 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           )
         }
 
+        choices <- unique(choices)
+
         shinyWidgets::virtualSelectInput(
           inputId = session$ns("method"),
           label = i18n("Method:"),
@@ -389,7 +397,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         req(input$n_breaks, input$method)
         if (input$method == "fixed") {
           req(input$fixed_brks)
-          if (any(c("hms", "POSIXt") %in% class(data[[variable]]))) {
+          if (any(c("hms", "POSIXct") %in% class(data[[variable]]))) {
             # cut.POSIXct <- cut.POSIXt
             f <- cut_var(data[[variable]], breaks = input$fixed_brks)
             list(var = f, brks = levels(f))
@@ -432,6 +440,11 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           # cut.POSIXct <- cut.POSIXt
           f <- cut_var(data[[variable]], breaks = "hour")
           list(var = f, brks = levels(f))
+        # } else if (input$method %in% c("week_only")) {
+        #   # As a proof of concept a single option to use "format" parameter
+        #   # https://www.stat.berkeley.edu/~s133/dates.html
+        #   f <- cut_var(data[[variable]], format = "%W")
+        #   list(var = f, brks = levels(f))
         } else {
           classInt::classIntervals(
             var = as.numeric(data[[variable]]),
@@ -445,6 +458,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         data <- req(data_r())
         variable <- req(input$variable)
         plot_histogram(data, variable, breaks = breaks_r()$brks, color = datamods:::get_primary_color())
+        # plot_histogram(data = breaks_r()$var, breaks = breaks_r()$brks, color = datamods:::get_primary_color())
       })
 
 
@@ -582,8 +596,13 @@ modal_cut_variable <- function(id,
 
 
 #' @importFrom graphics abline axis hist par plot.new plot.window
-plot_histogram <- function(data, column, bins = 30, breaks = NULL, color = "#112466") {
+plot_histogram <- function(data, column=NULL, bins = 30, breaks = NULL, color = "#112466") {
+  if (is.vector(data)){
+    x <- data
+  } else {
   x <- data[[column]]
+
+  }
   x <- as.numeric(x)
   op <- par(mar = rep(1.5, 4))
   on.exit(par(op))

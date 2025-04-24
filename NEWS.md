@@ -1,3 +1,7 @@
+# FreesearchR 25.4.4
+
+Polishing and moved hosted app to new address to fully reflect name change: [https://agdamsbo.shinyapps.io/FreesearchR/](https://agdamsbo.shinyapps.io/FreesearchR/)
+
 # FreesearchR 25.4.3
 
 - *NEW*: Added a variables type filter to easily exclude unwanted types. This also includes having data type rather than data class in the summary table. Will evaluate. Types are a simpler, more practical version of the *R* data class to easy interpretation.

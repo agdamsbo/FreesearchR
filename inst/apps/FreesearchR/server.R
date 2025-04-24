@@ -32,7 +32,8 @@ library(gtsummary)
 
 data(starwars)
 data(mtcars)
-mtcars <- mtcars |> append_column(as.Date(sample(1:365, nrow(mtcars))), "rand_dates")
+mtcars_date <- mtcars |> append_column(as.Date(sample(1:365, nrow(mtcars))), "rand_dates")
+mtcars_date$date <- as.Date(sample(seq_len(365),nrow(mtcars)))
 data(trial)
 
 
@@ -189,8 +190,11 @@ server <- function(input, output, session) {
       rv$data_original <- temp_data |>
         default_parsing()
 
-      rv$code$import_print <- list(
-        rv$code$import,
+      rv$code$import <- rv$code$import |>
+        expression_string(assign.str = "df <-")
+
+      rv$code$format <- list(
+        "df",
         rlang::expr(dplyr::select(dplyr::all_of(!!input$import_var))),
         rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
       ) |>
@@ -475,7 +479,11 @@ server <- function(input, output, session) {
   # })
 
   output$code_import <- shiny::renderUI({
-    prismCodeBlock(paste0("#Data import\n", rv$code$import_print))
+    prismCodeBlock(paste0("#Data import\n", rv$code$import))
+  })
+
+  output$code_import <- shiny::renderUI({
+    prismCodeBlock(paste0("#Data import formatting\n", rv$code$format))
   })
 
   output$code_data <- shiny::renderUI({

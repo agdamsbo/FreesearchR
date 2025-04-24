@@ -1,10 +1,10 @@
-name: freesearcheR
+name: FreesearchR
 title:
 username: agdamsbo
 account: agdamsbo
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
-appId: 13611288
-bundleId: 10164589
-url: https://agdamsbo.shinyapps.io/freesearcheR/
+appId: 14600805
+bundleId: 10169595
+url: https://agdamsbo.shinyapps.io/FreesearchR/
 version: 1

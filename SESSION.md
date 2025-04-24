@@ -11,11 +11,11 @@
 |collate     |en_US.UTF-8                                |
 |ctype       |en_US.UTF-8                                |
 |tz          |Europe/Copenhagen                          |
-|date        |2025-04-23                                 |
+|date        |2025-04-24                                 |
 |rstudio     |2024.12.1+563 Kousa Dogwood (desktop)      |
 |pandoc      |3.6.4 @ /opt/homebrew/bin/ (via rmarkdown) |
 |quarto      |1.6.40 @ /usr/local/bin/quarto             |
-|FreesearchR |25.4.3.250423                              |
+|FreesearchR |25.4.4.250424                              |
                                                                                 
                                                                                 
 --------------------------------------------------------------------------------
@@ -40,7 +40,7 @@
 |class         |7.3-23        |2025-01-01 |CRAN (R 4.4.1) |
 |classInt      |0.4-11        |2025-01-08 |CRAN (R 4.4.1) |
 |cli           |3.6.4         |2025-02-13 |CRAN (R 4.4.1) |
-|clipr         |0.8.0         |2022-02-22 |CRAN (R 4.4.1) |
+|codetools     |0.2-20        |2024-03-31 |CRAN (R 4.4.1) |
 |colorspace    |2.1-1         |2024-07-26 |CRAN (R 4.4.1) |
 |commonmark    |1.9.5         |2025-03-17 |CRAN (R 4.4.1) |
 |correlation   |0.8.7         |2025-03-03 |CRAN (R 4.4.1) |
@@ -66,9 +66,11 @@
 |fastmap       |1.2.0         |2024-05-15 |CRAN (R 4.4.1) |
 |fontawesome   |0.5.3         |2024-11-16 |CRAN (R 4.4.1) |
 |forcats       |1.0.0         |2023-01-29 |CRAN (R 4.4.0) |
+|foreach       |1.5.2         |2022-02-02 |CRAN (R 4.4.0) |
 |fs            |1.6.6         |2025-04-12 |CRAN (R 4.4.1) |
 |generics      |0.1.3         |2022-07-05 |CRAN (R 4.4.1) |
 |ggplot2       |3.5.2         |2025-04-09 |CRAN (R 4.4.1) |
+|glmnet        |4.1-8         |NA         |NA             |
 |glue          |1.8.0         |2024-09-30 |CRAN (R 4.4.1) |
 |gt            |1.0.0         |2025-04-05 |CRAN (R 4.4.1) |
 |gtable        |0.3.6         |2024-10-25 |CRAN (R 4.4.1) |
@@ -81,6 +83,7 @@
 |httpuv        |1.6.16        |2025-04-16 |CRAN (R 4.4.1) |
 |IDEAFilter    |0.2.0         |2024-04-15 |CRAN (R 4.4.0) |
 |insight       |1.2.0         |2025-04-22 |CRAN (R 4.4.1) |
+|iterators     |1.0.14        |2022-02-05 |CRAN (R 4.4.1) |
 |jquerylib     |0.1.4         |2021-04-26 |CRAN (R 4.4.0) |
 |jsonlite      |2.0.0         |2025-03-27 |CRAN (R 4.4.1) |
 |KernSmooth    |2.23-26       |2025-01-01 |CRAN (R 4.4.1) |
@@ -90,7 +93,6 @@
 |lattice       |0.22-7        |2025-04-02 |CRAN (R 4.4.1) |
 |lifecycle     |1.0.4         |2023-11-07 |CRAN (R 4.4.1) |
 |lme4          |1.1-37        |2025-03-26 |CRAN (R 4.4.1) |
-|magick        |2.8.6         |NA         |NA             |
 |magrittr      |2.0.3         |2022-03-30 |CRAN (R 4.4.1) |
 |MASS          |7.3-65        |2025-02-28 |CRAN (R 4.4.1) |
 |Matrix        |1.7-3         |2025-03-11 |CRAN (R 4.4.1) |
@@ -104,7 +106,6 @@
 |nloptr        |2.2.1         |2025-03-17 |CRAN (R 4.4.1) |
 |openssl       |2.3.2         |2025-02-03 |CRAN (R 4.4.1) |
 |openxlsx2     |1.14          |2025-03-20 |CRAN (R 4.4.1) |
-|pak           |0.8.0.2       |2025-04-08 |CRAN (R 4.4.1) |
 |parameters    |0.24.2        |2025-03-04 |CRAN (R 4.4.1) |
 |patchwork     |1.3.0         |2024-09-16 |CRAN (R 4.4.1) |
 |performance   |0.13.0        |2025-01-15 |CRAN (R 4.4.1) |
@@ -112,7 +113,6 @@
 |pillar        |1.10.2        |2025-04-05 |CRAN (R 4.4.1) |
 |pkgbuild      |1.4.7         |2025-03-24 |CRAN (R 4.4.1) |
 |pkgconfig     |2.0.3         |2019-09-22 |CRAN (R 4.4.1) |
-|pkgdown       |2.1.1         |2024-09-17 |CRAN (R 4.4.1) |
 |pkgload       |1.4.0         |2024-06-28 |CRAN (R 4.4.0) |
 |processx      |3.8.6         |2025-02-21 |CRAN (R 4.4.1) |
 |profvis       |0.4.0         |2024-09-20 |CRAN (R 4.4.1) |
@@ -122,6 +122,7 @@
 |purrr         |1.0.4         |2025-02-05 |CRAN (R 4.4.1) |
 |quarto        |1.4.4         |2024-07-20 |CRAN (R 4.4.0) |
 |R6            |2.6.1         |2025-02-15 |CRAN (R 4.4.1) |
+|ragg          |1.4.0         |2025-04-10 |CRAN (R 4.4.1) |
 |rbibutils     |2.3           |2024-10-04 |CRAN (R 4.4.1) |
 |RColorBrewer  |1.1-3         |2022-04-03 |CRAN (R 4.4.1) |
 |Rcpp          |1.0.14        |2025-01-12 |CRAN (R 4.4.1) |
@@ -130,6 +131,8 @@
 |readODS       |2.3.2         |2025-01-13 |CRAN (R 4.4.1) |
 |readr         |2.1.5         |2024-01-10 |CRAN (R 4.4.0) |
 |readxl        |1.4.5         |2025-03-07 |CRAN (R 4.4.1) |
+|REDCapCAST    |25.3.2        |2025-03-10 |CRAN (R 4.4.1) |
+|REDCapR       |1.4.0         |2025-01-11 |CRAN (R 4.4.1) |
 |reformulas    |0.4.0         |2024-11-03 |CRAN (R 4.4.1) |
 |remotes       |2.5.0         |2024-03-17 |CRAN (R 4.4.1) |
 |renv          |1.1.4         |2025-03-20 |CRAN (R 4.4.1) |
@@ -144,11 +147,16 @@
 |scales        |1.3.0         |2023-11-28 |CRAN (R 4.4.0) |
 |see           |0.11.0        |2025-03-11 |CRAN (R 4.4.1) |
 |sessioninfo   |1.2.3         |2025-02-05 |CRAN (R 4.4.1) |
+|shape         |1.4.6.1       |NA         |NA             |
 |shiny         |1.10.0        |2024-12-14 |CRAN (R 4.4.1) |
 |shinybusy     |0.3.3         |2024-03-09 |CRAN (R 4.4.0) |
 |shinyTime     |1.0.3         |2022-08-19 |CRAN (R 4.4.0) |
 |shinyWidgets  |0.9.0         |2025-02-21 |CRAN (R 4.4.1) |
 |stringi       |1.8.7         |2025-03-27 |CRAN (R 4.4.1) |
+|stringr       |1.5.1         |2023-11-14 |CRAN (R 4.4.0) |
+|survival      |3.8-3         |2024-12-17 |CRAN (R 4.4.1) |
+|systemfonts   |1.2.2         |2025-04-04 |CRAN (R 4.4.1) |
+|textshaping   |1.0.0         |2025-01-20 |CRAN (R 4.4.1) |
 |tibble        |3.2.1         |2023-03-20 |CRAN (R 4.4.0) |
 |tidyr         |1.3.1         |2024-01-24 |CRAN (R 4.4.1) |
 |tidyselect    |1.2.1         |2024-03-11 |CRAN (R 4.4.0) |

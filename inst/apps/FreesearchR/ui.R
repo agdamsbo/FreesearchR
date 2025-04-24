@@ -462,7 +462,7 @@ ui_elements <- list(
           shiny::tagList(
             lapply(
               paste0("code_", c(
-                "import", "data", "variables", "filter", "table1", "univariable", "multivariable"
+                "import", "format", "data", "variables", "filter", "table1", "univariable", "multivariable"
               )),
               \(.x)shiny::htmlOutput(outputId = .x)
             )
