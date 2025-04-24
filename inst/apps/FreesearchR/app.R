@@ -10,7 +10,7 @@
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'v25.4.4.250424'
+app_version <- function()'v25.4.3.250424'
 
 
 ########
@@ -298,6 +298,455 @@ sentence_paste <- function(data, and.str = "and") {
 
 
 
+
+
+########
+#### Current file: /Users/au301842/FreesearchR/R//create-column-mod.R 
+########
+
+#' @title Create new column
+#'
+#' @description
+#' This module allow to enter an expression to create a new column in a `data.frame`.
+#'
+#'
+#' @param id Module's ID.
+#'
+#' @return A [shiny::reactive()] function returning the data.
+#'
+#' @note User can only use a subset of function: `r paste(list_allowed_operations(), collapse=", ")`.
+#'  You can add more operations using the `allowed_operations` argument, for  example if you want to allow to use package lubridate, you can do:
+#'  ```r
+#'  c(list_allowed_operations(), getNamespaceExports("lubridate"))
+#'  ```
+#'
+#' @export
+#'
+#' @importFrom htmltools tagList tags css
+#' @importFrom shiny NS textInput textAreaInput uiOutput actionButton
+#' @importFrom phosphoricons ph
+#' @importFrom shinyWidgets virtualSelectInput
+#'
+#' @name create-column
+#'
+#' @example example/create_column_module_demo.R
+create_column_ui <- function(id) {
+  ns <- NS(id)
+  tagList(
+    # datamods:::html_dependency_datamods(),
+    # html_dependency_FreesearchR(),
+   tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "FreesearchR/inst/assets/css/FreesearchR.css")
+  ),
+    # tags$head(
+    #   # Note the wrapping of the string in HTML()
+    #   tags$style(HTML("
+    #   /* modified from esquisse for data types */
+    #   .btn-column-categorical {
+    #     background-color: #EF562D;
+    #     color: #FFFFFF;
+    #   }
+    #   .btn-column-continuous {
+    #     background-color: #0C4C8A;
+    #     color: #FFFFFF;
+    #   }
+    #   .btn-column-dichotomous {
+    #     background-color: #97D5E0;
+    #     color: #FFFFFF;
+    #   }
+    #   .btn-column-datetime {
+    #     background-color: #97D5E0;
+    #     color: #FFFFFF;
+    #   }
+    #   .btn-column-id {
+    #     background-color: #848484;
+    #     color: #FFFFFF;
+    #   }
+    #   .btn-column-text {
+    #     background-color: #2E2E2E;
+    #     color: #FFFFFF;
+    #   }"))
+    # ),
+    fluidRow(
+      column(
+        width = 6,
+        textInput(
+          inputId = ns("new_column"),
+          label = i18n("New column name:"),
+          value = "new_column1",
+          width = "100%"
+        )
+      ),
+      column(
+        width = 6,
+        shinyWidgets::virtualSelectInput(
+          inputId = ns("group_by"),
+          label = i18n("Group calculation by:"),
+          choices = NULL,
+          multiple = TRUE,
+          disableSelectAll = TRUE,
+          hasOptionDescription = TRUE,
+          width = "100%"
+        )
+      )
+    ),
+    textAreaInput(
+      inputId = ns("expression"),
+      label = i18n("Enter an expression to define new column:"),
+      value = "",
+      width = "100%",
+      rows = 6
+    ),
+    tags$i(
+      class = "d-block",
+      phosphoricons::ph("info"),
+      datamods::i18n("Click on a column name to add it to the expression:")
+    ),
+    uiOutput(outputId = ns("columns")),
+    uiOutput(outputId = ns("feedback")),
+    tags$div(
+      style = css(
+        display = "grid",
+        gridTemplateColumns = "3fr 1fr",
+        columnGap = "10px",
+        margin = "10px 0"
+      ),
+      actionButton(
+        inputId = ns("compute"),
+        label = tagList(
+          phosphoricons::ph("gear"), i18n("Create column")
+        ),
+        class = "btn-outline-primary",
+        width = "100%"
+      ),
+      actionButton(
+        inputId = ns("remove"),
+        label = tagList(
+          phosphoricons::ph("trash")
+        ),
+        class = "btn-outline-danger",
+        width = "100%"
+      )
+    )
+  )
+}
+
+#' @param data_r A [shiny::reactive()] function returning a `data.frame`.
+#' @param allowed_operations A `list` of allowed operations, see below for details.
+#'
+#' @export
+#'
+#' @rdname create-column
+#'
+#' @importFrom shiny moduleServer reactiveValues observeEvent renderUI req
+#'  updateTextAreaInput reactive bindEvent observe
+#' @importFrom shinyWidgets alert updateVirtualSelect
+create_column_server <- function(id,
+                                 data_r = reactive(NULL),
+                                 allowed_operations = list_allowed_operations()) {
+  moduleServer(
+    id,
+    function(input, output, session) {
+      ns <- session$ns
+
+      info_alert <- shinyWidgets::alert(
+        status = "info",
+        phosphoricons::ph("question"),
+        datamods::i18n("Choose a name for the column to be created or modified,"),
+        datamods::i18n("then enter an expression before clicking on the button above to validate or on "),
+        phosphoricons::ph("trash"), datamods::i18n("to delete it.")
+      )
+
+      rv <- reactiveValues(
+        data = NULL,
+        feedback = info_alert
+      )
+
+      observeEvent(input$hidden, rv$feedback <- info_alert)
+
+      bindEvent(observe({
+        data <- data_r()
+        shinyWidgets::updateVirtualSelect(
+          inputId = "group_by",
+          choices = make_choices_with_infos(data)
+        )
+      }), data_r(), input$hidden)
+
+      observeEvent(data_r(), rv$data <- data_r())
+
+      output$feedback <- renderUI(rv$feedback)
+
+      output$columns <- renderUI({
+        data <- req(rv$data)
+        mapply(
+          label = names(data),
+          data = data,
+          FUN = btn_column,
+          MoreArgs = list(inputId = ns("add_column")),
+          SIMPLIFY = FALSE
+        )
+      })
+
+      observeEvent(input$add_column, {
+        updateTextAreaInput(
+          session = session,
+          inputId = "expression",
+          value = paste0(input$expression, input$add_column)
+        )
+      })
+
+      observeEvent(input$new_column, {
+        if (input$new_column == "") {
+          rv$feedback <- shinyWidgets::alert(
+            status = "warning",
+            ph("warning"), datamods::i18n("New column name cannot be empty")
+          )
+        }
+      })
+
+      observeEvent(input$remove, {
+        rv$data[[input$new_column]] <- NULL
+      })
+      observeEvent(input$compute, {
+        rv$feedback <- try_compute_column(
+          expression = input$expression,
+          name = input$new_column,
+          rv = rv,
+          allowed_operations = allowed_operations,
+          by = input$group_by
+        )
+      })
+
+      return(reactive(rv$data))
+    }
+  )
+}
+
+#' @export
+#'
+#' @rdname create-column
+# @importFrom methods getGroupMembers
+list_allowed_operations <- function() {
+  c(
+    "(", "c",
+    # getGroupMembers("Arith"),
+    c("+", "-", "*", "^", "%%", "%/%", "/"),
+    # getGroupMembers("Compare"),
+    c("==", ">", "<", "!=", "<=", ">="),
+    # getGroupMembers("Logic"),
+    c("&", "|"),
+    # getGroupMembers("Math"),
+    c(
+      "abs", "sign", "sqrt", "ceiling", "floor", "trunc", "cummax",
+      "cummin", "cumprod", "cumsum", "exp", "expm1", "log", "log10",
+      "log2", "log1p", "cos", "cosh", "sin", "sinh", "tan", "tanh",
+      "acos", "acosh", "asin", "asinh", "atan", "atanh", "cospi", "sinpi",
+      "tanpi", "gamma", "lgamma", "digamma", "trigamma"
+    ),
+    # getGroupMembers("Math2"),
+    c("round", "signif"),
+    # getGroupMembers("Summary"),
+    c("max", "min", "range", "prod", "sum", "any", "all"),
+    "pmin", "pmax", "mean",
+    "paste", "paste0", "substr", "nchar", "trimws",
+    "gsub", "sub", "grepl", "ifelse", "length",
+    "as.numeric", "as.character", "as.integer", "as.Date", "as.POSIXct",
+    "as.factor", "factor"
+  )
+}
+
+
+#' @inheritParams shiny::modalDialog
+#' @export
+#'
+#' @importFrom shiny showModal modalDialog textInput
+#' @importFrom htmltools tagList
+#'
+#' @rdname create-column
+modal_create_column <- function(id,
+                                title = i18n("Create a new column"),
+                                easyClose = TRUE,
+                                size = "l",
+                                footer = NULL) {
+  ns <- NS(id)
+  showModal(modalDialog(
+    title = tagList(title, datamods:::button_close_modal()),
+    create_column_ui(id),
+    tags$div(
+      style = "display: none;",
+      textInput(inputId = ns("hidden"), label = NULL, value = datamods:::genId())
+    ),
+    easyClose = easyClose,
+    size = size,
+    footer = footer
+  ))
+}
+
+#' @inheritParams shinyWidgets::WinBox
+#' @export
+#'
+#' @importFrom shinyWidgets WinBox wbOptions wbControls
+#' @importFrom htmltools tagList
+#' @rdname create-column
+winbox_create_column <- function(id,
+                                 title = i18n("Create a new column"),
+                                 options = shinyWidgets::wbOptions(),
+                                 controls = shinyWidgets::wbControls()) {
+  ns <- NS(id)
+  WinBox(
+    title = title,
+    ui = tagList(
+      create_column_ui(id),
+      tags$div(
+        style = "display: none;",
+        textInput(inputId = ns("hidden"), label = NULL, value = datamods:::genId())
+      )
+    ),
+    options = modifyList(
+      shinyWidgets::wbOptions(height = "550px", modal = TRUE),
+      options
+    ),
+    controls = controls,
+    auto_height = FALSE
+  )
+}
+
+
+try_compute_column <- function(expression,
+                               name,
+                               rv,
+                               allowed_operations,
+                               by = NULL) {
+  parsed <- try(parse(text = expression, keep.source = FALSE), silent = TRUE)
+  if (inherits(parsed, "try-error")) {
+    return(datamods:::alert_error(attr(parsed, "condition")$message))
+  }
+  funs <- unlist(c(extract_calls(parsed), lapply(parsed, extract_calls)), recursive = TRUE)
+  if (!are_allowed_operations(funs, allowed_operations)) {
+    return(datamods:::alert_error(datamods::i18n("Some operations are not allowed")))
+  }
+  if (!isTruthy(by)) {
+    result <- try(
+      rlang::eval_tidy(rlang::parse_expr(expression), data = rv$data),
+      silent = TRUE
+    )
+  } else {
+    result <- try(
+      {
+        dt <- as.data.table(rv$data)
+        new_col <- NULL
+        dt[, new_col := rlang::eval_tidy(rlang::parse_expr(expression), data = .SD), by = by]
+        dt$new_col
+      },
+      silent = TRUE
+    )
+  }
+  if (inherits(result, "try-error")) {
+    return(alert_error(attr(result, "condition")$message))
+  }
+  adding_col <- try(rv$data[[name]] <- result, silent = TRUE)
+  if (inherits(adding_col, "try-error")) {
+    return(alert_error(attr(adding_col, "condition")$message))
+  }
+  code <- if (!isTruthy(by)) {
+    rlang::call2("mutate", !!!rlang::set_names(list(rlang::parse_expr(expression)), name))
+  } else {
+    rlang::call2(
+      "mutate",
+      !!!rlang::set_names(list(rlang::parse_expr(expression)), name),
+      !!!list(.by = rlang::expr(c(!!!rlang::syms(by))))
+    )
+  }
+  attr(rv$data, "code") <- Reduce(
+    f = function(x, y) rlang::expr(!!x %>% !!y),
+    x = c(attr(rv$data, "code"), code)
+  )
+  shinyWidgets::alert(
+    status = "success",
+    ph("check"), datamods::i18n("Column added!")
+  )
+}
+
+are_allowed_operations <- function(x, allowed_operations) {
+  all(
+    x %in% allowed_operations
+  )
+}
+
+
+extract_calls <- function(exp) {
+  if (is.call(exp)) {
+    return(list(
+      as.character(exp[[1L]]),
+      lapply(exp[-1L], extract_calls)
+    ))
+  }
+}
+
+alert_error <- function(text) {
+  alert(
+    status = "danger",
+    ph("bug"), text
+  )
+}
+
+
+btn_column <- function(label, data, inputId) {
+  icon <- get_var_icon(data, "class")
+  type <- data_type(data)
+  tags$button(
+    type = "button",
+    class = paste0("btn btn-column-", type),
+    style = css(
+      "--bs-btn-padding-y" = ".25rem",
+      "--bs-btn-padding-x" = ".5rem",
+      "--bs-btn-font-size" = ".75rem",
+      "margin-bottom" = "5px"
+    ),
+    if (!is.null(icon)) icon,
+    label,
+    onclick = sprintf(
+      "Shiny.setInputValue('%s', '%s', {priority: 'event'})",
+      inputId, label
+    )
+  )
+}
+
+make_choices_with_infos <- function(data) {
+  lapply(
+    X = seq_along(data),
+    FUN = function(i) {
+      nm <- names(data)[i]
+      values <- data[[nm]]
+      icon <- get_var_icon(values, "class")
+      # icon <- if (inherits(values, "character")) {
+      #   phosphoricons::ph("text-aa")
+      # } else if (inherits(values, "factor")) {
+      #   phosphoricons::ph("list-bullets")
+      # } else if (inherits(values, c("numeric", "integer"))) {
+      #   phosphoricons::ph("hash")
+      # } else if (inherits(values, c("Date"))) {
+      #   phosphoricons::ph("calendar")
+      # } else if (inherits(values, c("POSIXt"))) {
+      #   phosphoricons::ph("clock")
+      # } else {
+      #   NULL
+      # }
+      description <- if (is.atomic(values)) {
+        paste(i18n("Unique values:"), data.table::uniqueN(values))
+      } else {
+        ""
+      }
+      list(
+        label = htmltools::doRenderTags(tagList(
+          icon, nm
+        )),
+        value = nm,
+        description = description
+      )
+    }
+  )
+}
 
 
 ########
@@ -2379,9 +2828,9 @@ class_icons <- function(x) {
     shiny::icon("arrow-down-a-z")
   } else if (identical(x, "logical")) {
     shiny::icon("toggle-off")
-  } else if (any(c("Date", "POSIXct", "POSIXt") %in% x)) {
+  } else if (any(c("Date", "POSIXt") %in% x)) {
     shiny::icon("calendar-days")
-  } else if ("hms" %in% x) {
+  } else if (any("POSIXct", "hms") %in% x) {
     shiny::icon("clock")
   } else {
     shiny::icon("table")
@@ -2420,6 +2869,390 @@ type_icons <- function(x) {
       shiny::icon("table")
     }
     }
+}
+
+#' Easily get variable icon based on data type or class
+#'
+#' @param data variable or data frame
+#' @param class.type "type" or "class". Default is "class"
+#'
+#' @returns svg icon
+#' @export
+#'
+#' @examples
+#' mtcars[1] |> get_var_icon("class")
+#' default_parsing(mtcars) |> get_var_icon()
+get_var_icon <- function(data,class.type=c("class","type")){
+  if (is.data.frame(data)){
+    lapply(data,get_var_icon)
+  } else {
+
+  class.type <- match.arg(class.type)
+
+  switch(class.type,
+         type = {
+           type_icons(data_type(data))
+         },
+         class = {
+           class(data)[1] |> class_icons()
+         }
+  )
+}
+
+}
+
+
+########
+#### Current file: /Users/au301842/FreesearchR/R//datagrid-infos-mod.R 
+########
+
+
+#' Display a table in a window
+#'
+#' @param data a data object (either a `matrix` or a `data.frame`).
+#' @param title Title to be displayed in window.
+#' @param show_classes Show variables classes under variables names in table header.
+#' @param type Display table in a pop-up with [shinyWidgets::show_alert()],
+#'  in modal window with [shiny::showModal()] or in a WinBox window with [shinyWidgets::WinBox()].
+#' @param options Arguments passed to [toastui::datagrid()].
+#' @param width Width of the window, only used if `type = "popup"` or `type = "winbox"`.
+#' @param ... Additional options, such as `wbOptions = wbOptions()` or `wbControls = wbControls()`.
+#'
+#' @note
+#' If you use `type = "winbox"`, you'll need to use `shinyWidgets::html_dependency_winbox()` somewhere in your UI.
+#'
+#' @return No value.
+#' @export
+#'
+#' @importFrom htmltools tags tagList css
+#' @importFrom shiny showModal modalDialog
+#' @importFrom utils modifyList packageVersion
+#'
+#' @example examples/show_data.R
+show_data <- function(data,
+                      title = NULL,
+                      options = NULL,
+                      show_classes = TRUE,
+                      type = c("popup", "modal", "winbox"),
+                      width = "65%",
+                      ...) { # nocov start
+  type <- match.arg(type)
+  data <- as.data.frame(data)
+  args <- list(...)
+  gridTheme <- getOption("datagrid.theme")
+  if (length(gridTheme) < 1) {
+    datamods:::apply_grid_theme()
+  }
+  on.exit(toastui::reset_grid_theme())
+
+  if (is.null(options))
+    options <- list()
+
+  options$height <- 550
+  options$minBodyHeight <- 400
+  options$data <- data
+  options$theme <- "default"
+  options$colwidths <- "guess"
+  options$guess_colwidths_opts <- list(min_width = 90, max_width = 400, mul = 1, add = 10)
+  if (isTRUE(show_classes))
+    options$summary <- construct_col_summary(data)
+  datatable <- rlang::exec(toastui::datagrid, !!!options)
+  datatable <- toastui::grid_columns(datatable, className = "font-monospace")
+  if (identical(type, "winbox")) {
+    stopifnot(
+      "You need shinyWidgets >= 0.8.4" = packageVersion("shinyWidgets") >= "0.8.4"
+    )
+    wb_options <- if (is.null(args$wbOptions)) {
+      shinyWidgets::wbOptions(
+        height = "600px",
+        width = width,
+        modal = TRUE
+      )
+    } else {
+      modifyList(
+        shinyWidgets::wbOptions(
+          height = "600px",
+          width = width,
+          modal = TRUE
+        ),
+        args$wbOptions
+      )
+    }
+    wb_controls <- if (is.null(args$wbControls)) {
+      shinyWidgets::wbControls()
+    } else {
+      args$wbControls
+    }
+    shinyWidgets::WinBox(
+      title = title,
+      ui = datatable,
+      options = wb_options,
+      controls = wb_controls,
+      padding = "0 5px"
+    )
+  } else if (identical(type, "popup")) {
+    shinyWidgets::show_alert(
+      title = NULL,
+      text = tags$div(
+        if (!is.null(title)) {
+          tagList(
+            tags$h3(title),
+            tags$hr()
+          )
+        },
+        style = "color: #000 !important;",
+        datatable
+      ),
+      closeOnClickOutside = TRUE,
+      showCloseButton = TRUE,
+      btn_labels = NA,
+      html = TRUE,
+      width = width
+    )
+  } else {
+    showModal(modalDialog(
+      title = tagList(
+        datamods:::button_close_modal(),
+        title
+      ),
+      tags$div(
+        style = css(minHeight = validateCssUnit(options$height)),
+        toastui::renderDatagrid2(datatable)
+      ),
+      size = "xl",
+      footer = NULL,
+      easyClose = TRUE
+    ))
+  }
+} # nocov end
+
+
+
+#' @importFrom htmltools tagList tags css
+describe_col_char <- function(x, with_summary = TRUE) {
+  tags$div(
+    style = css(padding = "3px 0", fontSize = "x-small"),
+    tags$div(
+      style = css(fontStyle = "italic"),
+      get_var_icon(x),
+      # phosphoricons::ph("text-aa"),
+      "character"
+    ),
+    if (with_summary) {
+      tagList(
+        tags$hr(style = css(margin = "3px 0")),
+        tags$div(
+          i18n("Unique:"), length(unique(x))
+        ),
+        tags$div(
+          i18n("Missing:"), sum(is.na(x))
+        ),
+        tags$div(
+          style = css(whiteSpace = "normal", wordBreak = "break-all"),
+          i18n("Most Common:"), gsub(
+            pattern = "'",
+            replacement = "\u07F4",
+            x = names(sort(table(x), decreasing = TRUE))[1]
+          )
+        ),
+        tags$div(
+          "\u00A0"
+        )
+      )
+    }
+  )
+}
+
+fmt_p <- function(val, tot) {
+  paste0(round(val / tot * 100, 1), "%")
+}
+
+describe_col_factor <- function(x, with_summary = TRUE) {
+  count <- sort(table(x, useNA = "always"), decreasing = TRUE)
+  total <- sum(count)
+  one <- count[!is.na(names(count))][1]
+  two <- count[!is.na(names(count))][2]
+  missing <- count[is.na(names(count))]
+  tags$div(
+    style = css(padding = "3px 0", fontSize = "x-small"),
+    tags$div(
+      style = css(fontStyle = "italic"),
+      get_var_icon(x),
+      # phosphoricons::ph("list-bullets"),
+      "factor"
+    ),
+    if (with_summary) {
+      tagList(
+        tags$hr(style = css(margin = "3px 0")),
+        tags$div(
+          names(one), ":", fmt_p(one, total)
+        ),
+        tags$div(
+          names(two), ":", fmt_p(two, total)
+        ),
+        tags$div(
+          "Missing", ":", fmt_p(missing, total)
+        ),
+        tags$div(
+          "\u00A0"
+        )
+      )
+    }
+  )
+}
+
+describe_col_num <- function(x, with_summary = TRUE) {
+  tags$div(
+    style = css(padding = "3px 0", fontSize = "x-small"),
+    tags$div(
+      style = css(fontStyle = "italic"),
+      get_var_icon(x),
+      # phosphoricons::ph("hash"),
+      "numeric"
+    ),
+    if (with_summary) {
+      tagList(
+        tags$hr(style = css(margin = "3px 0")),
+        tags$div(
+          i18n("Min:"), round(min(x, na.rm = TRUE), 2)
+        ),
+        tags$div(
+          i18n("Mean:"), round(mean(x, na.rm = TRUE), 2)
+        ),
+        tags$div(
+          i18n("Max:"), round(max(x, na.rm = TRUE), 2)
+        ),
+        tags$div(
+          i18n("Missing:"), sum(is.na(x))
+        )
+      )
+    }
+  )
+}
+
+
+describe_col_date <- function(x, with_summary = TRUE) {
+  tags$div(
+    style = css(padding = "3px 0", fontSize = "x-small"),
+    tags$div(
+      style = css(fontStyle = "italic"),
+      get_var_icon(x),
+      # phosphoricons::ph("calendar"),
+      "date"
+    ),
+    if (with_summary) {
+      tagList(
+        tags$hr(style = css(margin = "3px 0")),
+        tags$div(
+          i18n("Min:"), min(x, na.rm = TRUE)
+        ),
+        tags$div(
+          i18n("Max:"), max(x, na.rm = TRUE)
+        ),
+        tags$div(
+          i18n("Missing:"), sum(is.na(x))
+        ),
+        tags$div(
+          "\u00A0"
+        )
+      )
+    }
+  )
+}
+
+describe_col_datetime <- function(x, with_summary = TRUE) {
+  tags$div(
+    style = css(padding = "3px 0", fontSize = "x-small"),
+    tags$div(
+      style = css(fontStyle = "italic"),
+      get_var_icon(x),
+      # phosphoricons::ph("clock"),
+      "datetime"
+    ),
+    if (with_summary) {
+      tagList(
+        tags$hr(style = css(margin = "3px 0")),
+        tags$div(
+          i18n("Min:"), min(x, na.rm = TRUE)
+        ),
+        tags$div(
+          i18n("Max:"), max(x, na.rm = TRUE)
+        ),
+        tags$div(
+          i18n("Missing:"), sum(is.na(x))
+        ),
+        tags$div(
+          "\u00A0"
+        )
+      )
+    }
+  )
+}
+
+
+describe_col_other <- function(x, with_summary = TRUE) {
+  tags$div(
+    style = css(padding = "3px 0", fontSize = "x-small"),
+    tags$div(
+      style = css(fontStyle = "italic"),
+      get_var_icon(x),
+      # phosphoricons::ph("clock"),
+      paste(class(x), collapse = ", ")
+    ),
+    if (with_summary) {
+      tagList(
+        tags$hr(style = css(margin = "3px 0")),
+        tags$div(
+          i18n("Unique:"), length(unique(x))
+        ),
+        tags$div(
+          i18n("Missing:"), sum(is.na(x))
+        ),
+        tags$div(
+          "\u00A0"
+        ),
+        tags$div(
+          "\u00A0"
+        )
+      )
+    }
+  )
+}
+
+construct_col_summary <- function(data) {
+  list(
+    position = "top",
+    height = 90,
+    columnContent = lapply(
+      X = setNames(names(data), names(data)),
+      FUN = function(col) {
+        values <- data[[col]]
+        content <- if (inherits(values, "character")) {
+          describe_col_char(values)
+        } else if (inherits(values, "factor")) {
+          describe_col_factor(values)
+        } else if (inherits(values, c("numeric", "integer"))) {
+          describe_col_num(values)
+        } else if (inherits(values, c("Date"))) {
+          describe_col_date(values)
+        } else if (inherits(values, c("POSIXt"))) {
+          describe_col_datetime(values)
+        } else {
+          describe_col_other(values)
+        }
+        list(
+          template = toastui::JS(
+            "function(value) {",
+            sprintf(
+              "return '%s';",
+              gsub(replacement = "", pattern = "\n", x = htmltools::doRenderTags(content))
+            ),
+            "}"
+          )
+        )
+      }
+    )
+  )
 }
 
 
@@ -3080,6 +3913,21 @@ is_identical_to_previous <- function(data, no.name = TRUE) {
       identical(lagged[.x], data[.x])
     }
   }, FUN.VALUE = logical(1))
+}
+
+
+########
+#### Current file: /Users/au301842/FreesearchR/R//html_dependency_freesearchr.R 
+########
+
+html_dependency_FreesearchR <- function() {
+  htmltools::htmlDependency(
+    name = "FreesearchR",
+    version = packageVersion("FreesearchR"),
+    src = list(href = "FreesearchR", file = "assets"),
+    package = "FreesearchR",
+    stylesheet = "css/FreesearchR.css"
+  )
 }
 
 
@@ -6953,7 +7801,7 @@ custom_theme <- function(...,
                          secondary = "#FF6F61",
                          bootswatch = "united",
                          base_font = bslib::font_google("Montserrat"),
-                         heading_font = bslib::font_google("Public Sans",wght = "700"),
+                         heading_font = bslib::font_google("Public Sans", wght = "700"),
                          code_font = bslib::font_google("Open Sans")
                          # success = "#1E4A8F",
                          # info = ,
@@ -6965,7 +7813,7 @@ custom_theme <- function(...,
                          # heading_font = bslib::font_google("Jost", wght = "800"),
                          # heading_font = bslib::font_google("Noto Serif"),
                          # heading_font = bslib::font_google("Alice"),
-                         ){
+) {
   bslib::bs_theme(
     ...,
     "navbar-bg" = primary,
@@ -6979,6 +7827,16 @@ custom_theme <- function(...,
   )
 }
 
+compliment_colors <- function() {
+  c(
+    "#00C896",
+    "#FFB100",
+    "#8A4FFF",
+    "#11A0EC"
+  )
+}
+
+
 
 #' GGplot default theme for plotting in Shiny
 #'
@@ -6987,16 +7845,16 @@ custom_theme <- function(...,
 #' @returns ggplot object
 #' @export
 #'
-gg_theme_shiny <- function(){
-    ggplot2::theme(
-      axis.title = ggplot2::element_text(size = 18),
-      axis.text = ggplot2::element_text(size = 14),
-      strip.text = ggplot2::element_text(size = 14),
-      legend.title = ggplot2::element_text(size = 18),
-      legend.text = ggplot2::element_text(size = 14),
-      plot.title = ggplot2::element_text(size = 24),
-      plot.subtitle = ggplot2::element_text(size = 18)
-    )
+gg_theme_shiny <- function() {
+  ggplot2::theme(
+    axis.title = ggplot2::element_text(size = 18),
+    axis.text = ggplot2::element_text(size = 14),
+    strip.text = ggplot2::element_text(size = 14),
+    legend.title = ggplot2::element_text(size = 18),
+    legend.text = ggplot2::element_text(size = 14),
+    plot.title = ggplot2::element_text(size = 24),
+    plot.subtitle = ggplot2::element_text(size = 18)
+  )
 }
 
 
@@ -7007,14 +7865,14 @@ gg_theme_shiny <- function(){
 #' @returns ggplot object
 #' @export
 #'
-gg_theme_export <- function(){
-    ggplot2::theme(
-      axis.title = ggplot2::element_text(size = 18),
-      axis.text.x = ggplot2::element_text(size = 14),
-      legend.title = ggplot2::element_text(size = 18),
-      legend.text = ggplot2::element_text(size = 14),
-      plot.title = ggplot2::element_text(size = 24)
-    )
+gg_theme_export <- function() {
+  ggplot2::theme(
+    axis.title = ggplot2::element_text(size = 18),
+    axis.text.x = ggplot2::element_text(size = 14),
+    legend.title = ggplot2::element_text(size = 18),
+    legend.text = ggplot2::element_text(size = 14),
+    plot.title = ggplot2::element_text(size = 24)
+  )
 }
 
 
@@ -8803,15 +9661,9 @@ dark <- custom_theme(
 ui <- bslib::page_fixed(
   prismDependencies,
   prismRDependency,
-  shiny::tags$head(includeHTML(("www/umami-app.html"))),
-  shiny::tags$style(
-    type = "text/css",
-    # add the name of the tab you want to use as title in data-value
-    shiny::HTML(
-      ".container-fluid > .nav > li >
-                        a[data-value='FreesearchR'] {font-size: 28px}"
-    )
-  ),
+  shiny::tags$head(
+    includeHTML(("www/umami-app.html")),
+    tags$link(rel = "stylesheet", type = "text/css", href = "style.css")),
   title = "FreesearchR",
   theme = light,
   shiny::useBusyIndicators(),
@@ -8850,7 +9702,7 @@ library(readr)
 library(MASS)
 library(stats)
 library(gt)
-library(openxlsx2)
+# library(openxlsx2)
 library(haven)
 library(readODS)
 require(shiny)
@@ -8863,16 +9715,16 @@ library(broom)
 library(broom.helpers)
 # library(REDCapCAST)
 library(easystats)
-library(esquisse)
+# library(esquisse)
 library(patchwork)
 library(DHARMa)
 library(apexcharter)
 library(toastui)
 library(datamods)
-library(data.table)
 library(IDEAFilter)
 library(shinyWidgets)
 library(DT)
+library(data.table)
 library(gtsummary)
 # library(FreesearchR)
 
@@ -9167,13 +10019,13 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_column,
-    datamods::modal_create_column(
+    modal_create_column(
       id = "modal_column",
       footer = "This window is aimed at advanced users and require some R-experience!",
       title = "Create new variables"
     )
   )
-  data_modal_r <- datamods::create_column_server(
+  data_modal_r <- create_column_server(
     id = "modal_column",
     data_r = reactive(rv$data)
   )
@@ -9296,7 +10148,7 @@ server <- function(input, output, session) {
   )
 
   observeEvent(input$modal_browse, {
-    datamods::show_data(REDCapCAST::fct_drop(rv$data_filtered), title = "Uploaded data overview", type = "modal")
+    show_data(REDCapCAST::fct_drop(rv$data_filtered), title = "Uploaded data overview", type = "modal")
   })
 
   output$original_str <- renderPrint({

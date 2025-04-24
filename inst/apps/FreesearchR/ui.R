@@ -507,15 +507,9 @@ dark <- custom_theme(
 ui <- bslib::page_fixed(
   prismDependencies,
   prismRDependency,
-  shiny::tags$head(includeHTML(("www/umami-app.html"))),
-  shiny::tags$style(
-    type = "text/css",
-    # add the name of the tab you want to use as title in data-value
-    shiny::HTML(
-      ".container-fluid > .nav > li >
-                        a[data-value='FreesearchR'] {font-size: 28px}"
-    )
-  ),
+  shiny::tags$head(
+    includeHTML(("www/umami-app.html")),
+    tags$link(rel = "stylesheet", type = "text/css", href = "style.css")),
   title = "FreesearchR",
   theme = light,
   shiny::useBusyIndicators(),

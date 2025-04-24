@@ -2,7 +2,7 @@ library(readr)
 library(MASS)
 library(stats)
 library(gt)
-library(openxlsx2)
+# library(openxlsx2)
 library(haven)
 library(readODS)
 require(shiny)
@@ -15,16 +15,16 @@ library(broom)
 library(broom.helpers)
 # library(REDCapCAST)
 library(easystats)
-library(esquisse)
+# library(esquisse)
 library(patchwork)
 library(DHARMa)
 library(apexcharter)
 library(toastui)
 library(datamods)
-library(data.table)
 library(IDEAFilter)
 library(shinyWidgets)
 library(DT)
+library(data.table)
 library(gtsummary)
 # library(FreesearchR)
 
@@ -319,13 +319,13 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_column,
-    datamods::modal_create_column(
+    modal_create_column(
       id = "modal_column",
       footer = "This window is aimed at advanced users and require some R-experience!",
       title = "Create new variables"
     )
   )
-  data_modal_r <- datamods::create_column_server(
+  data_modal_r <- create_column_server(
     id = "modal_column",
     data_r = reactive(rv$data)
   )
@@ -448,7 +448,7 @@ server <- function(input, output, session) {
   )
 
   observeEvent(input$modal_browse, {
-    datamods::show_data(REDCapCAST::fct_drop(rv$data_filtered), title = "Uploaded data overview", type = "modal")
+    show_data(REDCapCAST::fct_drop(rv$data_filtered), title = "Uploaded data overview", type = "modal")
   })
 
   output$original_str <- renderPrint({
