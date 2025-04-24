@@ -6,16 +6,16 @@
 #' @export
 custom_theme <- function(...,
                          version = 5,
-                         primary = "#1E4A8F",
-                         secondary = "#FF6F61",
+                         primary = FreesearchR_colors("primary"),
+                         secondary = FreesearchR_colors("secondary"),
                          bootswatch = "united",
                          base_font = bslib::font_google("Montserrat"),
                          heading_font = bslib::font_google("Public Sans", wght = "700"),
-                         code_font = bslib::font_google("Open Sans")
-                         # success = "#1E4A8F",
-                         # info = ,
-                         # warning = ,
-                         # danger = ,
+                         code_font = bslib::font_google("Open Sans"),
+                         success = FreesearchR_colors("success"),
+                         info = FreesearchR_colors("info"),
+                         warning = FreesearchR_colors("warning"),
+                         danger = FreesearchR_colors("danger")
                          # fg = "#000",
                          # bg="#fff",
                          # base_font = bslib::font_google("Alice"),
@@ -32,18 +32,35 @@ custom_theme <- function(...,
     bootswatch = bootswatch,
     base_font = base_font,
     heading_font = heading_font,
-    code_font = code_font
+    code_font = code_font,
+    success=success,
+    info=info,
+    warning=warning,
+    danger=danger
   )
 }
 
-compliment_colors <- function() {
-  c(
-    "#00C896",
-    "#FFB100",
-    "#8A4FFF",
-    "#11A0EC"
+FreesearchR_colors <- function(choose = NULL) {
+  out <- c(
+    primary = "#1E4A8F",
+    secondary = "#FF6F61",
+    success = "#00C896",
+    warning = "#FFB100",
+    danger = "#FF3A2F",
+    extra = "#8A4FFF",
+    info = "#11A0EC",
+    bg = "#FFFFFF",
+    dark = "#2D2D42",
+    fg = "#000000"
   )
+  if (!is.null(choose)) {
+    out[choose]
+  } else {
+    out
+  }
 }
+
+
 
 
 
