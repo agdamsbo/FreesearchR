@@ -9,7 +9,7 @@ type: software
 license: AGPL-3.0-or-later
 title: 'FreesearchR: A free and open-source browser based data analysis tool for researchers
   with publication ready output'
-version: 25.4.3
+version: 25.4.4
 doi: 10.5281/zenodo.14527429
 abstract: Easily evaluate and analysis clinical health data in your browser on a server
   or on your own device. Import data from multiple sources, summarise, modify and

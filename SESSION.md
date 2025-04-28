@@ -15,7 +15,7 @@
 |rstudio     |2024.12.1+563 Kousa Dogwood (desktop) |
 |pandoc      |3.6.4 @ /opt/homebrew/bin/pandoc      |
 |quarto      |1.6.40 @ /usr/local/bin/quarto        |
-|FreesearchR |25.4.3.250428                         |
+|FreesearchR |25.4.4.250428                         |
                                                                                 
                                                                                 
 --------------------------------------------------------------------------------
@@ -37,11 +37,14 @@
 |desc          |1.4.3         |2023-12-10 |CRAN (R 4.4.1) |
 |devtools      |2.4.5         |2022-10-11 |CRAN (R 4.4.0) |
 |digest        |0.6.37        |2024-08-19 |CRAN (R 4.4.1) |
+|dplyr         |1.1.4         |2023-11-17 |CRAN (R 4.4.0) |
 |e1071         |1.7-16        |2024-09-16 |CRAN (R 4.4.1) |
 |ellipsis      |0.3.2         |2021-04-29 |CRAN (R 4.4.1) |
+|evaluate      |1.0.3         |2025-01-10 |CRAN (R 4.4.1) |
 |fastmap       |1.2.0         |2024-05-15 |CRAN (R 4.4.1) |
-|FreesearchR   |25.4.3        |NA         |NA             |
+|FreesearchR   |25.4.4        |NA         |NA             |
 |fs            |1.6.6         |2025-04-12 |CRAN (R 4.4.1) |
+|generics      |0.1.3         |2022-07-05 |CRAN (R 4.4.1) |
 |glue          |1.8.0         |2024-09-30 |CRAN (R 4.4.1) |
 |here          |1.0.1         |2020-12-13 |CRAN (R 4.4.1) |
 |hms           |1.1.3         |2023-03-21 |CRAN (R 4.4.0) |
@@ -52,6 +55,7 @@
 |jsonlite      |2.0.0         |2025-03-27 |CRAN (R 4.4.1) |
 |jsonvalidate  |1.5.0         |2025-02-07 |CRAN (R 4.4.1) |
 |KernSmooth    |2.23-26       |2025-01-01 |CRAN (R 4.4.1) |
+|knitr         |1.50          |2025-03-16 |CRAN (R 4.4.1) |
 |later         |1.4.2         |2025-04-08 |CRAN (R 4.4.1) |
 |lifecycle     |1.0.4         |2023-11-07 |CRAN (R 4.4.1) |
 |magrittr      |2.0.3         |2022-03-30 |CRAN (R 4.4.1) |
@@ -91,5 +95,6 @@
 |vctrs         |0.6.5         |2023-12-01 |CRAN (R 4.4.0) |
 |vroom         |1.6.5         |2023-12-05 |CRAN (R 4.4.0) |
 |withr         |3.0.2         |2024-10-28 |CRAN (R 4.4.1) |
+|xfun          |0.52          |2025-04-02 |CRAN (R 4.4.1) |
 |xtable        |1.8-4         |2019-04-21 |CRAN (R 4.4.1) |
 |yaml          |2.3.10        |2024-07-26 |CRAN (R 4.4.1) |
