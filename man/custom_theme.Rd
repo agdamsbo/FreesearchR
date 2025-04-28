@@ -7,12 +7,16 @@
 custom_theme(
   ...,
   version = 5,
-  primary = "#1E4A8F",
-  secondary = "#FF6F61",
+  primary = FreesearchR_colors("primary"),
+  secondary = FreesearchR_colors("secondary"),
   bootswatch = "united",
   base_font = bslib::font_google("Montserrat"),
   heading_font = bslib::font_google("Public Sans", wght = "700"),
-  code_font = bslib::font_google("Open Sans")
+  code_font = bslib::font_google("Open Sans"),
+  success = FreesearchR_colors("success"),
+  info = FreesearchR_colors("info"),
+  warning = FreesearchR_colors("warning"),
+  danger = FreesearchR_colors("danger")
 )
 }
 \arguments{

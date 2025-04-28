@@ -16,11 +16,6 @@
 #' @return No value.
 #' @export
 #'
-#' @importFrom htmltools tags tagList css
-#' @importFrom shiny showModal modalDialog
-#' @importFrom utils modifyList packageVersion
-#'
-#' @example examples/show_data.R
 show_data <- function(data,
                       title = NULL,
                       options = NULL,

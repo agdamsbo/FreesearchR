@@ -23,7 +23,7 @@
 #'
 #' @name create-column
 #'
-#' @example example/create_column_module_demo.R
+#' @example examples/create_column_module_demo.R
 create_column_ui <- function(id) {
   ns <- NS(id)
   tagList(

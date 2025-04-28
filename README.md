@@ -7,9 +7,11 @@
 [![FreesearchR](https://img.shields.io/badge/Shiny-shinyapps.io-blue?style=flat&labelColor=white&logo=RStudio&logoColor=blue)](https://agdamsbo.shinyapps.io/FreesearchR/)
 <!-- badges: end -->
 
-This package is the backbone of the ***FreesearchR***, a free and open-source browser based data exploration and analysis tool intended to democratise clinical research by assisting any researcher to easily evaluate and analyse data and export publication ready results.
+The [***FreesearchR***](https://agdamsbo.shinyapps.io/FreesearchR/) is a simple, clinical health data exploration and analysis tool to democratise clinical research by assisting any researcher to easily evaluate and analyse data and export publication ready results.
 
-The ***FreesearchR***-tool is online and accessible here: [link to the app freely hosted on shinyapps.io](https://agdamsbo.shinyapps.io/FreesearchR/). All feedback is welcome and can be shared as a GitHub issue. Any suggestions on collaboration is much welcomed. Please reach out!
+[***FreesearchR***](https://agdamsbo.shinyapps.io/FreesearchR/) is free and open-source, and is directly accessible here: [link to the app freely hosted on shinyapps.io](https://agdamsbo.shinyapps.io/FreesearchR/). The app can also run locally, please see below.
+
+All feedback is welcome and can be shared as a GitHub issue. Any suggestions on collaboration is much welcomed. Please reach out!
 
 ## Motivation
 

@@ -10,7 +10,7 @@
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'v25.4.3.250424'
+app_version <- function()'v25.4.3.250428'
 
 
 ########
@@ -329,7 +329,7 @@ sentence_paste <- function(data, and.str = "and") {
 #'
 #' @name create-column
 #'
-#' @example example/create_column_module_demo.R
+#' @example examples/create_column_module_demo.R
 create_column_ui <- function(id) {
   ns <- NS(id)
   tagList(
@@ -2924,11 +2924,6 @@ get_var_icon <- function(data,class.type=c("class","type")){
 #' @return No value.
 #' @export
 #'
-#' @importFrom htmltools tags tagList css
-#' @importFrom shiny showModal modalDialog
-#' @importFrom utils modifyList packageVersion
-#'
-#' @example examples/show_data.R
 show_data <- function(data,
                       title = NULL,
                       options = NULL,
@@ -4632,7 +4627,7 @@ plot_box_single <- function(data, pri, sec=NULL, seed = 2103) {
     ggplot2::ggplot(ggplot2::aes(x = !!dplyr::sym(pri), y = !!dplyr::sym(sec), fill = !!dplyr::sym(sec), group = !!dplyr::sym(sec))) +
     ggplot2::geom_boxplot(linewidth = 1.8, outliers = FALSE) +
     ## THis could be optional in future
-    ggplot2::geom_jitter(color = "black", size = 2, alpha = 0.9, width = 0.1, height = .5) +
+    ggplot2::geom_jitter(color = "black", size = 2, alpha = 0.9, width = 0.1, height = .2) +
     ggplot2::coord_flip() +
     viridis::scale_fill_viridis(discrete = discrete, option = "D") +
     # ggplot2::theme_void() +
