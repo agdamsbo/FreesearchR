@@ -1,10 +1,13 @@
 Package: FreesearchR
-Title: Clinical Health Data Analysis
-Version: 25.4.3
-Authors@R: 
-    person("Andreas Gammelgaard", "Damsbo", , "agdamsbo@clin.au.dk", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0002-7559-1154"))
-Description: Free and open source browser based clinical health data exploration and analysis with publication ready output.
+Title: A free and open-source browser based data analysis tool for researchers with publication ready output
+Version: 25.4.4
+Authors@R: c(
+    person("Andreas Gammelgaard", "Damsbo",email="agdamsbo@clin.au.dk", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-7559-1154")),
+    person("Jutta Mari Adelin", "Jørgensen", role="ctb"),       
+    person("Anne Brink", "Behrndtz", role="ctb")
+    )
+Description: Easily evaluate and analysis clinical health data in your browser on a server or on your own device. Import data from multiple sources, summarise, modify and visualise data and export key metrics and regression analysis results in a publication ready format.
 License: AGPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -73,7 +76,8 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0),
     shinytest,
-    covr
+    covr,
+    cffr
 URL: https://github.com/agdamsbo/FreesearchR, https://agdamsbo.github.io/FreesearchR/
 BugReports: https://github.com/agdamsbo/FreesearchR/issues
 VignetteBuilder: knitr
