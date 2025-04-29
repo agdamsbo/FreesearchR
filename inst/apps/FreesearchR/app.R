@@ -10,7 +10,7 @@
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'v25.4.4.250428'
+app_version <- function()'v25.4.4.250429'
 
 
 ########
@@ -4553,7 +4553,7 @@ import_file_demo_app <- function() {
 #' @examples
 #' \dontrun{
 #' data(mtcars)
-#' shiny_FreesearchR(launch.browser = TRUE)
+#' launch_FreesearchR(launch.browser = TRUE)
 #' }
 launch_FreesearchR <- function(...){
   appDir <- system.file("apps", "FreesearchR", package = "FreesearchR")
@@ -4564,6 +4564,7 @@ launch_FreesearchR <- function(...){
   a <- shiny::runApp(appDir = paste0(appDir,"/app.R"), ...)
   return(invisible(a))
 }
+
 
 
 ########
@@ -10098,6 +10099,7 @@ server <- function(input, output, session) {
 
   #########  Data filter
   # IDEAFilter has the least cluttered UI, but might have a License issue
+  # Consider using shinyDataFilter, though not on CRAN
   data_filter <- IDEAFilter::IDEAFilter("data_filter",
     data = shiny::reactive(rv$data_variables),
     verbose = TRUE

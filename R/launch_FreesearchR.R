@@ -11,7 +11,7 @@
 #' @examples
 #' \dontrun{
 #' data(mtcars)
-#' shiny_FreesearchR(launch.browser = TRUE)
+#' launch_FreesearchR(launch.browser = TRUE)
 #' }
 launch_FreesearchR <- function(...){
   appDir <- system.file("apps", "FreesearchR", package = "FreesearchR")
@@ -22,3 +22,4 @@ launch_FreesearchR <- function(...){
   a <- shiny::runApp(appDir = paste0(appDir,"/app.R"), ...)
   return(invisible(a))
 }
+

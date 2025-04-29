@@ -53,4 +53,6 @@ Like any other project, this project was never possible without the great work o
 
 -   [easystats](https://easystats.github.io/easystats/): the [`performance::check_model()`](https://easystats.github.io/performance/articles/check_model.html) function was central in sparking the idea to create a data analysis tool.
 
+-   [IDEAfilter](https://biogen-inc.github.io/IDEAFilter/): a visually appealing data filter function based on the [{shinyDataFilter}](https://github.com/dgkf/shinyDataFilter).
+
 This project was all written by a human and not by any AI-based tools.

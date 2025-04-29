@@ -383,6 +383,7 @@ server <- function(input, output, session) {
 
   #########  Data filter
   # IDEAFilter has the least cluttered UI, but might have a License issue
+  # Consider using shinyDataFilter, though not on CRAN
   data_filter <- IDEAFilter::IDEAFilter("data_filter",
     data = shiny::reactive(rv$data_variables),
     verbose = TRUE

@@ -18,6 +18,6 @@ All data.frames in the global environment will be accessible through the app.
 \examples{
 \dontrun{
 data(mtcars)
-shiny_FreesearchR(launch.browser = TRUE)
+launch_FreesearchR(launch.browser = TRUE)
 }
 }

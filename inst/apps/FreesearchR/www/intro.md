@@ -4,7 +4,7 @@ This is the ***FreesearchR*** data analysis tool. We intend the ***FreesearchR**
 
 By intention, this tool has been designed to be simple to use with a minimum of mandatory options to keep the workflow streamlined, while also including a few options to go even further.
 
-There are some simple steps to go through (see corresponding tabs in the top):
+Here is a brief summary of the functions:
 
 1.  Import data to get started. This can be a spreadsheet/file on your machine, direct export from a REDCap server, sample data or data from a your local environment if run locally.
 
@@ -30,4 +30,4 @@ There are some simple steps to go through (see corresponding tabs in the top):
     
     -   Code to recreate all steps locally
 
-The full [project documentation is here](https://agdamsbo.github.io/FreesearchR/) and all code used is [freely available to read, copy, modify and improve](https://github.com/agdamsbo/FreesearchR) under an [open source license](https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md)! Contributions are welcome and much appreciated and can be reporting issues, suggesting new functionality, improving code or any other feedback [here](https://github.com/agdamsbo/FreesearchR/issues).
+The full [project documentation is here](https://agdamsbo.github.io/FreesearchR/) where you'll find detailed description of the app and link to the source code! If you want to [share feedback, please follow this link to a simple survey](https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8), or share on [GitHub](https://github.com/agdamsbo/FreesearchR/issues).
