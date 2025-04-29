@@ -9202,14 +9202,15 @@ ui_elements <- list(
         shiny::br(),
         shinyWidgets::radioGroupButtons(
           inputId = "source",
-          selected = "env",
+          selected = "file",
           choices = c(
             "File upload" = "file",
             "REDCap server export" = "redcap",
             "Local or sample data" = "env"
           ),
-          width = "100%"
+          size = "lg"
         ),
+        shiny::tags$script('document.querySelector("#source div").style.width = "100%"'),
         shiny::helpText("Upload a file from your device, get data directly from REDCap or select a sample data set for testing from the app."),
         shiny::br(),
         shiny::br(),
@@ -9703,7 +9704,7 @@ ui <- bslib::page_fixed(
       ),
       shiny::p(
         style = "margin: 1; color: #888;",
-        shiny::tags$a("AG Damsbo", href = "https://andreas.gdamsbo.dk/", target = "_blank", rel = "noopener noreferrer")," | ", app_version(), " | ", shiny::tags$a("License: AGPLv3", href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Source", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer")
+        shiny::tags$a("Docs", href = "https://agdamsbo.github.io/FreesearchR/", target = "_blank", rel = "noopener noreferrer")," | ", app_version(), " | ", shiny::tags$a("License: AGPLv3", href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Source", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Share feedback", href = "https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8", target = "_blank", rel = "noopener noreferrer")
       ),
     )
   )
