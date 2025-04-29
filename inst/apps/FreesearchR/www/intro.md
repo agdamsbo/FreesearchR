@@ -12,7 +12,7 @@ Here is a brief summary of the functions:
 
 1.  Evaluate data using descriptive analyses methods and inspect cross-correlations
 
-1.  Create simple, clean plots for data overview.
+1.  Create and export simple, clean plots for data overview and insights.
 
 1.  Create regression models for even more advanced data analyses
 

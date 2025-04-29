@@ -514,6 +514,7 @@ ui <- bslib::page_fixed(
   shiny::tags$head(
     includeHTML(("www/umami-app.html")),
     tags$link(rel = "stylesheet", type = "text/css", href = "style.css")),
+  tags$head(tags$link(rel="shortcut icon", href="favicon.svg")),
   title = "FreesearchR",
   theme = light,
   shiny::useBusyIndicators(),
