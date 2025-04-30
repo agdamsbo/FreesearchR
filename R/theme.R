@@ -54,7 +54,7 @@ FreesearchR_colors <- function(choose = NULL) {
     fg = "#000000"
   )
   if (!is.null(choose)) {
-    out[choose]
+    unname(out[choose])
   } else {
     out
   }

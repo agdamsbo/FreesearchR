@@ -60,3 +60,5 @@ Like any other project, this project was never possible without the great work o
 -   [IDEAfilter](https://biogen-inc.github.io/IDEAFilter/): a visually appealing data filter function based on the [{shinyDataFilter}](https://github.com/dgkf/shinyDataFilter).
 
 This project was all written by a human and not by any AI-based tools.
+
+The online ***FreesearchR*** app contains a tracking script, transmitting minimal data on usage. No uploaded data is transmitted anywhere. Have a look at the [tracking data here](https://analytics.gdamsbo.dk/share/2i4BNpMcDMB9lJvF/agdamsbo.shinyapps.io). No tracking data is sent running the app locally (see above).

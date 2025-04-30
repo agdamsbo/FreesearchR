@@ -482,6 +482,7 @@ regression_server <- function(id,
           ## To avoid plotting old models on fail/error
           rv$list$regression$tables <- NULL
 
+          # browser()
           tryCatch(
             {
               parameters <- list(
@@ -517,17 +518,9 @@ regression_server <- function(id,
                   )
                 })
 
-              list(
-                rv$code$import,
-                rlang::call2(.fn = "select", !!!list(input$import_var), .ns = "dplyr"),
-                rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
-              ) |>
-                merge_expression() |>
-                expression_string()
-
               rv$list$regression$tables <- out
-
               rv$list$input <- input
+
             },
             warning = function(warn) {
               showNotification(paste0(warn), type = "warning")
@@ -639,7 +632,7 @@ regression_server <- function(id,
       ##############################################################################
 
       return(shiny::reactive({
-        return(rv$list)
+          rv$list
       }))
     }
   )
