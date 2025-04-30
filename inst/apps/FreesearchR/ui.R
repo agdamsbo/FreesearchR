@@ -508,13 +508,10 @@ dark <- custom_theme(
 # Fonts to consider:
 # https://webdesignerdepot.com/17-open-source-fonts-youll-actually-love/
 
-ui <- bslib::page_fixed(
+ui_list <- shiny::tagList(
   prismDependencies,
   prismRDependency,
-  ## Basic Umami page tracking
-  shiny::tags$head(
-    includeHTML(("www/umami-app.html")),
-    tags$link(rel = "stylesheet", type = "text/css", href = "style.css")),
+  header_include(),
   ## This adds the actual favicon
   ## png and ico versions are kept for compatibility
   shiny::tags$head(tags$link(rel="shortcut icon", href="favicon.svg")),
@@ -546,3 +543,12 @@ ui <- bslib::page_fixed(
     )
   )
 )
+
+# ui_list <- shiny::tagAppendChild(ui_list,list(
+#   ## Basic Umami page tracking
+#   shiny::tags$head(includeHTML("www/umami-app.html"))
+#   # shiny::tags$head(shiny::tags$script(rel="defer", src="https://analytics.gdamsbo.dk/script.js", "data-website-id"="e7d4e13a-5824-4778-bbc0-8f92fb08303a"))
+#   ))
+
+ui <- do.call(
+  bslib::page_fixed,ui_list)

@@ -13,3 +13,5 @@
 ^pkgdown$
 ^data-raw$
 ^CITATION\.cff$
+^app_hosted$
+^app$

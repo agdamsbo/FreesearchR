@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/inst/apps/FreesearchR/functions.R 
+#### Current file: /Users/au301842/FreesearchR/app/functions.R 
 ########
 
 
@@ -7521,8 +7521,7 @@ regression_server <- function(id,
 
       shiny::observeEvent(
         list(
-          data_r(),
-          regression_vars()
+          data_r()
         ),
         {
           rv$list$regression$tables <- NULL
@@ -7537,6 +7536,7 @@ regression_server <- function(id,
           ## To avoid plotting old models on fail/error
           rv$list$regression$tables <- NULL
 
+          # browser()
           tryCatch(
             {
               parameters <- list(
@@ -7572,17 +7572,9 @@ regression_server <- function(id,
                   )
                 })
 
-              list(
-                rv$code$import,
-                rlang::call2(.fn = "select", !!!list(input$import_var), .ns = "dplyr"),
-                rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
-              ) |>
-                merge_expression() |>
-                expression_string()
-
               rv$list$regression$tables <- out
-
               rv$list$input <- input
+
             },
             warning = function(warn) {
               showNotification(paste0(warn), type = "warning")
@@ -7694,7 +7686,7 @@ regression_server <- function(id,
       ##############################################################################
 
       return(shiny::reactive({
-        return(rv$list)
+          rv$list
       }))
     }
   )
@@ -7880,7 +7872,7 @@ FreesearchR_colors <- function(choose = NULL) {
     fg = "#000000"
   )
   if (!is.null(choose)) {
-    out[choose]
+    unname(out[choose])
   } else {
     out
   }
@@ -9201,7 +9193,17 @@ grepl_fix <- function(data, pattern, type = c("prefix", "infix", "suffix")) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/inst/apps/FreesearchR/ui.R 
+#### Current file: /Users/au301842/FreesearchR/dev/header_include.R 
+########
+
+header_include <- function(){
+  shiny::tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "style.css"))
+}
+
+
+########
+#### Current file: /Users/au301842/FreesearchR/app/ui.R 
 ########
 
 # ns <- NS(id)
@@ -9717,10 +9719,7 @@ dark <- custom_theme(
 ui <- bslib::page_fixed(
   prismDependencies,
   prismRDependency,
-  ## Basic Umami page tracking
-  shiny::tags$head(
-    includeHTML(("www/umami-app.html")),
-    tags$link(rel = "stylesheet", type = "text/css", href = "style.css")),
+  header_include(),
   ## This adds the actual favicon
   ## png and ico versions are kept for compatibility
   shiny::tags$head(tags$link(rel="shortcut icon", href="favicon.svg")),
@@ -9743,7 +9742,7 @@ ui <- bslib::page_fixed(
       style = "background-color: #14131326; padding: 4px; text-align: center; bottom: 0; width: 100%;",
       shiny::p(
         style = "margin: 1",
-        "Data is only stored for analyses and deleted when the app is closed."
+        "Data is only stored for analyses and deleted when the app is closed.", shiny::markdown("Consider [running ***FreesearchR*** locally](https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine) if working with sensitive data.")
       ),
       shiny::p(
         style = "margin: 1; color: #888;",
@@ -9754,8 +9753,9 @@ ui <- bslib::page_fixed(
 )
 
 
+
 ########
-#### Current file: /Users/au301842/FreesearchR/inst/apps/FreesearchR/server.R 
+#### Current file: /Users/au301842/FreesearchR/app/server.R 
 ########
 
 library(readr)
@@ -9839,7 +9839,7 @@ server <- function(input, output, session) {
 
   rv <- shiny::reactiveValues(
     list = list(),
-    regression = list(),
+    regression = NULL,
     ds = NULL,
     local_temp = NULL,
     ready = NULL,
@@ -10234,7 +10234,7 @@ server <- function(input, output, session) {
       shiny::req(rv$data_filtered)
 
       rv$list$table1 <- NULL
-      rv$regression <- NULL
+      # rv$regression <- NULL
     }
   )
 
@@ -10414,6 +10414,22 @@ server <- function(input, output, session) {
 
   rv$regression <- regression_server("regression", data = shiny::reactive(rv$list$data))
 
+  # shiny::observeEvent(rv$regression, {
+  #   browser()
+  #   if (shiny::is.reactive(rv$regression)) {
+  #     rv$list$regression <- rv$regression()
+  #   } else {
+  #     rv$list$regression <- rv$regression
+  #   }
+  #   # rv$list$regression <- rv$regression()
+  # })
+
+  # output$regression_models <- renderText({
+  #   req(rv$list$regression)
+  #   browser()
+  #   names(rv$list$regression)
+  # })
+
   ##############################################################################
   #########
   #########  Page navigation
@@ -10464,6 +10480,7 @@ server <- function(input, output, session) {
       paste0("report.", input$output_type)
     }),
     content = function(file, type = input$output_type) {
+      # browser()
       # shiny::req(rv$list$regression)
       ## Notification is not progressing
       ## Presumably due to missing
@@ -10472,6 +10489,11 @@ server <- function(input, output, session) {
       format <- ifelse(type == "docx", "word_document", "odt_document")
 
       # browser()
+      # if (shiny::is.reactive(rv$regression)){
+      #   rv$list$regression <- rv$regression()
+      # }
+
+      # rv$list$regression <- rv$regression()
       rv$list$regression <- rv$regression()
 
       shiny::withProgress(message = "Generating the report. Hold on for a moment..", {
@@ -10525,7 +10547,7 @@ server <- function(input, output, session) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/inst/apps/FreesearchR/launch.R 
+#### Current file: /Users/au301842/FreesearchR/app/launch.R 
 ########
 
 shinyApp(ui, server)
