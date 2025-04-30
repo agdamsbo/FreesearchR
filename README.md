@@ -23,23 +23,27 @@ This app has the following simple goals:
 
 1.   ease quick data overview and basic visualisations for any clinical researcher
 
-## Install locally
+## Run locally on your own machine
 
-The ***FreesearchR***-tool can also be launched locally. Any data.frame available in the global environment will be accessible from the interface.
+The ***FreesearchR*** app can also run on your own machine with no data transmitted anywhere. Any data.frame available in the global environment will be accessible from the interface. Just follow the below steps:
 
-```
-require("devtools")
-devtools::install_github("agdamsbo/FreesearchR")
-library(FreesearchR)
-# By loading mtcars to the environment, it will be available 
-# in the interface like any other data.frame
-data(mtcars) 
-launch_FreesearchR()
-```
+1.   **Requirement:** You need to have [*R* installed](https://www.r-project.org/) and possibly an editor like [RStudio](https://posit.co/download/rstudio-desktop/). 
+
+1.   Then open the *R* console and copy/paste the following code, that will install the `{devtools}` package and then the `{FreesearchR}` *R*-package with its dependencies:
+
+     ```
+     require("devtools")
+     devtools::install_github("agdamsbo/FreesearchR")
+     library(FreesearchR)
+     # By loading mtcars to the environment, it will be available 
+     # in the interface like any other data.frame
+     data(mtcars) 
+     launch_FreesearchR()
+     ```
 
 ## Code of Conduct
 
-Please note that the ***FreesearchR*** project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
+Please note that the ***FreesearchR*** project is published with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
 
 ## Acknowledgements
 
