@@ -10,6 +10,8 @@ template:
     # code_font: {google: "Open Sans"}
   # Adding the switch destroys the theme colors
   light-switch: false
+  includes:
+    in_header: <script defer src="https://analytics.gdamsbo.dk/script.js" data-website-id="1f3baf18-29aa-4612-931b-58ea35922ae4"></script>
 
 navbar:
   bg: primary
@@ -23,9 +25,6 @@ navbar:
     q_a:
       text: Q&A
       href: QA.md
-
-includes:
-  in_header: umami-page.html
 
 footer:
   structure:

@@ -1,4 +1,4 @@
-# Welcome <img style="float: right;" src="logo-text-white-250.png">
+# Welcome <img style="float: right;" src="FreesearchR-logo.png">
 
 This is the ***FreesearchR*** data analysis tool. We intend the ***FreesearchR*** to be a powerful and free tool for easy data evaluation and analysis at the hands of the clinician. If you need more advanced tools for regression models or plotting, you'll probably be better off using *R* or similar directly on your own machine.
 

@@ -511,10 +511,13 @@ dark <- custom_theme(
 ui <- bslib::page_fixed(
   prismDependencies,
   prismRDependency,
+  ## Basic Umami page tracking
   shiny::tags$head(
     includeHTML(("www/umami-app.html")),
     tags$link(rel = "stylesheet", type = "text/css", href = "style.css")),
-  tags$head(tags$link(rel="shortcut icon", href="favicon.svg")),
+  ## This adds the actual favicon
+  ## png and ico versions are kept for compatibility
+  shiny::tags$head(tags$link(rel="shortcut icon", href="favicon.svg")),
   title = "FreesearchR",
   theme = light,
   shiny::useBusyIndicators(),
