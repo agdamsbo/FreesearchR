@@ -1,3 +1,11 @@
+# FreesearchR 25.4.5
+
+- *BUG*: Regression results and code not returned correctly
+
+- *IMPROVED*: analyses results are reset on data change
+
+- *NEW*: app usage tracking only in hosted app. README updated to reflect.
+ 
 # FreesearchR 25.4.4
 
 Minor updates in docs and easier citation.
