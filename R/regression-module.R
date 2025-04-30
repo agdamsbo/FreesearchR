@@ -331,10 +331,10 @@ regression_server <- function(id,
                 "Multivariable" = "regression_model_list"
               ) |>
                 lapply(\(.fun){
-                  parameters=list(
+                  parameters <- list(
                     data = data_r()[regression_vars()],
-                  outcome.str = input$outcome_var,
-              fun.descr = input$regression_type
+                    outcome.str = input$outcome_var,
+                    fun.descr = input$regression_type
                   )
 
                   do.call(
@@ -413,49 +413,68 @@ regression_server <- function(id,
           shiny::req(rv$check_plot)
           shiny::req(input$plot_checks)
 
-          p <- rv$check_plot() +
-            # patchwork::wrap_plots() +
-            patchwork::plot_annotation(title = "Multivariable regression model checks")
+          ## Print checks if a regression table is present
+          if (!is.null(rv$list$regression$tables)) {
+            p <- rv$check_plot() +
+              # patchwork::wrap_plots() +
+              patchwork::plot_annotation(title = "Multivariable regression model checks")
 
 
-          layout <- sapply(seq_len(length(p)), \(.x){
-            patchwork::area(.x, 1)
-          })
-
-          out <- p + patchwork::plot_layout(design = Reduce(c, layout))
-
-          index <- match(
-            input$plot_checks,
-            sapply(rv$check_plot(), \(.i){
-              get_ggplot_label(.i, "title")
+            layout <- sapply(seq_len(length(p)), \(.x){
+              patchwork::area(.x, 1)
             })
-          )
 
-          ls <- list()
+            p_list <- p + patchwork::plot_layout(design = Reduce(c, layout))
 
-          for (i in index) {
-            p <- out[[i]] +
-              ggplot2::theme(axis.text = ggplot2::element_text(size = 10),
-                             axis.title = ggplot2::element_text(size = 12),
-                             legend.text = ggplot2::element_text(size = 12),
-                             plot.subtitle = ggplot2::element_text(size = 12),
-                             plot.title = ggplot2::element_text(size = 18))
-            ls <- c(ls, list(p))
-          }
-          # browser()
-          tryCatch(
-            {
-              patchwork::wrap_plots(ls, ncol = if (length(ls) == 1) 1 else 2)
-            },
-            error = function(err) {
-              showNotification(err, type = "err")
+            index <- match(
+              input$plot_checks,
+              sapply(rv$check_plot(), \(.i){
+                get_ggplot_label(.i, "title")
+              })
+            )
+
+            ls <- list()
+
+            for (i in index) {
+              p <- p_list[[i]] +
+                ggplot2::theme(
+                  axis.text = ggplot2::element_text(size = 10),
+                  axis.title = ggplot2::element_text(size = 12),
+                  legend.text = ggplot2::element_text(size = 12),
+                  plot.subtitle = ggplot2::element_text(size = 12),
+                  plot.title = ggplot2::element_text(size = 18)
+                )
+              ls <- c(ls, list(p))
             }
-          )
+            # browser()
+            tryCatch(
+              {
+                out <- patchwork::wrap_plots(ls, ncol = if (length(ls) == 1) 1 else 2)
+              },
+              error = function(err) {
+                showNotification(err, type = "err")
+              }
+            )
+
+            out
+          } else {
+            return(NULL)
+          }
         },
         alt = "Assumptions testing of the multivariable regression model"
       )
 
-### Creating the regression table
+      shiny::observeEvent(
+        list(
+          data_r(),
+          regression_vars()
+        ),
+        {
+          rv$list$regression$tables <- NULL
+        }
+      )
+
+      ### Creating the regression table
       shiny::observeEvent(
         input$load,
         {
@@ -475,9 +494,9 @@ regression_server <- function(id,
                 purrr::map(\(.x){
                   do.call(
                     regression_table,
-                    append_list(.x,parameters,"x")
+                    append_list(.x, parameters, "x")
                   )
-})
+                })
 
               # if (input$add_regression_p == "no") {
               #   out <- out |>
@@ -490,16 +509,18 @@ regression_server <- function(id,
               # }
 
               rv$list$regression$models |>
-                purrr::imap(\(.x,.i){
+                purrr::imap(\(.x, .i){
                   rv$list$regression$models[[.i]][["code_table"]] <- paste(
-                  .x$code,
-                  expression_string(rlang::call2(.fn = "regression_table",!!!parameters,.ns = "FreesearchR"),assign.str=NULL),sep="|>\n")
+                    .x$code,
+                    expression_string(rlang::call2(.fn = "regression_table", !!!parameters, .ns = "FreesearchR"), assign.str = NULL),
+                    sep = "|>\n"
+                  )
                 })
 
               list(
                 rv$code$import,
-                rlang::call2(.fn = "select",!!!list(input$import_var),.ns = "dplyr"),
-                rlang::call2(.fn = "default_parsing",.ns = "FreesearchR")
+                rlang::call2(.fn = "select", !!!list(input$import_var), .ns = "dplyr"),
+                rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
               ) |>
                 merge_expression() |>
                 expression_string()
@@ -519,11 +540,15 @@ regression_server <- function(id,
       )
 
       output$table2 <- gt::render_gt({
-        shiny::req(rv$list$regression$tables)
-        rv$list$regression$tables |>
-          tbl_merge() |>
-          gtsummary::as_gt() |>
-          gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$params$descr}**")))
+        ## Print checks if a regression table is present
+        if (!is.null(rv$list$regression$tables)) {
+          rv$list$regression$tables |>
+            tbl_merge() |>
+            gtsummary::as_gt() |>
+            gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$params$descr}**")))
+        } else {
+          return(NULL)
+        }
       })
 
       ##############################################################################
@@ -619,5 +644,3 @@ regression_server <- function(id,
     }
   )
 }
-
-

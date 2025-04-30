@@ -33,7 +33,7 @@ library(gtsummary)
 data(starwars)
 data(mtcars)
 mtcars_date <- mtcars |> append_column(as.Date(sample(1:365, nrow(mtcars))), "rand_dates")
-mtcars_date$date <- as.Date(sample(seq_len(365),nrow(mtcars)))
+mtcars_date$date <- as.Date(sample(seq_len(365), nrow(mtcars)))
 data(trial)
 
 
@@ -464,6 +464,20 @@ server <- function(input, output, session) {
       ))
   })
 
+  ## Evaluation table/plots reset on data change
+  ## This does not work (!?)
+  shiny::observeEvent(
+    list(
+      rv$data_filtered
+    ),
+    {
+      shiny::req(rv$data_filtered)
+
+      rv$list$table1 <- NULL
+      rv$regression <- NULL
+    }
+  )
+
 
   ##############################################################################
   #########
@@ -525,6 +539,7 @@ server <- function(input, output, session) {
   ## Just a note to self
   ## This is a very rewarding couple of lines marking new insights to dynamically rendering code
   shiny::observe({
+    shiny::req(rv$regression)
     rv$regression()$regression$models |> purrr::imap(\(.x, .i){
       output[[paste0("code_", tolower(.i))]] <- shiny::renderUI({
         prismCodeBlock(paste0(paste("#", .i, "regression model\n"), .x$code_table))
@@ -601,11 +616,13 @@ server <- function(input, output, session) {
   })
 
   output$table1 <- gt::render_gt({
-    shiny::req(rv$list$table1)
-
-    rv$list$table1 |>
-      gtsummary::as_gt() |>
-      gt::tab_header(gt::md("**Table 1: Baseline Characteristics**"))
+    if (!is.null(rv$list$table1)) {
+      rv$list$table1 |>
+        gtsummary::as_gt() |>
+        gt::tab_header(gt::md("**Table 1: Baseline Characteristics**"))
+    } else {
+      return(NULL)
+    }
   })
 
   data_correlations_server(

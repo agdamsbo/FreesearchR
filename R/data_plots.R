@@ -351,9 +351,25 @@ data_visuals_server <- function(id,
         prismCodeBlock(paste0("#Plotting\n", rv$code))
       })
 
+      shiny::observeEvent(
+        list(
+          data()
+        ),
+        {
+          shiny::req(data())
+
+          rv$plot <- NULL
+        }
+      )
+
       output$plot <- shiny::renderPlot({
-        shiny::req(rv$plot)
-        rv$plot
+        # shiny::req(rv$plot)
+        # rv$plot
+        if (!is.null(rv$plot)) {
+          rv$plot
+        } else {
+          return(NULL)
+        }
       })
 
       output$download_plot <- shiny::downloadHandler(

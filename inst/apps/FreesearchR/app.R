@@ -10,7 +10,7 @@
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'v25.4.4.250429'
+app_version <- function()'v25.4.4.250430'
 
 
 ########
@@ -1925,9 +1925,25 @@ data_visuals_server <- function(id,
         prismCodeBlock(paste0("#Plotting\n", rv$code))
       })
 
+      shiny::observeEvent(
+        list(
+          data()
+        ),
+        {
+          shiny::req(data())
+
+          rv$plot <- NULL
+        }
+      )
+
       output$plot <- shiny::renderPlot({
-        shiny::req(rv$plot)
-        rv$plot
+        # shiny::req(rv$plot)
+        # rv$plot
+        if (!is.null(rv$plot)) {
+          rv$plot
+        } else {
+          return(NULL)
+        }
       })
 
       output$download_plot <- shiny::downloadHandler(
@@ -7370,10 +7386,10 @@ regression_server <- function(id,
                 "Multivariable" = "regression_model_list"
               ) |>
                 lapply(\(.fun){
-                  parameters=list(
+                  parameters <- list(
                     data = data_r()[regression_vars()],
-                  outcome.str = input$outcome_var,
-              fun.descr = input$regression_type
+                    outcome.str = input$outcome_var,
+                    fun.descr = input$regression_type
                   )
 
                   do.call(
@@ -7452,49 +7468,68 @@ regression_server <- function(id,
           shiny::req(rv$check_plot)
           shiny::req(input$plot_checks)
 
-          p <- rv$check_plot() +
-            # patchwork::wrap_plots() +
-            patchwork::plot_annotation(title = "Multivariable regression model checks")
+          ## Print checks if a regression table is present
+          if (!is.null(rv$list$regression$tables)) {
+            p <- rv$check_plot() +
+              # patchwork::wrap_plots() +
+              patchwork::plot_annotation(title = "Multivariable regression model checks")
 
 
-          layout <- sapply(seq_len(length(p)), \(.x){
-            patchwork::area(.x, 1)
-          })
-
-          out <- p + patchwork::plot_layout(design = Reduce(c, layout))
-
-          index <- match(
-            input$plot_checks,
-            sapply(rv$check_plot(), \(.i){
-              get_ggplot_label(.i, "title")
+            layout <- sapply(seq_len(length(p)), \(.x){
+              patchwork::area(.x, 1)
             })
-          )
 
-          ls <- list()
+            p_list <- p + patchwork::plot_layout(design = Reduce(c, layout))
 
-          for (i in index) {
-            p <- out[[i]] +
-              ggplot2::theme(axis.text = ggplot2::element_text(size = 10),
-                             axis.title = ggplot2::element_text(size = 12),
-                             legend.text = ggplot2::element_text(size = 12),
-                             plot.subtitle = ggplot2::element_text(size = 12),
-                             plot.title = ggplot2::element_text(size = 18))
-            ls <- c(ls, list(p))
-          }
-          # browser()
-          tryCatch(
-            {
-              patchwork::wrap_plots(ls, ncol = if (length(ls) == 1) 1 else 2)
-            },
-            error = function(err) {
-              showNotification(err, type = "err")
+            index <- match(
+              input$plot_checks,
+              sapply(rv$check_plot(), \(.i){
+                get_ggplot_label(.i, "title")
+              })
+            )
+
+            ls <- list()
+
+            for (i in index) {
+              p <- p_list[[i]] +
+                ggplot2::theme(
+                  axis.text = ggplot2::element_text(size = 10),
+                  axis.title = ggplot2::element_text(size = 12),
+                  legend.text = ggplot2::element_text(size = 12),
+                  plot.subtitle = ggplot2::element_text(size = 12),
+                  plot.title = ggplot2::element_text(size = 18)
+                )
+              ls <- c(ls, list(p))
             }
-          )
+            # browser()
+            tryCatch(
+              {
+                out <- patchwork::wrap_plots(ls, ncol = if (length(ls) == 1) 1 else 2)
+              },
+              error = function(err) {
+                showNotification(err, type = "err")
+              }
+            )
+
+            out
+          } else {
+            return(NULL)
+          }
         },
         alt = "Assumptions testing of the multivariable regression model"
       )
 
-### Creating the regression table
+      shiny::observeEvent(
+        list(
+          data_r(),
+          regression_vars()
+        ),
+        {
+          rv$list$regression$tables <- NULL
+        }
+      )
+
+      ### Creating the regression table
       shiny::observeEvent(
         input$load,
         {
@@ -7514,9 +7549,9 @@ regression_server <- function(id,
                 purrr::map(\(.x){
                   do.call(
                     regression_table,
-                    append_list(.x,parameters,"x")
+                    append_list(.x, parameters, "x")
                   )
-})
+                })
 
               # if (input$add_regression_p == "no") {
               #   out <- out |>
@@ -7529,16 +7564,18 @@ regression_server <- function(id,
               # }
 
               rv$list$regression$models |>
-                purrr::imap(\(.x,.i){
+                purrr::imap(\(.x, .i){
                   rv$list$regression$models[[.i]][["code_table"]] <- paste(
-                  .x$code,
-                  expression_string(rlang::call2(.fn = "regression_table",!!!parameters,.ns = "FreesearchR"),assign.str=NULL),sep="|>\n")
+                    .x$code,
+                    expression_string(rlang::call2(.fn = "regression_table", !!!parameters, .ns = "FreesearchR"), assign.str = NULL),
+                    sep = "|>\n"
+                  )
                 })
 
               list(
                 rv$code$import,
-                rlang::call2(.fn = "select",!!!list(input$import_var),.ns = "dplyr"),
-                rlang::call2(.fn = "default_parsing",.ns = "FreesearchR")
+                rlang::call2(.fn = "select", !!!list(input$import_var), .ns = "dplyr"),
+                rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
               ) |>
                 merge_expression() |>
                 expression_string()
@@ -7558,11 +7595,15 @@ regression_server <- function(id,
       )
 
       output$table2 <- gt::render_gt({
-        shiny::req(rv$list$regression$tables)
-        rv$list$regression$tables |>
-          tbl_merge() |>
-          gtsummary::as_gt() |>
-          gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$params$descr}**")))
+        ## Print checks if a regression table is present
+        if (!is.null(rv$list$regression$tables)) {
+          rv$list$regression$tables |>
+            tbl_merge() |>
+            gtsummary::as_gt() |>
+            gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$params$descr}**")))
+        } else {
+          return(NULL)
+        }
       })
 
       ##############################################################################
@@ -7658,8 +7699,6 @@ regression_server <- function(id,
     }
   )
 }
-
-
 
 
 ########
@@ -9678,10 +9717,13 @@ dark <- custom_theme(
 ui <- bslib::page_fixed(
   prismDependencies,
   prismRDependency,
+  ## Basic Umami page tracking
   shiny::tags$head(
     includeHTML(("www/umami-app.html")),
     tags$link(rel = "stylesheet", type = "text/css", href = "style.css")),
-  tags$head(tags$link(rel="shortcut icon", href="favicon.svg")),
+  ## This adds the actual favicon
+  ## png and ico versions are kept for compatibility
+  shiny::tags$head(tags$link(rel="shortcut icon", href="favicon.svg")),
   title = "FreesearchR",
   theme = light,
   shiny::useBusyIndicators(),
@@ -9751,7 +9793,7 @@ library(gtsummary)
 data(starwars)
 data(mtcars)
 mtcars_date <- mtcars |> append_column(as.Date(sample(1:365, nrow(mtcars))), "rand_dates")
-mtcars_date$date <- as.Date(sample(seq_len(365),nrow(mtcars)))
+mtcars_date$date <- as.Date(sample(seq_len(365), nrow(mtcars)))
 data(trial)
 
 
@@ -10182,6 +10224,20 @@ server <- function(input, output, session) {
       ))
   })
 
+  ## Evaluation table/plots reset on data change
+  ## This does not work (!?)
+  shiny::observeEvent(
+    list(
+      rv$data_filtered
+    ),
+    {
+      shiny::req(rv$data_filtered)
+
+      rv$list$table1 <- NULL
+      rv$regression <- NULL
+    }
+  )
+
 
   ##############################################################################
   #########
@@ -10243,6 +10299,7 @@ server <- function(input, output, session) {
   ## Just a note to self
   ## This is a very rewarding couple of lines marking new insights to dynamically rendering code
   shiny::observe({
+    shiny::req(rv$regression)
     rv$regression()$regression$models |> purrr::imap(\(.x, .i){
       output[[paste0("code_", tolower(.i))]] <- shiny::renderUI({
         prismCodeBlock(paste0(paste("#", .i, "regression model\n"), .x$code_table))
@@ -10319,11 +10376,13 @@ server <- function(input, output, session) {
   })
 
   output$table1 <- gt::render_gt({
-    shiny::req(rv$list$table1)
-
-    rv$list$table1 |>
-      gtsummary::as_gt() |>
-      gt::tab_header(gt::md("**Table 1: Baseline Characteristics**"))
+    if (!is.null(rv$list$table1)) {
+      rv$list$table1 |>
+        gtsummary::as_gt() |>
+        gt::tab_header(gt::md("**Table 1: Baseline Characteristics**"))
+    } else {
+      return(NULL)
+    }
   })
 
   data_correlations_server(
