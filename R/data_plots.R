@@ -45,15 +45,23 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
           title = "Download",
           icon = bsicons::bs_icon("download"),
           shinyWidgets::noUiSliderInput(
-            inputId = ns("height"),
+            inputId = ns("height_slide"),
             label = "Plot height (mm)",
             min = 50,
             max = 300,
             value = 100,
             step = 1,
             format = shinyWidgets::wNumbFormat(decimals = 0),
-            color = datamods:::get_primary_color()
+            color = datamods:::get_primary_color(),
+            inline = TRUE
           ),
+          # shiny::numericInput(
+          #   inputId = ns("height_numeric"),
+          #   label = "Plot height (mm)",
+          #   min = 50,
+          #   max = 300,
+          #   value = 100
+          # ),
           shinyWidgets::noUiSliderInput(
             inputId = ns("width"),
             label = "Plot width (mm)",
@@ -372,17 +380,32 @@ data_visuals_server <- function(id,
         }
       })
 
+      # shiny::observeEvent(input$height_numeric, {
+      #   shinyWidgets::updateNoUiSliderInput(session, ns("height_slide"), value = input$height_numeric)
+      # }, ignoreInit = TRUE)
+      # shiny::observeEvent(input$height_slide, {
+      #   shiny::updateNumericInput(session, ns("height_numeric"), value = input$height_slide)
+      # }, ignoreInit = TRUE)
+
+
       output$download_plot <- shiny::downloadHandler(
         filename = shiny::reactive({
           paste0("plot.", input$plot_type)
         }),
         content = function(file) {
+          if (inherits(rv$plot,"patchwork")){
+            plot <- rv$plot
+          } else {
+            plot <- rv$plot[[1]]
+
+          }
+          # browser()
           shiny::withProgress(message = "Drawing the plot. Hold on for a moment..", {
             ggplot2::ggsave(
               filename = file,
-              plot = rv$plot,
+              plot = plot,
               width = input$width,
-              height = input$height,
+              height = input$height_slide,
               dpi = 300,
               units = "mm", scale = 2
             )
@@ -517,8 +540,8 @@ supported_plots <- function() {
       fun = "plot_euler",
       descr = "Euler diagram",
       note = "Generate area-proportional Euler diagrams to display set relationships",
-      primary.type = "dichotomous",
-      secondary.type = "dichotomous",
+      primary.type = c("dichotomous", "categorical"),
+      secondary.type = c("dichotomous", "categorical"),
       secondary.multi = TRUE,
       secondary.max = 4,
       tertiary.type = c("dichotomous", "categorical"),
