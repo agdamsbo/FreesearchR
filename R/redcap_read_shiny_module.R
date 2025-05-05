@@ -112,7 +112,7 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
           tags$p(phosphoricons::ph("info", weight = "bold"), "Please specify data to download, then press 'Import'.")
         ),
         dismissible = TRUE
-      )#,
+      ) # ,
       ## TODO: Use busy indicator like on download to have button activate/deactivate
       # bslib::input_task_button(
       #   id = ns("data_import"),
@@ -200,7 +200,9 @@ m_redcap_readServer <- function(id) {
             )
 
             # browser()
-            imported <- try(rlang::exec(REDCapR::redcap_metadata_read, !!!parameters), silent = TRUE)
+            shiny::withProgress({
+              imported <- try(rlang::exec(REDCapR::redcap_metadata_read, !!!parameters), silent = TRUE)
+            },message = paste("Connecting to",data_rv$uri))
 
             ## TODO: Simplify error messages
             if (inherits(imported, "try-error") || NROW(imported) < 1 || ifelse(is.list(imported), !isTRUE(imported$success), FALSE)) {
@@ -227,8 +229,10 @@ m_redcap_readServer <- function(id) {
                 include_data_alert(
                   see_data_text = "Click to see data dictionary",
                   dataIdName = "see_data",
-                  extra = tags$p(tags$b(phosphoricons::ph("check", weight = "bold"), "Connected to server!"),
-                                 glue::glue("The {data_rv$info$project_title} project is loaded.")),
+                  extra = tags$p(
+                    tags$b(phosphoricons::ph("check", weight = "bold"), "Connected to server!"),
+                    glue::glue("The {data_rv$info$project_title} project is loaded.")
+                  ),
                   btn_show_data = TRUE
                 )
               )
