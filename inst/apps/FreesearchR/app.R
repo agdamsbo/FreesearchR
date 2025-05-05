@@ -9438,8 +9438,8 @@ ui_elements <- list(
               width = 9,
               shiny::tags$p(
                 shiny::markdown("Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."),
-                shiny::markdown("There are also more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code. At the bottom you can restore the original data."),
-                shiny::markdown("Please note that data modifications are applied before any data or variable filtering is applied.")
+                shiny::markdown("There are more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code. At the bottom you can restore the original data."),
+                shiny::markdown("Please note that data modifications are applied before any filtering.")
               )
             )
           ),
@@ -10293,10 +10293,12 @@ server <- function(input, output, session) {
   # })
 
   output$code_import <- shiny::renderUI({
+    shiny::req(rv$code$import)
     prismCodeBlock(paste0("#Data import\n", rv$code$import))
   })
 
-  output$code_import <- shiny::renderUI({
+  output$code_format <- shiny::renderUI({
+    shiny::req(rv$code$format)
     prismCodeBlock(paste0("#Data import formatting\n", rv$code$format))
   })
 

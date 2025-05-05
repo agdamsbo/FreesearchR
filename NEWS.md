@@ -1,10 +1,12 @@
 # FreesearchR 25.5.1
 
-- *BUG*: correct export of single variable plot.
+- *FIX*: correct export of single variable plot.
 
-- Include app version in report for reference.
+- *NEW*: Include app version in report for reference.
 
-- Show progress on connecting to a REDCap database.
+- *NEW*: Show progress on connecting to a REDCap database.
+
+- *FIX*: Data import code export.
 
 # FreesearchR 25.4.5
 
