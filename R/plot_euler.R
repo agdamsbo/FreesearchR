@@ -109,6 +109,12 @@ plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
 #' ) |> plot_euler_single()
 #' mtcars[c("vs", "am")] |> plot_euler_single()
 plot_euler_single <- function(data) {
+  # if (any("categorical" %in% data_type(data))){
+  #   shape <- "ellipse"
+  # } else {
+  #   shape <- "circle"
+  # }
+
   data |>
     ggeulerr(shape = "circle") +
     ggplot2::theme_void() +
