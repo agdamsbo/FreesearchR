@@ -10,7 +10,7 @@
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'v25.4.4.250430'
+app_version <- function()'25.5.1'
 
 
 ########
@@ -1619,15 +1619,23 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
           title = "Download",
           icon = bsicons::bs_icon("download"),
           shinyWidgets::noUiSliderInput(
-            inputId = ns("height"),
+            inputId = ns("height_slide"),
             label = "Plot height (mm)",
             min = 50,
             max = 300,
             value = 100,
             step = 1,
             format = shinyWidgets::wNumbFormat(decimals = 0),
-            color = datamods:::get_primary_color()
+            color = datamods:::get_primary_color(),
+            inline = TRUE
           ),
+          # shiny::numericInput(
+          #   inputId = ns("height_numeric"),
+          #   label = "Plot height (mm)",
+          #   min = 50,
+          #   max = 300,
+          #   value = 100
+          # ),
           shinyWidgets::noUiSliderInput(
             inputId = ns("width"),
             label = "Plot width (mm)",
@@ -1946,17 +1954,32 @@ data_visuals_server <- function(id,
         }
       })
 
+      # shiny::observeEvent(input$height_numeric, {
+      #   shinyWidgets::updateNoUiSliderInput(session, ns("height_slide"), value = input$height_numeric)
+      # }, ignoreInit = TRUE)
+      # shiny::observeEvent(input$height_slide, {
+      #   shiny::updateNumericInput(session, ns("height_numeric"), value = input$height_slide)
+      # }, ignoreInit = TRUE)
+
+
       output$download_plot <- shiny::downloadHandler(
         filename = shiny::reactive({
           paste0("plot.", input$plot_type)
         }),
         content = function(file) {
+          if (inherits(rv$plot,"patchwork")){
+            plot <- rv$plot
+          } else {
+            plot <- rv$plot[[1]]
+
+          }
+          # browser()
           shiny::withProgress(message = "Drawing the plot. Hold on for a moment..", {
             ggplot2::ggsave(
               filename = file,
-              plot = rv$plot,
+              plot = plot,
               width = input$width,
-              height = input$height,
+              height = input$height_slide,
               dpi = 300,
               units = "mm", scale = 2
             )
@@ -2091,8 +2114,8 @@ supported_plots <- function() {
       fun = "plot_euler",
       descr = "Euler diagram",
       note = "Generate area-proportional Euler diagrams to display set relationships",
-      primary.type = "dichotomous",
-      secondary.type = "dichotomous",
+      primary.type = c("dichotomous", "categorical"),
+      secondary.type = c("dichotomous", "categorical"),
       secondary.multi = TRUE,
       secondary.max = 4,
       tertiary.type = c("dichotomous", "categorical"),
@@ -3338,7 +3361,7 @@ write_rmd <- function(data, ...) {
   ## Ref: https://github.com/quarto-dev/quarto-cli/discussions/4041
   ## Outputs to the same as the .qmd file
   rmarkdown::render(
-    params = list(data.file = "web_data.rds"),
+    params = list(data.file = "web_data.rds",version=app_version()),
     # execute_params = list(data.file = temp),
     ...
   )
@@ -3925,6 +3948,13 @@ is_identical_to_previous <- function(data, no.name = TRUE) {
     }
   }, FUN.VALUE = logical(1))
 }
+
+
+########
+#### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
+########
+
+hosted_version <- function()'v25.5.1-250505'
 
 
 ########
@@ -4784,6 +4814,12 @@ plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
 #' ) |> plot_euler_single()
 #' mtcars[c("vs", "am")] |> plot_euler_single()
 plot_euler_single <- function(data) {
+  # if (any("categorical" %in% data_type(data))){
+  #   shape <- "ellipse"
+  # } else {
+  #   shape <- "circle"
+  # }
+
   data |>
     ggeulerr(shape = "circle") +
     ggplot2::theme_void() +
@@ -5441,7 +5477,7 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
           tags$p(phosphoricons::ph("info", weight = "bold"), "Please specify data to download, then press 'Import'.")
         ),
         dismissible = TRUE
-      )#,
+      ) # ,
       ## TODO: Use busy indicator like on download to have button activate/deactivate
       # bslib::input_task_button(
       #   id = ns("data_import"),
@@ -5529,7 +5565,9 @@ m_redcap_readServer <- function(id) {
             )
 
             # browser()
-            imported <- try(rlang::exec(REDCapR::redcap_metadata_read, !!!parameters), silent = TRUE)
+            shiny::withProgress({
+              imported <- try(rlang::exec(REDCapR::redcap_metadata_read, !!!parameters), silent = TRUE)
+            },message = paste("Connecting to",data_rv$uri))
 
             ## TODO: Simplify error messages
             if (inherits(imported, "try-error") || NROW(imported) < 1 || ifelse(is.list(imported), !isTRUE(imported$success), FALSE)) {
@@ -5556,8 +5594,10 @@ m_redcap_readServer <- function(id) {
                 include_data_alert(
                   see_data_text = "Click to see data dictionary",
                   dataIdName = "see_data",
-                  extra = tags$p(tags$b(phosphoricons::ph("check", weight = "bold"), "Connected to server!"),
-                                 glue::glue("The {data_rv$info$project_title} project is loaded.")),
+                  extra = tags$p(
+                    tags$b(phosphoricons::ph("check", weight = "bold"), "Connected to server!"),
+                    glue::glue("The {data_rv$info$project_title} project is loaded.")
+                  ),
                   btn_show_data = TRUE
                 )
               )
@@ -7521,7 +7561,8 @@ regression_server <- function(id,
 
       shiny::observeEvent(
         list(
-          data_r()
+          data_r(),
+          regression_vars()
         ),
         {
           rv$list$regression$tables <- NULL
@@ -9687,14 +9728,28 @@ ui_elements <- list(
     ),
   ##############################################################################
   #########
-  #########  Documentation panel
+  #########  Feedback link
+  #########
+  ##############################################################################
+  "feedback" = bslib::nav_item(
+    # shiny::img(shiny::icon("book")),
+    shiny::tags$a(
+      href = "https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8",
+      "Feedback",shiny::icon("arrow-up-right-from-square"),
+      target = "_blank",
+      rel = "noopener noreferrer"
+    )
+  ),
+  ##############################################################################
+  #########
+  #########  Documentation link
   #########
   ##############################################################################
   "docs" = bslib::nav_item(
     # shiny::img(shiny::icon("book")),
     shiny::tags$a(
       href = "https://agdamsbo.github.io/FreesearchR/",
-      "Docs (external)",
+      "Docs",shiny::icon("arrow-up-right-from-square"),
       target = "_blank",
       rel = "noopener noreferrer"
     )
@@ -9736,6 +9791,7 @@ ui <- bslib::page_fixed(
     ui_elements$analyze,
     ui_elements$download,
     bslib::nav_spacer(),
+    ui_elements$feedback,
     ui_elements$docs,
     fillable = FALSE,
     footer = shiny::tags$footer(
@@ -9746,7 +9802,7 @@ ui <- bslib::page_fixed(
       ),
       shiny::p(
         style = "margin: 1; color: #888;",
-        shiny::tags$a("Docs", href = "https://agdamsbo.github.io/FreesearchR/", target = "_blank", rel = "noopener noreferrer")," | ", app_version(), " | ", shiny::tags$a("License: AGPLv3", href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Source", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Share feedback", href = "https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8", target = "_blank", rel = "noopener noreferrer")
+        shiny::tags$a("Docs", href = "https://agdamsbo.github.io/FreesearchR/", target = "_blank", rel = "noopener noreferrer")," | ", hosted_version(), " | ", shiny::tags$a("License: AGPLv3", href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Source", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Share feedback", href = "https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8", target = "_blank", rel = "noopener noreferrer")
       ),
     )
   )
@@ -9773,9 +9829,7 @@ library(quarto)
 library(here)
 library(broom)
 library(broom.helpers)
-# library(REDCapCAST)
 library(easystats)
-# library(esquisse)
 library(patchwork)
 library(DHARMa)
 library(apexcharter)
@@ -9786,31 +9840,16 @@ library(shinyWidgets)
 library(DT)
 library(data.table)
 library(gtsummary)
-# library(FreesearchR)
-
-# source("functions.R")
 
 data(starwars)
 data(mtcars)
-mtcars_date <- mtcars |> append_column(as.Date(sample(1:365, nrow(mtcars))), "rand_dates")
-mtcars_date$date <- as.Date(sample(seq_len(365), nrow(mtcars)))
 data(trial)
-
-
-# light <- custom_theme()
-#
-# dark <- custom_theme(bg = "#000",fg="#fff")
 
 
 server <- function(input, output, session) {
   ## Listing files in www in session start to keep when ending and removing
   ## everything else.
   files.to.keep <- list.files("www/")
-
-  output$docs_file <- shiny::renderUI({
-    # shiny::includeHTML("www/docs.html")
-    shiny::HTML(readLines("www/docs.html"))
-  })
 
   ##############################################################################
   #########
@@ -10480,20 +10519,11 @@ server <- function(input, output, session) {
       paste0("report.", input$output_type)
     }),
     content = function(file, type = input$output_type) {
-      # browser()
-      # shiny::req(rv$list$regression)
       ## Notification is not progressing
       ## Presumably due to missing
-      # browser()
       # Simplified for .rmd output attempt
       format <- ifelse(type == "docx", "word_document", "odt_document")
 
-      # browser()
-      # if (shiny::is.reactive(rv$regression)){
-      #   rv$list$regression <- rv$regression()
-      # }
-
-      # rv$list$regression <- rv$regression()
       rv$list$regression <- rv$regression()
 
       shiny::withProgress(message = "Generating the report. Hold on for a moment..", {

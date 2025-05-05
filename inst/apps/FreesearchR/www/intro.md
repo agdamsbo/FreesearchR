@@ -30,4 +30,4 @@ Here is a brief summary of the functions:
     
     -   Code to recreate all steps locally
 
-The full [project documentation is here](https://agdamsbo.github.io/FreesearchR/) where you'll find detailed description of the app and link to the source code! If you want to [share feedback, please follow this link to a simple survey](https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8), or share on [GitHub](https://github.com/agdamsbo/FreesearchR/issues).
+The full [project documentation is here](https://agdamsbo.github.io/FreesearchR/) where you'll find detailed description of the app and link to the source code! If you want to [share feedback, please follow this link to a simple survey](https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8).
