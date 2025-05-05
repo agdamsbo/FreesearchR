@@ -6,6 +6,7 @@ author: FreesearchR data analysis tool
 toc: false
 params:
   data.file: NA
+  version: NA
 ---
 
 ```{r setup, echo = FALSE}
@@ -46,7 +47,7 @@ Research should be free and open with easy access for all. The FreesearchR tool 
 
 ## Methods
 
-Analyses were conducted in the *FreesearchR* data analysis web-tool based on R version 4.4.1.
+Analyses were conducted using the *FreesearchR* data analysis web-tool version `r params$version` based on *R* version 4.4.1.
 
 ## Results
 

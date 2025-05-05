@@ -65,7 +65,7 @@ write_rmd <- function(data, ...) {
   ## Ref: https://github.com/quarto-dev/quarto-cli/discussions/4041
   ## Outputs to the same as the .qmd file
   rmarkdown::render(
-    params = list(data.file = "web_data.rds"),
+    params = list(data.file = "web_data.rds",version=app_version()),
     # execute_params = list(data.file = temp),
     ...
   )
