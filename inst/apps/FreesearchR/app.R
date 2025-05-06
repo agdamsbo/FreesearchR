@@ -3954,7 +3954,7 @@ is_identical_to_previous <- function(data, no.name = TRUE) {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.5.1-250505'
+hosted_version <- function()'v25.5.1-250506'
 
 
 ########

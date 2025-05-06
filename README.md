@@ -13,6 +13,8 @@ The [***FreesearchR***](https://agdamsbo.shinyapps.io/FreesearchR/) is a simple,
 
 All feedback is welcome and can be shared as a GitHub issue. Any suggestions on collaboration is much welcomed. Please reach out!
 
+![FreesearchR demo](demo/demo.gif)
+
 ## Motivation
 
 This app has the following simple goals:
