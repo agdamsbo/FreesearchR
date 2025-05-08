@@ -10,7 +10,7 @@
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.5.1'
+app_version <- function()'25.5.2'
 
 
 ########
@@ -1969,7 +1969,9 @@ data_visuals_server <- function(id,
         content = function(file) {
           if (inherits(rv$plot,"patchwork")){
             plot <- rv$plot
-          } else {
+          } else if (inherits(rv$plot,"ggplot")){
+            plot <- rv$plot
+          }else {
             plot <- rv$plot[[1]]
 
           }
@@ -1994,7 +1996,6 @@ data_visuals_server <- function(id,
     }
   )
 }
-
 
 #' Select all from vector but
 #'
@@ -3954,7 +3955,7 @@ is_identical_to_previous <- function(data, no.name = TRUE) {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.5.1-250507'
+hosted_version <- function()'v25.5.2-250508'
 
 
 ########
@@ -9397,7 +9398,12 @@ ui_elements <- list(
           fluidRow(
             shiny::column(
               width = 9,
-              data_summary_ui(id = "data_summary")
+              data_summary_ui(id = "data_summary"),
+              shiny::br(),
+              shiny::br(),
+              shiny::br(),
+              shiny::br(),
+              shiny::br()
             ),
             shiny::column(
               width = 3,
