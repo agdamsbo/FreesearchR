@@ -62,7 +62,8 @@ Imports:
     eulerr,
     ggforce,
     RcppArmadillo,
-    ggcorrplot
+    ggcorrplot,
+    shinyjs
 Suggests: 
     styler,
     devtools,

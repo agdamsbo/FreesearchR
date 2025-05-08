@@ -978,6 +978,19 @@ references:
   year: '2025'
   doi: 10.32614/CRAN.package.ggcorrplot
 - type: software
+  title: shinyjs
+  abstract: 'shinyjs: Easily Improve the User Experience of Your Shiny Apps in Seconds'
+  notes: Imports
+  url: https://deanattali.com/shinyjs/
+  repository: https://CRAN.R-project.org/package=shinyjs
+  authors:
+  - family-names: Attali
+    given-names: Dean
+    email: daattali@gmail.com
+    orcid: https://orcid.org/0000-0002-5645-3493
+  year: '2025'
+  doi: 10.32614/CRAN.package.shinyjs
+- type: software
   title: styler
   abstract: 'styler: Non-Invasive Pretty Printing of R Code'
   notes: Suggests

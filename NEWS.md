@@ -2,6 +2,8 @@
 
 - *FIX*: correct export of plots. The solution in the last version broke more than it solved.
 
+- *NEW*: added simple loading animation.
+
 A privately hosted version is now live on app.freesearchr.org. For now, it is hosted on Hetzner with Yunohost.
 
 # FreesearchR 25.5.1

@@ -9741,7 +9741,7 @@ ui_elements <- list(
     # shiny::img(shiny::icon("book")),
     shiny::tags$a(
       href = "https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8",
-      "Feedback",shiny::icon("arrow-up-right-from-square"),
+      "Feedback", shiny::icon("arrow-up-right-from-square"),
       target = "_blank",
       rel = "noopener noreferrer"
     )
@@ -9755,7 +9755,7 @@ ui_elements <- list(
     # shiny::img(shiny::icon("book")),
     shiny::tags$a(
       href = "https://agdamsbo.github.io/FreesearchR/",
-      "Docs",shiny::icon("arrow-up-right-from-square"),
+      "Docs", shiny::icon("arrow-up-right-from-square"),
       target = "_blank",
       rel = "noopener noreferrer"
     )
@@ -9783,37 +9783,47 @@ ui <- bslib::page_fixed(
   header_include(),
   ## This adds the actual favicon
   ## png and ico versions are kept for compatibility
-  shiny::tags$head(tags$link(rel="shortcut icon", href="favicon.svg")),
+  shiny::tags$head(tags$link(rel = "shortcut icon", href = "favicon.svg")),
   title = "FreesearchR",
   theme = light,
   shiny::useBusyIndicators(),
-  bslib::page_navbar(
-    id = "main_panel",
-    ui_elements$home,
-    ui_elements$import,
-    ui_elements$overview,
-    ui_elements$describe,
-    ui_elements$visuals,
-    ui_elements$analyze,
-    ui_elements$download,
-    bslib::nav_spacer(),
-    ui_elements$feedback,
-    ui_elements$docs,
-    fillable = FALSE,
-    footer = shiny::tags$footer(
-      style = "background-color: #14131326; padding: 4px; text-align: center; bottom: 0; width: 100%;",
-      shiny::p(
-        style = "margin: 1",
-        "Data is only stored for analyses and deleted when the app is closed.", shiny::markdown("Consider [running ***FreesearchR*** locally](https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine) if working with sensitive data.")
-      ),
-      shiny::p(
-        style = "margin: 1; color: #888;",
-        shiny::tags$a("Docs", href = "https://agdamsbo.github.io/FreesearchR/", target = "_blank", rel = "noopener noreferrer")," | ", hosted_version(), " | ", shiny::tags$a("License: AGPLv3", href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Source", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Share feedback", href = "https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8", target = "_blank", rel = "noopener noreferrer")
-      ),
+  shinyjs::useShinyjs(),
+  shiny::div(
+    id = "loading_page",
+    # shiny::h1("Loading the FreesearchR app..."),
+    shinybusy::add_busy_spinner(position = "full-page")
+  ),
+  shinyjs::hidden(
+    shiny::div(
+      id = "main_content",
+      bslib::page_navbar(
+        id = "main_panel",
+        ui_elements$home,
+        ui_elements$import,
+        ui_elements$overview,
+        ui_elements$describe,
+        ui_elements$visuals,
+        ui_elements$analyze,
+        ui_elements$download,
+        bslib::nav_spacer(),
+        ui_elements$feedback,
+        ui_elements$docs,
+        fillable = FALSE,
+        footer = shiny::tags$footer(
+          style = "background-color: #14131326; padding: 4px; text-align: center; bottom: 0; width: 100%;",
+          shiny::p(
+            style = "margin: 1",
+            "Data is only stored for analyses and deleted when the app is closed.", shiny::markdown("Consider [running ***FreesearchR*** locally](https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine) if working with sensitive data.")
+          ),
+          shiny::p(
+            style = "margin: 1; color: #888;",
+            shiny::tags$a("Docs", href = "https://agdamsbo.github.io/FreesearchR/", target = "_blank", rel = "noopener noreferrer"), " | ", hosted_version(), " | ", shiny::tags$a("License: AGPLv3", href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Source", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Share feedback", href = "https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8", target = "_blank", rel = "noopener noreferrer")
+          ),
+        )
+      )
     )
   )
 )
-
 
 
 ########
@@ -9846,16 +9856,25 @@ library(shinyWidgets)
 library(DT)
 library(data.table)
 library(gtsummary)
+library(shinyjs)
 
 data(starwars)
 data(mtcars)
 data(trial)
+
+load_data <- function() {
+  Sys.sleep(1)
+  hide("loading_page")
+  show("main_content")
+}
 
 
 server <- function(input, output, session) {
   ## Listing files in www in session start to keep when ending and removing
   ## everything else.
   files.to.keep <- list.files("www/")
+
+  load_data()
 
   ##############################################################################
   #########
