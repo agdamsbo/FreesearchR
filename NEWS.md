@@ -1,3 +1,9 @@
+# FreesearchR 25.5.2
+
+- *FIX*: correct export of plots. The solution in the last version broke more than it solved.
+
+A privately hosted version is now live on app.freesearchr.org. For now, it is hosted on Hetzner with Yunohost.
+
 # FreesearchR 25.5.1
 
 - *FIX*: correct export of single variable plot.
