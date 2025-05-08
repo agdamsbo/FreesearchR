@@ -395,7 +395,9 @@ data_visuals_server <- function(id,
         content = function(file) {
           if (inherits(rv$plot,"patchwork")){
             plot <- rv$plot
-          } else {
+          } else if (inherits(rv$plot,"ggplot")){
+            plot <- rv$plot
+          }else {
             plot <- rv$plot[[1]]
 
           }
@@ -420,7 +422,6 @@ data_visuals_server <- function(id,
     }
   )
 }
-
 
 #' Select all from vector but
 #'
