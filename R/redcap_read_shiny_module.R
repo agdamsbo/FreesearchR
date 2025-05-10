@@ -200,9 +200,12 @@ m_redcap_readServer <- function(id) {
             )
 
             # browser()
-            shiny::withProgress({
-              imported <- try(rlang::exec(REDCapR::redcap_metadata_read, !!!parameters), silent = TRUE)
-            },message = paste("Connecting to",data_rv$uri))
+            shiny::withProgress(
+              {
+                imported <- try(rlang::exec(REDCapR::redcap_metadata_read, !!!parameters), silent = TRUE)
+              },
+              message = paste("Connecting to", data_rv$uri)
+            )
 
             ## TODO: Simplify error messages
             if (inherits(imported, "try-error") || NROW(imported) < 1 || ifelse(is.list(imported), !isTRUE(imported$success), FALSE)) {
@@ -228,7 +231,7 @@ m_redcap_readServer <- function(id) {
                 status = "success",
                 include_data_alert(
                   see_data_text = "Click to see data dictionary",
-                  dataIdName = "see_data",
+                  dataIdName = "see_dd",
                   extra = tags$p(
                     tags$b(phosphoricons::ph("check", weight = "bold"), "Connected to server!"),
                     glue::glue("The {data_rv$info$project_title} project is loaded.")
@@ -254,10 +257,21 @@ m_redcap_readServer <- function(id) {
     output$connect_success <- shiny::reactive(identical(data_rv$dd_status, "success"))
     shiny::outputOptions(output, "connect_success", suspendWhenHidden = FALSE)
 
-    shiny::observeEvent(input$see_data, {
-      datamods::show_data(
+    shiny::observeEvent(input$see_dd, {
+      show_data(
         purrr::pluck(data_rv$dd_list, "data"),
         title = "Data dictionary",
+        type = "modal",
+        show_classes = FALSE,
+        tags$b("Preview:")
+      )
+    })
+
+    shiny::observeEvent(input$see_data, {
+      show_data(
+        # purrr::pluck(data_rv$dd_list, "data"),
+        data_rv$data,
+        title = "Imported data set",
         type = "modal",
         show_classes = FALSE,
         tags$b("Preview:")
@@ -378,12 +392,23 @@ m_redcap_readServer <- function(id) {
         imported <- try(rlang::exec(REDCapCAST::read_redcap_tables, !!!parameters), silent = TRUE)
       })
 
-      code <- rlang::call2("read_redcap_tables",
-        !!!utils::modifyList(parameters, list(token = "PERSONAL_API_TOKEN")), ,
+      parameters_code <- parameters[c("uri", "fields", "events", "raw_or_label", "filter_logic")]
+
+      code <- rlang::call2(
+        "easy_redcap",
+        !!!utils::modifyList(
+          parameters_code,
+          list(
+            data_format = ifelse(
+              input$data_type == "long" && !is.null(input$data_type),
+              "long",
+              "wide"
+            ),
+            project.name = simple_snake(data_rv$info$project_title)
+          )
+        ),
         .ns = "REDCapCAST"
       )
-
-      # browser()
 
       if (inherits(imported, "try-error") || NROW(imported) < 1) {
         data_rv$data_status <- "error"
@@ -453,9 +478,17 @@ m_redcap_readServer <- function(id) {
           datamods:::insert_alert(
             selector = ns("retrieved"),
             status = data_rv$data_status,
-            tags$p(
-              tags$b(phosphoricons::ph("check", weight = "bold"), "Success!"),
-              data_rv$data_message
+            # tags$p(
+            #   tags$b(phosphoricons::ph("check", weight = "bold"), "Success!"),
+            #   data_rv$data_message
+            # ),
+            include_data_alert(
+              see_data_text = "Click to see the imported data",
+              dataIdName = "see_data",
+              extra = tags$p(
+                tags$b(phosphoricons::ph("check", weight = "bold"), data_rv$data_message)
+              ),
+              btn_show_data = TRUE
             )
           )
         } else {
