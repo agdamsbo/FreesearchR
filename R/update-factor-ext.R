@@ -31,7 +31,7 @@ update_factor_ui <- function(id) {
     fluidRow(
       column(
         width = 6,
-        virtualSelectInput(
+        shinyWidgets::virtualSelectInput(
           inputId = ns("variable"),
           label = i18n("Factor variable to reorder:"),
           choices = NULL,
@@ -66,10 +66,10 @@ update_factor_ui <- function(id) {
         )
       )
     ),
-    datagridOutput(ns("grid")),
+    toastui::datagridOutput(ns("grid")),
     tags$div(
       class = "float-end",
-      prettyCheckbox(
+      shinyWidgets::prettyCheckbox(
         inputId = ns("new_var"),
         label = i18n("Create a new variable (otherwise replaces the one selected)"),
         value = FALSE,

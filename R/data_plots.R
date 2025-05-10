@@ -681,6 +681,7 @@ create_plot <- function(data, type, pri, sec, ter = NULL, ...) {
 #' mtcars |> get_label()
 #' mtcars$mpg |> get_label()
 #' gtsummary::trial |> get_label(var = "trt")
+#' gtsummary::trial$trt |> get_label()
 #' 1:10 |> get_label()
 get_label <- function(data, var = NULL) {
   # data <- if (is.reactive(data)) data() else data

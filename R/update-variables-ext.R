@@ -1,7 +1,3 @@
-library(data.table)
-library(rlang)
-
-
 #' Select, rename and convert variables
 #'
 #' @param id Module id. See [shiny::moduleServer()].

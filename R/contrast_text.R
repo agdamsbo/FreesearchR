@@ -25,7 +25,6 @@
 #' contrast_text(c("#F2F2F2", "blue"), method="relative")
 #' @export
 #'
-#' @importFrom grDevices col2rgb
 #'
 contrast_text <- function(background,
                           light_text = 'white',

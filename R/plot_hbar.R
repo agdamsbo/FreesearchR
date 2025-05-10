@@ -62,9 +62,8 @@ vertical_stacked_bars <- function(data,
   contrast_cut <-
     sum(contrast_text(colors, threshold = .3) == "white")
 
-  score_label <- ifelse(is.na(REDCapCAST::get_attr(data$score, "label")), score, REDCapCAST::get_attr(data$score, "label"))
-  group_label <- ifelse(is.na(REDCapCAST::get_attr(data$group, "label")), group, REDCapCAST::get_attr(data$group, "label"))
-
+  score_label <- data |> get_label(var = score)
+  group_label <- data |> get_label(var = group)
 
   p |>
     (\(.x){

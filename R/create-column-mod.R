@@ -17,20 +17,17 @@
 #' @export
 #'
 #' @importFrom htmltools tagList tags css
-#' @importFrom shiny NS textInput textAreaInput uiOutput actionButton
-#' @importFrom phosphoricons ph
-#' @importFrom shinyWidgets virtualSelectInput
 #'
 #' @name create-column
 #'
 #' @example examples/create_column_module_demo.R
 create_column_ui <- function(id) {
   ns <- NS(id)
-  tagList(
+  htmltools::tagList(
     # datamods:::html_dependency_datamods(),
     # html_dependency_FreesearchR(),
-   tags$head(
-    tags$link(rel = "stylesheet", type = "text/css", href = "FreesearchR/inst/assets/css/FreesearchR.css")
+   shiny::tags$head(
+    shiny::tags$link(rel = "stylesheet", type = "text/css", href = "FreesearchR/inst/assets/css/FreesearchR.css")
   ),
     # tags$head(
     #   # Note the wrapping of the string in HTML()
@@ -84,7 +81,7 @@ create_column_ui <- function(id) {
         )
       )
     ),
-    textAreaInput(
+    shiny::textAreaInput(
       inputId = ns("expression"),
       label = i18n("Enter an expression to define new column:"),
       value = "",
@@ -132,9 +129,6 @@ create_column_ui <- function(id) {
 #'
 #' @rdname create-column
 #'
-#' @importFrom shiny moduleServer reactiveValues observeEvent renderUI req
-#'  updateTextAreaInput reactive bindEvent observe
-#' @importFrom shinyWidgets alert updateVirtualSelect
 create_column_server <- function(id,
                                  data_r = reactive(NULL),
                                  allowed_operations = list_allowed_operations()) {

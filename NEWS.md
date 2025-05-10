@@ -1,3 +1,13 @@
+# FreesearchR 25.5.4
+
+- *FIX* correctly omit NAs in `data_type()` call
+
+- *FIX* omit NAs when plotting Euler diagrams.
+
+- *FIX* print correct labels in horizontal stacked bars.
+
+- *FIX* initial app load should feel faster.
+
 # FreesearchR 25.5.3
 
 - *FIX* a little polish on the data import

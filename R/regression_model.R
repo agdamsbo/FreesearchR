@@ -271,12 +271,13 @@ data_type <- function(data) {
     sapply(data, data_type)
   } else {
     cl_d <- class(data)
+    l_unique <- length(unique(na.omit(data)))
     if (all(is.na(data))) {
       out <- "empty"
-    } else if (length(unique(data)) < 2) {
+    } else if (l_unique < 2) {
       out <- "monotone"
-    } else if (any(c("factor", "logical") %in% cl_d) | length(unique(data)) == 2) {
-      if (identical("logical", cl_d) | length(unique(data)) == 2) {
+    } else if (any(c("factor", "logical") %in% cl_d) | l_unique == 2) {
+      if (identical("logical", cl_d) | l_unique == 2) {
         out <- "dichotomous"
       } else {
         # if (is.ordered(data)) {
@@ -289,7 +290,7 @@ data_type <- function(data) {
       out <- "text"
     } else if (any(c("hms", "Date", "POSIXct", "POSIXt") %in% cl_d)) {
       out <- "datetime"
-    } else if (!length(unique(data)) == 2) {
+    } else if (l_unique > 2) {
       ## Previously had all thinkable classes
       ## Now just assumes the class has not been defined above
       ## any(c("numeric", "integer", "hms", "Date", "timediff") %in% cl_d) &

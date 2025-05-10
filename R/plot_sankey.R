@@ -119,7 +119,6 @@ plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors 
 #'   plot_sankey_single("first", "last", color.group = "pri")
 #' mtcars |>
 #'   default_parsing() |>
-#'   str()
 #' plot_sankey_single("cyl", "vs", color.group = "pri")
 plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), colors = NULL, ...) {
   color.group <- match.arg(color.group)
@@ -131,8 +130,6 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
   # browser()
 
   data <- data |> sankey_ready(pri = pri, sec = sec, ...)
-
-  library(ggalluvial)
 
   na.color <- "#2986cc"
   box.color <- "#1E4B66"
@@ -197,6 +194,8 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
       )
   }
 
+  ## Will fail to use stat="stratum" if library is not loaded.
+  library(ggalluvial)
   p +
     ggplot2::geom_text(
       stat = "stratum",

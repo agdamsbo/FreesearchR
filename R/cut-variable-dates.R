@@ -1,9 +1,3 @@
-library(datamods)
-library(toastui)
-library(phosphoricons)
-library(rlang)
-library(shiny)
-
 #' Extended cutting function with fall-back to the native base::cut
 #'
 #' @param x an object inheriting from class "hms"
@@ -212,9 +206,9 @@ cut_variable_ui <- function(id) {
     shiny::fluidRow(
       column(
         width = 3,
-        virtualSelectInput(
+        shinyWidgets::virtualSelectInput(
           inputId = ns("variable"),
-          label = i18n("Variable to cut:"),
+          label = datamods:::i18n("Variable to cut:"),
           choices = NULL,
           width = "100%"
         )
@@ -227,7 +221,7 @@ cut_variable_ui <- function(id) {
         width = 3,
         numericInput(
           inputId = ns("n_breaks"),
-          label = i18n("Number of breaks:"),
+          label = datamods:::i18n("Number of breaks:"),
           value = 3,
           min = 2,
           max = 12,
@@ -238,12 +232,12 @@ cut_variable_ui <- function(id) {
         width = 3,
         checkboxInput(
           inputId = ns("right"),
-          label = i18n("Close intervals on the right"),
+          label = datamods:::i18n("Close intervals on the right"),
           value = TRUE
         ),
         checkboxInput(
           inputId = ns("include_lowest"),
-          label = i18n("Include lowest value"),
+          label = datamods:::i18n("Include lowest value"),
           value = TRUE
         )
       )
@@ -254,10 +248,10 @@ cut_variable_ui <- function(id) {
       uiOutput(outputId = ns("slider_fixed"))
     ),
     plotOutput(outputId = ns("plot"), width = "100%", height = "270px"),
-    datagridOutput2(outputId = ns("count")),
+    toastui::datagridOutput2(outputId = ns("count")),
     actionButton(
       inputId = ns("create"),
-      label = tagList(ph("scissors"), i18n("Create factor variable")),
+      label = tagList(phosphoricons::ph("scissors"), datamods:::i18n("Create factor variable")),
       class = "btn-outline-primary float-end"
     ),
     tags$div(class = "clearfix")
@@ -288,7 +282,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           is.numeric(.x) || is_datetime(.x)
         }, logical(1))
         vars_num <- names(vars_num)[vars_num]
-        updateVirtualSelect(
+        shinyWidgets::updateVirtualSelect(
           inputId = "variable",
           choices = vars_num,
           selected = if (isTruthy(input$variable)) input$variable else vars_num[1]
@@ -325,9 +319,9 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         }
 
 
-        noUiSliderInput(
+        shinyWidgets::noUiSliderInput(
           inputId = session$ns("fixed_brks"),
-          label = i18n("Fixed breaks:"),
+          label = datamods:::i18n("Fixed breaks:"),
           min = lower,
           max = upper,
           value = brks,
@@ -382,7 +376,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
 
         shinyWidgets::virtualSelectInput(
           inputId = session$ns("method"),
-          label = i18n("Method:"),
+          label = datamods:::i18n("Method:"),
           choices = choices,
           selected = NULL,
           width = "100%"
@@ -525,7 +519,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         data
       })
 
-      output$count <- renderDatagrid2({
+      output$count <- toastui::renderDatagrid2({
         # shiny::req(rv$new_var_name)
         data <- req(data_cutted_r())
         # variable <- req(input$variable)
@@ -541,14 +535,14 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           datamods:::apply_grid_theme()
         }
         on.exit(toastui::reset_grid_theme())
-        grid <- datagrid(
+        grid <- toastui::datagrid(
           data = count_data,
           colwidths = "guess",
           theme = "default",
           bodyHeight = "auto"
         )
         grid <- toastui::grid_columns(grid, className = "font-monospace")
-        grid_colorbar(
+        toastui::grid_colorbar(
           grid,
           column = "count",
           label_outside = TRUE,
@@ -576,7 +570,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
 #'
 #' @rdname cut-variable
 modal_cut_variable <- function(id,
-                               title = i18n("Convert Numeric to Factor"),
+                               title = datamods:::i18n("Convert Numeric to Factor"),
                                easyClose = TRUE,
                                size = "l",
                                footer = NULL) {

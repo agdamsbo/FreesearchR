@@ -1,6 +1,45 @@
 
 
 ########
+#### Current file: /Users/au301842/FreesearchR/app/libs.R 
+########
+
+library(shiny)
+# library(shinyjs)
+# library(methods)
+# library(readr)
+# library(MASS)
+# library(stats)
+# library(gt)
+# library(openxlsx2)
+# library(haven)
+# library(readODS)
+# library(bslib)
+# library(assertthat)
+# library(dplyr)
+# library(quarto)
+# library(here)
+# library(broom)
+# library(broom.helpers)
+# library(easystats)
+# library(patchwork)
+# library(DHARMa)
+# library(apexcharter)
+library(toastui)
+# library(datamods)
+# library(IDEAFilter)
+library(shinyWidgets)
+# library(DT)
+# library(data.table)
+# library(gtsummary)
+library(bsicons)
+library(rlang)
+# library(datamods)
+# library(toastui)
+# library(phosphoricons)
+
+
+########
 #### Current file: /Users/au301842/FreesearchR/app/functions.R 
 ########
 
@@ -10,7 +49,7 @@
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.5.2'
+app_version <- function()'25.5.3'
 
 
 ########
@@ -129,7 +168,6 @@ create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALS
 #' contrast_text(c("#F2F2F2", "blue"), method="relative")
 #' @export
 #'
-#' @importFrom grDevices col2rgb
 #'
 contrast_text <- function(background,
                           light_text = 'white',
@@ -323,20 +361,17 @@ sentence_paste <- function(data, and.str = "and") {
 #' @export
 #'
 #' @importFrom htmltools tagList tags css
-#' @importFrom shiny NS textInput textAreaInput uiOutput actionButton
-#' @importFrom phosphoricons ph
-#' @importFrom shinyWidgets virtualSelectInput
 #'
 #' @name create-column
 #'
 #' @example examples/create_column_module_demo.R
 create_column_ui <- function(id) {
   ns <- NS(id)
-  tagList(
+  htmltools::tagList(
     # datamods:::html_dependency_datamods(),
     # html_dependency_FreesearchR(),
-   tags$head(
-    tags$link(rel = "stylesheet", type = "text/css", href = "FreesearchR/inst/assets/css/FreesearchR.css")
+   shiny::tags$head(
+    shiny::tags$link(rel = "stylesheet", type = "text/css", href = "FreesearchR/inst/assets/css/FreesearchR.css")
   ),
     # tags$head(
     #   # Note the wrapping of the string in HTML()
@@ -390,7 +425,7 @@ create_column_ui <- function(id) {
         )
       )
     ),
-    textAreaInput(
+    shiny::textAreaInput(
       inputId = ns("expression"),
       label = i18n("Enter an expression to define new column:"),
       value = "",
@@ -438,9 +473,6 @@ create_column_ui <- function(id) {
 #'
 #' @rdname create-column
 #'
-#' @importFrom shiny moduleServer reactiveValues observeEvent renderUI req
-#'  updateTextAreaInput reactive bindEvent observe
-#' @importFrom shinyWidgets alert updateVirtualSelect
 create_column_server <- function(id,
                                  data_r = reactive(NULL),
                                  allowed_operations = list_allowed_operations()) {
@@ -947,12 +979,6 @@ vectorSelectInput <- function(inputId,
 #### Current file: /Users/au301842/FreesearchR/R//cut-variable-dates.R 
 ########
 
-library(datamods)
-library(toastui)
-library(phosphoricons)
-library(rlang)
-library(shiny)
-
 #' Extended cutting function with fall-back to the native base::cut
 #'
 #' @param x an object inheriting from class "hms"
@@ -1161,9 +1187,9 @@ cut_variable_ui <- function(id) {
     shiny::fluidRow(
       column(
         width = 3,
-        virtualSelectInput(
+        shinyWidgets::virtualSelectInput(
           inputId = ns("variable"),
-          label = i18n("Variable to cut:"),
+          label = datamods:::i18n("Variable to cut:"),
           choices = NULL,
           width = "100%"
         )
@@ -1176,7 +1202,7 @@ cut_variable_ui <- function(id) {
         width = 3,
         numericInput(
           inputId = ns("n_breaks"),
-          label = i18n("Number of breaks:"),
+          label = datamods:::i18n("Number of breaks:"),
           value = 3,
           min = 2,
           max = 12,
@@ -1187,12 +1213,12 @@ cut_variable_ui <- function(id) {
         width = 3,
         checkboxInput(
           inputId = ns("right"),
-          label = i18n("Close intervals on the right"),
+          label = datamods:::i18n("Close intervals on the right"),
           value = TRUE
         ),
         checkboxInput(
           inputId = ns("include_lowest"),
-          label = i18n("Include lowest value"),
+          label = datamods:::i18n("Include lowest value"),
           value = TRUE
         )
       )
@@ -1203,10 +1229,10 @@ cut_variable_ui <- function(id) {
       uiOutput(outputId = ns("slider_fixed"))
     ),
     plotOutput(outputId = ns("plot"), width = "100%", height = "270px"),
-    datagridOutput2(outputId = ns("count")),
+    toastui::datagridOutput2(outputId = ns("count")),
     actionButton(
       inputId = ns("create"),
-      label = tagList(ph("scissors"), i18n("Create factor variable")),
+      label = tagList(phosphoricons::ph("scissors"), datamods:::i18n("Create factor variable")),
       class = "btn-outline-primary float-end"
     ),
     tags$div(class = "clearfix")
@@ -1237,7 +1263,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           is.numeric(.x) || is_datetime(.x)
         }, logical(1))
         vars_num <- names(vars_num)[vars_num]
-        updateVirtualSelect(
+        shinyWidgets::updateVirtualSelect(
           inputId = "variable",
           choices = vars_num,
           selected = if (isTruthy(input$variable)) input$variable else vars_num[1]
@@ -1274,9 +1300,9 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         }
 
 
-        noUiSliderInput(
+        shinyWidgets::noUiSliderInput(
           inputId = session$ns("fixed_brks"),
-          label = i18n("Fixed breaks:"),
+          label = datamods:::i18n("Fixed breaks:"),
           min = lower,
           max = upper,
           value = brks,
@@ -1331,7 +1357,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
 
         shinyWidgets::virtualSelectInput(
           inputId = session$ns("method"),
-          label = i18n("Method:"),
+          label = datamods:::i18n("Method:"),
           choices = choices,
           selected = NULL,
           width = "100%"
@@ -1474,7 +1500,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         data
       })
 
-      output$count <- renderDatagrid2({
+      output$count <- toastui::renderDatagrid2({
         # shiny::req(rv$new_var_name)
         data <- req(data_cutted_r())
         # variable <- req(input$variable)
@@ -1490,14 +1516,14 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           datamods:::apply_grid_theme()
         }
         on.exit(toastui::reset_grid_theme())
-        grid <- datagrid(
+        grid <- toastui::datagrid(
           data = count_data,
           colwidths = "guess",
           theme = "default",
           bodyHeight = "auto"
         )
         grid <- toastui::grid_columns(grid, className = "font-monospace")
-        grid_colorbar(
+        toastui::grid_colorbar(
           grid,
           column = "count",
           label_outside = TRUE,
@@ -1525,7 +1551,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
 #'
 #' @rdname cut-variable
 modal_cut_variable <- function(id,
-                               title = i18n("Convert Numeric to Factor"),
+                               title = datamods:::i18n("Convert Numeric to Factor"),
                                easyClose = TRUE,
                                size = "l",
                                footer = NULL) {
@@ -2255,6 +2281,7 @@ create_plot <- function(data, type, pri, sec, ter = NULL, ...) {
 #' mtcars |> get_label()
 #' mtcars$mpg |> get_label()
 #' gtsummary::trial |> get_label(var = "trt")
+#' gtsummary::trial$trt |> get_label()
 #' 1:10 |> get_label()
 get_label <- function(data, var = NULL) {
   # data <- if (is.reactive(data)) data() else data
@@ -3969,7 +3996,7 @@ simple_snake <- function(data){
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.5.2-250510'
+hosted_version <- function()'v25.5.3-250510'
 
 
 ########
@@ -4807,10 +4834,11 @@ plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
   out <- lapply(ds, \(.x){
     .x[c(pri, sec)] |>
       as.data.frame() |>
+      na.omit() |>
       plot_euler_single()
   })
 
-# names(out)
+  # names(out)
   wrap_plot_list(out)
   # patchwork::wrap_plots(out, guides = "collect")
 }
@@ -4922,9 +4950,8 @@ vertical_stacked_bars <- function(data,
   contrast_cut <-
     sum(contrast_text(colors, threshold = .3) == "white")
 
-  score_label <- ifelse(is.na(REDCapCAST::get_attr(data$score, "label")), score, REDCapCAST::get_attr(data$score, "label"))
-  group_label <- ifelse(is.na(REDCapCAST::get_attr(data$group, "label")), group, REDCapCAST::get_attr(data$group, "label"))
-
+  score_label <- data |> get_label(var = score)
+  group_label <- data |> get_label(var = group)
 
   p |>
     (\(.x){
@@ -5114,7 +5141,6 @@ plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors 
 #'   plot_sankey_single("first", "last", color.group = "pri")
 #' mtcars |>
 #'   default_parsing() |>
-#'   str()
 #' plot_sankey_single("cyl", "vs", color.group = "pri")
 plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), colors = NULL, ...) {
   color.group <- match.arg(color.group)
@@ -5126,8 +5152,6 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
   # browser()
 
   data <- data |> sankey_ready(pri = pri, sec = sec, ...)
-
-  library(ggalluvial)
 
   na.color <- "#2986cc"
   box.color <- "#1E4B66"
@@ -5192,6 +5216,8 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
       )
   }
 
+  ## Will fail to use stat="stratum" if library is not loaded.
+  library(ggalluvial)
   p +
     ggplot2::geom_text(
       stat = "stratum",
@@ -6346,12 +6372,13 @@ data_type <- function(data) {
     sapply(data, data_type)
   } else {
     cl_d <- class(data)
+    l_unique <- length(unique(na.omit(data)))
     if (all(is.na(data))) {
       out <- "empty"
-    } else if (length(unique(data)) < 2) {
+    } else if (l_unique < 2) {
       out <- "monotone"
-    } else if (any(c("factor", "logical") %in% cl_d) | length(unique(data)) == 2) {
-      if (identical("logical", cl_d) | length(unique(data)) == 2) {
+    } else if (any(c("factor", "logical") %in% cl_d) | l_unique == 2) {
+      if (identical("logical", cl_d) | l_unique == 2) {
         out <- "dichotomous"
       } else {
         # if (is.ordered(data)) {
@@ -6364,7 +6391,7 @@ data_type <- function(data) {
       out <- "text"
     } else if (any(c("hms", "Date", "POSIXct", "POSIXt") %in% cl_d)) {
       out <- "datetime"
-    } else if (!length(unique(data)) == 2) {
+    } else if (l_unique > 2) {
       ## Previously had all thinkable classes
       ## Now just assumes the class has not been defined above
       ## any(c("numeric", "integer", "hms", "Date", "timediff") %in% cl_d) &
@@ -8039,7 +8066,7 @@ update_factor_ui <- function(id) {
     fluidRow(
       column(
         width = 6,
-        virtualSelectInput(
+        shinyWidgets::virtualSelectInput(
           inputId = ns("variable"),
           label = i18n("Factor variable to reorder:"),
           choices = NULL,
@@ -8074,10 +8101,10 @@ update_factor_ui <- function(id) {
         )
       )
     ),
-    datagridOutput(ns("grid")),
+    toastui::datagridOutput(ns("grid")),
     tags$div(
       class = "float-end",
-      prettyCheckbox(
+      shinyWidgets::prettyCheckbox(
         inputId = ns("new_var"),
         label = i18n("Create a new variable (otherwise replaces the one selected)"),
         value = FALSE,
@@ -8302,10 +8329,6 @@ winbox_update_factor <- function(id,
 ########
 #### Current file: /Users/au301842/FreesearchR/R//update-variables-ext.R 
 ########
-
-library(data.table)
-library(rlang)
-
 
 #' Select, rename and convert variables
 #'
@@ -9870,35 +9893,7 @@ ui <- bslib::page_fixed(
 #### Current file: /Users/au301842/FreesearchR/app/server.R 
 ########
 
-library(shiny)
-# library(shinyjs)
-# library(methods)
-library(readr)
-library(MASS)
-library(stats)
-library(gt)
-# library(openxlsx2)
-library(haven)
-library(readODS)
-library(bslib)
-library(assertthat)
-library(dplyr)
-library(quarto)
-library(here)
-library(broom)
-library(broom.helpers)
-library(easystats)
-library(patchwork)
-library(DHARMa)
-library(apexcharter)
-library(toastui)
-library(datamods)
-library(IDEAFilter)
-library(shinyWidgets)
-library(DT)
-library(data.table)
-library(gtsummary)
-library(bsicons)
+
 
 data(starwars)
 data(mtcars)
