@@ -652,3 +652,17 @@ is_identical_to_previous <- function(data, no.name = TRUE) {
     }
   }, FUN.VALUE = logical(1))
 }
+
+
+#' Simplified version of the snakecase packages to_snake_case
+#'
+#' @param data character string vector
+#'
+#' @returns vector
+#' @export
+#'
+#' @examples
+#' c("foo bar", "fooBar21", "!!Foo'B'a-r", "foo_bar", "F  OO bar") |> simple_snake()
+simple_snake <- function(data){
+  gsub("[\\s+]","_",gsub("[^\\w\\s:-]", "", tolower(data), perl=TRUE), perl=TRUE)
+}

@@ -2983,7 +2983,7 @@ show_data <- function(data,
   if (is.null(options))
     options <- list()
 
-  options$height <- 550
+  options$height <- 500
   options$minBodyHeight <- 400
   options$data <- data
   options$theme <- "default"
@@ -3951,11 +3951,25 @@ is_identical_to_previous <- function(data, no.name = TRUE) {
 }
 
 
+#' Simplified version of the snakecase packages to_snake_case
+#'
+#' @param data character string vector
+#'
+#' @returns vector
+#' @export
+#'
+#' @examples
+#' c("foo bar", "fooBar21", "!!Foo'B'a-r", "foo_bar", "F  OO bar") |> simple_snake()
+simple_snake <- function(data){
+  gsub("[\\s+]","_",gsub("[^\\w\\s:-]", "", tolower(data), perl=TRUE), perl=TRUE)
+}
+
+
 ########
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.5.2-250508'
+hosted_version <- function()'v25.5.2-250510'
 
 
 ########
@@ -5566,9 +5580,12 @@ m_redcap_readServer <- function(id) {
             )
 
             # browser()
-            shiny::withProgress({
-              imported <- try(rlang::exec(REDCapR::redcap_metadata_read, !!!parameters), silent = TRUE)
-            },message = paste("Connecting to",data_rv$uri))
+            shiny::withProgress(
+              {
+                imported <- try(rlang::exec(REDCapR::redcap_metadata_read, !!!parameters), silent = TRUE)
+              },
+              message = paste("Connecting to", data_rv$uri)
+            )
 
             ## TODO: Simplify error messages
             if (inherits(imported, "try-error") || NROW(imported) < 1 || ifelse(is.list(imported), !isTRUE(imported$success), FALSE)) {
@@ -5594,7 +5611,7 @@ m_redcap_readServer <- function(id) {
                 status = "success",
                 include_data_alert(
                   see_data_text = "Click to see data dictionary",
-                  dataIdName = "see_data",
+                  dataIdName = "see_dd",
                   extra = tags$p(
                     tags$b(phosphoricons::ph("check", weight = "bold"), "Connected to server!"),
                     glue::glue("The {data_rv$info$project_title} project is loaded.")
@@ -5620,10 +5637,21 @@ m_redcap_readServer <- function(id) {
     output$connect_success <- shiny::reactive(identical(data_rv$dd_status, "success"))
     shiny::outputOptions(output, "connect_success", suspendWhenHidden = FALSE)
 
-    shiny::observeEvent(input$see_data, {
-      datamods::show_data(
+    shiny::observeEvent(input$see_dd, {
+      show_data(
         purrr::pluck(data_rv$dd_list, "data"),
         title = "Data dictionary",
+        type = "modal",
+        show_classes = FALSE,
+        tags$b("Preview:")
+      )
+    })
+
+    shiny::observeEvent(input$see_data, {
+      show_data(
+        # purrr::pluck(data_rv$dd_list, "data"),
+        data_rv$data,
+        title = "Imported data set",
         type = "modal",
         show_classes = FALSE,
         tags$b("Preview:")
@@ -5744,12 +5772,23 @@ m_redcap_readServer <- function(id) {
         imported <- try(rlang::exec(REDCapCAST::read_redcap_tables, !!!parameters), silent = TRUE)
       })
 
-      code <- rlang::call2("read_redcap_tables",
-        !!!utils::modifyList(parameters, list(token = "PERSONAL_API_TOKEN")), ,
+      parameters_code <- parameters[c("uri", "fields", "events", "raw_or_label", "filter_logic")]
+
+      code <- rlang::call2(
+        "easy_redcap",
+        !!!utils::modifyList(
+          parameters_code,
+          list(
+            data_format = ifelse(
+              input$data_type == "long" && !is.null(input$data_type),
+              "long",
+              "wide"
+            ),
+            project.name = simple_snake(data_rv$info$project_title)
+          )
+        ),
         .ns = "REDCapCAST"
       )
-
-      # browser()
 
       if (inherits(imported, "try-error") || NROW(imported) < 1) {
         data_rv$data_status <- "error"
@@ -5819,9 +5858,17 @@ m_redcap_readServer <- function(id) {
           datamods:::insert_alert(
             selector = ns("retrieved"),
             status = data_rv$data_status,
-            tags$p(
-              tags$b(phosphoricons::ph("check", weight = "bold"), "Success!"),
-              data_rv$data_message
+            # tags$p(
+            #   tags$b(phosphoricons::ph("check", weight = "bold"), "Success!"),
+            #   data_rv$data_message
+            # ),
+            include_data_alert(
+              see_data_text = "Click to see the imported data",
+              dataIdName = "see_data",
+              extra = tags$p(
+                tags$b(phosphoricons::ph("check", weight = "bold"), data_rv$data_message)
+              ),
+              btn_show_data = TRUE
             )
           )
         } else {
@@ -6020,13 +6067,6 @@ redcap_demo_app <- function() {
   }
   shiny::shinyApp(ui, server)
 }
-
-
-########
-#### Current file: /Users/au301842/FreesearchR/R//redcap.R 
-########
-
-
 
 
 ########
@@ -9317,10 +9357,10 @@ ui_elements <- list(
           condition = "input.source=='env'",
           import_globalenv_ui(id = "env", title = NULL)
         ),
-        shiny::conditionalPanel(
-          condition = "input.source=='redcap'",
-          DT::DTOutput(outputId = "redcap_prev")
-        ),
+        # shiny::conditionalPanel(
+        #   condition = "input.source=='redcap'",
+        #   DT::DTOutput(outputId = "redcap_prev")
+        # ),
         shiny::conditionalPanel(
           condition = "output.data_loaded == true",
           shiny::br(),
@@ -9329,13 +9369,8 @@ ui_elements <- list(
           shiny::fluidRow(
             shiny::column(
               width = 6,
+              shiny::p("Filter by completeness threshold:"),
               shiny::br(),
-              shiny::p("Filter by completeness threshold and manual selection:"),
-              shiny::br(),
-              shiny::br()
-            ),
-            shiny::column(
-              width = 6,
               shinyWidgets::noUiSliderInput(
                 inputId = "complete_cutoff",
                 label = NULL,
@@ -9348,12 +9383,17 @@ ui_elements <- list(
                 color = datamods:::get_primary_color()
               ),
               shiny::helpText("Exclude variables with completeness below the specified percentage."),
-              shiny::br(),
+              shiny::br()
+            ),
+            shiny::column(
+              width = 6,
+              shiny::p("Specify manually:"),
               shiny::br(),
               shiny::uiOutput(outputId = "import_var"),
-              shiny::uiOutput(outputId = "data_info_import", inline = TRUE)
+              shiny::br()
             )
-          )
+          ),
+          shiny::uiOutput(outputId = "data_info_import", inline = TRUE)
         ),
         shiny::br(),
         shiny::br(),
@@ -9830,6 +9870,9 @@ ui <- bslib::page_fixed(
 #### Current file: /Users/au301842/FreesearchR/app/server.R 
 ########
 
+library(shiny)
+# library(shinyjs)
+# library(methods)
 library(readr)
 library(MASS)
 library(stats)
@@ -9837,7 +9880,6 @@ library(gt)
 # library(openxlsx2)
 library(haven)
 library(readODS)
-require(shiny)
 library(bslib)
 library(assertthat)
 library(dplyr)
@@ -9856,7 +9898,7 @@ library(shinyWidgets)
 library(DT)
 library(data.table)
 library(gtsummary)
-library(shinyjs)
+library(bsicons)
 
 data(starwars)
 data(mtcars)
@@ -9864,8 +9906,8 @@ data(trial)
 
 load_data <- function() {
   Sys.sleep(1)
-  hide("loading_page")
-  show("main_content")
+  shinyjs::hide("loading_page")
+  shinyjs::show("main_content")
 }
 
 
@@ -9946,14 +9988,14 @@ server <- function(input, output, session) {
   })
 
   ## This is used to ensure the reactive data is retrieved
-  output$redcap_prev <- DT::renderDT(
-    {
-      DT::datatable(head(from_redcap$data(), 5),
-        caption = "First 5 observations"
-      )
-    },
-    server = TRUE
-  )
+  # output$redcap_prev <- DT::renderDT(
+  #   {
+  #     DT::datatable(head(from_redcap$data(), 5),
+  #       caption = "First 5 observations"
+  #     )
+  #   },
+  #   server = TRUE
+  # )
 
   from_env <- datamods::import_globalenv_server(
     id = "env",
