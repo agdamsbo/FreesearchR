@@ -39,6 +39,5 @@ data.frame(
   plot_sankey_single("first", "last", color.group = "pri")
 mtcars |>
   default_parsing() |>
-  str()
 plot_sankey_single("cyl", "vs", color.group = "pri")
 }

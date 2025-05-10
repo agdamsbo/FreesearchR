@@ -22,5 +22,6 @@ mtcars |> get_label(var = "mpg")
 mtcars |> get_label()
 mtcars$mpg |> get_label()
 gtsummary::trial |> get_label(var = "trt")
+gtsummary::trial$trt |> get_label()
 1:10 |> get_label()
 }

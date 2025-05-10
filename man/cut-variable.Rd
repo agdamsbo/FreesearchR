@@ -13,7 +13,7 @@ cut_variable_server(id, data_r = reactive(NULL))
 
 modal_cut_variable(
   id,
-  title = i18n("Convert Numeric to Factor"),
+  title = datamods:::i18n("Convert Numeric to Factor"),
   easyClose = TRUE,
   size = "l",
   footer = NULL
