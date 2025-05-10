@@ -1,3 +1,11 @@
+# FreesearchR 25.5.3
+
+- *FIX* a little polish on the data import
+
+- *FIX* polished REDCap import and new code to reference the `REDCapCAST::easy_redcap()` function.
+
+- *FIX* updated documentation to reflect new private hosting on a Hetzner server in Germany.
+
 # FreesearchR 25.5.2
 
 - *FIX*: correct export of plots. The solution in the last version broke more than it solved.

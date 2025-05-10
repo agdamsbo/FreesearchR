@@ -11,7 +11,7 @@ template:
   # Adding the switch destroys the theme colors
   light-switch: false
   includes:
-    in_header: <script defer src="https://analytics.gdamsbo.dk/script.js" data-website-id="1f3baf18-29aa-4612-931b-58ea35922ae4"></script>
+    in_header: <script defer src="https://stats.freesearchr.org/script.js" data-website-id="85bfd1e8-2cbe-4a4a-aa34-1dfb2960905b"></script>
 
 navbar:
   bg: primary
