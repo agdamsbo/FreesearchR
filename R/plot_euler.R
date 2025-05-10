@@ -87,10 +87,11 @@ plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
   out <- lapply(ds, \(.x){
     .x[c(pri, sec)] |>
       as.data.frame() |>
+      na.omit() |>
       plot_euler_single()
   })
 
-# names(out)
+  # names(out)
   wrap_plot_list(out)
   # patchwork::wrap_plots(out, guides = "collect")
 }
