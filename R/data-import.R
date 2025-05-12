@@ -35,7 +35,7 @@ data_import_ui <- function(id) {
       ),
       shiny::conditionalPanel(
         condition = "input.source=='env'",
-        import_globalenv_ui(id = ns("env"), title = NULL)
+        datamods::import_globalenv_ui(id = ns("env"), title = NULL)
       ),
       shiny::conditionalPanel(
         condition = "input.source=='redcap'",

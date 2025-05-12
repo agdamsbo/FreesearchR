@@ -26,7 +26,7 @@ library(shiny)
 # library(DHARMa)
 # library(apexcharter)
 library(toastui)
-# library(datamods)
+library(datamods)
 # library(IDEAFilter)
 library(shinyWidgets)
 # library(DT)
@@ -49,7 +49,7 @@ library(rlang)
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.5.3'
+app_version <- function()'25.5.4'
 
 
 ########
@@ -2455,7 +2455,7 @@ data_import_ui <- function(id) {
       ),
       shiny::conditionalPanel(
         condition = "input.source=='env'",
-        import_globalenv_ui(id = ns("env"), title = NULL)
+        datamods::import_globalenv_ui(id = ns("env"), title = NULL)
       ),
       shiny::conditionalPanel(
         condition = "input.source=='redcap'",
@@ -3996,7 +3996,7 @@ simple_snake <- function(data){
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.5.3-250510'
+hosted_version <- function()'v25.5.4-250512'
 
 
 ########
