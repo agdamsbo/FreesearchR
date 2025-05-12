@@ -1,3 +1,7 @@
+# FreesearchR 25.5.5
+
+- *FIX* several minor bugs and polish
+
 # FreesearchR 25.5.4
 
 - *FIX* correctly omit NAs in `data_type()` call

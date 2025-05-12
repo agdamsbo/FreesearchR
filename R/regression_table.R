@@ -96,15 +96,17 @@
 #'   # gtsummary::bold_p()
 #' }
 regression_table <- function(x, ...) {
+  args <- list(...)
+
   if ("list" %in% class(x)) {
     x |>
       purrr::map(\(.m){
-        regression_table_create(x = .m, ...) |>
+        regression_table_create(x = .m, args.list = args) |>
           gtsummary::add_n()
       }) |>
       gtsummary::tbl_stack()
   } else {
-    regression_table_create(x, ...)
+    regression_table_create(x, args.list = args)
   }
 }
 
