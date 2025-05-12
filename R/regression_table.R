@@ -108,6 +108,17 @@ regression_table <- function(x, ...) {
   }
 }
 
+#' Create regression summary table
+#'
+#' @param x (list of) regression model
+#' @param ... ignored for now
+#' @param args.list args.list for the summary function
+#' @param fun table summary function. Default is "gtsummary::tbl_regression"
+#' @param theme summary table theme
+#'
+#' @returns gtsummary list object
+#' @export
+#'
 regression_table_create <- function(x, ..., args.list = NULL, fun = "gtsummary::tbl_regression", theme = c("jama", "lancet", "nejm", "qjecon")) {
   # Stripping custom class
   class(x) <- class(x)[class(x) != "freesearchr_model"]
