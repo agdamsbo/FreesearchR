@@ -7134,7 +7134,7 @@ regression_table_create <- function(x, ..., args.list = NULL, fun = "gtsummary::
     }
   }
 
-  gtsummary::theme_gtsummary_journal(journal = theme)
+  # gtsummary::theme_gtsummary_journal(journal = theme)
   if (inherits(x, "polr")) {
     # browser()
     out <- do.call(getfun(fun), c(list(x = x), args.list))
@@ -7249,16 +7249,6 @@ regression_ui <- function(id, ...) {
           # ),
           shiny::uiOutput(outputId = ns("regression_type")),
           shiny::radioButtons(
-            inputId = ns("add_regression_p"),
-            label = "Add p-value",
-            inline = TRUE,
-            selected = "yes",
-            choices = list(
-              "Yes" = "yes",
-              "No" = "no"
-            )
-          ),
-          shiny::radioButtons(
             inputId = ns("all"),
             label = "Specify covariables",
             inline = TRUE, selected = 2,
@@ -7288,6 +7278,29 @@ regression_ui <- function(id, ...) {
             auto_reset = TRUE
           ),
           shiny::helpText("Press 'Analyse' to create the regression model and after changing parameters."),
+          shiny::tags$br(),
+          shiny::radioButtons(
+            inputId = ns("add_regression_p"),
+            label = "Show p-value",
+            inline = TRUE,
+            selected = "yes",
+            choices = list(
+              "Yes" = "yes",
+              "No" = "no"
+            )
+          ),
+          # shiny::tags$br(),
+          # shiny::radioButtons(
+          #   inputId = ns("tbl_theme"),
+          #   label = "Show p-value",
+          #   inline = TRUE,
+          #   selected = "jama",
+          #   choices = list(
+          #     "JAMA" = "jama",
+          #     "Lancet" = "lancet",
+          #     "NEJM" = "nejm"
+          #   )
+          # ),
           shiny::tags$br()
         ),
         do.call(
@@ -7693,7 +7706,6 @@ regression_server <- function(id,
 
               rv$list$regression$tables <- out
               rv$list$input <- input
-
             },
             warning = function(warn) {
               showNotification(paste0(warn), type = "warning")
@@ -7705,21 +7717,28 @@ regression_server <- function(id,
         }
       )
 
+      ## Consider creating merged table with theming and then passing object
+      ## to render.
 
       output$table2 <- gt::render_gt({
         ## Print checks if a regression table is present
         if (!is.null(rv$list$regression$tables)) {
-          out <- rv$list$regression$tables |>
+          gtsummary::theme_gtsummary_journal(journal = "jama")
+          merged <- rv$list$regression$tables |>
             tbl_merge()
 
           if (input$add_regression_p == "no") {
-            out <- out |>
+            merged <- merged |>
               gtsummary::modify_column_hide(column = dplyr::starts_with("p.value"))
           }
 
-          out |>
+          out <- merged |>
             gtsummary::as_gt() |>
             gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$params$descr}**")))
+
+          rv$list$regression$table_merged
+
+          out
         } else {
           return(NULL)
         }
@@ -7813,7 +7832,7 @@ regression_server <- function(id,
       ##############################################################################
 
       return(shiny::reactive({
-          rv$list
+        rv$list
       }))
     }
   )
