@@ -46,6 +46,13 @@
 #'     args.list = list(family = stats::binomial(link = "logit"))
 #'   ) |>
 #'   regression_table()
+#' mtcars|>
+#'  regression_model(
+#'     outcome.str = "mpg",
+#'     args.list = NULL)
+#'   ) |>
+#'   regression_table()
+#'
 #'
 #' list(
 #'   "Univariable" = regression_model_uv,

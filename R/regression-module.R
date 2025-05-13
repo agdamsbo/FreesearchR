@@ -486,7 +486,7 @@ regression_server <- function(id,
           tryCatch(
             {
               parameters <- list(
-                add_p = input$add_regression_p == "no"
+                p.values = input$add_regression_p == "no"
               )
 
               out <- lapply(rv$list$regression$models, \(.x){
@@ -498,16 +498,6 @@ regression_server <- function(id,
                     append_list(.x, parameters, "x")
                   )
                 })
-
-              # if (input$add_regression_p == "no") {
-              #   out <- out |>
-              #     lapply(\(.x){
-              #       .x |>
-              #         gtsummary::modify_column_hide(
-              #           column = "p.value"
-              #         )
-              #     })
-              # }
 
               rv$list$regression$models |>
                 purrr::imap(\(.x, .i){
@@ -532,11 +522,19 @@ regression_server <- function(id,
         }
       )
 
+
       output$table2 <- gt::render_gt({
         ## Print checks if a regression table is present
         if (!is.null(rv$list$regression$tables)) {
-          rv$list$regression$tables |>
-            tbl_merge() |>
+          out <- rv$list$regression$tables |>
+            tbl_merge()
+
+          if (input$add_regression_p == "no") {
+            out <- out |>
+              gtsummary::modify_column_hide(column = dplyr::starts_with("p.value"))
+          }
+
+          out |>
             gtsummary::as_gt() |>
             gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$params$descr}**")))
         } else {
