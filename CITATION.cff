@@ -9,7 +9,7 @@ type: software
 license: AGPL-3.0-or-later
 title: 'FreesearchR: A free and open-source browser based data analysis tool for researchers
   with publication ready output'
-version: 25.5.4
+version: 25.5.5
 doi: 10.5281/zenodo.14527429
 identifiers:
 - type: url
@@ -990,6 +990,18 @@ references:
     orcid: https://orcid.org/0000-0002-5645-3493
   year: '2025'
   doi: 10.32614/CRAN.package.shinyjs
+- type: software
+  title: emmeans
+  abstract: 'emmeans: Estimated Marginal Means, aka Least-Squares Means'
+  notes: Imports
+  url: https://rvlenth.github.io/emmeans/
+  repository: https://CRAN.R-project.org/package=emmeans
+  authors:
+  - family-names: Lenth
+    given-names: Russell V.
+    email: russell-lenth@uiowa.edu
+  year: '2025'
+  doi: 10.32614/CRAN.package.emmeans
 - type: software
   title: styler
   abstract: 'styler: Non-Invasive Pretty Printing of R Code'

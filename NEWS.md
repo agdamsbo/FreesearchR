@@ -2,6 +2,8 @@
 
 - *FIX* several minor bugs and polish
 
+- *FIX* include/exclude p-values in regression table.
+
 # FreesearchR 25.5.4
 
 - *FIX* correctly omit NAs in `data_type()` call

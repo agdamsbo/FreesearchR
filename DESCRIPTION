@@ -1,6 +1,6 @@
 Package: FreesearchR
 Title: A free and open-source browser based data analysis tool for researchers with publication ready output
-Version: 25.5.4
+Version: 25.5.5
 Authors@R: c(
     person("Andreas Gammelgaard", "Damsbo",email="agdamsbo@clin.au.dk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7559-1154")),
@@ -63,7 +63,8 @@ Imports:
     ggforce,
     RcppArmadillo,
     ggcorrplot,
-    shinyjs
+    shinyjs,
+    emmeans
 Suggests: 
     styler,
     devtools,
