@@ -140,7 +140,7 @@ regression_table_create <- function(x, ..., args.list = NULL, fun = "gtsummary::
     }
   }
 
-  # gtsummary::theme_gtsummary_journal(journal = theme)
+  gtsummary::theme_gtsummary_journal(journal = theme)
   if (inherits(x, "polr")) {
     # browser()
     out <- do.call(getfun(fun), c(list(x = x), args.list))

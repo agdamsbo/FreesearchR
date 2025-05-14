@@ -49,7 +49,7 @@ library(rlang)
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.5.4'
+app_version <- function()'25.5.5'
 
 
 ########
@@ -3996,7 +3996,7 @@ simple_snake <- function(data){
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.5.4-250513'
+hosted_version <- function()'v25.5.5-250514'
 
 
 ########
@@ -7134,7 +7134,7 @@ regression_table_create <- function(x, ..., args.list = NULL, fun = "gtsummary::
     }
   }
 
-  # gtsummary::theme_gtsummary_journal(journal = theme)
+  gtsummary::theme_gtsummary_journal(journal = theme)
   if (inherits(x, "polr")) {
     # browser()
     out <- do.call(getfun(fun), c(list(x = x), args.list))
@@ -7505,7 +7505,7 @@ regression_server <- function(id,
 
       ##############################################################################
       #########
-      #########  Regression analysis
+      #########  Regression models
       #########
       ##############################################################################
 
@@ -7550,6 +7550,179 @@ regression_server <- function(id,
               showNotification(paste0("Creating regression models failed with the following error: ", err), type = "err")
             }
           )
+        }
+      )
+
+
+
+      shiny::observeEvent(
+        list(
+          data_r(),
+          regression_vars()
+        ),
+        {
+          rv$list$regression$tables <- NULL
+        }
+      )
+
+      ##############################################################################
+      #########
+      #########  Regression table
+      #########
+      ##############################################################################
+
+      ### Creating the regression table
+      shiny::observeEvent(
+        input$load,
+        {
+          shiny::req(rv$list$regression$models)
+          ## To avoid plotting old models on fail/error
+          rv$list$regression$tables <- NULL
+
+          # browser()
+          tryCatch(
+            {
+              parameters <- list(
+                p.values = input$add_regression_p == "no"
+              )
+
+              out <- lapply(rv$list$regression$models, \(.x){
+                .x$model
+              }) |>
+                purrr::map(\(.x){
+                  do.call(
+                    regression_table,
+                    append_list(.x, parameters, "x")
+                  )
+                })
+
+              rv$list$regression$models |>
+                purrr::imap(\(.x, .i){
+                  rv$list$regression$models[[.i]][["code_table"]] <- paste(
+                    .x$code,
+                    expression_string(rlang::call2(.fn = "regression_table", !!!parameters, .ns = "FreesearchR"), assign.str = NULL),
+                    sep = "|>\n"
+                  )
+                })
+
+              rv$list$regression$tables <- out
+              rv$list$input <- input
+            },
+            warning = function(warn) {
+              showNotification(paste0(warn), type = "warning")
+            },
+            error = function(err) {
+              showNotification(paste0("Creating a regression table failed with the following error: ", err), type = "err")
+            }
+          )
+        }
+      )
+
+      ## Consider creating merged table with theming and then passing object
+      ## to render.
+
+      output$table2 <- gt::render_gt({
+        ## Print checks if a regression table is present
+        if (!is.null(rv$list$regression$tables)) {
+          # gtsummary::theme_gtsummary_journal(journal = "jama")
+          merged <- rv$list$regression$tables |>
+            tbl_merge()
+
+          if (input$add_regression_p == "no") {
+            merged <- merged |>
+              gtsummary::modify_column_hide(column = dplyr::starts_with("p.value"))
+          }
+
+          out <- merged |>
+            gtsummary::as_gt() |>
+            gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$params$descr}**")))
+
+          # rv$list$regression$table_merged <- out
+
+          out
+        } else {
+          return(NULL)
+        }
+      })
+
+      ##############################################################################
+      #########
+      #########  Coefficients plot
+      #########
+      ##############################################################################
+
+      shiny::observeEvent(list(
+        input$plot_model,
+        rv$list$regression
+      ), {
+        shiny::req(input$plot_model)
+
+        tryCatch(
+          {
+            p <- merge_long(
+              rv$list$regression,
+              sort_by(
+                input$plot_model,
+                c("Univariable", "Minimal", "Multivariable"),
+                na.rm = TRUE
+              )
+            ) |>
+              (\(.x){
+                if (length(input$plot_model) > 1) {
+                  plot.tbl_regression(
+                    x = .x,
+                    colour = "model",
+                    dodged = TRUE
+                  ) +
+                    ggplot2::theme(legend.position = "bottom") +
+                    ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
+                } else {
+                  plot.tbl_regression(
+                    x = .x,
+                    colour = "variable"
+                  ) +
+                    ggplot2::theme(legend.position = "none")
+                }
+              })()
+
+            rv$plot <- p +
+              ggplot2::scale_y_discrete(labels = scales::label_wrap(15)) +
+              gg_theme_shiny()
+          },
+          error = function(err) {
+            showNotification(paste0(err), type = "err")
+          }
+        )
+      })
+
+
+      output$regression_plot <- shiny::renderPlot(
+        {
+          shiny::req(input$plot_model)
+
+          rv$plot
+        },
+        alt = "Regression coefficient plot"
+      )
+
+      # plot_download_server(
+      #   id = ns("reg_plot_download"),
+      #   data = shiny::reactive(rv$plot)
+      # )
+
+      output$download_plot <- shiny::downloadHandler(
+        filename = paste0("regression_plot.", input$plot_type),
+        content = function(file) {
+          shiny::withProgress(message = "Saving the plot. Hold on for a moment..", {
+            ggplot2::ggsave(
+              filename = file,
+              plot = rv$plot,
+              width = input$plot_width,
+              height = input$plot_height,
+              dpi = 300,
+              units = "mm", scale = 2
+            )
+          })
         }
       )
 
@@ -7658,171 +7831,6 @@ regression_server <- function(id,
           }
         },
         alt = "Assumptions testing of the multivariable regression model"
-      )
-
-      shiny::observeEvent(
-        list(
-          data_r(),
-          regression_vars()
-        ),
-        {
-          rv$list$regression$tables <- NULL
-        }
-      )
-
-      ### Creating the regression table
-      shiny::observeEvent(
-        input$load,
-        {
-          shiny::req(rv$list$regression$models)
-          ## To avoid plotting old models on fail/error
-          rv$list$regression$tables <- NULL
-
-          # browser()
-          tryCatch(
-            {
-              parameters <- list(
-                p.values = input$add_regression_p == "no"
-              )
-
-              out <- lapply(rv$list$regression$models, \(.x){
-                .x$model
-              }) |>
-                purrr::map(\(.x){
-                  do.call(
-                    regression_table,
-                    append_list(.x, parameters, "x")
-                  )
-                })
-
-              rv$list$regression$models |>
-                purrr::imap(\(.x, .i){
-                  rv$list$regression$models[[.i]][["code_table"]] <- paste(
-                    .x$code,
-                    expression_string(rlang::call2(.fn = "regression_table", !!!parameters, .ns = "FreesearchR"), assign.str = NULL),
-                    sep = "|>\n"
-                  )
-                })
-
-              rv$list$regression$tables <- out
-              rv$list$input <- input
-            },
-            warning = function(warn) {
-              showNotification(paste0(warn), type = "warning")
-            },
-            error = function(err) {
-              showNotification(paste0("Creating a regression table failed with the following error: ", err), type = "err")
-            }
-          )
-        }
-      )
-
-      ## Consider creating merged table with theming and then passing object
-      ## to render.
-
-      output$table2 <- gt::render_gt({
-        ## Print checks if a regression table is present
-        if (!is.null(rv$list$regression$tables)) {
-          gtsummary::theme_gtsummary_journal(journal = "jama")
-          merged <- rv$list$regression$tables |>
-            tbl_merge()
-
-          if (input$add_regression_p == "no") {
-            merged <- merged |>
-              gtsummary::modify_column_hide(column = dplyr::starts_with("p.value"))
-          }
-
-          out <- merged |>
-            gtsummary::as_gt() |>
-            gt::tab_header(gt::md(glue::glue("**Table 2: {rv$list$regression$params$descr}**")))
-
-          rv$list$regression$table_merged
-
-          out
-        } else {
-          return(NULL)
-        }
-      })
-
-      ##############################################################################
-      #########
-      #########  Coefficients plot
-      #########
-      ##############################################################################
-
-      shiny::observeEvent(list(
-        input$plot_model,
-        rv$list$regression
-      ), {
-        shiny::req(input$plot_model)
-
-        tryCatch(
-          {
-            p <- merge_long(
-              rv$list$regression,
-              sort_by(
-                input$plot_model,
-                c("Univariable", "Minimal", "Multivariable"),
-                na.rm = TRUE
-              )
-            ) |>
-              (\(.x){
-                if (length(input$plot_model) > 1) {
-                  plot.tbl_regression(
-                    x = .x,
-                    colour = "model",
-                    dodged = TRUE
-                  ) +
-                    ggplot2::theme(legend.position = "bottom") +
-                    ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE))
-                } else {
-                  plot.tbl_regression(
-                    x = .x,
-                    colour = "variable"
-                  ) +
-                    ggplot2::theme(legend.position = "none")
-                }
-              })()
-
-            rv$plot <- p +
-              ggplot2::scale_y_discrete(labels = scales::label_wrap(15)) +
-              gg_theme_shiny()
-          },
-          error = function(err) {
-            showNotification(paste0(err), type = "err")
-          }
-        )
-      })
-
-
-      output$regression_plot <- shiny::renderPlot(
-        {
-          shiny::req(input$plot_model)
-
-          rv$plot
-        },
-        alt = "Regression coefficient plot"
-      )
-
-      # plot_download_server(
-      #   id = ns("reg_plot_download"),
-      #   data = shiny::reactive(rv$plot)
-      # )
-
-      output$download_plot <- shiny::downloadHandler(
-        filename = paste0("regression_plot.", input$plot_type),
-        content = function(file) {
-          shiny::withProgress(message = "Saving the plot. Hold on for a moment..", {
-            ggplot2::ggsave(
-              filename = file,
-              plot = rv$plot,
-              width = input$plot_width,
-              height = input$plot_height,
-              dpi = 300,
-              units = "mm", scale = 2
-            )
-          })
-        }
       )
 
       ##############################################################################
