@@ -43,7 +43,7 @@ vec2sentence <- function(data, sep.word = "and") {
 
 ## Introduction
 
-Research should be free and open with easy access for all. The FreesearchR tool attempts to help lower the bar to participate in contributing to science by making guided data analysis easily accessible in the web-browser.
+Research should be free and open with easy access for all. The *FreesearchR* tool attempts to help lower the bar to participate in research by making basic data exploration and analyses easily accessible.
 
 ## Methods
 
