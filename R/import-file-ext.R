@@ -83,7 +83,7 @@ import_file_ui <- function(id,
       inputId = ns("file"),
       label = datamods:::i18n("Upload a file:"),
       buttonLabel = datamods:::i18n("Browse..."),
-      placeholder = datamods:::i18n("No file selected"),
+      placeholder = datamods:::i18n("No file selected; maximum file size is 5 mb"),
       accept = file_extensions,
       width = "100%",
       ## A solution to allow multiple file upload is being considered
