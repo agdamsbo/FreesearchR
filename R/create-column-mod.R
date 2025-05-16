@@ -187,7 +187,7 @@ create_column_server <- function(id,
         if (input$new_column == "") {
           rv$feedback <- shinyWidgets::alert(
             status = "warning",
-            ph("warning"), datamods::i18n("New column name cannot be empty")
+            phosphoricons::ph("warning"), datamods::i18n("New column name cannot be empty")
           )
         }
       })
@@ -351,7 +351,7 @@ try_compute_column <- function(expression,
   )
   shinyWidgets::alert(
     status = "success",
-    ph("check"), datamods::i18n("Column added!")
+    phosphoricons::ph("check"), datamods::i18n("Column added!")
   )
 }
 
@@ -374,7 +374,7 @@ extract_calls <- function(exp) {
 alert_error <- function(text) {
   alert(
     status = "danger",
-    ph("bug"), text
+    phosphoricons::ph("bug"), text
   )
 }
 
