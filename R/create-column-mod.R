@@ -96,7 +96,7 @@ create_column_ui <- function(id) {
     uiOutput(outputId = ns("columns")),
     uiOutput(outputId = ns("feedback")),
     tags$div(
-      style = css(
+      style = htmltools::css(
         display = "grid",
         gridTemplateColumns = "3fr 1fr",
         columnGap = "10px",
@@ -385,7 +385,7 @@ btn_column <- function(label, data, inputId) {
   tags$button(
     type = "button",
     class = paste0("btn btn-column-", type),
-    style = css(
+    style = htmltools::css(
       "--bs-btn-padding-y" = ".25rem",
       "--bs-btn-padding-x" = ".5rem",
       "--bs-btn-font-size" = ".75rem",
