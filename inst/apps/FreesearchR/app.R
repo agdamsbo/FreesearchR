@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/app/libs.R 
+#### Current file: /Users/au301842/FreesearchR/app/libs.R
 ########
 
 library(shiny)
@@ -40,20 +40,20 @@ library(rlang)
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/app/functions.R 
+#### Current file: /Users/au301842/FreesearchR/app/functions.R
 ########
 
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//app_version.R 
+#### Current file: /Users/au301842/FreesearchR/R//app_version.R
 ########
 
 app_version <- function()'25.5.5'
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//baseline_table.R 
+#### Current file: /Users/au301842/FreesearchR/R//baseline_table.R
 ########
 
 #' Print a flexible baseline characteristics table
@@ -138,7 +138,7 @@ create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALS
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//contrast_text.R 
+#### Current file: /Users/au301842/FreesearchR/R//contrast_text.R
 ########
 
 #' @title Contrast Text Color
@@ -194,7 +194,7 @@ contrast_text <- function(background,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//correlations-module.R 
+#### Current file: /Users/au301842/FreesearchR/R//correlations-module.R
 ########
 
 #' Data correlations evaluation module
@@ -339,7 +339,7 @@ sentence_paste <- function(data, and.str = "and") {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//create-column-mod.R 
+#### Current file: /Users/au301842/FreesearchR/R//create-column-mod.R
 ########
 
 #' @title Create new column
@@ -531,7 +531,7 @@ create_column_server <- function(id,
         if (input$new_column == "") {
           rv$feedback <- shinyWidgets::alert(
             status = "warning",
-            ph("warning"), datamods::i18n("New column name cannot be empty")
+            phosphoricons::ph("warning"), datamods::i18n("New column name cannot be empty")
           )
         }
       })
@@ -695,7 +695,7 @@ try_compute_column <- function(expression,
   )
   shinyWidgets::alert(
     status = "success",
-    ph("check"), datamods::i18n("Column added!")
+    phosphoricons::ph("check"), datamods::i18n("Column added!")
   )
 }
 
@@ -718,7 +718,7 @@ extract_calls <- function(exp) {
 alert_error <- function(text) {
   alert(
     status = "danger",
-    ph("bug"), text
+    phosphoricons::ph("bug"), text
   )
 }
 
@@ -782,7 +782,7 @@ make_choices_with_infos <- function(data) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//custom_SelectInput.R 
+#### Current file: /Users/au301842/FreesearchR/R//custom_SelectInput.R
 ########
 
 #' A selectizeInput customized for data frames with column labels
@@ -976,7 +976,7 @@ vectorSelectInput <- function(inputId,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//cut-variable-dates.R 
+#### Current file: /Users/au301842/FreesearchR/R//cut-variable-dates.R
 ########
 
 #' Extended cutting function with fall-back to the native base::cut
@@ -1595,7 +1595,7 @@ plot_histogram <- function(data, column=NULL, bins = 30, breaks = NULL, color = 
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//data_plots.R 
+#### Current file: /Users/au301842/FreesearchR/R//data_plots.R
 ########
 
 # source(here::here("functions.R"))
@@ -2415,7 +2415,7 @@ clean_common_axis <- function(p, axis) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//data-import.R 
+#### Current file: /Users/au301842/FreesearchR/R//data-import.R
 ########
 
 data_import_ui <- function(id) {
@@ -2572,7 +2572,7 @@ data_import_demo_app <- function() {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//data-summary.R 
+#### Current file: /Users/au301842/FreesearchR/R//data-summary.R
 ########
 
 #' Data summary module
@@ -2970,7 +2970,7 @@ get_var_icon <- function(data,class.type=c("class","type")){
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//datagrid-infos-mod.R 
+#### Current file: /Users/au301842/FreesearchR/R//datagrid-infos-mod.R
 ########
 
 
@@ -3319,7 +3319,7 @@ construct_col_summary <- function(data) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//helpers.R 
+#### Current file: /Users/au301842/FreesearchR/R//helpers.R
 ########
 
 #' Wrapper function to get function from character vector referring to function from namespace. Passed to 'do.call()'
@@ -3993,14 +3993,14 @@ simple_snake <- function(data){
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
+#### Current file: /Users/au301842/FreesearchR/R//hosted_version.R
 ########
 
-hosted_version <- function()'v25.5.5-250514'
+hosted_version <- function()'v25.5.5-250516'
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//html_dependency_freesearchr.R 
+#### Current file: /Users/au301842/FreesearchR/R//html_dependency_freesearchr.R
 ########
 
 html_dependency_FreesearchR <- function() {
@@ -4015,7 +4015,7 @@ html_dependency_FreesearchR <- function() {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//import-file-ext.R 
+#### Current file: /Users/au301842/FreesearchR/R//import-file-ext.R
 ########
 
 #' @title Import data from a file
@@ -4103,7 +4103,7 @@ import_file_ui <- function(id,
       inputId = ns("file"),
       label = datamods:::i18n("Upload a file:"),
       buttonLabel = datamods:::i18n("Browse..."),
-      placeholder = datamods:::i18n("No file selected"),
+      placeholder = datamods:::i18n("No file selected; maximum file size is 5 mb"),
       accept = file_extensions,
       width = "100%",
       ## A solution to allow multiple file upload is being considered
@@ -4625,7 +4625,7 @@ import_file_demo_app <- function() {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//launch_FreesearchR.R 
+#### Current file: /Users/au301842/FreesearchR/R//launch_FreesearchR.R
 ########
 
 #' Easily launch the FreesearchR app
@@ -4656,7 +4656,7 @@ launch_FreesearchR <- function(...){
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_box.R 
+#### Current file: /Users/au301842/FreesearchR/R//plot_box.R
 ########
 
 #' Beautiful box plot(s)
@@ -4742,7 +4742,7 @@ plot_box_single <- function(data, pri, sec=NULL, seed = 2103) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_euler.R 
+#### Current file: /Users/au301842/FreesearchR/R//plot_euler.R
 ########
 
 #' Area proportional venn diagrams
@@ -4883,7 +4883,7 @@ plot_euler_single <- function(data) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_hbar.R 
+#### Current file: /Users/au301842/FreesearchR/R//plot_hbar.R
 ########
 
 #' Nice horizontal stacked bars (Grotta bars)
@@ -4983,7 +4983,7 @@ vertical_stacked_bars <- function(data,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_ridge.R 
+#### Current file: /Users/au301842/FreesearchR/R//plot_ridge.R
 ########
 
 #' Plot nice ridge plot
@@ -5017,7 +5017,7 @@ plot_ridge <- function(data, x, y, z = NULL, ...) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_sankey.R 
+#### Current file: /Users/au301842/FreesearchR/R//plot_sankey.R
 ########
 
 #' Readying data for sankey plot
@@ -5250,7 +5250,7 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_scatter.R 
+#### Current file: /Users/au301842/FreesearchR/R//plot_scatter.R
 ########
 
 #' Beautiful violin plot
@@ -5285,7 +5285,7 @@ plot_scatter <- function(data, pri, sec, ter = NULL) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_violin.R 
+#### Current file: /Users/au301842/FreesearchR/R//plot_violin.R
 ########
 
 #' Beatiful violin plot
@@ -5320,7 +5320,7 @@ plot_violin <- function(data, pri, sec, ter = NULL) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot-download-module.R 
+#### Current file: /Users/au301842/FreesearchR/R//plot-download-module.R
 ########
 
 plot_download_ui <- regression_ui <- function(id, ...) {
@@ -5401,7 +5401,7 @@ plot_download_server <- function(id,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//redcap_read_shiny_module.R 
+#### Current file: /Users/au301842/FreesearchR/R//redcap_read_shiny_module.R
 ########
 
 #' Shiny module to browser and export REDCap data
@@ -6096,7 +6096,7 @@ redcap_demo_app <- function() {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//regression_model.R 
+#### Current file: /Users/au301842/FreesearchR/R//regression_model.R
 ########
 
 #' Create a regression model programatically
@@ -6823,7 +6823,7 @@ regression_model_uv_list <- function(data,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//regression_plot.R 
+#### Current file: /Users/au301842/FreesearchR/R//regression_plot.R
 ########
 
 #' Regression coef plot from gtsummary. Slightly modified to pass on arguments
@@ -6989,7 +6989,7 @@ symmetrical_scale_x_log10 <- function(plot, breaks = c(1, 2, 3, 5, 10), ...) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//regression_table.R 
+#### Current file: /Users/au301842/FreesearchR/R//regression_table.R
 ########
 
 #' Create table of regression model
@@ -7178,7 +7178,7 @@ tbl_merge <- function(data) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//regression-module.R 
+#### Current file: /Users/au301842/FreesearchR/R//regression-module.R
 ########
 
 ### On rewriting this module
@@ -7848,7 +7848,7 @@ regression_server <- function(id,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//report.R 
+#### Current file: /Users/au301842/FreesearchR/R//report.R
 ########
 
 #' Split vector by an index and embed addition
@@ -7936,7 +7936,7 @@ modify_qmd <- function(file, format) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//syntax_highlight.R 
+#### Current file: /Users/au301842/FreesearchR/R//syntax_highlight.R
 ########
 
 ## Inpiration:
@@ -7967,7 +7967,7 @@ html_code_wrap <- function(string,lang="r"){
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//theme.R 
+#### Current file: /Users/au301842/FreesearchR/R//theme.R
 ########
 
 #' Custom theme based on unity
@@ -8075,7 +8075,7 @@ gg_theme_export <- function() {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//update-factor-ext.R 
+#### Current file: /Users/au301842/FreesearchR/R//update-factor-ext.R
 ########
 
 
@@ -8125,8 +8125,8 @@ update_factor_ui <- function(id) {
         actionButton(
           inputId = ns("sort_levels"),
           label = tagList(
-            ph("sort-ascending"),
-            i18n("Sort by levels")
+            phosphoricons::ph("sort-ascending"),
+            datamods:::i18n("Sort by levels")
           ),
           class = "btn-outline-primary mb-3",
           width = "100%"
@@ -8138,8 +8138,8 @@ update_factor_ui <- function(id) {
         actionButton(
           inputId = ns("sort_occurrences"),
           label = tagList(
-            ph("sort-ascending"),
-            i18n("Sort by count")
+            phosphoricons::ph("sort-ascending"),
+            datamods:::i18n("Sort by count")
           ),
           class = "btn-outline-primary mb-3",
           width = "100%"
@@ -8151,7 +8151,7 @@ update_factor_ui <- function(id) {
       class = "float-end",
       shinyWidgets::prettyCheckbox(
         inputId = ns("new_var"),
-        label = i18n("Create a new variable (otherwise replaces the one selected)"),
+        label = datamods:::i18n("Create a new variable (otherwise replaces the one selected)"),
         value = FALSE,
         status = "primary",
         outline = TRUE,
@@ -8159,7 +8159,7 @@ update_factor_ui <- function(id) {
       ),
       actionButton(
         inputId = ns("create"),
-        label = tagList(ph("arrow-clockwise"), i18n("Update factor variable")),
+        label = tagList(phosphoricons::ph("arrow-clockwise"), datamods:::i18n("Update factor variable")),
         class = "btn-outline-primary"
       )
     ),
@@ -8207,13 +8207,13 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
         if (input$sort_levels %% 2 == 1) {
           decreasing <- FALSE
           label <- tagList(
-            ph("sort-descending"),
+            phosphoricons::ph("sort-descending"),
             "Sort Levels"
           )
         } else {
           decreasing <- TRUE
           label <- tagList(
-            ph("sort-ascending"),
+            phosphoricons::ph("sort-ascending"),
             "Sort Levels"
           )
         }
@@ -8225,14 +8225,14 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
         if (input$sort_occurrences %% 2 == 1) {
           decreasing <- FALSE
           label <- tagList(
-            ph("sort-descending"),
-            i18n("Sort count")
+            phosphoricons::ph("sort-descending"),
+            datamods:::i18n("Sort count")
           )
         } else {
           decreasing <- TRUE
           label <- tagList(
-            ph("sort-ascending"),
-            i18n("Sort count")
+            phosphoricons::ph("sort-ascending"),
+            datamods:::i18n("Sort count")
           )
         }
         updateActionButton(inputId = "sort_occurrences", label = as.character(label))
@@ -8259,7 +8259,7 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
         grid <- grid_columns(
           grid,
           columns = c("Var1", "Var1_toset", "Freq"),
-          header = c(i18n("Levels"), "New label", i18n("Count"))
+          header = c(datamods:::i18n("Levels"), "New label", datamods:::i18n("Count"))
         )
         grid <- grid_colorbar(
           grid,
@@ -8372,7 +8372,7 @@ winbox_update_factor <- function(id,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//update-variables-ext.R 
+#### Current file: /Users/au301842/FreesearchR/R//update-variables-ext.R
 ########
 
 #' Select, rename and convert variables
@@ -9184,7 +9184,7 @@ clean_date <- function(data) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//wide2long.R 
+#### Current file: /Users/au301842/FreesearchR/R//wide2long.R
 ########
 
 #' Alternative pivoting method for easily pivoting based on name pattern
@@ -9343,7 +9343,7 @@ grepl_fix <- function(data, pattern, type = c("prefix", "infix", "suffix")) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/dev/header_include.R 
+#### Current file: /Users/au301842/FreesearchR/dev/header_include.R
 ########
 
 header_include <- function(){
@@ -9353,7 +9353,16 @@ header_include <- function(){
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/app/ui.R 
+#### Current file: /Users/au301842/FreesearchR/dev/dev_banner.R
+########
+
+dev_banner <- function(){
+    NULL
+      }
+
+
+########
+#### Current file: /Users/au301842/FreesearchR/app/ui.R
 ########
 
 # ns <- NS(id)
@@ -9369,6 +9378,10 @@ ui_elements <- list(
   "home" = bslib::nav_panel(
     title = "FreesearchR",
     shiny::fluidRow(
+      ## On building the dev-version for shinyapps.io, the dev_banner() is redefined
+      ## Default just output "NULL"
+      ## This could probably be achieved more legantly, but this works.
+      dev_banner(),
       shiny::column(width = 2),
       shiny::column(
         width = 8,
@@ -9935,7 +9948,7 @@ ui <- bslib::page_fixed(
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/app/server.R 
+#### Current file: /Users/au301842/FreesearchR/app/server.R
 ########
 
 
@@ -10686,7 +10699,7 @@ server <- function(input, output, session) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/app/launch.R 
+#### Current file: /Users/au301842/FreesearchR/app/launch.R
 ########
 
 shinyApp(ui, server)

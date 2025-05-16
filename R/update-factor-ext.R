@@ -45,8 +45,8 @@ update_factor_ui <- function(id) {
         actionButton(
           inputId = ns("sort_levels"),
           label = tagList(
-            ph("sort-ascending"),
-            i18n("Sort by levels")
+            phosphoricons::ph("sort-ascending"),
+            datamods:::i18n("Sort by levels")
           ),
           class = "btn-outline-primary mb-3",
           width = "100%"
@@ -58,8 +58,8 @@ update_factor_ui <- function(id) {
         actionButton(
           inputId = ns("sort_occurrences"),
           label = tagList(
-            ph("sort-ascending"),
-            i18n("Sort by count")
+            phosphoricons::ph("sort-ascending"),
+            datamods:::i18n("Sort by count")
           ),
           class = "btn-outline-primary mb-3",
           width = "100%"
@@ -71,7 +71,7 @@ update_factor_ui <- function(id) {
       class = "float-end",
       shinyWidgets::prettyCheckbox(
         inputId = ns("new_var"),
-        label = i18n("Create a new variable (otherwise replaces the one selected)"),
+        label = datamods:::i18n("Create a new variable (otherwise replaces the one selected)"),
         value = FALSE,
         status = "primary",
         outline = TRUE,
@@ -79,7 +79,7 @@ update_factor_ui <- function(id) {
       ),
       actionButton(
         inputId = ns("create"),
-        label = tagList(ph("arrow-clockwise"), i18n("Update factor variable")),
+        label = tagList(phosphoricons::ph("arrow-clockwise"), datamods:::i18n("Update factor variable")),
         class = "btn-outline-primary"
       )
     ),
@@ -127,13 +127,13 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
         if (input$sort_levels %% 2 == 1) {
           decreasing <- FALSE
           label <- tagList(
-            ph("sort-descending"),
+            phosphoricons::ph("sort-descending"),
             "Sort Levels"
           )
         } else {
           decreasing <- TRUE
           label <- tagList(
-            ph("sort-ascending"),
+            phosphoricons::ph("sort-ascending"),
             "Sort Levels"
           )
         }
@@ -145,14 +145,14 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
         if (input$sort_occurrences %% 2 == 1) {
           decreasing <- FALSE
           label <- tagList(
-            ph("sort-descending"),
-            i18n("Sort count")
+            phosphoricons::ph("sort-descending"),
+            datamods:::i18n("Sort count")
           )
         } else {
           decreasing <- TRUE
           label <- tagList(
-            ph("sort-ascending"),
-            i18n("Sort count")
+            phosphoricons::ph("sort-ascending"),
+            datamods:::i18n("Sort count")
           )
         }
         updateActionButton(inputId = "sort_occurrences", label = as.character(label))
@@ -179,7 +179,7 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
         grid <- grid_columns(
           grid,
           columns = c("Var1", "Var1_toset", "Freq"),
-          header = c(i18n("Levels"), "New label", i18n("Count"))
+          header = c(datamods:::i18n("Levels"), "New label", datamods:::i18n("Count"))
         )
         grid <- grid_colorbar(
           grid,
