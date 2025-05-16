@@ -1,3 +1,11 @@
+# FreesearchR 25.5.6
+
+- *FIX* note on max file size of 5 mb
+
+- *FIX* added a banner to the dev version on shinyapps.io
+
+- *FIX* updated intro text
+
 # FreesearchR 25.5.5
 
 - *FIX* several minor bugs and polish
