@@ -49,7 +49,7 @@ library(rlang)
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.5.7'
+app_version <- function()'25.6.1'
 
 
 ########
@@ -3996,7 +3996,7 @@ simple_snake <- function(data){
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.5.7-250604'
+hosted_version <- function()'v25.6.1-250604'
 
 
 ########
@@ -10368,7 +10368,14 @@ server <- function(input, output, session) {
   )
 
   observeEvent(input$modal_browse, {
-    show_data(REDCapCAST::fct_drop(rv$data_filtered), title = "Uploaded data overview", type = "modal")
+    tryCatch(
+      {
+        show_data(REDCapCAST::fct_drop(rv$data_filtered), title = "Uploaded data overview", type = "modal")
+      },
+      error = function(err) {
+        showNotification(paste0("We encountered the following error browsing your data: ", err), type = "err")
+      }
+    )
   })
 
   output$original_str <- renderPrint({
