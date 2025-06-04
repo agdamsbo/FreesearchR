@@ -1,3 +1,9 @@
+# FreesearchR 25.6.1
+
+- *FIX* big not allowing to browse data
+
+- *FIX* caught the last bugs when initiating the creation of new variables
+
 # FreesearchR 25.5.6
 
 - *FIX* note on max file size of 5 mb

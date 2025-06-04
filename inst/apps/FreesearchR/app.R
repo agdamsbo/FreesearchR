@@ -49,7 +49,7 @@ library(rlang)
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.5.6'
+app_version <- function()'25.5.7'
 
 
 ########
@@ -3078,7 +3078,7 @@ show_data <- function(data,
         title
       ),
       tags$div(
-        style = css(minHeight = validateCssUnit(options$height)),
+        style = htmltools::css(minHeight = htmltools::validateCssUnit(options$height)),
         toastui::renderDatagrid2(datatable)
       ),
       size = "xl",
@@ -3093,25 +3093,25 @@ show_data <- function(data,
 #' @importFrom htmltools tagList tags css
 describe_col_char <- function(x, with_summary = TRUE) {
   tags$div(
-    style = css(padding = "3px 0", fontSize = "x-small"),
+    style = htmltools::css(padding = "3px 0", fontSize = "x-small"),
     tags$div(
-      style = css(fontStyle = "italic"),
+      style = htmltools::css(fontStyle = "italic"),
       get_var_icon(x),
       # phosphoricons::ph("text-aa"),
       "character"
     ),
     if (with_summary) {
       tagList(
-        tags$hr(style = css(margin = "3px 0")),
+        tags$hr(style = htmltools::css(margin = "3px 0")),
         tags$div(
-          i18n("Unique:"), length(unique(x))
+          datamods:::i18n("Unique:"), length(unique(x))
         ),
         tags$div(
-          i18n("Missing:"), sum(is.na(x))
+          datamods:::i18n("Missing:"), sum(is.na(x))
         ),
         tags$div(
-          style = css(whiteSpace = "normal", wordBreak = "break-all"),
-          i18n("Most Common:"), gsub(
+          style = htmltools::css(whiteSpace = "normal", wordBreak = "break-all"),
+          datamods:::i18n("Most Common:"), gsub(
             pattern = "'",
             replacement = "\u07F4",
             x = names(sort(table(x), decreasing = TRUE))[1]
@@ -3136,16 +3136,16 @@ describe_col_factor <- function(x, with_summary = TRUE) {
   two <- count[!is.na(names(count))][2]
   missing <- count[is.na(names(count))]
   tags$div(
-    style = css(padding = "3px 0", fontSize = "x-small"),
+    style = htmltools::css(padding = "3px 0", fontSize = "x-small"),
     tags$div(
-      style = css(fontStyle = "italic"),
+      style = htmltools::css(fontStyle = "italic"),
       get_var_icon(x),
       # phosphoricons::ph("list-bullets"),
       "factor"
     ),
     if (with_summary) {
       tagList(
-        tags$hr(style = css(margin = "3px 0")),
+        tags$hr(style = htmltools::css(margin = "3px 0")),
         tags$div(
           names(one), ":", fmt_p(one, total)
         ),
@@ -3165,27 +3165,27 @@ describe_col_factor <- function(x, with_summary = TRUE) {
 
 describe_col_num <- function(x, with_summary = TRUE) {
   tags$div(
-    style = css(padding = "3px 0", fontSize = "x-small"),
+    style = htmltools::css(padding = "3px 0", fontSize = "x-small"),
     tags$div(
-      style = css(fontStyle = "italic"),
+      style = htmltools::css(fontStyle = "italic"),
       get_var_icon(x),
       # phosphoricons::ph("hash"),
       "numeric"
     ),
     if (with_summary) {
       tagList(
-        tags$hr(style = css(margin = "3px 0")),
+        tags$hr(style = htmltools::css(margin = "3px 0")),
         tags$div(
-          i18n("Min:"), round(min(x, na.rm = TRUE), 2)
+          datamods:::i18n("Min:"), round(min(x, na.rm = TRUE), 2)
         ),
         tags$div(
-          i18n("Mean:"), round(mean(x, na.rm = TRUE), 2)
+          datamods:::i18n("Mean:"), round(mean(x, na.rm = TRUE), 2)
         ),
         tags$div(
-          i18n("Max:"), round(max(x, na.rm = TRUE), 2)
+          datamods:::i18n("Max:"), round(max(x, na.rm = TRUE), 2)
         ),
         tags$div(
-          i18n("Missing:"), sum(is.na(x))
+          datamods:::i18n("Missing:"), sum(is.na(x))
         )
       )
     }
@@ -3195,24 +3195,24 @@ describe_col_num <- function(x, with_summary = TRUE) {
 
 describe_col_date <- function(x, with_summary = TRUE) {
   tags$div(
-    style = css(padding = "3px 0", fontSize = "x-small"),
+    style = htmltools::css(padding = "3px 0", fontSize = "x-small"),
     tags$div(
-      style = css(fontStyle = "italic"),
+      style = htmltools::css(fontStyle = "italic"),
       get_var_icon(x),
       # phosphoricons::ph("calendar"),
       "date"
     ),
     if (with_summary) {
       tagList(
-        tags$hr(style = css(margin = "3px 0")),
+        tags$hr(style = htmltools::css(margin = "3px 0")),
         tags$div(
-          i18n("Min:"), min(x, na.rm = TRUE)
+          datamods:::i18n("Min:"), min(x, na.rm = TRUE)
         ),
         tags$div(
-          i18n("Max:"), max(x, na.rm = TRUE)
+          datamods:::i18n("Max:"), max(x, na.rm = TRUE)
         ),
         tags$div(
-          i18n("Missing:"), sum(is.na(x))
+          datamods:::i18n("Missing:"), sum(is.na(x))
         ),
         tags$div(
           "\u00A0"
@@ -3224,24 +3224,24 @@ describe_col_date <- function(x, with_summary = TRUE) {
 
 describe_col_datetime <- function(x, with_summary = TRUE) {
   tags$div(
-    style = css(padding = "3px 0", fontSize = "x-small"),
+    style = htmltools::css(padding = "3px 0", fontSize = "x-small"),
     tags$div(
-      style = css(fontStyle = "italic"),
+      style = htmltools::css(fontStyle = "italic"),
       get_var_icon(x),
       # phosphoricons::ph("clock"),
       "datetime"
     ),
     if (with_summary) {
       tagList(
-        tags$hr(style = css(margin = "3px 0")),
+        tags$hr(style = htmltools::css(margin = "3px 0")),
         tags$div(
-          i18n("Min:"), min(x, na.rm = TRUE)
+          datamods:::i18n("Min:"), min(x, na.rm = TRUE)
         ),
         tags$div(
-          i18n("Max:"), max(x, na.rm = TRUE)
+          datamods:::i18n("Max:"), max(x, na.rm = TRUE)
         ),
         tags$div(
-          i18n("Missing:"), sum(is.na(x))
+          datamods:::i18n("Missing:"), sum(is.na(x))
         ),
         tags$div(
           "\u00A0"
@@ -3254,21 +3254,21 @@ describe_col_datetime <- function(x, with_summary = TRUE) {
 
 describe_col_other <- function(x, with_summary = TRUE) {
   tags$div(
-    style = css(padding = "3px 0", fontSize = "x-small"),
+    style = htmltools::css(padding = "3px 0", fontSize = "x-small"),
     tags$div(
-      style = css(fontStyle = "italic"),
+      style = htmltools::css(fontStyle = "italic"),
       get_var_icon(x),
       # phosphoricons::ph("clock"),
       paste(class(x), collapse = ", ")
     ),
     if (with_summary) {
       tagList(
-        tags$hr(style = css(margin = "3px 0")),
+        tags$hr(style = htmltools::css(margin = "3px 0")),
         tags$div(
-          i18n("Unique:"), length(unique(x))
+          datamods:::i18n("Unique:"), length(unique(x))
         ),
         tags$div(
-          i18n("Missing:"), sum(is.na(x))
+          datamods:::i18n("Missing:"), sum(is.na(x))
         ),
         tags$div(
           "\u00A0"
@@ -3996,7 +3996,7 @@ simple_snake <- function(data){
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.5.6-250516'
+hosted_version <- function()'v25.5.7-250604'
 
 
 ########
