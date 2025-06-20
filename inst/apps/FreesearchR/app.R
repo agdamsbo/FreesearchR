@@ -16,7 +16,7 @@ library(shiny)
 # library(readODS)
 # library(bslib)
 # library(assertthat)
-# library(dplyr)
+library(dplyr)
 # library(quarto)
 # library(here)
 # library(broom)
@@ -31,7 +31,7 @@ library(datamods)
 library(shinyWidgets)
 # library(DT)
 # library(data.table)
-# library(gtsummary)
+library(gtsummary)
 library(bsicons)
 library(rlang)
 # library(datamods)
@@ -49,7 +49,7 @@ library(rlang)
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.6.1'
+app_version <- function()'25.6.3'
 
 
 ########
@@ -3374,7 +3374,7 @@ write_quarto <- function(data, ...) {
   )
 }
 
-write_rmd <- function(data, ...) {
+write_rmd <- function(data, ..., params.args=NULL) {
   # Exports data to temporary location
   #
   # I assume this is more secure than putting it in the www folder and deleting
@@ -3389,7 +3389,7 @@ write_rmd <- function(data, ...) {
   ## Ref: https://github.com/quarto-dev/quarto-cli/discussions/4041
   ## Outputs to the same as the .qmd file
   rmarkdown::render(
-    params = list(data.file = "web_data.rds",version=app_version()),
+    params = modifyList(list(data.file = "web_data.rds",version=app_version()),params.args),
     # execute_params = list(data.file = temp),
     ...
   )
@@ -3996,7 +3996,7 @@ simple_snake <- function(data){
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.6.1-250604'
+hosted_version <- function()'v25.6.3-250620'
 
 
 ########
@@ -4653,6 +4653,124 @@ launch_FreesearchR <- function(...){
   return(invisible(a))
 }
 
+
+
+########
+#### Current file: /Users/au301842/FreesearchR/R//missings-module.R 
+########
+
+#' Data correlations evaluation module
+#'
+#' @param id Module id
+#'
+#' @name data-missings
+#' @returns Shiny ui module
+#' @export
+data_missings_ui <- function(id) {
+  ns <- shiny::NS(id)
+
+  shiny::tagList(
+    gt::gt_output(outputId = ns("missings_table")),
+    shiny::plotOutput(outputId = ns("missings_plot"))
+  )
+}
+
+
+#'
+#' @param data data
+#' @param output.format output format
+#'
+#' @name data-missings
+#' @returns shiny server module
+#' @export
+data_missings_server <- function(id,
+                                 data,
+                                 ...) {
+  shiny::moduleServer(
+    id = id,
+    module = function(input, output, session) {
+      # ns <- session$ns
+
+      rv <- shiny::reactiveValues(
+        data = NULL
+      )
+
+      rv$data <- if (is.reactive(data)) data else reactive(data)
+
+      output$missings_plot <- shiny::renderPlot({
+        visdat::vis_dat(rv$data(),palette = "cb_safe")
+      })
+    }
+  )
+}
+
+
+missing_demo_app <- function() {
+  ui <- shiny::fluidPage(
+    shiny::actionButton(
+      inputId = "modal_missings",
+      label = "Browse data",
+      width = "100%",
+      disabled = FALSE
+    )#,
+    # data_missings_ui("data")
+  )
+  server <- function(input, output, session) {
+    data_demo <- mtcars
+    data_demo[2:4, "cyl"] <- NA
+
+    observeEvent(input$modal_missings, {
+      tryCatch(
+        {
+          modal_data_missings(data = data_demo, id = "modal_missings")
+        },
+        error = function(err) {
+          showNotification(paste0("We encountered the following error browsing your data: ", err), type = "err")
+        }
+      )
+    })
+  }
+  shiny::shinyApp(ui, server)
+}
+
+missing_demo_app()
+
+
+modal_data_missings <- function(data,
+                                title = "Show missing pattern",
+                                easyClose = TRUE,
+                                size = "xl",
+                                footer = NULL,
+                                ...) {
+
+  datar <- if (is.reactive(data)) data else reactive(data)
+
+  showModal(modalDialog(
+    title = tagList(title, datamods:::button_close_modal()),
+    tags$div(
+      shiny::renderPlot({
+        visdat::vis_dat(datar())+
+          # ggplot2::theme_void() +
+          ggplot2::theme(
+            # legend.position = "none",
+            panel.grid.major = ggplot2::element_blank(),
+            panel.grid.minor = ggplot2::element_blank(),
+            # axis.text.y = element_blank(),
+            # axis.title.y = element_blank(),
+            text = ggplot2::element_text(size = 15),
+            # axis.text = ggplot2::element_blank(),
+            # panel.background = ggplot2::element_rect(fill = "white"),
+            # plot.background = ggplot2::element_rect(fill = "white"),
+            # panel.border = ggplot2::element_blank()
+            plot.title = ggplot2::element_blank()
+          )
+      })
+    ),
+    easyClose = easyClose,
+    size = size,
+    footer = footer
+  ))
+}
 
 
 ########
@@ -9404,6 +9522,7 @@ ui_elements <- list(
         width = 8,
         shiny::h4("Choose your data source"),
         shiny::br(),
+        # shiny::uiOutput(outputId = "source"),
         shinyWidgets::radioGroupButtons(
           inputId = "source",
           selected = "file",
@@ -9429,6 +9548,13 @@ ui_elements <- list(
         ),
         shiny::conditionalPanel(
           condition = "input.source=='redcap'",
+          shinyWidgets::alert(
+            id = "redcap-warning",
+            status = "info",
+            shiny::tags$h2(shiny::markdown("Careful with sensitive data")),
+            shiny::tags$p("The", shiny::tags$i(shiny::tags$b("FreesearchR")), "app only stores data for analyses, but please only use with sensitive data when running locally.", "", shiny::tags$a("Read more here", href = "https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine"),"."),
+            dismissible = TRUE
+          ),
           m_redcap_readUI(
             id = "redcap_import",
             title = ""
@@ -9446,11 +9572,11 @@ ui_elements <- list(
           condition = "output.data_loaded == true",
           shiny::br(),
           shiny::br(),
-          shiny::h5("Specify variables to include"),
+          shiny::h5("Select variables for final import"),
           shiny::fluidRow(
             shiny::column(
               width = 6,
-              shiny::p("Filter by completeness threshold:"),
+              shiny::p("Exclude incomplete variables:"),
               shiny::br(),
               shinyWidgets::noUiSliderInput(
                 inputId = "complete_cutoff",
@@ -9459,16 +9585,16 @@ ui_elements <- list(
                 min = 0,
                 max = 100,
                 step = 5,
-                value = 70,
+                value = 30,
                 format = shinyWidgets::wNumbFormat(decimals = 0),
                 color = datamods:::get_primary_color()
               ),
-              shiny::helpText("Exclude variables with completeness below the specified percentage."),
+              shiny::helpText("Only include variables with missingness below the specified percentage."),
               shiny::br()
             ),
             shiny::column(
               width = 6,
-              shiny::p("Specify manually:"),
+              shiny::p("Manual selection:"),
               shiny::br(),
               shiny::uiOutput(outputId = "import_var"),
               shiny::br()
@@ -9529,33 +9655,44 @@ ui_elements <- list(
             shiny::column(
               width = 3,
               shiny::actionButton(
+                inputId = "modal_missings",
+                label = "Visual overview",
+                width = "100%",
+                disabled = TRUE
+              ),
+              shiny::br(),
+              shiny::br(),
+              shiny::actionButton(
                 inputId = "modal_browse",
                 label = "Browse data",
                 width = "100%",
                 disabled = TRUE
               ),
-              shiny::tags$br(),
-              shiny::tags$br(),
-              shiny::uiOutput(outputId = "column_filter"),
-              shiny::helpText("Variable ", tags$a(
-                "data type",
+              shiny::br(),
+              shiny::br(),
+              shiny::tags$h6("Filter data types"),
+              shiny::uiOutput(
+                outputId = "column_filter"),
+              shiny::helpText("Read more on how ", tags$a(
+                "data types",
                 href = "https://agdamsbo.github.io/FreesearchR/articles/data-types.html",
                 target = "_blank",
                 rel = "noopener noreferrer"
-              ), " filtering."),
-              shiny::tags$br(),
-              shiny::tags$br(),
+              ), " are defined."),
+              shiny::br(),
+              shiny::br(),
+              shiny::tags$h6("Create data filters"),
+              shiny::tags$p("Filter on observation level"),
               IDEAFilter::IDEAFilter_ui("data_filter"),
-              shiny::helpText("Observations level filtering."),
-              shiny::tags$br(),
-              shiny::tags$br()
+              shiny::br(),
+              shiny::br()
             )
           ),
-          shiny::tags$br(),
-          shiny::tags$br(),
-          shiny::tags$br(),
-          shiny::tags$br(),
-          shiny::tags$br()
+          shiny::br(),
+          shiny::br(),
+          # shiny::br(),
+          # shiny::br(),
+          shiny::br()
         ),
         bslib::nav_panel(
           title = "Modify",
@@ -9953,9 +10090,15 @@ ui <- bslib::page_fixed(
 
 
 
-data(starwars)
+
 data(mtcars)
-data(trial)
+
+# trial <- gtsummary::trial
+# starwars <- dplyr::starwars
+#
+# mtcars_na <- rbind(mtcars,NA,NA)
+
+# thematic::thematic_shiny()
 
 load_data <- function() {
   Sys.sleep(1)
@@ -9963,6 +10106,7 @@ load_data <- function() {
   shinyjs::show("main_content")
 }
 
+# is_local = is.na(Sys.getenv('SHINY_SERVER_VERSION', NA))
 
 server <- function(input, output, session) {
   ## Listing files in www in session start to keep when ending and removing
@@ -10018,6 +10162,28 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
+  ## This does not render correctly apparently due to css and load order
+  # output$source <- shiny::renderUI({
+  #
+  #   choices <- c(
+  #     "File upload" = "file",
+  #     "REDCap server export" = "redcap",
+  #     "Local or sample data" = "env"
+  #   )
+  #
+  #   if (isTRUE(is_local)){
+  #     choices <- choices[c(1,3)]
+  #   }
+  #
+  #   shinyWidgets::radioGroupButtons(
+  #     inputId = "source",
+  #     selected = "file",
+  #     choices = choices,
+  #     size = "lg"
+  #   )
+  # })
+
+
   data_file <- import_file_server(
     id = "file_import",
     show_data_in = "popup",
@@ -10067,7 +10233,7 @@ server <- function(input, output, session) {
   output$import_var <- shiny::renderUI({
     shiny::req(rv$data_temp)
 
-    preselect <- names(rv$data_temp)[sapply(rv$data_temp, missing_fraction) <= input$complete_cutoff / 100]
+    preselect <- names(rv$data_temp)[sapply(rv$data_temp, missing_fraction) <= (input$complete_cutoff / 100)]
 
     shinyWidgets::virtualSelectInput(
       inputId = "import_var",
@@ -10136,10 +10302,12 @@ server <- function(input, output, session) {
     if (is.null(rv$data_original) | NROW(rv$data_original) == 0) {
       shiny::updateActionButton(inputId = "act_start", disabled = TRUE)
       shiny::updateActionButton(inputId = "modal_browse", disabled = TRUE)
+      shiny::updateActionButton(inputId = "modal_missings", disabled = TRUE)
       shiny::updateActionButton(inputId = "act_eval", disabled = TRUE)
     } else {
       shiny::updateActionButton(inputId = "act_start", disabled = FALSE)
       shiny::updateActionButton(inputId = "modal_browse", disabled = FALSE)
+      shiny::updateActionButton(inputId = "modal_missings", disabled = FALSE)
       shiny::updateActionButton(inputId = "act_eval", disabled = FALSE)
     }
   })
@@ -10279,7 +10447,7 @@ server <- function(input, output, session) {
     # c("dichotomous", "ordinal", "categorical", "datatime", "continuous")
     shinyWidgets::virtualSelectInput(
       inputId = "column_filter",
-      label = "Select variable types to include",
+      label = "Select data types to include",
       selected = unique(data_type(rv$data)),
       choices = unique(data_type(rv$data)),
       updateOn = "change",
@@ -10377,6 +10545,18 @@ server <- function(input, output, session) {
       }
     )
   })
+
+  observeEvent(input$modal_missings, {
+    tryCatch(
+      {
+        modal_data_missings(data = REDCapCAST::fct_drop(rv$data_filtered))
+      },
+      error = function(err) {
+        showNotification(paste0("We encountered the following error showing missingness: ", err), type = "err")
+      }
+    )
+  })
+
 
   output$original_str <- renderPrint({
     str(rv$data_original)
@@ -10660,6 +10840,9 @@ server <- function(input, output, session) {
           {
             rv$list |>
               write_rmd(
+                params.args = list(
+                  regression.p=rv$list$regression$input$add_regression_p
+                  ),
                 output_format = format,
                 input = file.path(getwd(), "www/report.rmd")
               )
