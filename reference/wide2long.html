@@ -11,7 +11,7 @@ an added "ignore" string pattern or similarly. Example 2.'><meta property="og:im
 
     <a class="navbar-brand me-2" href="../index.html">FreesearchR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.6.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,7 +41,7 @@ an added "ignore" string pattern or similarly. Example 2.'><meta property="og:im
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Alternative pivoting method for easily pivoting based on name pattern</h1>
-      <small class="dont-index">Source: <a href="https://github.com/agdamsbo/FreesearchR/blob/v25.6.2/R/wide2long.R" class="external-link"><code>R/wide2long.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/agdamsbo/FreesearchR/blob/main/R/wide2long.R" class="external-link"><code>R/wide2long.R</code></a></small>
       <div class="d-none name"><code>wide2long.Rd</code></div>
     </div>
 
@@ -103,46 +103,46 @@ Default is "1", first column.</p></dd>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"age"</span>, <span class="st">"weight_0"</span>, <span class="st">"weight_1"</span>, <span class="st">"height_1"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">wide2long</span><span class="op">(</span>pattern <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"_0"</span>, <span class="st">"_1"</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"suffix"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    id age instance weight height</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1  71        0     95     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   1  NA        1     98    179</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   2  72        0     77     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   2  NA        1     98    182</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   3  70        0     85     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   3  NA        1     74    197</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   4  71        0     83     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   4  NA        1     82    199</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9   5  72        0     90     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10  5  NA        1     88    179</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11  6  75        0     94     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12  6  NA        1     94    175</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13  7  74        0     75     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14  7  NA        1    100    179</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15  8  71        0     91     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16  8  NA        1     83    195</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17  9  78        0     77     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18  9  NA        1     96    176</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19 10  79        0     90     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20 10  NA        1     92    187</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21 11  78        0     93     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22 11  NA        1     96    188</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 23 12  71        0     72     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 24 12  NA        1     73    193</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 25 13  71        0     77     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 26 13  NA        1     89    187</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 27 14  76        0     74     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 28 14  NA        1    100    192</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 29 15  73        0     83     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 30 15  NA        1     96    190</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 31 16  75        0     96     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 32 16  NA        1     82    183</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 33 17  71        0     82     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 34 17  NA        1     72    192</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 35 18  76        0     88     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 36 18  NA        1     77    195</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 37 19  78        0     72     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 38 19  NA        1     93    184</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 39 20  75        0     97     NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 40 20  NA        1     98    198</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1  72        0     75     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   1  NA        1     70    185</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   2  77        0     79     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   2  NA        1     86    180</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   3  74        0     95     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   3  NA        1     91    190</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   4  80        0     76     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8   4  NA        1     82    175</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9   5  72        0     87     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10  5  NA        1     91    193</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11  6  72        0     88     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12  6  NA        1     95    195</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13  7  74        0     93     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14  7  NA        1     75    197</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15  8  72        0     87     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16  8  NA        1     81    177</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17  9  78        0     92     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18  9  NA        1     78    190</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19 10  80        0     90     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20 10  NA        1     70    176</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21 11  76        0     83     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22 11  NA        1     93    172</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23 12  80        0     92     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24 12  NA        1     91    179</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25 13  73        0     95     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26 13  NA        1     70    170</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27 14  73        0     84     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28 14  NA        1     98    199</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29 15  80        0     98     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30 15  NA        1     79    174</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31 16  72        0     84     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 32 16  NA        1     82    174</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 33 17  77        0     79     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 34 17  NA        1     88    173</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 35 18  77        0     98     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 36 18  NA        1     77    180</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 37 19  79        0     74     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 38 19  NA        1     81    178</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 39 20  79        0     91     NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 40 20  NA        1     80    171</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">70</span><span class="op">:</span><span class="fl">80</span>, <span class="fl">20</span>, <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">70</span><span class="op">:</span><span class="fl">100</span>, <span class="fl">20</span>, <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
@@ -152,46 +152,46 @@ Default is "1", first column.</p></dd>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"age"</span>, <span class="st">"weight_0"</span>, <span class="st">"weight_a_1"</span>, <span class="st">"height_b_1"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">wide2long</span><span class="op">(</span>pattern <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"_0"</span>, <span class="st">"_1"</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"suffix"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    id age instance weight weight_a height_b</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1  79        0     75       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   1  NA        1     NA       71      171</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   2  74        0     93       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   2  NA        1     NA       97      199</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   3  75        0     95       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   3  NA        1     NA       81      192</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   4  70        0     97       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   4  NA        1     NA       75      195</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9   5  70        0     77       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10  5  NA        1     NA       83      191</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11  6  75        0     90       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12  6  NA        1     NA       95      178</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13  7  75        0     76       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14  7  NA        1     NA       78      200</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15  8  79        0     72       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16  8  NA        1     NA       76      185</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17  9  75        0     79       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18  9  NA        1     NA       88      195</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19 10  78        0     70       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20 10  NA        1     NA       74      199</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21 11  70        0     99       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22 11  NA        1     NA       86      176</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 23 12  77        0     74       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 24 12  NA        1     NA       78      174</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 25 13  75        0     74       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 26 13  NA        1     NA       91      192</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 27 14  70        0     73       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 28 14  NA        1     NA       81      176</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 29 15  79        0     80       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 30 15  NA        1     NA       91      176</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 31 16  72        0     78       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 32 16  NA        1     NA       94      181</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 33 17  77        0     71       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 34 17  NA        1     NA       82      181</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 35 18  80        0     97       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 36 18  NA        1     NA       81      200</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 37 19  80        0     79       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 38 19  NA        1     NA       72      195</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 39 20  74        0     71       NA       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 40 20  NA        1     NA       77      171</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1  79        0     78       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   1  NA        1     NA       78      188</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   2  71        0    100       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   2  NA        1     NA       89      183</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   3  71        0     85       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   3  NA        1     NA       77      188</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   4  75        0     95       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8   4  NA        1     NA       94      179</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9   5  79        0     99       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10  5  NA        1     NA       72      171</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11  6  78        0     76       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12  6  NA        1     NA       91      185</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13  7  76        0     74       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14  7  NA        1     NA       90      180</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15  8  72        0     92       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16  8  NA        1     NA       96      188</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17  9  74        0     76       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18  9  NA        1     NA       90      193</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19 10  70        0     76       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20 10  NA        1     NA       99      172</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21 11  78        0     81       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22 11  NA        1     NA       85      176</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23 12  75        0     81       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24 12  NA        1     NA       76      199</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25 13  75        0    100       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26 13  NA        1     NA       94      191</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27 14  78        0     95       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28 14  NA        1     NA       79      199</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29 15  72        0     71       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30 15  NA        1     NA       88      192</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31 16  77        0     89       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 32 16  NA        1     NA       95      193</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 33 17  71        0     89       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 34 17  NA        1     NA       72      181</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 35 18  76        0     94       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 36 18  NA        1     NA       94      197</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 37 19  79        0     88       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 38 19  NA        1     NA       82      177</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 39 20  75        0     96       NA       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 40 20  NA        1     NA       85      192</span>
 <span class="r-in"><span><span class="co"># Optional filling of missing values by last observation carried forward</span></span></span>
 <span class="r-in"><span><span class="co"># Needed for mmrm analyses</span></span></span>
 <span class="r-in"><span><span class="va">long_missings</span> <span class="op">|&gt;</span></span></span>
