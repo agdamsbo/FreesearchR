@@ -11,11 +11,11 @@
 |collate     |en_US.UTF-8                                |
 |ctype       |en_US.UTF-8                                |
 |tz          |Europe/Copenhagen                          |
-|date        |2025-06-04                                 |
+|date        |2025-06-06                                 |
 |rstudio     |2025.05.0+496 Mariposa Orchid (desktop)    |
 |pandoc      |3.6.4 @ /opt/homebrew/bin/ (via rmarkdown) |
 |quarto      |1.7.30 @ /usr/local/bin/quarto             |
-|FreesearchR |25.6.1.250604                              |
+|FreesearchR |25.6.2.250606                              |
                                                                                 
                                                                                 
 --------------------------------------------------------------------------------
@@ -76,7 +76,6 @@
 |farver            |2.1.2         |2024-05-13 |CRAN (R 4.4.1) |
 |fastmap           |1.2.0         |2024-05-15 |CRAN (R 4.4.1) |
 |flextable         |0.9.7         |2024-10-27 |CRAN (R 4.4.1) |
-|fontawesome       |0.5.3         |2024-11-16 |CRAN (R 4.4.1) |
 |fontBitstreamVera |0.1.1         |2017-02-01 |CRAN (R 4.4.1) |
 |fontLiberation    |0.1.0         |2016-10-15 |CRAN (R 4.4.1) |
 |fontquiver        |0.2.1         |2017-02-01 |CRAN (R 4.4.0) |
@@ -84,7 +83,7 @@
 |foreach           |1.5.2         |2022-02-02 |CRAN (R 4.4.0) |
 |foreign           |0.8-90        |2025-03-31 |CRAN (R 4.4.1) |
 |Formula           |1.2-5         |2023-02-24 |CRAN (R 4.4.1) |
-|FreesearchR       |25.6.1        |NA         |NA             |
+|FreesearchR       |25.6.2        |NA         |NA             |
 |fs                |1.6.6         |2025-04-12 |CRAN (R 4.4.1) |
 |gdtools           |0.4.2         |2025-03-27 |CRAN (R 4.4.1) |
 |generics          |0.1.3         |2022-07-05 |CRAN (R 4.4.1) |
@@ -160,6 +159,7 @@
 |R6                |2.6.1         |2025-02-15 |CRAN (R 4.4.1) |
 |ragg              |1.4.0         |2025-04-10 |CRAN (R 4.4.1) |
 |rankinPlot        |1.1.0         |2023-01-30 |CRAN (R 4.4.0) |
+|rappdirs          |0.3.3         |2021-01-31 |CRAN (R 4.4.1) |
 |rbibutils         |2.3           |2024-10-04 |CRAN (R 4.4.1) |
 |RColorBrewer      |1.1-3         |2022-04-03 |CRAN (R 4.4.1) |
 |Rcpp              |1.0.14        |2025-01-12 |CRAN (R 4.4.1) |

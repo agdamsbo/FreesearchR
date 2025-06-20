@@ -7,6 +7,7 @@ toc: false
 params:
   data.file: NA
   version: NA
+  regression.p: NA
 ---
 
 ```{r setup, echo = FALSE}
@@ -65,7 +66,15 @@ if ("table1" %in% names(web_data)) {
 ```{r, results = 'asis'}
 if ("regression" %in% names(web_data) && length(web_data$regression) > 0) {
   reg_tbl <- web_data$regression$regression$tables
-  knitr::knit_print(tbl_merge(reg_tbl))
+  
+  merged <- tbl_merge(reg_tbl)
+  
+  if (params$regression.p == "no") {
+            merged <- merged |>
+              gtsummary::modify_column_hide(column = dplyr::starts_with("p.value"))
+          }
+  
+  knitr::knit_print(merged)
 }
 ```
 

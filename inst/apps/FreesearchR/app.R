@@ -4750,6 +4750,7 @@ modal_data_missings <- function(data,
     tags$div(
       shiny::renderPlot({
         visdat::vis_dat(datar())+
+          ggplot2::guides(fill = ggplot2::guide_legend(title = "Data class")) +
           # ggplot2::theme_void() +
           ggplot2::theme(
             # legend.position = "none",
@@ -10549,7 +10550,8 @@ server <- function(input, output, session) {
   observeEvent(input$modal_missings, {
     tryCatch(
       {
-        modal_data_missings(data = REDCapCAST::fct_drop(rv$data_filtered))
+        modal_data_missings(data = REDCapCAST::fct_drop(rv$data_filtered),
+                            footer = "This pop-up gives you an overview of how your data is interpreted, and where data is missing. Use this information to consider if data is missing at random or if some observations are missing systematically wich may be caused by an observation bias.")
       },
       error = function(err) {
         showNotification(paste0("We encountered the following error showing missingness: ", err), type = "err")

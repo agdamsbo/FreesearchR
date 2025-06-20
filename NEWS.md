@@ -1,3 +1,17 @@
+# FreesearchR 25.6.3
+
+- *NEW* First go at introducing more options to evaluate missings. Also reworded the text on the initial filter to only include variables missings less than the given threshold.
+
+# FreesearchR 25.6.2
+
+- *FIX* Added warning about only using REDCap with sensitive data running locally. THis applies to all data actually. Considering taking REDCap out in hosted version. Standalone app is in the works.
+
+- *FIX* Reworded the completeness filter to be on missingness, as this is a more commonly used concept.
+
+- *FIX* Improved layout around data filters to improve usage.
+
+- *FIX* Regression table in report respects inclusion of p-values or not.
+
 # FreesearchR 25.6.1
 
 - *FIX* big not allowing to browse data

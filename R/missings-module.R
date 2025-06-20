@@ -89,6 +89,7 @@ modal_data_missings <- function(data,
     tags$div(
       shiny::renderPlot({
         visdat::vis_dat(datar())+
+          ggplot2::guides(fill = ggplot2::guide_legend(title = "Data class")) +
           # ggplot2::theme_void() +
           ggplot2::theme(
             # legend.position = "none",
