@@ -9,7 +9,7 @@ type: software
 license: AGPL-3.0-or-later
 title: 'FreesearchR: A free and open-source browser based data analysis tool for researchers
   with publication ready output'
-version: 25.6.2
+version: 25.6.3
 doi: 10.5281/zenodo.14527429
 identifiers:
 - type: url
@@ -1002,6 +1002,19 @@ references:
     email: russell-lenth@uiowa.edu
   year: '2025'
   doi: 10.32614/CRAN.package.emmeans
+- type: software
+  title: visdat
+  abstract: 'visdat: Preliminary Visualisation of Data'
+  notes: Imports
+  url: https://docs.ropensci.org/visdat/
+  repository: https://CRAN.R-project.org/package=visdat
+  authors:
+  - family-names: Tierney
+    given-names: Nicholas
+    email: nicholas.tierney@gmail.com
+    orcid: https://orcid.org/0000-0003-1460-8722
+  year: '2025'
+  doi: 10.32614/CRAN.package.visdat
 - type: software
   title: styler
   abstract: 'styler: Non-Invasive Pretty Printing of R Code'

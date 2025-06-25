@@ -3996,7 +3996,7 @@ simple_snake <- function(data){
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.6.3-250620'
+hosted_version <- function()'v25.6.3-250625'
 
 
 ########
@@ -4670,8 +4670,7 @@ data_missings_ui <- function(id) {
   ns <- shiny::NS(id)
 
   shiny::tagList(
-    gt::gt_output(outputId = ns("missings_table")),
-    shiny::plotOutput(outputId = ns("missings_plot"))
+    gt::gt_output(outputId = ns("missings_table"))
   )
 }
 
@@ -4685,20 +4684,56 @@ data_missings_ui <- function(id) {
 #' @export
 data_missings_server <- function(id,
                                  data,
+                                 variable,
                                  ...) {
   shiny::moduleServer(
     id = id,
     module = function(input, output, session) {
       # ns <- session$ns
 
+      datar <- if (is.reactive(data)) data else reactive(data)
+      variabler <- if (is.reactive(variable)) variable else reactive(variable)
+
       rv <- shiny::reactiveValues(
         data = NULL
       )
 
-      rv$data <- if (is.reactive(data)) data else reactive(data)
+      rv$data <- shiny::reactive({
+        df_tbl <- datar()
+        by_var <- variabler()
 
-      output$missings_plot <- shiny::renderPlot({
-        visdat::vis_dat(rv$data(),palette = "cb_safe")
+        tryCatch(
+          {
+            if (!is.null(by_var) && by_var != "" && by_var %in% names(df_tbl)) {
+              df_tbl[[by_var]] <- ifelse(is.na(df_tbl[[by_var]]), "Missing", "Non-missing")
+
+              out <- gtsummary::tbl_summary(df_tbl, by = by_var) |>
+                gtsummary::add_p()
+            } else {
+              out <- gtsummary::tbl_summary(df_tbl)
+            }
+          },
+          error = function(err) {
+            showNotification(paste0("Error: ", err), type = "err")
+          }
+        )
+
+        out
+      })
+
+      output$missings_table <- gt::render_gt({
+        shiny::req(datar)
+        shiny::req(variabler)
+
+        if (is.null(variabler()) || variabler() == "" || !variabler() %in% names(datar())) {
+          title <- "No missing observations"
+        } else {
+          title <- paste("Missing vs non-missing observations in", variabler())
+        }
+
+        rv$data() |>
+          gtsummary::as_gt() |>
+          gt::tab_header(title = gt::md(title))
       })
     }
   )
@@ -4712,17 +4747,24 @@ missing_demo_app <- function() {
       label = "Browse data",
       width = "100%",
       disabled = FALSE
-    )#,
-    # data_missings_ui("data")
+    ),
+    shiny::selectInput(
+      inputId = "missings_var",
+      label = "Select variable to stratify analysis", choices = c("cyl", "vs")
+    ),
+    data_missings_ui("data")
   )
   server <- function(input, output, session) {
     data_demo <- mtcars
-    data_demo[2:4, "cyl"] <- NA
+    data_demo[sample(1:32, 10), "cyl"] <- NA
+    data_demo[sample(1:32, 8), "vs"] <- NA
+
+    data_missings_server(id = "data", data = data_demo, variable = shiny::reactive(input$missings_var))
 
     observeEvent(input$modal_missings, {
       tryCatch(
         {
-          modal_data_missings(data = data_demo, id = "modal_missings")
+          modal_visual_missings(data = data_demo, id = "modal_missings")
         },
         error = function(err) {
           showNotification(paste0("We encountered the following error browsing your data: ", err), type = "err")
@@ -4736,20 +4778,22 @@ missing_demo_app <- function() {
 missing_demo_app()
 
 
-modal_data_missings <- function(data,
-                                title = "Show missing pattern",
-                                easyClose = TRUE,
-                                size = "xl",
-                                footer = NULL,
-                                ...) {
-
+modal_visual_missings <- function(data,
+                                  title = "Visual overview of data classes and missing observations",
+                                  easyClose = TRUE,
+                                  size = "xl",
+                                  footer = NULL,
+                                  ...) {
   datar <- if (is.reactive(data)) data else reactive(data)
 
   showModal(modalDialog(
     title = tagList(title, datamods:::button_close_modal()),
     tags$div(
+      # apexcharter::renderApexchart({
+      #   missings_apex_plot(datar(), ...)
+      # })
       shiny::renderPlot({
-        visdat::vis_dat(datar())+
+        visdat::vis_dat(datar(),sort_type = FALSE) +
           ggplot2::guides(fill = ggplot2::guide_legend(title = "Data class")) +
           # ggplot2::theme_void() +
           ggplot2::theme(
@@ -4758,7 +4802,7 @@ modal_data_missings <- function(data,
             panel.grid.minor = ggplot2::element_blank(),
             # axis.text.y = element_blank(),
             # axis.title.y = element_blank(),
-            text = ggplot2::element_text(size = 15),
+            text = ggplot2::element_text(size = 18),
             # axis.text = ggplot2::element_blank(),
             # panel.background = ggplot2::element_rect(fill = "white"),
             # plot.background = ggplot2::element_rect(fill = "white"),
@@ -4771,6 +4815,102 @@ modal_data_missings <- function(data,
     size = size,
     footer = footer
   ))
+}
+
+
+## Slow with many observations...
+
+#' Plot missings and class with apexcharter
+#'
+#' @param data data frame
+#'
+#' @returns An [apexchart()] `htmlwidget` object.
+#' @export
+#'
+#' @examples
+#' data_demo <- mtcars
+#' data_demo[2:4, "cyl"] <- NA
+#' rbind(data_demo, data_demo, data_demo, data_demo) |> missings_apex_plot()
+#' data_demo |> missings_apex_plot()
+#' mtcars |> missings_apex_plot(animation = TRUE)
+#' # dplyr::storms |> missings_apex_plot()
+#' visdat::vis_dat(dplyr::storms)
+missings_apex_plot <- function(data, animation = FALSE, ...) {
+  browser()
+
+  df_plot <- purrr::map_df(data, \(x){
+    ifelse(is.na(x),
+      yes = NA,
+      no = glue::glue_collapse(class(x),
+        sep = "\n"
+      )
+    )
+  }) %>%
+    dplyr::mutate(rows = dplyr::row_number()) %>%
+    tidyr::pivot_longer(
+      cols = -rows,
+      names_to = "variable", values_to = "valueType", values_transform = list(valueType = as.character)
+    ) %>%
+    dplyr::arrange(rows, variable, valueType)
+
+
+  df_plot$valueType_num <- df_plot$valueType |>
+    forcats::as_factor() |>
+    as.numeric()
+
+
+  df_plot$valueType[is.na(df_plot$valueType)] <- "NA"
+  df_plot$valueType_num[is.na(df_plot$valueType_num)] <- max(df_plot$valueType_num, na.rm = TRUE) + 1
+
+  labels <- setNames(unique(df_plot$valueType_num), unique(df_plot$valueType))
+
+  if (any(df_plot$valueType == "NA")) {
+    colors <- setNames(c(viridisLite::viridis(n = length(labels) - 1), "#999999"), names(labels))
+  } else {
+    colors <- setNames(viridisLite::viridis(n = length(labels)), names(labels))
+  }
+
+
+  label_list <- labels |>
+    purrr::imap(\(.x, .i){
+      list(
+        from = .x,
+        to = .x,
+        color = colors[[.i]],
+        name = .i
+      )
+    }) |>
+    setNames(NULL)
+
+  out <- apexcharter::apex(
+    data = df_plot,
+    type = "heatmap",
+    mapping = apexcharter::aes(x = variable, y = rows, fill = valueType_num),
+    ...
+  ) %>%
+    apexcharter::ax_stroke(width = NULL) |>
+    apexcharter::ax_plotOptions(
+      heatmap = apexcharter::heatmap_opts(
+        radius = 0,
+        enableShades = FALSE,
+        colorScale = list(
+          ranges = label_list
+        ),
+        useFillColorAsStroke = TRUE
+      )
+    ) %>%
+    apexcharter::ax_dataLabels(enabled = FALSE) |>
+    apexcharter::ax_tooltip(
+      enabled = FALSE,
+      intersect = FALSE
+    )
+
+  if (!isTRUE(animation)) {
+    out <- out |>
+      apexcharter::ax_chart(animations = list(enabled = FALSE))
+  }
+
+  out
 }
 
 
@@ -5543,18 +5683,25 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
   }
 
   server_ui <- shiny::tagList(
-    # width = 6,
     shiny::tags$h4("REDCap server"),
     shiny::textInput(
       inputId = ns("uri"),
       label = "Web address",
-      value = if_not_missing(url, "https://redcap.your.institution/")
+      value = if_not_missing(url, "https://redcap.your.institution/"),
+      width = "100%"
     ),
     shiny::helpText("Format should be either 'https://redcap.your.institution/' or 'https://your.institution/redcap/'"),
-    shiny::textInput(
+    # shiny::textInput(
+    #   inputId = ns("api"),
+    #   label = "API token",
+    #   value = "",
+    #   width = "100%"
+    # ),
+    shiny::passwordInput(
       inputId = ns("api"),
       label = "API token",
-      value = ""
+      value = "",
+      width = "100%"
     ),
     shiny::helpText("The token is a string of 32 numbers and letters."),
     shiny::br(),
@@ -5592,31 +5739,34 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
 
   params_ui <-
     shiny::tagList(
-      # width = 6,
       shiny::tags$h4("Data import parameters"),
-      shiny::helpText("Options here will show, when API and uri are typed"),
-      shiny::tags$br(),
-      shiny::uiOutput(outputId = ns("fields")),
       shiny::tags$div(
-        class = "shiny-input-container",
-        shiny::tags$label(
-          class = "control-label",
-          `for` = ns("dropdown_params"),
-          "...",
-          style = htmltools::css(visibility = "hidden")
+        style = htmltools::css(
+          display = "grid",
+          gridTemplateColumns = "1fr 50px",
+          gridColumnGap = "10px"
         ),
-        shinyWidgets::dropMenu(
-          shiny::actionButton(
-            inputId = ns("dropdown_params"),
-            label = "Add data filters",
-            icon = shiny::icon("filter"),
-            width = "100%",
-            class = "px-1"
+        shiny::uiOutput(outputId = ns("fields")),
+        shiny::tags$div(
+          class = "shiny-input-container",
+          shiny::tags$label(
+            class = "control-label",
+            `for` = ns("dropdown_params"),
+            "...",
+            style = htmltools::css(visibility = "hidden")
           ),
-          filter_ui
-        ),
-        shiny::helpText("Optionally filter project arms if logitudinal or apply server side data filters")
+          shinyWidgets::dropMenu(
+            shiny::actionButton(
+              inputId = ns("dropdown_params"),
+              label = shiny::icon("filter"),
+              width = "50px"
+            ),
+            filter_ui
+          )
+        )
       ),
+      shiny::helpText("Select fields/variables to import and click the funnel to apply optional filters"),
+      shiny::tags$br(),
       shiny::tags$br(),
       shiny::uiOutput(outputId = ns("data_type")),
       shiny::uiOutput(outputId = ns("fill")),
@@ -5637,28 +5787,14 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
           tags$p(phosphoricons::ph("info", weight = "bold"), "Please specify data to download, then press 'Import'.")
         ),
         dismissible = TRUE
-      ) # ,
-      ## TODO: Use busy indicator like on download to have button activate/deactivate
-      # bslib::input_task_button(
-      #   id = ns("data_import"),
-      #   label = "Import",
-      #   icon = shiny::icon("download", lib = "glyphicon"),
-      #   label_busy = "Just a minute...",
-      #   icon_busy = fontawesome::fa_i("arrows-rotate",
-      #     class = "fa-spin",
-      #     "aria-hidden" = "true"
-      #   ),
-      #   type = "primary",
-      #   auto_reset = TRUE#,state="busy"
-      # ),
-      # shiny::br(),
-      # shiny::helpText("Press 'Import' to get data from the REDCap server. Check the preview below before proceeding.")
+      )
     )
 
 
   shiny::fluidPage(
     title = title,
     server_ui,
+    # shiny::uiOutput(ns("params_ui")),
     shiny::conditionalPanel(
       condition = "output.connect_success == true",
       params_ui,
@@ -5782,6 +5918,7 @@ m_redcap_readServer <- function(id) {
     output$connect_success <- shiny::reactive(identical(data_rv$dd_status, "success"))
     shiny::outputOptions(output, "connect_success", suspendWhenHidden = FALSE)
 
+
     shiny::observeEvent(input$see_dd, {
       show_data(
         purrr::pluck(data_rv$dd_list, "data"),
@@ -5817,7 +5954,7 @@ m_redcap_readServer <- function(id) {
       shiny::req(data_rv$dd_list)
       shinyWidgets::virtualSelectInput(
         inputId = ns("fields"),
-        label = "Select variables to import:",
+        label = "Select fields/variables to import:",
         choices = purrr::pluck(data_rv$dd_list, "data") |>
           dplyr::select(field_name, form_name) |>
           (\(.x){
@@ -5826,7 +5963,8 @@ m_redcap_readServer <- function(id) {
         updateOn = "change",
         multiple = TRUE,
         search = TRUE,
-        showValueAsTags = TRUE
+        showValueAsTags = TRUE,
+        width = "100%"
       )
     })
 
@@ -5835,13 +5973,14 @@ m_redcap_readServer <- function(id) {
       if (isTRUE(data_rv$info$has_repeating_instruments_or_events)) {
         vectorSelectInput(
           inputId = ns("data_type"),
-          label = "Select the data format to import",
+          label = "Specify the data format",
           choices = c(
             "Wide data (One row for each subject)" = "wide",
             "Long data for project with repeating instruments (default REDCap)" = "long"
           ),
           selected = "wide",
-          multiple = FALSE
+          multiple = FALSE,
+          width = "100%"
         )
       }
     })
@@ -5867,7 +6006,8 @@ m_redcap_readServer <- function(id) {
             "No, leave the data as is" = "no"
           ),
           selected = "no",
-          multiple = FALSE
+          multiple = FALSE,
+          width = "100%"
         )
       }
     })
@@ -5887,7 +6027,8 @@ m_redcap_readServer <- function(id) {
           selected = NULL,
           label = "Filter by events/arms",
           choices = stats::setNames(arms()[[3]], arms()[[1]]),
-          multiple = TRUE
+          multiple = TRUE,
+          width = "100%"
         )
       }
     })
@@ -9553,7 +9694,7 @@ ui_elements <- list(
             id = "redcap-warning",
             status = "info",
             shiny::tags$h2(shiny::markdown("Careful with sensitive data")),
-            shiny::tags$p("The", shiny::tags$i(shiny::tags$b("FreesearchR")), "app only stores data for analyses, but please only use with sensitive data when running locally.", "", shiny::tags$a("Read more here", href = "https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine"),"."),
+            shiny::tags$p("The", shiny::tags$i(shiny::tags$b("FreesearchR")), "app only stores data for analyses, but please only use with sensitive data when running locally.", "", shiny::tags$a("Read more here", href = "https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine"), "."),
             dismissible = TRUE
           ),
           m_redcap_readUI(
@@ -9571,6 +9712,14 @@ ui_elements <- list(
         # ),
         shiny::conditionalPanel(
           condition = "output.data_loaded == true",
+          shiny::br(),
+            shiny::actionButton(
+              inputId = "modal_initial_view",
+              label = "Quick overview",
+              width = "100%",
+              icon = shiny::icon("binoculars"),
+              disabled = FALSE
+            ),
           shiny::br(),
           shiny::br(),
           shiny::h5("Select variables for final import"),
@@ -9590,7 +9739,7 @@ ui_elements <- list(
                 format = shinyWidgets::wNumbFormat(decimals = 0),
                 color = datamods:::get_primary_color()
               ),
-              shiny::helpText("Only include variables with missingness below the specified percentage."),
+              shiny::helpText("Only include variables missing less observations than the specified percentage."),
               shiny::br()
             ),
             shiny::column(
@@ -9601,22 +9750,24 @@ ui_elements <- list(
               shiny::br()
             )
           ),
-          shiny::uiOutput(outputId = "data_info_import", inline = TRUE)
+          shiny::uiOutput(outputId = "data_info_import", inline = TRUE),
+          shiny::br(),
+          shiny::br(),
+          shiny::actionButton(
+            inputId = "act_start",
+            label = "Start",
+            width = "100%",
+            icon = shiny::icon("play"),
+            disabled = TRUE
+          ),
+          shiny::helpText('After importing, hit "Start" or navigate to the desired tab.'),
+          shiny::br(),
+          shiny::br()
         ),
-        shiny::br(),
-        shiny::br(),
-        shiny::actionButton(
-          inputId = "act_start",
-          label = "Start",
-          width = "100%",
-          icon = shiny::icon("play"),
-          disabled = TRUE
-        ),
-        shiny::helpText('After importing, hit "Start" or navigate to the desired tab.'),
-        shiny::br(),
-        shiny::br(),
         shiny::column(width = 2)
-      )
+      ),
+      shiny::br(),
+      shiny::br()
     )
   ),
   ##############################################################################
@@ -9639,19 +9790,8 @@ ui_elements <- list(
               width = 9,
               shiny::uiOutput(outputId = "data_info", inline = TRUE),
               shiny::tags$p(
-                "Below is a short summary table, on the right you can click to browse data and create data filters."
+                "Below is a short summary table, on the right you can click to visualise data classes or browse data and create different data filters."
               )
-            )
-          ),
-          fluidRow(
-            shiny::column(
-              width = 9,
-              data_summary_ui(id = "data_summary"),
-              shiny::br(),
-              shiny::br(),
-              shiny::br(),
-              shiny::br(),
-              shiny::br()
             ),
             shiny::column(
               width = 3,
@@ -9670,10 +9810,41 @@ ui_elements <- list(
                 disabled = TRUE
               ),
               shiny::br(),
+              shiny::br()
+            )
+          ),
+          fluidRow(
+            shiny::column(
+              width = 9,
+              data_summary_ui(id = "data_summary"),
               shiny::br(),
+              shiny::br(),
+              shiny::br(),
+              shiny::br(),
+              shiny::br()
+            ),
+            shiny::column(
+              width = 3,
+              # shiny::actionButton(
+              #   inputId = "modal_missings",
+              #   label = "Visual overview",
+              #   width = "100%",
+              #   disabled = TRUE
+              # ),
+              # shiny::br(),
+              # shiny::br(),
+              # shiny::actionButton(
+              #   inputId = "modal_browse",
+              #   label = "Browse data",
+              #   width = "100%",
+              #   disabled = TRUE
+              # ),
+              # shiny::br(),
+              # shiny::br(),
               shiny::tags$h6("Filter data types"),
               shiny::uiOutput(
-                outputId = "column_filter"),
+                outputId = "column_filter"
+              ),
               shiny::helpText("Read more on how ", tags$a(
                 "data types",
                 href = "https://agdamsbo.github.io/FreesearchR/articles/data-types.html",
@@ -9682,7 +9853,7 @@ ui_elements <- list(
               ), " are defined."),
               shiny::br(),
               shiny::br(),
-              shiny::tags$h6("Create data filters"),
+              shiny::tags$h6("Filter observations"),
               shiny::tags$p("Filter on observation level"),
               IDEAFilter::IDEAFilter_ui("data_filter"),
               shiny::br(),
@@ -9850,6 +10021,13 @@ ui_elements <- list(
                 color = datamods:::get_primary_color()
               ),
               shiny::helpText("Set the cut-off for considered 'highly correlated'.")
+            ),
+            bslib::accordion_panel(
+              vlaue = "acc_mis",
+              title = "Missings",
+              icon = bsicons::bs_icon("x-circle"),
+              shiny::uiOutput("missings_var"),
+              shiny::helpText("To consider if daata is missing by random, choose the outcome/dependent variable, if it has any missings to evaluate if there is a significant difference across other variables depending on missing data or not.")
             )
           )
         ),
@@ -9860,6 +10038,10 @@ ui_elements <- list(
         bslib::nav_panel(
           title = "Correlations",
           data_correlations_ui(id = "correlations", height = 600)
+        ),
+        bslib::nav_panel(
+          title = "Missings",
+          data_missings_ui(id = "missingness")
         )
       )
     ),
@@ -10089,9 +10271,6 @@ ui <- bslib::page_fixed(
 #### Current file: /Users/au301842/FreesearchR/app/server.R 
 ########
 
-
-
-
 data(mtcars)
 
 # trial <- gtsummary::trial
@@ -10229,6 +10408,21 @@ server <- function(input, output, session) {
 
     rv$data_temp <- from_env$data()
     rv$code <- modifyList(x = rv$code, list(import = from_env$name()))
+  })
+
+  observeEvent(input$modal_initial_view, {
+    tryCatch(
+      {
+        modal_visual_missings(
+          data = default_parsing(rv$data_temp),
+          footer = NULL,
+          size = "xl"
+        )
+      },
+      error = function(err) {
+        showNotification(paste0("We encountered the following error showing missingness: ", err), type = "err")
+      }
+    )
   })
 
   output$import_var <- shiny::renderUI({
@@ -10550,8 +10744,11 @@ server <- function(input, output, session) {
   observeEvent(input$modal_missings, {
     tryCatch(
       {
-        modal_data_missings(data = REDCapCAST::fct_drop(rv$data_filtered),
-                            footer = "This pop-up gives you an overview of how your data is interpreted, and where data is missing. Use this information to consider if data is missing at random or if some observations are missing systematically wich may be caused by an observation bias.")
+        modal_visual_missings(
+          data = REDCapCAST::fct_drop(rv$data_filtered),
+          footer = "Here is an overview of how your data is interpreted, and where data is missing. Use this information to consider if data is missing at random or if some observations are missing systematically wich may be caused by an observation bias.",
+          size = "xl"
+        )
       },
       error = function(err) {
         showNotification(paste0("We encountered the following error showing missingness: ", err), type = "err")
@@ -10711,6 +10908,16 @@ server <- function(input, output, session) {
     }
   )
 
+  output$table1 <- gt::render_gt({
+    if (!is.null(rv$list$table1)) {
+      rv$list$table1 |>
+        gtsummary::as_gt() |>
+        gt::tab_header(gt::md("**Table 1: Baseline Characteristics**"))
+    } else {
+      return(NULL)
+    }
+  })
+
   output$outcome_var_cor <- shiny::renderUI({
     columnSelectInput(
       inputId = "outcome_var_cor",
@@ -10725,16 +10932,6 @@ server <- function(input, output, session) {
     )
   })
 
-  output$table1 <- gt::render_gt({
-    if (!is.null(rv$list$table1)) {
-      rv$list$table1 |>
-        gtsummary::as_gt() |>
-        gt::tab_header(gt::md("**Table 1: Baseline Characteristics**"))
-    } else {
-      return(NULL)
-    }
-  })
-
   data_correlations_server(
     id = "correlations",
     data = shiny::reactive({
@@ -10747,6 +10944,24 @@ server <- function(input, output, session) {
     }),
     cutoff = shiny::reactive(input$cor_cutoff)
   )
+
+  output$missings_var <- shiny::renderUI({
+    columnSelectInput(
+      inputId = "missings_var",
+      label = "Select variable to stratify analysis",
+      data = shiny::reactive({
+        shiny::req(rv$data_filtered)
+        rv$data_filtered[apply(rv$data_filtered,2,anyNA)]
+      })()
+    )
+  })
+
+  data_missings_server(
+    id = "missingness",
+    data = shiny::reactive(rv$data_filtered),
+    variable = shiny::reactive(input$missings_var)
+  )
+
 
   ##############################################################################
   #########
@@ -10843,8 +11058,8 @@ server <- function(input, output, session) {
             rv$list |>
               write_rmd(
                 params.args = list(
-                  regression.p=rv$list$regression$input$add_regression_p
-                  ),
+                  regression.p = rv$list$regression$input$add_regression_p
+                ),
                 output_format = format,
                 input = file.path(getwd(), "www/report.rmd")
               )

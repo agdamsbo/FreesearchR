@@ -1,6 +1,10 @@
 # FreesearchR 25.6.3
 
-- *NEW* First go at introducing more options to evaluate missings. Also reworded the text on the initial filter to only include variables missings less than the given threshold.
+- *NEW* First go at introducing more options to evaluate missings. This has introduced a new dependency to use the visdat package and visualisation. The solution includes the option to visualise data classes and missingness as well as comparisons of variables by missing outcome variable or not to determine the nature of missingness.
+
+- *FIX* The REDCap import module has been updated visually and the PAI token is now hidden as a password. This module should still only be used when running locally if you are accessing sensitive data.
+
+- minor rewordings and updated UI.
 
 # FreesearchR 25.6.2
 
