@@ -8,7 +8,7 @@
 \usage{
 data_missings_ui(id)
 
-data_missings_server(id, data, ...)
+data_missings_server(id, data, variable, ...)
 }
 \arguments{
 \item{id}{Module id}
