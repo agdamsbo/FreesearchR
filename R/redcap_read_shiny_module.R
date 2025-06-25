@@ -18,18 +18,25 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
   }
 
   server_ui <- shiny::tagList(
-    # width = 6,
     shiny::tags$h4("REDCap server"),
     shiny::textInput(
       inputId = ns("uri"),
       label = "Web address",
-      value = if_not_missing(url, "https://redcap.your.institution/")
+      value = if_not_missing(url, "https://redcap.your.institution/"),
+      width = "100%"
     ),
     shiny::helpText("Format should be either 'https://redcap.your.institution/' or 'https://your.institution/redcap/'"),
-    shiny::textInput(
+    # shiny::textInput(
+    #   inputId = ns("api"),
+    #   label = "API token",
+    #   value = "",
+    #   width = "100%"
+    # ),
+    shiny::passwordInput(
       inputId = ns("api"),
       label = "API token",
-      value = ""
+      value = "",
+      width = "100%"
     ),
     shiny::helpText("The token is a string of 32 numbers and letters."),
     shiny::br(),
@@ -67,31 +74,34 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
 
   params_ui <-
     shiny::tagList(
-      # width = 6,
       shiny::tags$h4("Data import parameters"),
-      shiny::helpText("Options here will show, when API and uri are typed"),
-      shiny::tags$br(),
-      shiny::uiOutput(outputId = ns("fields")),
       shiny::tags$div(
-        class = "shiny-input-container",
-        shiny::tags$label(
-          class = "control-label",
-          `for` = ns("dropdown_params"),
-          "...",
-          style = htmltools::css(visibility = "hidden")
+        style = htmltools::css(
+          display = "grid",
+          gridTemplateColumns = "1fr 50px",
+          gridColumnGap = "10px"
         ),
-        shinyWidgets::dropMenu(
-          shiny::actionButton(
-            inputId = ns("dropdown_params"),
-            label = "Add data filters",
-            icon = shiny::icon("filter"),
-            width = "100%",
-            class = "px-1"
+        shiny::uiOutput(outputId = ns("fields")),
+        shiny::tags$div(
+          class = "shiny-input-container",
+          shiny::tags$label(
+            class = "control-label",
+            `for` = ns("dropdown_params"),
+            "...",
+            style = htmltools::css(visibility = "hidden")
           ),
-          filter_ui
-        ),
-        shiny::helpText("Optionally filter project arms if logitudinal or apply server side data filters")
+          shinyWidgets::dropMenu(
+            shiny::actionButton(
+              inputId = ns("dropdown_params"),
+              label = shiny::icon("filter"),
+              width = "50px"
+            ),
+            filter_ui
+          )
+        )
       ),
+      shiny::helpText("Select fields/variables to import and click the funnel to apply optional filters"),
+      shiny::tags$br(),
       shiny::tags$br(),
       shiny::uiOutput(outputId = ns("data_type")),
       shiny::uiOutput(outputId = ns("fill")),
@@ -112,28 +122,14 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
           tags$p(phosphoricons::ph("info", weight = "bold"), "Please specify data to download, then press 'Import'.")
         ),
         dismissible = TRUE
-      ) # ,
-      ## TODO: Use busy indicator like on download to have button activate/deactivate
-      # bslib::input_task_button(
-      #   id = ns("data_import"),
-      #   label = "Import",
-      #   icon = shiny::icon("download", lib = "glyphicon"),
-      #   label_busy = "Just a minute...",
-      #   icon_busy = fontawesome::fa_i("arrows-rotate",
-      #     class = "fa-spin",
-      #     "aria-hidden" = "true"
-      #   ),
-      #   type = "primary",
-      #   auto_reset = TRUE#,state="busy"
-      # ),
-      # shiny::br(),
-      # shiny::helpText("Press 'Import' to get data from the REDCap server. Check the preview below before proceeding.")
+      )
     )
 
 
   shiny::fluidPage(
     title = title,
     server_ui,
+    # shiny::uiOutput(ns("params_ui")),
     shiny::conditionalPanel(
       condition = "output.connect_success == true",
       params_ui,
@@ -257,6 +253,7 @@ m_redcap_readServer <- function(id) {
     output$connect_success <- shiny::reactive(identical(data_rv$dd_status, "success"))
     shiny::outputOptions(output, "connect_success", suspendWhenHidden = FALSE)
 
+
     shiny::observeEvent(input$see_dd, {
       show_data(
         purrr::pluck(data_rv$dd_list, "data"),
@@ -292,7 +289,7 @@ m_redcap_readServer <- function(id) {
       shiny::req(data_rv$dd_list)
       shinyWidgets::virtualSelectInput(
         inputId = ns("fields"),
-        label = "Select variables to import:",
+        label = "Select fields/variables to import:",
         choices = purrr::pluck(data_rv$dd_list, "data") |>
           dplyr::select(field_name, form_name) |>
           (\(.x){
@@ -301,7 +298,8 @@ m_redcap_readServer <- function(id) {
         updateOn = "change",
         multiple = TRUE,
         search = TRUE,
-        showValueAsTags = TRUE
+        showValueAsTags = TRUE,
+        width = "100%"
       )
     })
 
@@ -310,13 +308,14 @@ m_redcap_readServer <- function(id) {
       if (isTRUE(data_rv$info$has_repeating_instruments_or_events)) {
         vectorSelectInput(
           inputId = ns("data_type"),
-          label = "Select the data format to import",
+          label = "Specify the data format",
           choices = c(
             "Wide data (One row for each subject)" = "wide",
             "Long data for project with repeating instruments (default REDCap)" = "long"
           ),
           selected = "wide",
-          multiple = FALSE
+          multiple = FALSE,
+          width = "100%"
         )
       }
     })
@@ -342,7 +341,8 @@ m_redcap_readServer <- function(id) {
             "No, leave the data as is" = "no"
           ),
           selected = "no",
-          multiple = FALSE
+          multiple = FALSE,
+          width = "100%"
         )
       }
     })
@@ -362,7 +362,8 @@ m_redcap_readServer <- function(id) {
           selected = NULL,
           label = "Filter by events/arms",
           choices = stats::setNames(arms()[[3]], arms()[[1]]),
-          multiple = TRUE
+          multiple = TRUE,
+          width = "100%"
         )
       }
     })
