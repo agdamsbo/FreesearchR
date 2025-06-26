@@ -46,7 +46,7 @@ FreesearchR_colors <- function(choose = NULL) {
     secondary = "#FF6F61",
     success = "#00C896",
     warning = "#FFB100",
-    danger = "#FF3A2F",
+    danger = "#CC2E25",
     extra = "#8A4FFF",
     info = "#11A0EC",
     bg = "#FFFFFF",
@@ -60,7 +60,18 @@ FreesearchR_colors <- function(choose = NULL) {
   }
 }
 
-
+#' Use the FreesearchR colors
+#'
+#' @param n number of colors
+#'
+#' @returns character vector
+#' @export
+#'
+#' @examples
+#' FreesearchR_palette(n=7)
+FreesearchR_palette <- function(n){
+  rep_len(FreesearchR_colors(),n)
+}
 
 
 
