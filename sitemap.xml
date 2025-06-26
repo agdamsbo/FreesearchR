@@ -13,6 +13,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/authors.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/index.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/news/index.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/FreesearchR_palette.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/add_class_icon.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/add_sparkline.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/align_axes.html</loc></url>
@@ -40,6 +41,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/data-plots.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/data-summary.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/data_description.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/data_summary_gather.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/data_type.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/data_type_filter.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/data_types.html</loc></url>
@@ -108,11 +110,13 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/symmetrical_scale_x_log10.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/tbl_merge.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/type_icons.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/unique_short.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/update-factor.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/update-variables.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/update_variables_datagrid.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/vectorSelectInput.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/vertical_stacked_bars.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/visual_summary.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/wide2long.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/wrap_plot_list.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/write_quarto.html</loc></url>
