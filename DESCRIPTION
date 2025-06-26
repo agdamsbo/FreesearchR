@@ -79,7 +79,8 @@ Suggests:
     testthat (>= 3.0.0),
     shinytest,
     covr,
-    cffr
+    cffr,
+    shiny2docker
 URL: https://github.com/agdamsbo/FreesearchR, https://agdamsbo.github.io/FreesearchR/, https://app.FreesearchR.org/
 BugReports: https://github.com/agdamsbo/FreesearchR/issues
 VignetteBuilder: knitr

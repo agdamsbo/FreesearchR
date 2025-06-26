@@ -11,11 +11,11 @@
 |collate     |en_US.UTF-8                                |
 |ctype       |en_US.UTF-8                                |
 |tz          |Europe/Copenhagen                          |
-|date        |2025-06-25                                 |
+|date        |2025-06-26                                 |
 |rstudio     |2025.05.0+496 Mariposa Orchid (desktop)    |
 |pandoc      |3.6.4 @ /opt/homebrew/bin/ (via rmarkdown) |
 |quarto      |1.7.30 @ /usr/local/bin/quarto             |
-|FreesearchR |25.6.3.250625                              |
+|FreesearchR |25.6.3.250626                              |
                                                                                 
                                                                                 
 --------------------------------------------------------------------------------
@@ -107,7 +107,6 @@
 |htmltools         |0.5.8.1       |2024-04-04 |CRAN (R 4.4.1) |
 |htmlwidgets       |1.6.4         |2023-12-06 |CRAN (R 4.4.0) |
 |httpuv            |1.6.16        |2025-04-16 |CRAN (R 4.4.1) |
-|httr              |1.4.7         |2023-08-15 |CRAN (R 4.4.0) |
 |IDEAFilter        |0.2.0         |2024-04-15 |CRAN (R 4.4.0) |
 |insight           |1.2.0         |2025-04-22 |CRAN (R 4.4.1) |
 |iterators         |1.0.14        |2022-02-05 |CRAN (R 4.4.1) |
@@ -140,7 +139,6 @@
 |opdisDownsampling |1.0.1         |2024-04-15 |CRAN (R 4.4.0) |
 |openssl           |2.3.2         |2025-02-03 |CRAN (R 4.4.1) |
 |openxlsx2         |1.15          |2025-04-25 |CRAN (R 4.4.1) |
-|pak               |0.8.0.2       |2025-04-08 |CRAN (R 4.4.1) |
 |parameters        |0.24.2        |2025-03-04 |CRAN (R 4.4.1) |
 |patchwork         |1.3.0         |2024-09-16 |CRAN (R 4.4.1) |
 |pbmcapply         |1.5.1         |2022-04-28 |CRAN (R 4.4.1) |
@@ -201,7 +199,6 @@
 |sessioninfo       |1.2.3         |2025-02-05 |CRAN (R 4.4.1) |
 |shiny             |1.10.0        |2024-12-14 |CRAN (R 4.4.1) |
 |shinybusy         |0.3.3         |2024-03-09 |CRAN (R 4.4.0) |
-|shinydashboard    |0.7.3         |NA         |NA             |
 |shinyjs           |2.1.0         |2021-12-23 |CRAN (R 4.4.0) |
 |shinyTime         |1.0.3         |2022-08-19 |CRAN (R 4.4.0) |
 |shinyWidgets      |0.9.0         |2025-02-21 |CRAN (R 4.4.1) |
@@ -225,7 +222,8 @@
 |uuid              |1.2-1         |2024-07-29 |CRAN (R 4.4.1) |
 |V8                |6.0.3         |2025-03-26 |CRAN (R 4.4.1) |
 |vctrs             |0.6.5         |2023-12-01 |CRAN (R 4.4.0) |
-|visdat            |0.6.0         |2023-02-02 |CRAN (R 4.4.0) |
+|viridisLite       |0.4.2         |2023-05-02 |CRAN (R 4.4.1) |
+|visdat            |0.6.0         |NA         |NA             |
 |vroom             |1.6.5         |2023-12-05 |CRAN (R 4.4.0) |
 |withr             |3.0.2         |2024-10-28 |CRAN (R 4.4.1) |
 |writexl           |1.5.4         |2025-04-15 |CRAN (R 4.4.1) |

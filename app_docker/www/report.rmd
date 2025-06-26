@@ -1,0 +1,83 @@
+---
+title: "FreesearchR data report"
+date: "Report generated `r gsub('(\\D)0', '\\1', format(Sys.time(), '%A, %d.%m.%Y'))`"
+format: docx
+author: FreesearchR data analysis tool
+toc: false
+params:
+  data.file: NA
+  version: NA
+  regression.p: NA
+---
+
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+# glue::glue("{format(lubridate::today(),'%A')}, {lubridate::day(lubridate::today())}.{lubridate::month(lubridate::today())}.{lubridate::year(lubridate::today())}")
+```
+
+```{r}
+web_data <- readr::read_rds(file = params$data.file)
+# web_data <- readr::read_rds(file = "~/FreesearchR/inst/apps/FreesearchR/www/web_data.rds")
+library(gtsummary)
+library(gt)
+
+tbl_merge <- function(data) {
+  if (is.null(names(data))) {
+    data |> gtsummary::tbl_merge()
+  } else {
+    data |> gtsummary::tbl_merge(tab_spanner = names(data))
+  }
+}
+
+vec2sentence <- function(data, sep.word = "and") {
+  sep.word <- paste0(" ", gsub(" ", "", sep.word), " ")
+  if (length(data) < 2) {
+    out <- data
+  } else if (length(data) == 2) {
+    out <- paste(data, collapse = sep.word)
+  } else {
+    out <- paste(paste(data[-length(data)], collapse = ","), data[length(data)], sep = sep.word)
+  }
+  return(out)
+}
+```
+
+## Introduction
+
+Research should be free and open with easy access for all. The *FreesearchR* tool attempts to help lower the bar to participate in research by making basic data exploration and analyses easily accessible.
+
+## Methods
+
+Analyses were conducted using the *FreesearchR* data analysis web-tool version `r params$version` based on *R* version 4.4.1.
+
+## Results
+
+Below are the baseline characteristics.
+
+```{r, results = 'asis'}
+if ("table1" %in% names(web_data)) {
+  tbl <- gtsummary::as_gt(web_data$table1)
+  knitr::knit_print(tbl)
+}
+```
+
+`r if (length(web_data$regression) > 0) glue::glue("Below are the results from the { tolower(vec2sentence(names(web_data$regression$regression$tables)))} {web_data$regression$regression$params$descr}.")`
+
+```{r, results = 'asis'}
+if ("regression" %in% names(web_data) && length(web_data$regression) > 0) {
+  reg_tbl <- web_data$regression$regression$tables
+  
+  merged <- tbl_merge(reg_tbl)
+  
+  if (params$regression.p == "no") {
+            merged <- merged |>
+              gtsummary::modify_column_hide(column = dplyr::starts_with("p.value"))
+          }
+  
+  knitr::knit_print(merged)
+}
+```
+
+## Discussion
+
+Good luck on your further work!
