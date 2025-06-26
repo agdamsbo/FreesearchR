@@ -1,9 +1,9 @@
 FROM rocker/geospatial:4.4.1
-RUN apt-get update -y && apt-get install -y  make pandoc zlib1g-dev libicu-dev libcurl4-openssl-dev libsecret-1-dev libxml2-dev libssl-dev libx11-dev libfontconfig1-dev libfreetype6-dev git libsodium-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y && apt-get install -y  cmake make libcurl4-openssl-dev libicu-dev libssl-dev pandoc zlib1g-dev libsecret-1-dev libxml2-dev libx11-dev libcairo2-dev libfontconfig1-dev libfreetype6-dev libfribidi-dev libharfbuzz-dev libjpeg-dev libpng-dev libtiff-dev libfftw3-dev libsodium-dev && rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /usr/local/lib/R/etc/ /usr/lib/R/etc/
 RUN echo "options(renv.config.pak.enabled = FALSE, repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl', Ncpus = 4)" | tee /usr/local/lib/R/etc/Rprofile.site | tee /usr/lib/R/etc/Rprofile.site
 RUN R -e 'install.packages("remotes")'
-RUN R -e 'remotes::install_version("renv", version = "1.0.3")'
+RUN R -e 'remotes::install_version("renv", version = "1.1.4")'
 COPY renv.lock renv.lock
 RUN --mount=type=cache,id=renv-cache,target=/root/.cache/R/renv R -e 'renv::restore()'
 WORKDIR /srv/shiny-server/

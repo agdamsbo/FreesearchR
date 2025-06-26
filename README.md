@@ -27,7 +27,13 @@ This app has the following simple goals:
 
 ## Run locally on your own machine
 
-The ***FreesearchR*** app can also run on your own machine with no data transmitted anywhere. Any data.frame available in the global environment will be accessible from the interface. Just follow the below steps:
+The ***FreesearchR*** app can also run on your own machine with no data transmitted anywhere. Blow are the available options.
+
+### Run from R (or RStduio)
+
+Working with data in R, FreesearchR is a quick and easy tool to get overview and perform the first explorative analyses to get you going.
+
+Any data available in the your R session will be available to the FreesearchR app. Just follow the below steps to get going:
 
 1.   **Requirement:** You need to have [*R* installed](https://www.r-project.org/) and possibly an editor like [RStudio](https://posit.co/download/rstudio-desktop/). 
 
@@ -42,6 +48,21 @@ The ***FreesearchR*** app can also run on your own machine with no data transmit
      data(mtcars) 
      launch_FreesearchR()
      ```
+
+### Running with docker compose
+
+For advanced users, wanting to deploy the FreesearchR app to run anywhere, a docker image is available.
+
+Below is the minimal `docker_compose.yml` file:
+
+```
+services:
+  freesearchr: 
+    image: ghcr.io/agdamsbo/freesearchr:latest 
+    ports: 
+      - '3838:3838'
+    restart: on-failure
+```
 
 ## Code of Conduct
 

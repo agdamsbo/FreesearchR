@@ -1260,6 +1260,19 @@ references:
   year: '2025'
   doi: 10.32614/CRAN.package.cffr
 - type: software
+  title: shiny2docker
+  abstract: 'shiny2docker: Generate Dockerfiles for ''Shiny'' Applications'
+  notes: Suggests
+  url: https://github.com/VincentGuyader/shiny2docker
+  repository: https://CRAN.R-project.org/package=shiny2docker
+  authors:
+  - family-names: Guyader
+    given-names: Vincent
+    email: vincent@thinkr.fr
+    orcid: https://orcid.org/0000-0003-0671-9270
+  year: '2025'
+  doi: 10.32614/CRAN.package.shiny2docker
+- type: software
   title: 'R: A Language and Environment for Statistical Computing'
   notes: Depends
   url: https://www.R-project.org/

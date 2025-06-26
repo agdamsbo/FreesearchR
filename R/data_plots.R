@@ -340,7 +340,7 @@ data_visuals_server <- function(id,
                   rv$plot <- rlang::exec(create_plot, !!!append_list(data(), parameters, "data"))
                 })
 
-                rv$code <- glue::glue("FreesearchR::create_plot(data,{list2str(parameters)})")
+                rv$code <- glue::glue("FreesearchR::create_plot(df,{list2str(parameters)})")
               },
               # warning = function(warn) {
               #   showNotification(paste0(warn), type = "warning")
