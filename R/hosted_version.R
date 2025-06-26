@@ -1,1 +1,1 @@
-hosted_version <- function()'v25.6.3-250625'
+hosted_version <- function()'v25.6.3-250626'

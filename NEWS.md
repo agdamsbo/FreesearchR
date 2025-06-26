@@ -1,6 +1,6 @@
 # FreesearchR 25.6.3
 
-- *NEW* First go at introducing more options to evaluate missings. This has introduced a new dependency to use the visdat package and visualisation. The solution includes the option to visualise data classes and missingness as well as comparisons of variables by missing outcome variable or not to determine the nature of missingness.
+- *NEW* Introducing more options to evaluate missing observations. Inspired by the [visdat()] function from the {visdat} package, a specialised function has been introduced to easily visualise data classes and missing observations in the data set. This highly increases the options to visually get an overview of the data and to assess the pattern of missing data. Also under Evaluate, a comparison module has been introduced to compare the distribution of observations across variables depending on the missing vs non-missing in a specified variable.
 
 - *FIX* The REDCap import module has been updated visually and the PAI token is now hidden as a password. This module should still only be used when running locally if you are accessing sensitive data.
 

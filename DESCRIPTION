@@ -64,8 +64,7 @@ Imports:
     RcppArmadillo,
     ggcorrplot,
     shinyjs,
-    emmeans,
-    visdat
+    emmeans
 Suggests: 
     styler,
     devtools,
