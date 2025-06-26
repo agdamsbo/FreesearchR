@@ -34,7 +34,8 @@ data_missings_server <- function(id,
       variabler <- if (is.reactive(variable)) variable else reactive(variable)
 
       rv <- shiny::reactiveValues(
-        data = NULL
+        data = NULL,
+        table = NULL
       )
 
       rv$data <- shiny::reactive({
@@ -65,15 +66,25 @@ data_missings_server <- function(id,
         shiny::req(variabler)
 
         if (is.null(variabler()) || variabler() == "" || !variabler() %in% names(datar())) {
+          if (anyNA(datar())){
+            title <- "No variable chosen for analysis"
+          } else {
           title <- "No missing observations"
+          }
         } else {
-          title <- paste("Missing vs non-missing observations in", variabler())
+          title <- glue::glue("Missing vs non-missing observations in the variable **'{variabler()}'**")
         }
 
-        rv$data() |>
+        out <- rv$data() |>
           gtsummary::as_gt() |>
           gt::tab_header(title = gt::md(title))
+
+        rv$table <- out
+
+        out
       })
+
+      return(reactive(rv$table))
     }
   )
 }
@@ -100,10 +111,12 @@ missing_demo_app <- function() {
 
     data_missings_server(id = "data", data = data_demo, variable = shiny::reactive(input$missings_var))
 
+    visual_summary_server(id = "visual", data = data_demo)
+
     observeEvent(input$modal_missings, {
       tryCatch(
         {
-          modal_visual_missings(data = data_demo, id = "modal_missings")
+          modal_visual_summary(id = "visual")
         },
         error = function(err) {
           showNotification(paste0("We encountered the following error browsing your data: ", err), type = "err")
@@ -117,137 +130,9 @@ missing_demo_app <- function() {
 missing_demo_app()
 
 
-modal_visual_missings <- function(data,
-                                  title = "Visual overview of data classes and missing observations",
-                                  easyClose = TRUE,
-                                  size = "xl",
-                                  footer = NULL,
-                                  ...) {
-  datar <- if (is.reactive(data)) data else reactive(data)
-
-  showModal(modalDialog(
-    title = tagList(title, datamods:::button_close_modal()),
-    tags$div(
-      # apexcharter::renderApexchart({
-      #   missings_apex_plot(datar(), ...)
-      # })
-      shiny::renderPlot({
-        visdat::vis_dat(datar(),sort_type = FALSE) +
-          ggplot2::guides(fill = ggplot2::guide_legend(title = "Data class")) +
-          # ggplot2::theme_void() +
-          ggplot2::theme(
-            # legend.position = "none",
-            panel.grid.major = ggplot2::element_blank(),
-            panel.grid.minor = ggplot2::element_blank(),
-            # axis.text.y = element_blank(),
-            # axis.title.y = element_blank(),
-            text = ggplot2::element_text(size = 18),
-            # axis.text = ggplot2::element_blank(),
-            # panel.background = ggplot2::element_rect(fill = "white"),
-            # plot.background = ggplot2::element_rect(fill = "white"),
-            # panel.border = ggplot2::element_blank()
-            plot.title = ggplot2::element_blank()
-          )
-      })
-    ),
-    easyClose = easyClose,
-    size = size,
-    footer = footer
-  ))
-}
 
 
-## Slow with many observations...
-
-#' Plot missings and class with apexcharter
-#'
-#' @param data data frame
-#'
-#' @returns An [apexchart()] `htmlwidget` object.
-#' @export
-#'
-#' @examples
-#' data_demo <- mtcars
-#' data_demo[2:4, "cyl"] <- NA
-#' rbind(data_demo, data_demo, data_demo, data_demo) |> missings_apex_plot()
-#' data_demo |> missings_apex_plot()
-#' mtcars |> missings_apex_plot(animation = TRUE)
-#' # dplyr::storms |> missings_apex_plot()
-#' visdat::vis_dat(dplyr::storms)
-missings_apex_plot <- function(data, animation = FALSE, ...) {
-  browser()
-
-  df_plot <- purrr::map_df(data, \(x){
-    ifelse(is.na(x),
-      yes = NA,
-      no = glue::glue_collapse(class(x),
-        sep = "\n"
-      )
-    )
-  }) %>%
-    dplyr::mutate(rows = dplyr::row_number()) %>%
-    tidyr::pivot_longer(
-      cols = -rows,
-      names_to = "variable", values_to = "valueType", values_transform = list(valueType = as.character)
-    ) %>%
-    dplyr::arrange(rows, variable, valueType)
 
 
-  df_plot$valueType_num <- df_plot$valueType |>
-    forcats::as_factor() |>
-    as.numeric()
 
 
-  df_plot$valueType[is.na(df_plot$valueType)] <- "NA"
-  df_plot$valueType_num[is.na(df_plot$valueType_num)] <- max(df_plot$valueType_num, na.rm = TRUE) + 1
-
-  labels <- setNames(unique(df_plot$valueType_num), unique(df_plot$valueType))
-
-  if (any(df_plot$valueType == "NA")) {
-    colors <- setNames(c(viridisLite::viridis(n = length(labels) - 1), "#999999"), names(labels))
-  } else {
-    colors <- setNames(viridisLite::viridis(n = length(labels)), names(labels))
-  }
-
-
-  label_list <- labels |>
-    purrr::imap(\(.x, .i){
-      list(
-        from = .x,
-        to = .x,
-        color = colors[[.i]],
-        name = .i
-      )
-    }) |>
-    setNames(NULL)
-
-  out <- apexcharter::apex(
-    data = df_plot,
-    type = "heatmap",
-    mapping = apexcharter::aes(x = variable, y = rows, fill = valueType_num),
-    ...
-  ) %>%
-    apexcharter::ax_stroke(width = NULL) |>
-    apexcharter::ax_plotOptions(
-      heatmap = apexcharter::heatmap_opts(
-        radius = 0,
-        enableShades = FALSE,
-        colorScale = list(
-          ranges = label_list
-        ),
-        useFillColorAsStroke = TRUE
-      )
-    ) %>%
-    apexcharter::ax_dataLabels(enabled = FALSE) |>
-    apexcharter::ax_tooltip(
-      enabled = FALSE,
-      intersect = FALSE
-    )
-
-  if (!isTRUE(animation)) {
-    out <- out |>
-      apexcharter::ax_chart(animations = list(enabled = FALSE))
-  }
-
-  out
-}
