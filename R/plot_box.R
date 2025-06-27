@@ -1,16 +1,26 @@
 #' Beautiful box plot(s)
 #'
+#' @param data data frame
+#' @param pri primary variable
+#' @param sec secondary variable
+#' @param ter tertiary variable
+#' @param ... passed on to wrap_plot_list
+#'
 #' @returns ggplot2 object
 #' @export
 #'
 #' @name data-plots
 #'
 #' @examples
-#' mtcars |> plot_box(pri = "mpg", sec = "cyl", ter = "gear")
+#' mtcars |> plot_box(pri = "mpg", sec = "gear")
+#' mtcars |> plot_box(pri = "mpg", sec="cyl")
 #' mtcars |>
 #'   default_parsing() |>
 #'   plot_box(pri = "mpg", sec = "cyl", ter = "gear")
-plot_box <- function(data, pri, sec, ter = NULL) {
+#' mtcars |>
+#'   default_parsing() |>
+#'   plot_box(pri = "mpg", sec = "cyl", ter = "gear",axis.font.family="mono")
+plot_box <- function(data, pri, sec, ter = NULL,...) {
   if (!is.null(ter)) {
     ds <- split(data, data[ter])
   } else {
@@ -25,7 +35,7 @@ plot_box <- function(data, pri, sec, ter = NULL) {
     )
   })
 
-  wrap_plot_list(out)
+  wrap_plot_list(out,title=glue::glue("Grouped by {get_label(data,ter)}"),...)
 }
 
 
@@ -41,6 +51,7 @@ plot_box <- function(data, pri, sec, ter = NULL) {
 #' @examples
 #' mtcars |> plot_box_single("mpg")
 #' mtcars |> plot_box_single("mpg","cyl")
+#' gtsummary::trial |> plot_box_single("age","trt")
 plot_box_single <- function(data, pri, sec=NULL, seed = 2103) {
   set.seed(seed)
 
@@ -56,6 +67,8 @@ plot_box_single <- function(data, pri, sec=NULL, seed = 2103) {
     ggplot2::geom_boxplot(linewidth = 1.8, outliers = FALSE) +
     ## THis could be optional in future
     ggplot2::geom_jitter(color = "black", size = 2, alpha = 0.9, width = 0.1, height = .2) +
+    ggplot2::xlab(get_label(data,pri))+
+    ggplot2::ylab(get_label(data,sec)) +
     ggplot2::coord_flip() +
     viridis::scale_fill_viridis(discrete = discrete, option = "D") +
     # ggplot2::theme_void() +
