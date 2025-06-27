@@ -22,7 +22,7 @@ data_visuals_server(id, data, ...)
 
 create_plot(data, type, pri, sec, ter = NULL, ...)
 
-plot_box(data, pri, sec, ter = NULL)
+plot_box(data, pri, sec, ter = NULL, ...)
 
 plot_box_single(data, pri, sec = NULL, seed = 2103)
 
@@ -41,9 +41,9 @@ plot_violin(data, pri, sec, ter = NULL)
 \arguments{
 \item{id}{Module id. (Use 'ns("id")')}
 
-\item{...}{ignored for now}
+\item{...}{passed on to wrap_plot_list}
 
-\item{data}{data.frame}
+\item{data}{data frame}
 
 \item{type}{plot type (derived from possible_plots() and matches custom function)}
 
@@ -99,12 +99,17 @@ Beatiful violin plot
 }
 \examples{
 create_plot(mtcars, "plot_violin", "mpg", "cyl") |> attributes()
-mtcars |> plot_box(pri = "mpg", sec = "cyl", ter = "gear")
+mtcars |> plot_box(pri = "mpg", sec = "gear")
+mtcars |> plot_box(pri = "mpg", sec="cyl")
 mtcars |>
   default_parsing() |>
   plot_box(pri = "mpg", sec = "cyl", ter = "gear")
+mtcars |>
+  default_parsing() |>
+  plot_box(pri = "mpg", sec = "cyl", ter = "gear",axis.font.family="mono")
 mtcars |> plot_box_single("mpg")
 mtcars |> plot_box_single("mpg","cyl")
+gtsummary::trial |> plot_box_single("age","trt")
 mtcars |> plot_hbars(pri = "carb", sec = "cyl")
 mtcars |> plot_hbars(pri = "carb", sec = NULL)
 mtcars |>

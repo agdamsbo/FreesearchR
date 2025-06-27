@@ -1,3 +1,9 @@
+# FreesearchR 25.6.4
+
+The app is now also published as a docker container. See the README for instructions. It is mainly to use for hosting the app. Work is ongoing to publish a true standalone app, preferably for both Windows and MacOS.
+
+- *FIX* improved plot labels.
+
 # FreesearchR 25.6.3
 
 - *NEW* Introducing more options to evaluate missing observations. Inspired by the [visdat()] function from the {visdat} package, a specialised function has been introduced to easily visualise data classes and missing observations in the data set. This highly increases the options to visually get an overview of the data and to assess the pattern of missing data. Also under Evaluate, a comparison module has been introduced to compare the distribution of observations across variables depending on the missing vs non-missing in a specified variable.

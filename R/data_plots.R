@@ -337,7 +337,14 @@ data_visuals_server <- function(id,
                 )
 
                 shiny::withProgress(message = "Drawing the plot. Hold tight for a moment..", {
-                  rv$plot <- rlang::exec(create_plot, !!!append_list(data(), parameters, "data"))
+                  rv$plot <- rlang::exec(
+                    create_plot,
+                    !!!append_list(
+                      data(),
+                      parameters,
+                      "data"
+                    )
+                  )
                 })
 
                 rv$code <- glue::glue("FreesearchR::create_plot(df,{list2str(parameters)})")
@@ -393,13 +400,12 @@ data_visuals_server <- function(id,
           paste0("plot.", input$plot_type)
         }),
         content = function(file) {
-          if (inherits(rv$plot,"patchwork")){
+          if (inherits(rv$plot, "patchwork")) {
             plot <- rv$plot
-          } else if (inherits(rv$plot,"ggplot")){
+          } else if (inherits(rv$plot, "ggplot")) {
             plot <- rv$plot
-          }else {
+          } else {
             plot <- rv$plot[[1]]
-
           }
           # browser()
           shiny::withProgress(message = "Drawing the plot. Hold on for a moment..", {
@@ -659,12 +665,12 @@ create_plot <- function(data, type, pri, sec, ter = NULL, ...) {
 
   out <- do.call(
     type,
-    modifyList(parameters,list(data=data))
+    modifyList(parameters, list(data = data))
   )
 
-  code <- rlang::call2(type,!!!parameters,.ns = "FreesearchR")
+  code <- rlang::call2(type, !!!parameters, .ns = "FreesearchR")
 
-  attr(out,"code") <- code
+  attr(out, "code") <- code
   out
 }
 
@@ -731,11 +737,17 @@ line_break <- function(data, lineLength = 20, force = FALSE) {
 #'
 #' @param data list of ggplot2 objects
 #' @param tag_levels passed to patchwork::plot_annotation if given. Default is NULL
+#' @param title panel title
+#' @param ... ignored for argument overflow
 #'
 #' @returns list of ggplot2 objects
 #' @export
 #'
-wrap_plot_list <- function(data, tag_levels = NULL) {
+wrap_plot_list <- function(data,
+                           tag_levels = NULL,
+                           title = NULL,
+                           axis.font.family=NULL,
+                           ...) {
   if (ggplot2::is_ggplot(data[[1]])) {
     if (length(data) > 1) {
       out <- data |>
@@ -749,17 +761,35 @@ wrap_plot_list <- function(data, tag_levels = NULL) {
           }
         })() |>
         align_axes() |>
-        patchwork::wrap_plots(guides = "collect", axes = "collect", axis_titles = "collect")
+        patchwork::wrap_plots(
+          guides = "collect",
+          axes = "collect",
+          axis_titles = "collect"
+        )
       if (!is.null(tag_levels)) {
         out <- out + patchwork::plot_annotation(tag_levels = tag_levels)
       }
+      if (!is.null(title)) {
+        out <- out +
+          patchwork::plot_annotation(
+            title = title,
+            theme = ggplot2::theme(plot.title = ggplot2::element_text(size = 25))
+          )
+      }
     } else {
-      out <- data
+      out <- data[[1]]
     }
   } else {
     cli::cli_abort("Can only wrap lists of {.cls ggplot} objects")
   }
-  out
+
+  if (inherits(x = out, what = "patchwork")) {
+    out &
+      ggplot2::theme(axis.text = ggplot2::element_text(family = axis.font.family))
+  } else {
+    out +
+      ggplot2::theme(axis.text = ggplot2::element_text(family = axis.font.family))
+  }
 }
 
 

@@ -49,7 +49,7 @@ library(rlang)
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.6.3'
+app_version <- function()'25.6.4'
 
 
 ########
@@ -1937,7 +1937,14 @@ data_visuals_server <- function(id,
                 )
 
                 shiny::withProgress(message = "Drawing the plot. Hold tight for a moment..", {
-                  rv$plot <- rlang::exec(create_plot, !!!append_list(data(), parameters, "data"))
+                  rv$plot <- rlang::exec(
+                    create_plot,
+                    !!!append_list(
+                      data(),
+                      parameters,
+                      "data"
+                    )
+                  )
                 })
 
                 rv$code <- glue::glue("FreesearchR::create_plot(df,{list2str(parameters)})")
@@ -1993,13 +2000,12 @@ data_visuals_server <- function(id,
           paste0("plot.", input$plot_type)
         }),
         content = function(file) {
-          if (inherits(rv$plot,"patchwork")){
+          if (inherits(rv$plot, "patchwork")) {
             plot <- rv$plot
-          } else if (inherits(rv$plot,"ggplot")){
+          } else if (inherits(rv$plot, "ggplot")) {
             plot <- rv$plot
-          }else {
+          } else {
             plot <- rv$plot[[1]]
-
           }
           # browser()
           shiny::withProgress(message = "Drawing the plot. Hold on for a moment..", {
@@ -2259,12 +2265,12 @@ create_plot <- function(data, type, pri, sec, ter = NULL, ...) {
 
   out <- do.call(
     type,
-    modifyList(parameters,list(data=data))
+    modifyList(parameters, list(data = data))
   )
 
-  code <- rlang::call2(type,!!!parameters,.ns = "FreesearchR")
+  code <- rlang::call2(type, !!!parameters, .ns = "FreesearchR")
 
-  attr(out,"code") <- code
+  attr(out, "code") <- code
   out
 }
 
@@ -2331,11 +2337,17 @@ line_break <- function(data, lineLength = 20, force = FALSE) {
 #'
 #' @param data list of ggplot2 objects
 #' @param tag_levels passed to patchwork::plot_annotation if given. Default is NULL
+#' @param title panel title
+#' @param ... ignored for argument overflow
 #'
 #' @returns list of ggplot2 objects
 #' @export
 #'
-wrap_plot_list <- function(data, tag_levels = NULL) {
+wrap_plot_list <- function(data,
+                           tag_levels = NULL,
+                           title = NULL,
+                           axis.font.family=NULL,
+                           ...) {
   if (ggplot2::is_ggplot(data[[1]])) {
     if (length(data) > 1) {
       out <- data |>
@@ -2349,17 +2361,35 @@ wrap_plot_list <- function(data, tag_levels = NULL) {
           }
         })() |>
         align_axes() |>
-        patchwork::wrap_plots(guides = "collect", axes = "collect", axis_titles = "collect")
+        patchwork::wrap_plots(
+          guides = "collect",
+          axes = "collect",
+          axis_titles = "collect"
+        )
       if (!is.null(tag_levels)) {
         out <- out + patchwork::plot_annotation(tag_levels = tag_levels)
       }
+      if (!is.null(title)) {
+        out <- out +
+          patchwork::plot_annotation(
+            title = title,
+            theme = ggplot2::theme(plot.title = ggplot2::element_text(size = 25))
+          )
+      }
     } else {
-      out <- data
+      out <- data[[1]]
     }
   } else {
     cli::cli_abort("Can only wrap lists of {.cls ggplot} objects")
   }
-  out
+
+  if (inherits(x = out, what = "patchwork")) {
+    out &
+      ggplot2::theme(axis.text = ggplot2::element_text(family = axis.font.family))
+  } else {
+    out +
+      ggplot2::theme(axis.text = ggplot2::element_text(family = axis.font.family))
+  }
 }
 
 
@@ -3996,7 +4026,7 @@ simple_snake <- function(data){
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.6.3-250626'
+hosted_version <- function()'v25.6.4-250627'
 
 
 ########
@@ -4805,17 +4835,27 @@ missing_demo_app()
 
 #' Beautiful box plot(s)
 #'
+#' @param data data frame
+#' @param pri primary variable
+#' @param sec secondary variable
+#' @param ter tertiary variable
+#' @param ... passed on to wrap_plot_list
+#'
 #' @returns ggplot2 object
 #' @export
 #'
 #' @name data-plots
 #'
 #' @examples
-#' mtcars |> plot_box(pri = "mpg", sec = "cyl", ter = "gear")
+#' mtcars |> plot_box(pri = "mpg", sec = "gear")
+#' mtcars |> plot_box(pri = "mpg", sec="cyl")
 #' mtcars |>
 #'   default_parsing() |>
 #'   plot_box(pri = "mpg", sec = "cyl", ter = "gear")
-plot_box <- function(data, pri, sec, ter = NULL) {
+#' mtcars |>
+#'   default_parsing() |>
+#'   plot_box(pri = "mpg", sec = "cyl", ter = "gear",axis.font.family="mono")
+plot_box <- function(data, pri, sec, ter = NULL,...) {
   if (!is.null(ter)) {
     ds <- split(data, data[ter])
   } else {
@@ -4830,7 +4870,7 @@ plot_box <- function(data, pri, sec, ter = NULL) {
     )
   })
 
-  wrap_plot_list(out)
+  wrap_plot_list(out,title=glue::glue("Grouped by {get_label(data,ter)}"),...)
 }
 
 
@@ -4846,6 +4886,7 @@ plot_box <- function(data, pri, sec, ter = NULL) {
 #' @examples
 #' mtcars |> plot_box_single("mpg")
 #' mtcars |> plot_box_single("mpg","cyl")
+#' gtsummary::trial |> plot_box_single("age","trt")
 plot_box_single <- function(data, pri, sec=NULL, seed = 2103) {
   set.seed(seed)
 
@@ -4861,6 +4902,8 @@ plot_box_single <- function(data, pri, sec=NULL, seed = 2103) {
     ggplot2::geom_boxplot(linewidth = 1.8, outliers = FALSE) +
     ## THis could be optional in future
     ggplot2::geom_jitter(color = "black", size = 2, alpha = 0.9, width = 0.1, height = .2) +
+    ggplot2::xlab(get_label(data,pri))+
+    ggplot2::ylab(get_label(data,sec)) +
     ggplot2::coord_flip() +
     viridis::scale_fill_viridis(discrete = discrete, option = "D") +
     # ggplot2::theme_void() +
@@ -4983,7 +5026,7 @@ plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
   })
 
   # names(out)
-  wrap_plot_list(out)
+  wrap_plot_list(out,title=glue::glue("Grouped by {get_label(data,ter)}"))
   # patchwork::wrap_plots(out, guides = "collect")
 }
 
@@ -5458,7 +5501,7 @@ plot_violin <- function(data, pri, sec, ter = NULL) {
     )
   })
 
-  wrap_plot_list(out)
+  wrap_plot_list(out,title=glue::glue("Grouped by {get_label(data,ter)}"))
   # patchwork::wrap_plots(out,guides = "collect")
 }
 

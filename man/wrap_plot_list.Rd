@@ -4,12 +4,22 @@
 \alias{wrap_plot_list}
 \title{Wrapping}
 \usage{
-wrap_plot_list(data, tag_levels = NULL)
+wrap_plot_list(
+  data,
+  tag_levels = NULL,
+  title = NULL,
+  axis.font.family = NULL,
+  ...
+)
 }
 \arguments{
 \item{data}{list of ggplot2 objects}
 
 \item{tag_levels}{passed to patchwork::plot_annotation if given. Default is NULL}
+
+\item{title}{panel title}
+
+\item{...}{ignored for argument overflow}
 }
 \value{
 list of ggplot2 objects
