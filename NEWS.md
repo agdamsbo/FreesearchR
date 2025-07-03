@@ -1,3 +1,7 @@
+# FreesearchR 25.7.1 - DEV
+
+- *NEW* UI overhaul and navigation update. The interface is simplified to clearly show the relationship between panels and sub-items by abandoning multiple levels on panel to instead show a drop-down menu. This also results in simplified sidebar menus with room to add more controls in the future.
+
 # FreesearchR 25.6.4
 
 The app is now also published as a docker container. See the README for instructions. It is mainly to use for hosting the app. Work is ongoing to publish a true standalone app, preferably for both Windows and MacOS.
