@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/app/libs.R 
+#### Current file: /Users/au301842/FreesearchR/app/libs.R
 ########
 
 library(shiny)
@@ -40,20 +40,20 @@ library(rlang)
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/app/functions.R 
+#### Current file: /Users/au301842/FreesearchR/app/functions.R
 ########
 
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//app_version.R 
+#### Current file: /Users/au301842/FreesearchR/R//app_version.R
 ########
 
-app_version <- function()'25.7.1'
+app_version <- function()'25.7.2'
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//baseline_table.R 
+#### Current file: /Users/au301842/FreesearchR/R//baseline_table.R
 ########
 
 #' Print a flexible baseline characteristics table
@@ -138,7 +138,7 @@ create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALS
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//contrast_text.R 
+#### Current file: /Users/au301842/FreesearchR/R//contrast_text.R
 ########
 
 #' @title Contrast Text Color
@@ -194,7 +194,7 @@ contrast_text <- function(background,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//correlations-module.R 
+#### Current file: /Users/au301842/FreesearchR/R//correlations-module.R
 ########
 
 #' Data correlations evaluation module
@@ -339,7 +339,7 @@ sentence_paste <- function(data, and.str = "and") {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//create-column-mod.R 
+#### Current file: /Users/au301842/FreesearchR/R//create-column-mod.R
 ########
 
 #' @title Create new column
@@ -782,7 +782,7 @@ make_choices_with_infos <- function(data) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//custom_SelectInput.R 
+#### Current file: /Users/au301842/FreesearchR/R//custom_SelectInput.R
 ########
 
 #' A selectizeInput customized for data frames with column labels
@@ -976,7 +976,7 @@ vectorSelectInput <- function(inputId,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//cut-variable-dates.R 
+#### Current file: /Users/au301842/FreesearchR/R//cut-variable-dates.R
 ########
 
 #' Extended cutting function with fall-back to the native base::cut
@@ -1595,7 +1595,7 @@ plot_histogram <- function(data, column=NULL, bins = 30, breaks = NULL, color = 
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//data_plots.R 
+#### Current file: /Users/au301842/FreesearchR/R//data_plots.R
 ########
 
 # source(here::here("functions.R"))
@@ -2445,7 +2445,7 @@ clean_common_axis <- function(p, axis) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//data-import.R 
+#### Current file: /Users/au301842/FreesearchR/R//data-import.R
 ########
 
 data_import_ui <- function(id) {
@@ -2602,7 +2602,7 @@ data_import_demo_app <- function() {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//data-summary.R 
+#### Current file: /Users/au301842/FreesearchR/R//data-summary.R
 ########
 
 #' Data summary module
@@ -3000,7 +3000,7 @@ get_var_icon <- function(data,class.type=c("class","type")){
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//datagrid-infos-mod.R 
+#### Current file: /Users/au301842/FreesearchR/R//datagrid-infos-mod.R
 ########
 
 
@@ -3349,7 +3349,7 @@ construct_col_summary <- function(data) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//helpers.R 
+#### Current file: /Users/au301842/FreesearchR/R//helpers.R
 ########
 
 #' Wrapper function to get function from character vector referring to function from namespace. Passed to 'do.call()'
@@ -4023,14 +4023,14 @@ simple_snake <- function(data){
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
+#### Current file: /Users/au301842/FreesearchR/R//hosted_version.R
 ########
 
-hosted_version <- function()'v25.7.1-250703'
+hosted_version <- function()'v25.7.2-250703'
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//html_dependency_freesearchr.R 
+#### Current file: /Users/au301842/FreesearchR/R//html_dependency_freesearchr.R
 ########
 
 html_dependency_FreesearchR <- function() {
@@ -4045,7 +4045,7 @@ html_dependency_FreesearchR <- function() {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//import-file-ext.R 
+#### Current file: /Users/au301842/FreesearchR/R//import-file-ext.R
 ########
 
 #' @title Import data from a file
@@ -4655,7 +4655,7 @@ import_file_demo_app <- function() {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//launch_FreesearchR.R 
+#### Current file: /Users/au301842/FreesearchR/R//launch_FreesearchR.R
 ########
 
 #' Easily launch the FreesearchR app
@@ -4686,7 +4686,7 @@ launch_FreesearchR <- function(...){
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//missings-module.R 
+#### Current file: /Users/au301842/FreesearchR/R//missings-module.R
 ########
 
 #' Data correlations evaluation module
@@ -4835,7 +4835,7 @@ compare_missings <- function(data,by_var){
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_box.R 
+#### Current file: /Users/au301842/FreesearchR/R//plot_box.R
 ########
 
 #' Beautiful box plot(s)
@@ -4934,7 +4934,7 @@ plot_box_single <- function(data, pri, sec=NULL, seed = 2103) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_euler.R 
+#### Current file: /Users/au301842/FreesearchR/R//plot_euler.R
 ########
 
 #' Area proportional venn diagrams
@@ -5075,7 +5075,7 @@ plot_euler_single <- function(data) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_hbar.R 
+#### Current file: /Users/au301842/FreesearchR/R//plot_hbar.R
 ########
 
 #' Nice horizontal stacked bars (Grotta bars)
@@ -5175,7 +5175,7 @@ vertical_stacked_bars <- function(data,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_ridge.R 
+#### Current file: /Users/au301842/FreesearchR/R//plot_ridge.R
 ########
 
 #' Plot nice ridge plot
@@ -5209,7 +5209,7 @@ plot_ridge <- function(data, x, y, z = NULL, ...) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_sankey.R 
+#### Current file: /Users/au301842/FreesearchR/R//plot_sankey.R
 ########
 
 #' Readying data for sankey plot
@@ -5442,7 +5442,7 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_scatter.R 
+#### Current file: /Users/au301842/FreesearchR/R//plot_scatter.R
 ########
 
 #' Beautiful violin plot
@@ -5477,7 +5477,7 @@ plot_scatter <- function(data, pri, sec, ter = NULL) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot_violin.R 
+#### Current file: /Users/au301842/FreesearchR/R//plot_violin.R
 ########
 
 #' Beatiful violin plot
@@ -5512,7 +5512,7 @@ plot_violin <- function(data, pri, sec, ter = NULL) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//plot-download-module.R 
+#### Current file: /Users/au301842/FreesearchR/R//plot-download-module.R
 ########
 
 plot_download_ui <- regression_ui <- function(id, ...) {
@@ -5593,7 +5593,7 @@ plot_download_server <- function(id,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//redcap_read_shiny_module.R 
+#### Current file: /Users/au301842/FreesearchR/R//redcap_read_shiny_module.R
 ########
 
 #' Shiny module to browser and export REDCap data
@@ -6289,7 +6289,7 @@ redcap_demo_app <- function() {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//regression_model.R 
+#### Current file: /Users/au301842/FreesearchR/R//regression_model.R
 ########
 
 #' Create a regression model programatically
@@ -7016,7 +7016,7 @@ regression_model_uv_list <- function(data,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//regression_plot.R 
+#### Current file: /Users/au301842/FreesearchR/R//regression_plot.R
 ########
 
 #' Regression coef plot from gtsummary. Slightly modified to pass on arguments
@@ -7182,7 +7182,7 @@ symmetrical_scale_x_log10 <- function(plot, breaks = c(1, 2, 3, 5, 10), ...) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//regression_table.R 
+#### Current file: /Users/au301842/FreesearchR/R//regression_table.R
 ########
 
 #' Create table of regression model
@@ -7371,7 +7371,7 @@ tbl_merge <- function(data) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//regression-module.R 
+#### Current file: /Users/au301842/FreesearchR/R//regression-module.R
 ########
 
 ### On rewriting this module
@@ -8059,7 +8059,7 @@ regression_server <- function(id,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//report.R 
+#### Current file: /Users/au301842/FreesearchR/R//report.R
 ########
 
 #' Split vector by an index and embed addition
@@ -8147,7 +8147,7 @@ modify_qmd <- function(file, format) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//syntax_highlight.R 
+#### Current file: /Users/au301842/FreesearchR/R//syntax_highlight.R
 ########
 
 ## Inpiration:
@@ -8178,7 +8178,7 @@ html_code_wrap <- function(string,lang="r"){
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//theme.R 
+#### Current file: /Users/au301842/FreesearchR/R//theme.R
 ########
 
 #' Custom theme based on unity
@@ -8297,7 +8297,7 @@ gg_theme_export <- function() {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//update-factor-ext.R 
+#### Current file: /Users/au301842/FreesearchR/R//update-factor-ext.R
 ########
 
 
@@ -8594,7 +8594,7 @@ winbox_update_factor <- function(id,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//update-variables-ext.R 
+#### Current file: /Users/au301842/FreesearchR/R//update-variables-ext.R
 ########
 
 #' Select, rename and convert variables
@@ -9406,7 +9406,7 @@ clean_date <- function(data) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//visual_summary.R 
+#### Current file: /Users/au301842/FreesearchR/R//visual_summary.R
 ########
 
 #' Data correlations evaluation module
@@ -9703,7 +9703,7 @@ unique_short <- function(data, max = 15) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//wide2long.R 
+#### Current file: /Users/au301842/FreesearchR/R//wide2long.R
 ########
 
 #' Alternative pivoting method for easily pivoting based on name pattern
@@ -9862,17 +9862,18 @@ grepl_fix <- function(data, pattern, type = c("prefix", "infix", "suffix")) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/dev/header_include.R 
+#### Current file: /Users/au301842/FreesearchR/dev/header_include.R
 ########
 
 header_include <- function(){
   shiny::tags$head(
-    tags$link(rel = "stylesheet", type = "text/css", href = "style.css"))
+    tags$link(rel = "stylesheet", type = "text/css", href = "style.css"),
+    tags$script(src="scripts.js"))
 }
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/dev/dev_banner.R 
+#### Current file: /Users/au301842/FreesearchR/dev/dev_banner.R
 ########
 
 dev_banner <- function(){
@@ -9881,7 +9882,7 @@ dev_banner <- function(){
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/app/ui.R 
+#### Current file: /Users/au301842/FreesearchR/app/ui.R
 ########
 
 # ns <- NS(id)
@@ -9918,7 +9919,7 @@ ui_elements <- list(
   ##############################################################################
   "import" = bslib::nav_panel(
     title = "Get started",
-    icon = shiny::icon("upload"),
+    icon = shiny::icon("play"),
     shiny::fluidRow(
       shiny::column(width = 2),
       shiny::column(
@@ -10486,17 +10487,35 @@ ui <- bslib::page_fixed(
   header_include(),
   ## Automatically close drop-downs on navigation
   ## Thanks to claude.ai
-  tags$script("
-        $(document).on('shown.bs.tab', '#main_panel', function(e) {
-          // Close dropdown in this specific navset only
-          $('#main_panel .dropdown-menu').removeClass('show');
-          $('#main_panel .dropdown-toggle').removeClass('show').attr('aria-expanded', 'false');
-
-          // Close navbar collapse (burger menu)
-          $('#main_panel .navbar-collapse collapse').removeClass('show');
-          $('#main_panel .navbar-toggle').removeClass('collapsed').attr('aria-expanded', 'false');
-        });
-        "),
+  # tags$script("
+  #       $(document).on('shown.bs.tab', '#main_panel', function(e) {
+  #         // Close dropdown in this specific navset only
+  #         $('#main_panel .dropdown-menu').removeClass('show');
+  #         $('#main_panel .dropdown-toggle').removeClass('show').attr('aria-expanded', 'false');
+  #       });
+  #
+  #       $(document).on('shiny:sessioninitialized', function() {
+  #       // Function to collapse navbar on mobile
+  #       function collapseNavbar() {
+  #         var navbar = $('.navbar-collapse');
+  #         if (navbar.hasClass('show')) {
+  #           navbar.removeClass('show');
+  #           $('.navbar-toggler').addClass('collapsed');
+  #           $('.navbar-toggler').attr('aria-expanded', 'false');
+  #         }
+  #       }
+  #
+  #       // Add click event to navigation tabs
+  #       $(document).on('click', '.nav-link[data-bs-toggle=\"tab\"]', function() {
+  #         setTimeout(collapseNavbar, 10);
+  #       });
+  #
+  #       // Also handle direct clicks on nav items
+  #       $(document).on('click', '.navbar-nav .nav-link', function() {
+  #         setTimeout(collapseNavbar, 10);
+  #       });
+  #       });
+  # "),
   ## This adds the actual favicon
   ## png and ico versions are kept for compatibility
   shiny::tags$head(tags$link(rel = "shortcut icon", href = "favicon.svg")),
@@ -10543,7 +10562,7 @@ ui <- bslib::page_fixed(
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/app/server.R 
+#### Current file: /Users/au301842/FreesearchR/app/server.R
 ########
 
 data(mtcars)
@@ -11350,7 +11369,7 @@ server <- function(input, output, session) {
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/app/launch.R 
+#### Current file: /Users/au301842/FreesearchR/app/launch.R
 ########
 
 shinyApp(ui, server)

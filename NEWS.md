@@ -1,4 +1,8 @@
-# FreesearchR 25.7.1 - DEV
+# FreesearchR 25.7.2 - DEV
+
+- *FIX* refining hiding drop downs. All JavaScript is now in separate file. Coded with GAI help from claude.ai.
+
+# FreesearchR 25.7.1
 
 - *NEW* UI overhaul and navigation update. The interface is simplified to clearly show the relationship between panels and sub-items by abandoning multiple levels on panel to instead show a drop-down menu. This also results in simplified sidebar menus with room to add more controls in the future.
 
