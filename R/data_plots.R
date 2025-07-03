@@ -11,97 +11,96 @@
 data_visuals_ui <- function(id, tab_title = "Plots", ...) {
   ns <- shiny::NS(id)
 
-  # bslib::navset_bar(
   list(
-
-    # Sidebar with a slider input
-    sidebar = bslib::sidebar(
-      bslib::accordion(
-        multiple = FALSE,
-        bslib::accordion_panel(
-          title = "Creating plot",
-          icon = bsicons::bs_icon("graph-up"),
-          shiny::uiOutput(outputId = ns("primary")),
-          shiny::helpText('Only non-text variables are available for plotting. Go the "Data" to reclass data to plot.'),
-          shiny::tags$br(),
-          shiny::uiOutput(outputId = ns("type")),
-          shiny::uiOutput(outputId = ns("secondary")),
-          shiny::uiOutput(outputId = ns("tertiary")),
-          shiny::br(),
-          shiny::actionButton(
-            inputId = ns("act_plot"),
-            label = "Plot",
-            width = "100%",
-            icon = shiny::icon("palette"),
-            disabled = FALSE
+    bslib::layout_sidebar(
+      sidebar = bslib::sidebar(
+        bslib::accordion(
+          multiple = FALSE,
+          bslib::accordion_panel(
+            title = "Creating plot",
+            icon = bsicons::bs_icon("graph-up"),
+            shiny::uiOutput(outputId = ns("primary")),
+            shiny::helpText('Only non-text variables are available for plotting. Go the "Data" to reclass data to plot.'),
+            shiny::tags$br(),
+            shiny::uiOutput(outputId = ns("type")),
+            shiny::uiOutput(outputId = ns("secondary")),
+            shiny::uiOutput(outputId = ns("tertiary")),
+            shiny::br(),
+            shiny::actionButton(
+              inputId = ns("act_plot"),
+              label = "Plot",
+              width = "100%",
+              icon = shiny::icon("palette"),
+              disabled = FALSE
+            ),
+            shiny::helpText('Adjust settings, then press "Plot".')
           ),
-          shiny::helpText('Adjust settings, then press "Plot".')
-        ),
-        # bslib::accordion_panel(
-        #   title = "Advanced",
-        #   icon = bsicons::bs_icon("gear")
-        # ),
-        bslib::accordion_panel(
-          title = "Download",
-          icon = bsicons::bs_icon("download"),
-          shinyWidgets::noUiSliderInput(
-            inputId = ns("height_slide"),
-            label = "Plot height (mm)",
-            min = 50,
-            max = 300,
-            value = 100,
-            step = 1,
-            format = shinyWidgets::wNumbFormat(decimals = 0),
-            color = datamods:::get_primary_color(),
-            inline = TRUE
-          ),
-          # shiny::numericInput(
-          #   inputId = ns("height_numeric"),
-          #   label = "Plot height (mm)",
-          #   min = 50,
-          #   max = 300,
-          #   value = 100
-          # ),
-          shinyWidgets::noUiSliderInput(
-            inputId = ns("width"),
-            label = "Plot width (mm)",
-            min = 50,
-            max = 300,
-            value = 100,
-            step = 1,
-            format = shinyWidgets::wNumbFormat(decimals = 0),
-            color = datamods:::get_primary_color()
-          ),
-          shiny::selectInput(
-            inputId = ns("plot_type"),
-            label = "File format",
-            choices = list(
-              "png",
-              "tiff",
-              "eps",
-              "pdf",
-              "jpeg",
-              "svg"
+          bslib::accordion_panel(
+            title = "Download",
+            icon = bsicons::bs_icon("download"),
+            shinyWidgets::noUiSliderInput(
+              inputId = ns("height_slide"),
+              label = "Plot height (mm)",
+              min = 50,
+              max = 300,
+              value = 100,
+              step = 1,
+              format = shinyWidgets::wNumbFormat(decimals = 0),
+              color = datamods:::get_primary_color(),
+              inline = TRUE
+            ),
+            # shiny::numericInput(
+            #   inputId = ns("height_numeric"),
+            #   label = "Plot height (mm)",
+            #   min = 50,
+            #   max = 300,
+            #   value = 100
+            # ),
+            shinyWidgets::noUiSliderInput(
+              inputId = ns("width"),
+              label = "Plot width (mm)",
+              min = 50,
+              max = 300,
+              value = 100,
+              step = 1,
+              format = shinyWidgets::wNumbFormat(decimals = 0),
+              color = datamods:::get_primary_color()
+            ),
+            shiny::selectInput(
+              inputId = ns("plot_type"),
+              label = "File format",
+              choices = list(
+                "png",
+                "tiff",
+                "eps",
+                "pdf",
+                "jpeg",
+                "svg"
+              )
+            ),
+            shiny::br(),
+            # Button
+            shiny::downloadButton(
+              outputId = ns("download_plot"),
+              label = "Download plot",
+              icon = shiny::icon("download")
             )
-          ),
-          shiny::br(),
-          # Button
-          shiny::downloadButton(
-            outputId = ns("download_plot"),
-            label = "Download plot",
-            icon = shiny::icon("download")
           )
-        )
-      )
-    ),
-    bslib::nav_panel(
-      title = tab_title,
+        ),
+        shiny::p("We have collected a few notes on visualising data and details on the options included in FreesearchR:", shiny::tags$a(
+          href = "https://agdamsbo.github.io/FreesearchR/articles/visuals.html",
+          "View notes in new tab",
+          target = "_blank",
+          rel = "noopener noreferrer"
+        ))
+      ),
       shiny::plotOutput(ns("plot"), height = "70vh"),
       shiny::tags$br(),
       shiny::tags$br(),
       shiny::htmlOutput(outputId = ns("code_plot"))
     )
   )
+  # )
 }
 
 
@@ -725,6 +724,7 @@ get_label <- function(data, var = NULL) {
 #' paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(force = TRUE)
 line_break <- function(data, lineLength = 20, force = FALSE) {
   if (isTRUE(force)) {
+    ## This eats some letters when splitting a sentence... ??
     gsub(paste0("(.{1,", lineLength, "})(\\s|[[:alnum:]])"), "\\1\n", data)
   } else {
     paste(strwrap(data, lineLength), collapse = "\n")
@@ -746,7 +746,7 @@ line_break <- function(data, lineLength = 20, force = FALSE) {
 wrap_plot_list <- function(data,
                            tag_levels = NULL,
                            title = NULL,
-                           axis.font.family=NULL,
+                           axis.font.family = NULL,
                            ...) {
   if (ggplot2::is_ggplot(data[[1]])) {
     if (length(data) > 1) {

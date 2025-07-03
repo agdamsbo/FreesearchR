@@ -44,14 +44,7 @@ data_missings_server <- function(id,
 
         tryCatch(
           {
-            if (!is.null(by_var) && by_var != "" && by_var %in% names(df_tbl)) {
-              df_tbl[[by_var]] <- ifelse(is.na(df_tbl[[by_var]]), "Missing", "Non-missing")
-
-              out <- gtsummary::tbl_summary(df_tbl, by = by_var) |>
-                gtsummary::add_p()
-            } else {
-              out <- gtsummary::tbl_summary(df_tbl)
-            }
+            out <- compare_missings(df_tbl,by_var)
           },
           error = function(err) {
             showNotification(paste0("Error: ", err), type = "err")
@@ -129,10 +122,22 @@ missing_demo_app <- function() {
 
 missing_demo_app()
 
+#' Pairwise comparison of missings across covariables
+#'
+#' @param data data frame
+#' @param by_var variable to stratify by missingness
+#'
+#' @returns gtsummary list object
+#' @export
+#'
+compare_missings <- function(data,by_var){
+  if (!is.null(by_var) && by_var != "" && by_var %in% names(data)) {
+    data[[by_var]] <- ifelse(is.na(data[[by_var]]), "Missing", "Non-missing")
 
-
-
-
-
-
-
+    out <- gtsummary::tbl_summary(data, by = by_var) |>
+      gtsummary::add_p()
+  } else {
+    out <- gtsummary::tbl_summary(data)
+  }
+  out
+}

@@ -44,155 +44,173 @@ regression_ui <- function(id, ...) {
   ns <- shiny::NS(id)
 
   shiny::tagList(
-    title = "",
-    sidebar = bslib::sidebar(
-      shiny::uiOutput(outputId = ns("data_info"), inline = TRUE),
-      bslib::accordion(
-        open = "acc_reg",
-        multiple = FALSE,
-        bslib::accordion_panel(
-          value = "acc_reg",
-          title = "Regression",
-          icon = bsicons::bs_icon("calculator"),
-          shiny::uiOutput(outputId = ns("outcome_var")),
-          # shiny::selectInput(
-          #   inputId = "design",
-          #   label = "Study design",
-          #   selected = "no",
-          #   inline = TRUE,
-          #   choices = list(
-          #     "Cross-sectional" = "cross-sectional"
-          #   )
-          # ),
-          shiny::uiOutput(outputId = ns("regression_type")),
-          shiny::radioButtons(
-            inputId = ns("all"),
-            label = "Specify covariables",
-            inline = TRUE, selected = 2,
-            choiceNames = c(
-              "Yes",
-              "No"
-            ),
-            choiceValues = c(1, 2)
-          ),
-          shiny::conditionalPanel(
-            condition = "input.all==1",
-            shiny::uiOutput(outputId = ns("regression_vars")),
-            shiny::helpText("If none are selected, all are included."),
-            shiny::tags$br(),
-            ns = ns
-          ),
-          bslib::input_task_button(
-            id = ns("load"),
-            label = "Analyse",
-            icon = bsicons::bs_icon("pencil"),
-            label_busy = "Working...",
-            icon_busy = fontawesome::fa_i("arrows-rotate",
-              class = "fa-spin",
-              "aria-hidden" = "true"
-            ),
-            type = "secondary",
-            auto_reset = TRUE
-          ),
-          shiny::helpText("Press 'Analyse' to create the regression model and after changing parameters."),
-          shiny::tags$br(),
-          shiny::radioButtons(
-            inputId = ns("add_regression_p"),
-            label = "Show p-value",
-            inline = TRUE,
-            selected = "yes",
-            choices = list(
-              "Yes" = "yes",
-              "No" = "no"
-            )
-          ),
-          # shiny::tags$br(),
-          # shiny::radioButtons(
-          #   inputId = ns("tbl_theme"),
-          #   label = "Show p-value",
-          #   inline = TRUE,
-          #   selected = "jama",
-          #   choices = list(
-          #     "JAMA" = "jama",
-          #     "Lancet" = "lancet",
-          #     "NEJM" = "nejm"
-          #   )
-          # ),
-          shiny::tags$br()
-        ),
-        do.call(
-          bslib::accordion_panel,
-          c(
-            list(
-              value = "acc_plot",
-              title = "Coefficient plot",
-              icon = bsicons::bs_icon("bar-chart-steps"),
+    # title = "",
+    bslib::nav_panel(
+      title = "Regression table",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          shiny::uiOutput(outputId = ns("data_info"), inline = TRUE),
+          bslib::accordion(
+            open = "acc_reg",
+            multiple = FALSE,
+            bslib::accordion_panel(
+              value = "acc_reg",
+              title = "Regression",
+              icon = bsicons::bs_icon("calculator"),
+              shiny::uiOutput(outputId = ns("outcome_var")),
+              # shiny::selectInput(
+              #   inputId = "design",
+              #   label = "Study design",
+              #   selected = "no",
+              #   inline = TRUE,
+              #   choices = list(
+              #     "Cross-sectional" = "cross-sectional"
+              #   )
+              # ),
+              shiny::uiOutput(outputId = ns("regression_type")),
+              shiny::radioButtons(
+                inputId = ns("all"),
+                label = "Specify covariables",
+                inline = TRUE, selected = 2,
+                choiceNames = c(
+                  "Yes",
+                  "No"
+                ),
+                choiceValues = c(1, 2)
+              ),
+              shiny::conditionalPanel(
+                condition = "input.all==1",
+                shiny::uiOutput(outputId = ns("regression_vars")),
+                shiny::helpText("If none are selected, all are included."),
+                shiny::tags$br(),
+                ns = ns
+              ),
+              bslib::input_task_button(
+                id = ns("load"),
+                label = "Analyse",
+                icon = bsicons::bs_icon("pencil"),
+                label_busy = "Working...",
+                icon_busy = fontawesome::fa_i("arrows-rotate",
+                  class = "fa-spin",
+                  "aria-hidden" = "true"
+                ),
+                type = "secondary",
+                auto_reset = TRUE
+              ),
+              shiny::helpText("Press 'Analyse' to create the regression model and after changing parameters."),
               shiny::tags$br(),
-              shiny::uiOutput(outputId = ns("plot_model"))
-            ),
-            # plot_download_ui(ns("reg_plot_download"))
-            shiny::tagList(
-              shinyWidgets::noUiSliderInput(
-                inputId = ns("plot_height"),
-                label = "Plot height (mm)",
-                min = 50,
-                max = 300,
-                value = 100,
-                step = 1,
-                format = shinyWidgets::wNumbFormat(decimals = 0),
-                color = datamods:::get_primary_color()
-              ),
-              shinyWidgets::noUiSliderInput(
-                inputId = ns("plot_width"),
-                label = "Plot width (mm)",
-                min = 50,
-                max = 300,
-                value = 100,
-                step = 1,
-                format = shinyWidgets::wNumbFormat(decimals = 0),
-                color = datamods:::get_primary_color()
-              ),
-              shiny::selectInput(
-                inputId = ns("plot_type"),
-                label = "File format",
+              shiny::radioButtons(
+                inputId = ns("add_regression_p"),
+                label = "Show p-value",
+                inline = TRUE,
+                selected = "yes",
                 choices = list(
-                  "png",
-                  "tiff",
-                  "eps",
-                  "pdf",
-                  "jpeg",
-                  "svg"
+                  "Yes" = "yes",
+                  "No" = "no"
                 )
               ),
-              shiny::br(),
-              # Button
-              shiny::downloadButton(
-                outputId = ns("download_plot"),
-                label = "Download plot",
-                icon = shiny::icon("download")
+              # shiny::tags$br(),
+              # shiny::radioButtons(
+              #   inputId = ns("tbl_theme"),
+              #   label = "Show p-value",
+              #   inline = TRUE,
+              #   selected = "jama",
+              #   choices = list(
+              #     "JAMA" = "jama",
+              #     "Lancet" = "lancet",
+              #     "NEJM" = "nejm"
+              #   )
+              # ),
+              shiny::tags$br()
+            )
+          )
+        ),
+        gt::gt_output(outputId = ns("table2"))
+      )
+    ),
+    bslib::nav_panel(
+      title = "Coefficient plot",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::accordion(
+            open = "acc_reg",
+            multiple = FALSE,
+            do.call(
+              bslib::accordion_panel,
+              c(
+                list(
+                  value = "acc_plot",
+                  title = "Coefficient plot",
+                  icon = bsicons::bs_icon("bar-chart-steps"),
+                  shiny::tags$br(),
+                  shiny::uiOutput(outputId = ns("plot_model"))
+                ),
+                # plot_download_ui(ns("reg_plot_download"))
+                shiny::tagList(
+                  shinyWidgets::noUiSliderInput(
+                    inputId = ns("plot_height"),
+                    label = "Plot height (mm)",
+                    min = 50,
+                    max = 300,
+                    value = 100,
+                    step = 1,
+                    format = shinyWidgets::wNumbFormat(decimals = 0),
+                    color = datamods:::get_primary_color()
+                  ),
+                  shinyWidgets::noUiSliderInput(
+                    inputId = ns("plot_width"),
+                    label = "Plot width (mm)",
+                    min = 50,
+                    max = 300,
+                    value = 100,
+                    step = 1,
+                    format = shinyWidgets::wNumbFormat(decimals = 0),
+                    color = datamods:::get_primary_color()
+                  ),
+                  shiny::selectInput(
+                    inputId = ns("plot_type"),
+                    label = "File format",
+                    choices = list(
+                      "png",
+                      "tiff",
+                      "eps",
+                      "pdf",
+                      "jpeg",
+                      "svg"
+                    )
+                  ),
+                  shiny::br(),
+                  # Button
+                  shiny::downloadButton(
+                    outputId = ns("download_plot"),
+                    label = "Download plot",
+                    icon = shiny::icon("download")
+                  )
+                )
               )
             )
           )
         ),
-        bslib::accordion_panel(
-          value = "acc_checks",
-          title = "Checks",
-          icon = bsicons::bs_icon("clipboard-check"),
-          shiny::uiOutput(outputId = ns("plot_checks"))
-        )
+        shiny::plotOutput(outputId = ns("regression_plot"), height = "80vh")
       )
     ),
     bslib::nav_panel(
-      title = "Regression table",
-      gt::gt_output(outputId = ns("table2"))
-    ),
-    bslib::nav_panel(
-      title = "Coefficient plot",
-      shiny::plotOutput(outputId = ns("regression_plot"), height = "80vh")
-    ),
-    bslib::nav_panel(
       title = "Model checks",
-      shiny::plotOutput(outputId = ns("check"), height = "90vh")
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::accordion(
+            open = "acc_reg",
+            multiple = FALSE,
+            bslib::accordion_panel(
+              value = "acc_checks",
+              title = "Checks",
+              icon = bsicons::bs_icon("clipboard-check"),
+              shiny::uiOutput(outputId = ns("plot_checks"))
+            )
+          )
+        ),
+        shiny::plotOutput(outputId = ns("check"), height = "90vh")
+      )
     )
   )
 }

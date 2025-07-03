@@ -5,7 +5,7 @@
 ########
 
 library(shiny)
-# library(shinyjs)
+library(shinyjs)
 # library(methods)
 # library(readr)
 # library(MASS)
@@ -49,7 +49,7 @@ library(rlang)
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.6.4'
+app_version <- function()'25.7.1'
 
 
 ########
@@ -1611,97 +1611,96 @@ plot_histogram <- function(data, column=NULL, bins = 30, breaks = NULL, color = 
 data_visuals_ui <- function(id, tab_title = "Plots", ...) {
   ns <- shiny::NS(id)
 
-  # bslib::navset_bar(
   list(
-
-    # Sidebar with a slider input
-    sidebar = bslib::sidebar(
-      bslib::accordion(
-        multiple = FALSE,
-        bslib::accordion_panel(
-          title = "Creating plot",
-          icon = bsicons::bs_icon("graph-up"),
-          shiny::uiOutput(outputId = ns("primary")),
-          shiny::helpText('Only non-text variables are available for plotting. Go the "Data" to reclass data to plot.'),
-          shiny::tags$br(),
-          shiny::uiOutput(outputId = ns("type")),
-          shiny::uiOutput(outputId = ns("secondary")),
-          shiny::uiOutput(outputId = ns("tertiary")),
-          shiny::br(),
-          shiny::actionButton(
-            inputId = ns("act_plot"),
-            label = "Plot",
-            width = "100%",
-            icon = shiny::icon("palette"),
-            disabled = FALSE
+    bslib::layout_sidebar(
+      sidebar = bslib::sidebar(
+        bslib::accordion(
+          multiple = FALSE,
+          bslib::accordion_panel(
+            title = "Creating plot",
+            icon = bsicons::bs_icon("graph-up"),
+            shiny::uiOutput(outputId = ns("primary")),
+            shiny::helpText('Only non-text variables are available for plotting. Go the "Data" to reclass data to plot.'),
+            shiny::tags$br(),
+            shiny::uiOutput(outputId = ns("type")),
+            shiny::uiOutput(outputId = ns("secondary")),
+            shiny::uiOutput(outputId = ns("tertiary")),
+            shiny::br(),
+            shiny::actionButton(
+              inputId = ns("act_plot"),
+              label = "Plot",
+              width = "100%",
+              icon = shiny::icon("palette"),
+              disabled = FALSE
+            ),
+            shiny::helpText('Adjust settings, then press "Plot".')
           ),
-          shiny::helpText('Adjust settings, then press "Plot".')
-        ),
-        # bslib::accordion_panel(
-        #   title = "Advanced",
-        #   icon = bsicons::bs_icon("gear")
-        # ),
-        bslib::accordion_panel(
-          title = "Download",
-          icon = bsicons::bs_icon("download"),
-          shinyWidgets::noUiSliderInput(
-            inputId = ns("height_slide"),
-            label = "Plot height (mm)",
-            min = 50,
-            max = 300,
-            value = 100,
-            step = 1,
-            format = shinyWidgets::wNumbFormat(decimals = 0),
-            color = datamods:::get_primary_color(),
-            inline = TRUE
-          ),
-          # shiny::numericInput(
-          #   inputId = ns("height_numeric"),
-          #   label = "Plot height (mm)",
-          #   min = 50,
-          #   max = 300,
-          #   value = 100
-          # ),
-          shinyWidgets::noUiSliderInput(
-            inputId = ns("width"),
-            label = "Plot width (mm)",
-            min = 50,
-            max = 300,
-            value = 100,
-            step = 1,
-            format = shinyWidgets::wNumbFormat(decimals = 0),
-            color = datamods:::get_primary_color()
-          ),
-          shiny::selectInput(
-            inputId = ns("plot_type"),
-            label = "File format",
-            choices = list(
-              "png",
-              "tiff",
-              "eps",
-              "pdf",
-              "jpeg",
-              "svg"
+          bslib::accordion_panel(
+            title = "Download",
+            icon = bsicons::bs_icon("download"),
+            shinyWidgets::noUiSliderInput(
+              inputId = ns("height_slide"),
+              label = "Plot height (mm)",
+              min = 50,
+              max = 300,
+              value = 100,
+              step = 1,
+              format = shinyWidgets::wNumbFormat(decimals = 0),
+              color = datamods:::get_primary_color(),
+              inline = TRUE
+            ),
+            # shiny::numericInput(
+            #   inputId = ns("height_numeric"),
+            #   label = "Plot height (mm)",
+            #   min = 50,
+            #   max = 300,
+            #   value = 100
+            # ),
+            shinyWidgets::noUiSliderInput(
+              inputId = ns("width"),
+              label = "Plot width (mm)",
+              min = 50,
+              max = 300,
+              value = 100,
+              step = 1,
+              format = shinyWidgets::wNumbFormat(decimals = 0),
+              color = datamods:::get_primary_color()
+            ),
+            shiny::selectInput(
+              inputId = ns("plot_type"),
+              label = "File format",
+              choices = list(
+                "png",
+                "tiff",
+                "eps",
+                "pdf",
+                "jpeg",
+                "svg"
+              )
+            ),
+            shiny::br(),
+            # Button
+            shiny::downloadButton(
+              outputId = ns("download_plot"),
+              label = "Download plot",
+              icon = shiny::icon("download")
             )
-          ),
-          shiny::br(),
-          # Button
-          shiny::downloadButton(
-            outputId = ns("download_plot"),
-            label = "Download plot",
-            icon = shiny::icon("download")
           )
-        )
-      )
-    ),
-    bslib::nav_panel(
-      title = tab_title,
+        ),
+        shiny::p("We have collected a few notes on visualising data and details on the options included in FreesearchR:", shiny::tags$a(
+          href = "https://agdamsbo.github.io/FreesearchR/articles/visuals.html",
+          "View notes in new tab",
+          target = "_blank",
+          rel = "noopener noreferrer"
+        ))
+      ),
       shiny::plotOutput(ns("plot"), height = "70vh"),
       shiny::tags$br(),
       shiny::tags$br(),
       shiny::htmlOutput(outputId = ns("code_plot"))
     )
   )
+  # )
 }
 
 
@@ -2325,6 +2324,7 @@ get_label <- function(data, var = NULL) {
 #' paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(force = TRUE)
 line_break <- function(data, lineLength = 20, force = FALSE) {
   if (isTRUE(force)) {
+    ## This eats some letters when splitting a sentence... ??
     gsub(paste0("(.{1,", lineLength, "})(\\s|[[:alnum:]])"), "\\1\n", data)
   } else {
     paste(strwrap(data, lineLength), collapse = "\n")
@@ -2346,7 +2346,7 @@ line_break <- function(data, lineLength = 20, force = FALSE) {
 wrap_plot_list <- function(data,
                            tag_levels = NULL,
                            title = NULL,
-                           axis.font.family=NULL,
+                           axis.font.family = NULL,
                            ...) {
   if (ggplot2::is_ggplot(data[[1]])) {
     if (length(data) > 1) {
@@ -4026,7 +4026,7 @@ simple_snake <- function(data){
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.6.4-250627'
+hosted_version <- function()'v25.7.1-250703'
 
 
 ########
@@ -4735,14 +4735,7 @@ data_missings_server <- function(id,
 
         tryCatch(
           {
-            if (!is.null(by_var) && by_var != "" && by_var %in% names(df_tbl)) {
-              df_tbl[[by_var]] <- ifelse(is.na(df_tbl[[by_var]]), "Missing", "Non-missing")
-
-              out <- gtsummary::tbl_summary(df_tbl, by = by_var) |>
-                gtsummary::add_p()
-            } else {
-              out <- gtsummary::tbl_summary(df_tbl)
-            }
+            out <- compare_missings(df_tbl,by_var)
           },
           error = function(err) {
             showNotification(paste0("Error: ", err), type = "err")
@@ -4820,13 +4813,25 @@ missing_demo_app <- function() {
 
 missing_demo_app()
 
+#' Pairwise comparison of missings across covariables
+#'
+#' @param data data frame
+#' @param by_var variable to stratify by missingness
+#'
+#' @returns gtsummary list object
+#' @export
+#'
+compare_missings <- function(data,by_var){
+  if (!is.null(by_var) && by_var != "" && by_var %in% names(data)) {
+    data[[by_var]] <- ifelse(is.na(data[[by_var]]), "Missing", "Non-missing")
 
-
-
-
-
-
-
+    out <- gtsummary::tbl_summary(data, by = by_var) |>
+      gtsummary::add_p()
+  } else {
+    out <- gtsummary::tbl_summary(data)
+  }
+  out
+}
 
 
 ########
@@ -7415,155 +7420,173 @@ regression_ui <- function(id, ...) {
   ns <- shiny::NS(id)
 
   shiny::tagList(
-    title = "",
-    sidebar = bslib::sidebar(
-      shiny::uiOutput(outputId = ns("data_info"), inline = TRUE),
-      bslib::accordion(
-        open = "acc_reg",
-        multiple = FALSE,
-        bslib::accordion_panel(
-          value = "acc_reg",
-          title = "Regression",
-          icon = bsicons::bs_icon("calculator"),
-          shiny::uiOutput(outputId = ns("outcome_var")),
-          # shiny::selectInput(
-          #   inputId = "design",
-          #   label = "Study design",
-          #   selected = "no",
-          #   inline = TRUE,
-          #   choices = list(
-          #     "Cross-sectional" = "cross-sectional"
-          #   )
-          # ),
-          shiny::uiOutput(outputId = ns("regression_type")),
-          shiny::radioButtons(
-            inputId = ns("all"),
-            label = "Specify covariables",
-            inline = TRUE, selected = 2,
-            choiceNames = c(
-              "Yes",
-              "No"
-            ),
-            choiceValues = c(1, 2)
-          ),
-          shiny::conditionalPanel(
-            condition = "input.all==1",
-            shiny::uiOutput(outputId = ns("regression_vars")),
-            shiny::helpText("If none are selected, all are included."),
-            shiny::tags$br(),
-            ns = ns
-          ),
-          bslib::input_task_button(
-            id = ns("load"),
-            label = "Analyse",
-            icon = bsicons::bs_icon("pencil"),
-            label_busy = "Working...",
-            icon_busy = fontawesome::fa_i("arrows-rotate",
-              class = "fa-spin",
-              "aria-hidden" = "true"
-            ),
-            type = "secondary",
-            auto_reset = TRUE
-          ),
-          shiny::helpText("Press 'Analyse' to create the regression model and after changing parameters."),
-          shiny::tags$br(),
-          shiny::radioButtons(
-            inputId = ns("add_regression_p"),
-            label = "Show p-value",
-            inline = TRUE,
-            selected = "yes",
-            choices = list(
-              "Yes" = "yes",
-              "No" = "no"
-            )
-          ),
-          # shiny::tags$br(),
-          # shiny::radioButtons(
-          #   inputId = ns("tbl_theme"),
-          #   label = "Show p-value",
-          #   inline = TRUE,
-          #   selected = "jama",
-          #   choices = list(
-          #     "JAMA" = "jama",
-          #     "Lancet" = "lancet",
-          #     "NEJM" = "nejm"
-          #   )
-          # ),
-          shiny::tags$br()
-        ),
-        do.call(
-          bslib::accordion_panel,
-          c(
-            list(
-              value = "acc_plot",
-              title = "Coefficient plot",
-              icon = bsicons::bs_icon("bar-chart-steps"),
+    # title = "",
+    bslib::nav_panel(
+      title = "Regression table",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          shiny::uiOutput(outputId = ns("data_info"), inline = TRUE),
+          bslib::accordion(
+            open = "acc_reg",
+            multiple = FALSE,
+            bslib::accordion_panel(
+              value = "acc_reg",
+              title = "Regression",
+              icon = bsicons::bs_icon("calculator"),
+              shiny::uiOutput(outputId = ns("outcome_var")),
+              # shiny::selectInput(
+              #   inputId = "design",
+              #   label = "Study design",
+              #   selected = "no",
+              #   inline = TRUE,
+              #   choices = list(
+              #     "Cross-sectional" = "cross-sectional"
+              #   )
+              # ),
+              shiny::uiOutput(outputId = ns("regression_type")),
+              shiny::radioButtons(
+                inputId = ns("all"),
+                label = "Specify covariables",
+                inline = TRUE, selected = 2,
+                choiceNames = c(
+                  "Yes",
+                  "No"
+                ),
+                choiceValues = c(1, 2)
+              ),
+              shiny::conditionalPanel(
+                condition = "input.all==1",
+                shiny::uiOutput(outputId = ns("regression_vars")),
+                shiny::helpText("If none are selected, all are included."),
+                shiny::tags$br(),
+                ns = ns
+              ),
+              bslib::input_task_button(
+                id = ns("load"),
+                label = "Analyse",
+                icon = bsicons::bs_icon("pencil"),
+                label_busy = "Working...",
+                icon_busy = fontawesome::fa_i("arrows-rotate",
+                  class = "fa-spin",
+                  "aria-hidden" = "true"
+                ),
+                type = "secondary",
+                auto_reset = TRUE
+              ),
+              shiny::helpText("Press 'Analyse' to create the regression model and after changing parameters."),
               shiny::tags$br(),
-              shiny::uiOutput(outputId = ns("plot_model"))
-            ),
-            # plot_download_ui(ns("reg_plot_download"))
-            shiny::tagList(
-              shinyWidgets::noUiSliderInput(
-                inputId = ns("plot_height"),
-                label = "Plot height (mm)",
-                min = 50,
-                max = 300,
-                value = 100,
-                step = 1,
-                format = shinyWidgets::wNumbFormat(decimals = 0),
-                color = datamods:::get_primary_color()
-              ),
-              shinyWidgets::noUiSliderInput(
-                inputId = ns("plot_width"),
-                label = "Plot width (mm)",
-                min = 50,
-                max = 300,
-                value = 100,
-                step = 1,
-                format = shinyWidgets::wNumbFormat(decimals = 0),
-                color = datamods:::get_primary_color()
-              ),
-              shiny::selectInput(
-                inputId = ns("plot_type"),
-                label = "File format",
+              shiny::radioButtons(
+                inputId = ns("add_regression_p"),
+                label = "Show p-value",
+                inline = TRUE,
+                selected = "yes",
                 choices = list(
-                  "png",
-                  "tiff",
-                  "eps",
-                  "pdf",
-                  "jpeg",
-                  "svg"
+                  "Yes" = "yes",
+                  "No" = "no"
                 )
               ),
-              shiny::br(),
-              # Button
-              shiny::downloadButton(
-                outputId = ns("download_plot"),
-                label = "Download plot",
-                icon = shiny::icon("download")
+              # shiny::tags$br(),
+              # shiny::radioButtons(
+              #   inputId = ns("tbl_theme"),
+              #   label = "Show p-value",
+              #   inline = TRUE,
+              #   selected = "jama",
+              #   choices = list(
+              #     "JAMA" = "jama",
+              #     "Lancet" = "lancet",
+              #     "NEJM" = "nejm"
+              #   )
+              # ),
+              shiny::tags$br()
+            )
+          )
+        ),
+        gt::gt_output(outputId = ns("table2"))
+      )
+    ),
+    bslib::nav_panel(
+      title = "Coefficient plot",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::accordion(
+            open = "acc_reg",
+            multiple = FALSE,
+            do.call(
+              bslib::accordion_panel,
+              c(
+                list(
+                  value = "acc_plot",
+                  title = "Coefficient plot",
+                  icon = bsicons::bs_icon("bar-chart-steps"),
+                  shiny::tags$br(),
+                  shiny::uiOutput(outputId = ns("plot_model"))
+                ),
+                # plot_download_ui(ns("reg_plot_download"))
+                shiny::tagList(
+                  shinyWidgets::noUiSliderInput(
+                    inputId = ns("plot_height"),
+                    label = "Plot height (mm)",
+                    min = 50,
+                    max = 300,
+                    value = 100,
+                    step = 1,
+                    format = shinyWidgets::wNumbFormat(decimals = 0),
+                    color = datamods:::get_primary_color()
+                  ),
+                  shinyWidgets::noUiSliderInput(
+                    inputId = ns("plot_width"),
+                    label = "Plot width (mm)",
+                    min = 50,
+                    max = 300,
+                    value = 100,
+                    step = 1,
+                    format = shinyWidgets::wNumbFormat(decimals = 0),
+                    color = datamods:::get_primary_color()
+                  ),
+                  shiny::selectInput(
+                    inputId = ns("plot_type"),
+                    label = "File format",
+                    choices = list(
+                      "png",
+                      "tiff",
+                      "eps",
+                      "pdf",
+                      "jpeg",
+                      "svg"
+                    )
+                  ),
+                  shiny::br(),
+                  # Button
+                  shiny::downloadButton(
+                    outputId = ns("download_plot"),
+                    label = "Download plot",
+                    icon = shiny::icon("download")
+                  )
+                )
               )
             )
           )
         ),
-        bslib::accordion_panel(
-          value = "acc_checks",
-          title = "Checks",
-          icon = bsicons::bs_icon("clipboard-check"),
-          shiny::uiOutput(outputId = ns("plot_checks"))
-        )
+        shiny::plotOutput(outputId = ns("regression_plot"), height = "80vh")
       )
     ),
     bslib::nav_panel(
-      title = "Regression table",
-      gt::gt_output(outputId = ns("table2"))
-    ),
-    bslib::nav_panel(
-      title = "Coefficient plot",
-      shiny::plotOutput(outputId = ns("regression_plot"), height = "80vh")
-    ),
-    bslib::nav_panel(
       title = "Model checks",
-      shiny::plotOutput(outputId = ns("check"), height = "90vh")
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::accordion(
+            open = "acc_reg",
+            multiple = FALSE,
+            bslib::accordion_panel(
+              value = "acc_checks",
+              title = "Checks",
+              icon = bsicons::bs_icon("clipboard-check"),
+              shiny::uiOutput(outputId = ns("plot_checks"))
+            )
+          )
+        ),
+        shiny::plotOutput(outputId = ns("check"), height = "90vh")
+      )
     )
   )
 }
@@ -9873,6 +9896,8 @@ ui_elements <- list(
   ##############################################################################
   "home" = bslib::nav_panel(
     title = "FreesearchR",
+    # title = shiny::div(htmltools::img(src="FreesearchR-logo-white-nobg-h80.png")),
+    icon = shiny::icon("house"),
     shiny::fluidRow(
       ## On building the dev-version for shinyapps.io, the dev_banner() is redefined
       ## Default just output "NULL"
@@ -9884,8 +9909,7 @@ ui_elements <- list(
         shiny::markdown(readLines("www/intro.md")),
         shiny::column(width = 2)
       )
-    ),
-    icon = shiny::icon("home")
+    )
   ),
   ##############################################################################
   #########
@@ -9893,7 +9917,8 @@ ui_elements <- list(
   #########
   ##############################################################################
   "import" = bslib::nav_panel(
-    title = "Import",
+    title = "Get started",
+    icon = shiny::icon("upload"),
     shiny::fluidRow(
       shiny::column(width = 2),
       shiny::column(
@@ -9949,13 +9974,13 @@ ui_elements <- list(
         shiny::conditionalPanel(
           condition = "output.data_loaded == true",
           shiny::br(),
-            shiny::actionButton(
-              inputId = "modal_initial_view",
-              label = "Quick overview",
-              width = "100%",
-              icon = shiny::icon("binoculars"),
-              disabled = FALSE
-            ),
+          shiny::actionButton(
+            inputId = "modal_initial_view",
+            label = "Quick overview",
+            width = "100%",
+            icon = shiny::icon("binoculars"),
+            disabled = FALSE
+          ),
           shiny::br(),
           shiny::br(),
           shiny::h5("Select variables for final import"),
@@ -10011,272 +10036,273 @@ ui_elements <- list(
   #########  Data overview panel
   #########
   ##############################################################################
-  "overview" =
-  # bslib::nav_panel_hidden(
+  "prepare" = bslib::nav_menu(
+    title = "Prepare",
+    icon = shiny::icon("pen-to-square"),
     bslib::nav_panel(
-      # value = "overview",
-      title = "Data",
-      bslib::navset_bar(
-        fillable = TRUE,
-        bslib::nav_panel(
-          title = "Overview",
-          tags$h3("Overview and filtering"),
-          fluidRow(
-            shiny::column(
-              width = 9,
-              shiny::uiOutput(outputId = "data_info", inline = TRUE),
-              shiny::tags$p(
-                "Below is a short summary table, on the right you can click to visualise data classes or browse data and create different data filters."
-              )
-            ),
-            shiny::column(
-              width = 3,
-              shiny::actionButton(
-                inputId = "modal_visual_overview",
-                label = "Visual overview",
-                width = "100%",
-                disabled = TRUE
-              ),
-              shiny::br(),
-              shiny::br(),
-              shiny::actionButton(
-                inputId = "modal_browse",
-                label = "Browse data",
-                width = "100%",
-                disabled = TRUE
-              ),
-              shiny::br(),
-              shiny::br()
-            )
-          ),
-          fluidRow(
-            shiny::column(
-              width = 9,
-              data_summary_ui(id = "data_summary"),
-              shiny::br(),
-              shiny::br(),
-              shiny::br(),
-              shiny::br(),
-              shiny::br()
-            ),
-            shiny::column(
-              width = 3,
-              # shiny::actionButton(
-              #   inputId = "modal_missings",
-              #   label = "Visual overview",
-              #   width = "100%",
-              #   disabled = TRUE
-              # ),
-              # shiny::br(),
-              # shiny::br(),
-              # shiny::actionButton(
-              #   inputId = "modal_browse",
-              #   label = "Browse data",
-              #   width = "100%",
-              #   disabled = TRUE
-              # ),
-              # shiny::br(),
-              # shiny::br(),
-              shiny::tags$h6("Filter data types"),
-              shiny::uiOutput(
-                outputId = "column_filter"
-              ),
-              shiny::helpText("Read more on how ", tags$a(
-                "data types",
-                href = "https://agdamsbo.github.io/FreesearchR/articles/data-types.html",
-                target = "_blank",
-                rel = "noopener noreferrer"
-              ), " are defined."),
-              shiny::br(),
-              shiny::br(),
-              shiny::tags$h6("Filter observations"),
-              shiny::tags$p("Filter on observation level"),
-              IDEAFilter::IDEAFilter_ui("data_filter"),
-              shiny::br(),
-              shiny::br()
-            )
+      title = "Overview",
+      icon = shiny::icon("eye"),
+      value = "nav_prepare_overview",
+      tags$h3("Overview and filtering"),
+      fluidRow(
+        shiny::column(
+          width = 9,
+          shiny::uiOutput(outputId = "data_info", inline = TRUE),
+          shiny::tags$p(
+            "Below is a short summary table, on the right you can click to visualise data classes or browse data and create different data filters."
+          )
+        ),
+        shiny::column(
+          width = 3,
+          shiny::actionButton(
+            inputId = "modal_visual_overview",
+            label = "Visual overview",
+            width = "100%",
+            disabled = TRUE
           ),
           shiny::br(),
           shiny::br(),
-          # shiny::br(),
-          # shiny::br(),
+          shiny::actionButton(
+            inputId = "modal_browse",
+            label = "Browse data",
+            width = "100%",
+            disabled = TRUE
+          ),
+          shiny::br(),
+          shiny::br()
+        )
+      ),
+      fluidRow(
+        shiny::column(
+          width = 9,
+          data_summary_ui(id = "data_summary"),
+          shiny::br(),
+          shiny::br(),
+          shiny::br(),
+          shiny::br(),
           shiny::br()
         ),
-        bslib::nav_panel(
-          title = "Modify",
-          tags$h3("Subset, rename and convert variables"),
-          fluidRow(
-            shiny::column(
-              width = 9,
-              shiny::tags$p(
-                shiny::markdown("Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."),
-                shiny::markdown("There are more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code. At the bottom you can restore the original data."),
-                shiny::markdown("Please note that data modifications are applied before any filtering.")
-              )
-            )
+        shiny::column(
+          width = 3,
+          shiny::tags$h6("Filter data types"),
+          shiny::uiOutput(
+            outputId = "column_filter"
           ),
-          # shiny::tags$br(),
-          update_variables_ui("modal_variables"),
-          shiny::tags$br(),
-          shiny::tags$br(),
-          shiny::tags$h4("Advanced data manipulation"),
-          shiny::tags$p("Below options allow more advanced varaible manipulations."),
-          shiny::tags$br(),
-          shiny::tags$br(),
-          shiny::fluidRow(
-            shiny::column(
-              width = 4,
-              shiny::actionButton(
-                inputId = "modal_update",
-                label = "Reorder factor levels",
-                width = "100%"
-              ),
-              shiny::tags$br(),
-              shiny::helpText("Reorder the levels of factor/categorical variables."),
-              shiny::tags$br(),
-              shiny::tags$br()
-            ),
-            shiny::column(
-              width = 4,
-              shiny::actionButton(
-                inputId = "modal_cut",
-                label = "New factor",
-                width = "100%"
-              ),
-              shiny::tags$br(),
-              shiny::helpText("Create factor/categorical variable from a continous variable (number/date/time)."),
-              shiny::tags$br(),
-              shiny::tags$br()
-            ),
-            shiny::column(
-              width = 4,
-              shiny::actionButton(
-                inputId = "modal_column",
-                label = "New variable",
-                width = "100%"
-              ),
-              shiny::tags$br(),
-              shiny::helpText(shiny::markdown("Create a new variable/column based on an *R*-expression.")),
-              shiny::tags$br(),
-              shiny::tags$br()
-            )
-          ),
-          tags$h4("Compare modified data to original"),
-          shiny::tags$br(),
+          shiny::helpText("Read more on how ", tags$a(
+            "data types",
+            href = "https://agdamsbo.github.io/FreesearchR/articles/data-types.html",
+            target = "_blank",
+            rel = "noopener noreferrer"
+          ), " are defined."),
+          shiny::br(),
+          shiny::br(),
+          shiny::tags$h6("Filter observations"),
+          shiny::tags$p("Filter on observation level"),
+          IDEAFilter::IDEAFilter_ui("data_filter"),
+          shiny::br(),
+          shiny::br()
+        )
+      ),
+      shiny::br(),
+      shiny::br(),
+      shiny::br()
+    ),
+    bslib::nav_panel(
+      title = "Modify",
+      icon = shiny::icon("file-pen"),
+      tags$h3("Subset, rename and convert variables"),
+      fluidRow(
+        shiny::column(
+          width = 9,
           shiny::tags$p(
-            "Raw print of the original vs the modified data."
-          ),
-          shiny::tags$br(),
-          shiny::fluidRow(
-            shiny::column(
-              width = 6,
-              shiny::tags$b("Original data:"),
-              # verbatimTextOutput("original"),
-              shiny::verbatimTextOutput("original_str")
-            ),
-            shiny::column(
-              width = 6,
-              shiny::tags$b("Modified data:"),
-              # verbatimTextOutput("modified"),
-              shiny::verbatimTextOutput("modified_str")
-            )
-          ),
-          shiny::tags$br(),
+            shiny::markdown("Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."),
+            shiny::markdown("There are more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code. At the bottom you can restore the original data."),
+            shiny::markdown("Please note that data modifications are applied before any filtering.")
+          )
+        )
+      ),
+      update_variables_ui("modal_variables"),
+      shiny::tags$br(),
+      shiny::tags$br(),
+      shiny::tags$h4("Advanced data manipulation"),
+      shiny::tags$p("Below options allow more advanced varaible manipulations."),
+      shiny::tags$br(),
+      shiny::tags$br(),
+      shiny::fluidRow(
+        shiny::column(
+          width = 4,
           shiny::actionButton(
-            inputId = "data_reset",
-            label = "Restore original data",
+            inputId = "modal_update",
+            label = "Reorder factor levels",
             width = "100%"
           ),
           shiny::tags$br(),
-          shiny::helpText("Reset to original imported dataset. Careful! There is no un-doing."),
+          shiny::helpText("Reorder the levels of factor/categorical variables."),
+          shiny::tags$br(),
+          shiny::tags$br()
+        ),
+        shiny::column(
+          width = 4,
+          shiny::actionButton(
+            inputId = "modal_cut",
+            label = "New factor",
+            width = "100%"
+          ),
+          shiny::tags$br(),
+          shiny::helpText("Create factor/categorical variable from a continous variable (number/date/time)."),
+          shiny::tags$br(),
+          shiny::tags$br()
+        ),
+        shiny::column(
+          width = 4,
+          shiny::actionButton(
+            inputId = "modal_column",
+            label = "New variable",
+            width = "100%"
+          ),
+          shiny::tags$br(),
+          shiny::helpText(shiny::markdown("Create a new variable/column based on an *R*-expression.")),
+          shiny::tags$br(),
           shiny::tags$br()
         )
-      )
-    ),
+      ),
+      tags$h4("Compare modified data to original"),
+      shiny::tags$br(),
+      shiny::tags$p(
+        "Raw print of the original vs the modified data."
+      ),
+      shiny::tags$br(),
+      shiny::fluidRow(
+        shiny::column(
+          width = 6,
+          shiny::tags$b("Original data:"),
+          shiny::verbatimTextOutput("original_str")
+        ),
+        shiny::column(
+          width = 6,
+          shiny::tags$b("Modified data:"),
+          shiny::verbatimTextOutput("modified_str")
+        )
+      ),
+      shiny::tags$br(),
+      shiny::actionButton(
+        inputId = "data_reset",
+        label = "Restore original data",
+        width = "100%"
+      ),
+      shiny::tags$br(),
+      shiny::helpText("Reset to original imported dataset. Careful! There is no un-doing."),
+      shiny::tags$br()
+    )
+    # )
+  ),
   ##############################################################################
   #########
   #########  Descriptive analyses panel
   #########
   ##############################################################################
   "describe" =
-    bslib::nav_panel(
+    bslib::nav_menu(
       title = "Evaluate",
-      id = "navdescribe",
-      bslib::navset_bar(
-        title = "",
-        sidebar = bslib::sidebar(
-          shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
-          bslib::accordion(
-            open = "acc_chars",
-            multiple = FALSE,
-            bslib::accordion_panel(
-              value = "acc_chars",
-              title = "Characteristics",
-              icon = bsicons::bs_icon("table"),
-              shiny::uiOutput("strat_var"),
-              shiny::helpText("Only factor/categorical variables are available for stratification. Go back to the 'Data' tab to reclass a variable if it's not on the list."),
-              shiny::conditionalPanel(
-                condition = "input.strat_var!='none'",
-                shiny::radioButtons(
-                  inputId = "add_p",
-                  label = "Compare strata?",
-                  selected = "no",
-                  inline = TRUE,
-                  choices = list(
-                    "No" = "no",
-                    "Yes" = "yes"
-                  )
+      icon = shiny::icon("magnifying-glass-chart"),
+      # id = "navdescribe",
+      # bslib::navset_bar(
+      #   title = "",
+      bslib::nav_panel(
+        title = "Characteristics",
+        icon = bsicons::bs_icon("table"),
+        bslib::layout_sidebar(
+          sidebar = bslib::sidebar(
+            shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
+            bslib::accordion(
+              open = "acc_chars",
+              multiple = FALSE,
+              bslib::accordion_panel(
+                open = TRUE,
+                value = "acc_chars",
+                title = "Settings",
+                icon = bsicons::bs_icon("table"),
+                shiny::uiOutput("strat_var"),
+                shiny::helpText("Only factor/categorical variables are available for stratification. Go back to the 'Prepare' tab to reclass a variable if it's not on the list."),
+                shiny::conditionalPanel(
+                  condition = "input.strat_var!='none'",
+                  shiny::radioButtons(
+                    inputId = "add_p",
+                    label = "Compare strata?",
+                    selected = "no",
+                    inline = TRUE,
+                    choices = list(
+                      "No" = "no",
+                      "Yes" = "yes"
+                    )
+                  ),
+                  shiny::helpText("Option to perform statistical comparisons between strata in baseline table.")
                 ),
-                shiny::helpText("Option to perform statistical comparisons between strata in baseline table.")
-              ),
-              shiny::br(),
-              shiny::br(),
-              shiny::actionButton(
-                inputId = "act_eval",
-                label = "Evaluate",
-                width = "100%",
-                icon = shiny::icon("calculator"),
-                disabled = TRUE
+                shiny::br(),
+                shiny::br(),
+                shiny::actionButton(
+                  inputId = "act_eval",
+                  label = "Evaluate",
+                  width = "100%",
+                  icon = shiny::icon("calculator"),
+                  disabled = TRUE
+                )
               )
-            ),
-            bslib::accordion_panel(
-              vlaue = "acc_cor",
-              title = "Correlations",
-              icon = bsicons::bs_icon("bounding-box"),
-              shiny::uiOutput("outcome_var_cor"),
-              shiny::helpText("To avoid evaluating the correlation of the outcome variable, this can be excluded from the plot or select 'none'."),
-              shiny::br(),
-              shinyWidgets::noUiSliderInput(
-                inputId = "cor_cutoff",
-                label = "Correlation cut-off",
-                min = 0,
-                max = 1,
-                step = .01,
-                value = .8,
-                format = shinyWidgets::wNumbFormat(decimals = 2),
-                color = datamods:::get_primary_color()
-              ),
-              shiny::helpText("Set the cut-off for considered 'highly correlated'.")
-            ),
-            bslib::accordion_panel(
-              vlaue = "acc_mis",
-              title = "Missings",
-              icon = bsicons::bs_icon("x-circle"),
-              shiny::uiOutput("missings_var"),
-              shiny::helpText("To consider if daata is missing by random, choose the outcome/dependent variable, if it has any missings to evaluate if there is a significant difference across other variables depending on missing data or not.")
             )
-          )
-        ),
-        bslib::nav_panel(
-          title = "Characteristics",
+          ),
           gt::gt_output(outputId = "table1")
-        ),
-        bslib::nav_panel(
-          title = "Correlations",
+        )
+      ),
+      bslib::nav_panel(
+        title = "Correlations",
+        icon = bsicons::bs_icon("bounding-box"),
+        bslib::layout_sidebar(
+          sidebar = bslib::sidebar(
+            shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
+            bslib::accordion(
+              open = "acc_chars",
+              multiple = FALSE,
+              bslib::accordion_panel(
+                value = "acc_cor",
+                title = "Correlations",
+                icon = bsicons::bs_icon("bounding-box"),
+                shiny::uiOutput("outcome_var_cor"),
+                shiny::helpText("To avoid evaluating the correlation of the outcome variable, this can be excluded from the plot or select 'none'."),
+                shiny::br(),
+                shinyWidgets::noUiSliderInput(
+                  inputId = "cor_cutoff",
+                  label = "Correlation cut-off",
+                  min = 0,
+                  max = 1,
+                  step = .01,
+                  value = .8,
+                  format = shinyWidgets::wNumbFormat(decimals = 2),
+                  color = datamods:::get_primary_color()
+                ),
+                shiny::helpText("Set the cut-off for considered 'highly correlated'.")
+              )
+            )
+          ),
           data_correlations_ui(id = "correlations", height = 600)
-        ),
-        bslib::nav_panel(
-          title = "Missings",
+        )
+      ),
+      bslib::nav_panel(
+        title = "Missings",
+        icon = bsicons::bs_icon("x-circle"),
+        bslib::layout_sidebar(
+          sidebar = bslib::sidebar(
+            bslib::accordion(
+              open = "acc_chars",
+              multiple = FALSE,
+              bslib::accordion_panel(
+                vlaue = "acc_mis",
+                title = "Missings",
+                icon = bsicons::bs_icon("x-circle"),
+                shiny::uiOutput("missings_var"),
+                shiny::helpText("To consider if data is missing by random, choose the outcome/dependent variable, if it has any missings to evaluate if there is a significant difference across other variables depending on missing data or not.")
+              )
+            )
+          ),
           data_missings_ui(id = "missingness")
         )
       )
@@ -10286,27 +10312,23 @@ ui_elements <- list(
   #########  Download panel
   #########
   ##############################################################################
-  "visuals" = bslib::nav_panel(
-    title = "Visuals",
-    id = "navvisuals",
-    do.call(
-      bslib::navset_bar,
-      c(
-        data_visuals_ui("visuals"),
-        shiny::tagList(
-          bslib::nav_spacer(),
-          bslib::nav_item(
-            # shiny::img(shiny::icon("book")),
-            shiny::tags$a(
-              href = "https://agdamsbo.github.io/FreesearchR/articles/visuals.html",
-              "Notes (external)",
-              target = "_blank",
-              rel = "noopener noreferrer"
-            )
-          )
-        )
-      )
+  "visuals" = do.call(
+    bslib::nav_panel,
+    c(
+      list(
+        title = "Visuals",
+        icon = shiny::icon("chart-line"),
+        id = "navvisuals"
+      ),
+      data_visuals_ui("visuals")
     )
+    # do.call(
+    #   bslib::navset_bar,
+    #     data_visuals_ui("visuals")#,
+    # c(
+
+    # )
+    # )
   ),
   ##############################################################################
   #########
@@ -10316,9 +10338,10 @@ ui_elements <- list(
   "analyze" =
     bslib::nav_panel(
       title = "Regression",
+      icon = shiny::icon("calculator"),
       id = "navanalyses",
       do.call(
-        bslib::navset_bar,
+        bslib::navset_card_tab,
         regression_ui("regression")
       )
     ),
@@ -10330,6 +10353,7 @@ ui_elements <- list(
   "download" =
     bslib::nav_panel(
       title = "Download",
+      icon = shiny::icon("download"),
       id = "navdownload",
       shiny::fluidRow(
         shiny::column(width = 2),
@@ -10455,9 +10479,24 @@ dark <- custom_theme(
 # https://webdesignerdepot.com/17-open-source-fonts-youll-actually-love/
 
 ui <- bslib::page_fixed(
+  ## Code formatting dependencies
   prismDependencies,
   prismRDependency,
+  ## Version dependent header
   header_include(),
+  ## Automatically close drop-downs on navigation
+  ## Thanks to claude.ai
+  tags$script("
+        $(document).on('shown.bs.tab', '#main_panel', function(e) {
+          // Close dropdown in this specific navset only
+          $('#main_panel .dropdown-menu').removeClass('show');
+          $('#main_panel .dropdown-toggle').removeClass('show').attr('aria-expanded', 'false');
+
+          // Close navbar collapse (burger menu)
+          $('#main_panel .navbar-collapse collapse').removeClass('show');
+          $('#main_panel .navbar-toggle').removeClass('collapsed').attr('aria-expanded', 'false');
+        });
+        "),
   ## This adds the actual favicon
   ## png and ico versions are kept for compatibility
   shiny::tags$head(tags$link(rel = "shortcut icon", href = "favicon.svg")),
@@ -10477,14 +10516,14 @@ ui <- bslib::page_fixed(
         id = "main_panel",
         ui_elements$home,
         ui_elements$import,
-        ui_elements$overview,
+        ui_elements$prepare,
         ui_elements$describe,
         ui_elements$visuals,
         ui_elements$analyze,
         ui_elements$download,
         bslib::nav_spacer(),
-        ui_elements$feedback,
-        ui_elements$docs,
+        # ui_elements$feedback,
+        # ui_elements$docs,
         fillable = FALSE,
         footer = shiny::tags$footer(
           style = "background-color: #14131326; padding: 4px; text-align: center; bottom: 0; width: 100%;",
@@ -10494,7 +10533,7 @@ ui <- bslib::page_fixed(
           ),
           shiny::p(
             style = "margin: 1; color: #888;",
-            shiny::tags$a("Docs", href = "https://agdamsbo.github.io/FreesearchR/", target = "_blank", rel = "noopener noreferrer"), " | ", hosted_version(), " | ", shiny::tags$a("License: AGPLv3", href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Source", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Share feedback", href = "https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8", target = "_blank", rel = "noopener noreferrer")
+            shiny::tags$a("Documentation", href = "https://agdamsbo.github.io/FreesearchR/", target = "_blank", rel = "noopener noreferrer"), " | ", hosted_version(), " | ", shiny::tags$a("License: AGPLv3", href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Source", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Share feedback", href = "https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8", target = "_blank", rel = "noopener noreferrer")
           ),
         )
       )
@@ -11206,7 +11245,7 @@ server <- function(input, output, session) {
   ##############################################################################
 
   shiny::observeEvent(input$act_start, {
-    bslib::nav_select(id = "main_panel", selected = "Data")
+    bslib::nav_select(id = "main_panel", selected = "nav_prepare_overview")
   })
 
   ##############################################################################
