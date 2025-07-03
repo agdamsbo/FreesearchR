@@ -8,6 +8,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/articles/FreesearchR.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/articles/data-types.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/articles/index.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/articles/missingness.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/articles/session.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/articles/visuals.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/authors.html</loc></url>
@@ -27,6 +28,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/clean_date.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/clean_sep.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/columnSelectInput.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/compare_missings.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/contrast_text.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/create-column.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/create_baseline.html</loc></url>
