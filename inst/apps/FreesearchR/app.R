@@ -8681,7 +8681,7 @@ ui_elements <- function(selection) {
           icon = bsicons::bs_icon("bounding-box"),
           bslib::layout_sidebar(
             sidebar = bslib::sidebar(
-              shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
+              # shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
               bslib::accordion(
                 open = "acc_chars",
                 multiple = FALSE,
