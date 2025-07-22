@@ -14,15 +14,11 @@ library(FreesearchR)
 
 # Getting started with ***FreesearchR***
 
-Below is a simple walk-trough and basic instructions for the functions on the FreesearchR app.
+Below is a simple walk-trough and basic descriptions on the different features of the ***FreesearchR*** app.
 
 ## Launching
 
-The easiest way to get started is to launch [the hosted version of the app on shinyapps.io (click this link)](https://agdamsbo.shinyapps.io/freesearcheR/).
-
-Additionally you have the option to run the app locally with access to any data in your current working environment.
-
-To do this, open *R* (or RStudio or similar), and run the following code to install the latest version of ***FreesearchR*** and launch the app:
+The easiest way to get started is to launch [the onlie version of the app (click this link)](https://app.freesearchr.org/). Please be aware not to upload sensitive data in this version as data security can not be guaranteed in this online environment. The app can easily be run from *R* on your own computer by running the code below ([read more on running locally here](https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine)):
 
 ```{r}
 require("pak")
@@ -31,19 +27,17 @@ library(FreesearchR)
 FreesearchR::launch_FreesearchR()
 ```
 
-As a small note, a standalone Windows app version is on the drawing board as well, but no time frame is available.
+As a small note, a standalone Windows app version is on the drawing board as well, but no time frame is currently available.
 
-## Importing data
+## Get started
 
-Once in the app and in the "**Import**", you have three options available for importing data: file upload, REDCap server export and local or sample data.
+Once in the app, get started by loading your data. You have three options available for importing data: file upload, REDCap server export and local or sample data.
 
-After choosing a data source, you can set a threshold to filter data be completenes and further manually specify variables to include for analyses.
+After choosing a data source nad importing data, you can preview the basic data structure and missing observations, set a threshold to filter data by completeness and further manually specify variables to include for analyses.
 
 ### File upload
 
-Currently several data file formats are supported for easy import (csv, txt, xls(x), ods, rds, dta). If importing workbooks (xls(x) or ods), you are prompted to specify sheet(s) to import. If choosing multiple sheets, these are automatically merged by common variable(s), so please make sure that key variables are correctly named identically.
-
-A notification is posted with error or success. After succesfull import data can be previewed directly by clicking "click to see data" in the notification.
+Several data file formats are supported for easy import (csv, txt, xls(x), ods, rds, dta). If importing workbooks (xls(x) or ods), you are prompted to specify sheet(s) to import. If choosing multiple sheets, these are automatically merged by common variable(s), so please make sure that key/ID variables are correctly named identically.
 
 ### REDCap server export
 
@@ -51,7 +45,7 @@ Export data directly from a REDCap server. You need to first generate an API-tok
 
 Please don't store the API-key on your device unless encrypted or in a keyring, as this may compromise data safety. Log in to your REDCap server and retrieve the token when needed.
 
-Type the correct webaddress of your REDCap server.
+Type the correct web address of your REDCap server.
 
 The module will validate the information and you can click "Connect".
 
@@ -59,11 +53,11 @@ This will unfold options to preview your data dictionary (the main database meta
 
 ### Local or sample data
 
-When opening the online hosted app, this is mainly for testing purposes. When running the app locally from *R* on your own computer, you will find all data.frames in the current environment here. This extends the possible uses of this app to allow for quick and easy data insights and code generation for basic plotting to fine tune.
+When opening the online hosted app, you can load some sample data to try out the app. When running the app locally from *R* on your own computer, you will find all data frames loaded in your environment here. This extends the possible uses of this app to allow for quick and easy data insights and code generation.
 
-## Data
+## Prepare
 
-This is the panel to get a good overview of your data, check data is classed and formatted correctly, perform simple modifications and filter data. 
+This is the panel to prepare data for evaluation and analyses and get a good overview of your data, check data is classed and formatted correctly, perform simple modifications and filter data. 
 
 ### Summary
 
@@ -147,11 +141,13 @@ c("continuous", "dichotomous", "categorical") |>
 
 Generate simple regression models and get the results in a nice table. This will also be included in the exported report.
 
+This will generate a combined table with both univariate regression model results for each included variable and a multivariate model with all variables included for explorative analyses.
+
 ### Plots
 
 Plot the coefficients from the regression models in a forest plot. Choose which model(s) to include.
 
-### Checks
+### Model checks
 
 Check model assumptions visually. Supported checks can be chosen.
 

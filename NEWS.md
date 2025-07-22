@@ -1,10 +1,14 @@
-# FreesearchR 25.7.2 - DEV
+# FreesearchR 25.7.3 - DEV
+
+- *NEW* preparing to automatically only show relevant tabs to simplify interface. NOT IMPLEMENTED YET
+
+# FreesearchR 25.7.2
 
 - *FIX* refining hiding drop downs. All JavaScript is now in separate file. Coded with GAI help from claude.ai.
 
 - *FIX* refined iconography and navigation
 
-- *NEW* preparing to automatically only show relevant tabs to simplify interface. NOT IMPLEMENTED YET
+- *FIX* updated intro and docs.
 
 # FreesearchR 25.7.1
 

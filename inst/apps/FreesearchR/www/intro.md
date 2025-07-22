@@ -1,31 +1,19 @@
-# Welcome <img style="float: right;" src="FreesearchR-logo.png">
+# Welcome <img src="FreesearchR-logo.png" style="float: right;"/>
 
-This is the ***FreesearchR*** data analysis tool. We intend ***FreesearchR*** to be a free tool for easy data evaluation and analysis. If you need more advanced tools, start with ***FreesearchR*** and then you'll probably be better off using *R* or similar directly.
+This is the ***FreesearchR*** data analysis tool, a free tool for basic data evaluation and analysis. If you need more advanced tools, start with ***FreesearchR*** and then you'll probably be better off using *R* or similar directly.
 
-Here is a brief summary of the functions:
+With this tool you can:
 
-1.  **Import data** from a spreadsheet/file on your machine, direct export from a REDCap server, sample data or data from a your local environment if run locally.
+1.  **Import data** from a spreadsheet/file on your machine, directly from a [REDCap](https://projectredcap.org/ "Read more on the data capture tool REDCap") server, try it with sample data or access data directly [if run in R locally](https://agdamsbo.github.io/FreesearchR//#run-locally-on-your-own-machine "Read about running FreesearchR on your local machine")
 
-1.  **Data inspection** and  **modification** like modifying variables or creating new (categorical from numeric or time data, or completely new variables from the data)
+2.  **Prepare** data for analysis by filtering data, modifying variables or create new variables
 
-1.  **Evaluate data** using descriptive analyses methods and inspect cross-correlations
+3.  **Evaluate data** using descriptive analyses methods and inspect cross-correlations as well as [missing observations](https://agdamsbo.github.io/FreesearchR/articles/missingness.html "Read more about missing data")
 
-1.  **Create and export simple, clean plots** for data overview and insights
+4.  **Visualise data** by [creating simple, clean plots](https://agdamsbo.github.io/FreesearchR/articles/visuals.html "See available plot types") for overview and quick insights
 
-1.  **Create regression simple models** for even more advanced data analyses
+5.  **Create simple regression models** for even more advanced data analyses
 
-    -   Linear, dichotomous or ordinal logistic regression will be used depending on specified outcome variable
-    
-    -   Plot regression analysis coefficients
+6.  **Download** results as a report, get the modified data set and save the code for learning and to reproduce the results later
 
-    -   Evaluate model assumptions
-
-1.  **Export results**
-
-    -   Descriptive and regression analyses results for MS Word or [LibreOffice](https://www.libreoffice.org/)
-    
-    -   Modified data with preserved metadata
-    
-    -   Code to recreate all steps locally
-
-The full [project documentation is here](https://agdamsbo.github.io/FreesearchR/) where you'll find detailed description of the app and link to the source code! If you want to [share feedback, please follow this link to a simple survey](https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8).
+The full [project documentation is here](https://agdamsbo.github.io/FreesearchR/) where you'll find detailed descriptions of the app and link to the source code! If you want to [share feedback, please follow this link to a simple survey](https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8).
