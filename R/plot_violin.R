@@ -14,16 +14,19 @@ plot_violin <- function(data, pri, sec, ter = NULL) {
     ds <- list(data)
   }
 
-  out <- lapply(ds, \(.ds){
-    rempsyc::nice_violin(
-      data = .ds,
-      group = sec,
-      response = pri,
-      xtitle = get_label(data, var = sec),
-      ytitle = get_label(data, var = pri)
-    )
-  })
+  # browser()
+  suppressWarnings({
+    out <- lapply(ds, \(.ds){
+      rempsyc::nice_violin(
+        data = .ds,
+        group = sec,
+        response = pri,
+        xtitle = get_label(data, var = sec),
+        ytitle = get_label(data, var = pri)
+      )
+    })
 
-  wrap_plot_list(out,title=glue::glue("Grouped by {get_label(data,ter)}"))
+    wrap_plot_list(out, title = glue::glue("Grouped by {get_label(data,ter)}"))
+  })
   # patchwork::wrap_plots(out,guides = "collect")
 }
