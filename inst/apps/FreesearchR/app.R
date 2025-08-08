@@ -49,7 +49,7 @@ library(rlang)
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.7.2'
+app_version <- function()'25.7.3'
 
 
 ########
@@ -4026,7 +4026,7 @@ simple_snake <- function(data){
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.7.2-250722'
+hosted_version <- function()'v25.7.3-250808'
 
 
 ########

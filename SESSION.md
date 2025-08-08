@@ -15,7 +15,7 @@
 |rstudio     |2025.05.0+496 Mariposa Orchid (desktop)    |
 |pandoc      |3.6.4 @ /opt/homebrew/bin/ (via rmarkdown) |
 |quarto      |1.7.30 @ /usr/local/bin/quarto             |
-|FreesearchR |25.7.2.250722                              |
+|FreesearchR |25.7.3.250722                              |
                                                                                 
                                                                                 
 --------------------------------------------------------------------------------
@@ -55,6 +55,7 @@
 |colorspace        |2.1-1         |2024-07-26 |CRAN (R 4.4.1) |
 |commonmark        |2.0.0         |2025-07-07 |CRAN (R 4.4.1) |
 |crayon            |1.5.3         |2024-06-20 |CRAN (R 4.4.1) |
+|credentials       |2.0.2         |2024-10-04 |CRAN (R 4.4.1) |
 |curl              |6.4.0         |2025-06-22 |CRAN (R 4.4.1) |
 |data.table        |1.17.8        |2025-07-10 |CRAN (R 4.4.1) |
 |datamods          |1.5.3         |2024-10-02 |CRAN (R 4.4.1) |
@@ -87,16 +88,19 @@
 |foreach           |1.5.2         |2022-02-02 |CRAN (R 4.4.0) |
 |foreign           |0.8-90        |2025-03-31 |CRAN (R 4.4.1) |
 |Formula           |1.2-5         |2023-02-24 |CRAN (R 4.4.1) |
-|FreesearchR       |25.7.2        |NA         |NA             |
+|FreesearchR       |25.7.3        |NA         |NA             |
 |fs                |1.6.6         |2025-04-12 |CRAN (R 4.4.1) |
 |gdtools           |0.4.2         |2025-03-27 |CRAN (R 4.4.1) |
 |generics          |0.1.4         |2025-05-09 |CRAN (R 4.4.1) |
+|gert              |2.1.5         |2025-03-25 |CRAN (R 4.4.1) |
 |ggalluvial        |0.12.5        |2023-02-22 |CRAN (R 4.4.0) |
 |ggcorrplot        |0.1.4.1       |2023-09-05 |CRAN (R 4.4.0) |
 |ggforce           |0.5.0         |2025-06-18 |CRAN (R 4.4.1) |
 |ggplot2           |3.5.2         |2025-04-09 |CRAN (R 4.4.1) |
 |ggridges          |0.5.6         |2024-01-23 |CRAN (R 4.4.0) |
 |ggstats           |0.10.0        |2025-07-02 |CRAN (R 4.4.1) |
+|gh                |1.5.0         |2025-05-26 |CRAN (R 4.4.1) |
+|gitcreds          |0.1.2         |2022-09-08 |CRAN (R 4.4.1) |
 |glue              |1.8.0         |2024-09-30 |CRAN (R 4.4.1) |
 |gridExtra         |2.3           |2017-09-09 |CRAN (R 4.4.1) |
 |gt                |1.0.0         |2025-04-05 |CRAN (R 4.4.1) |
@@ -110,6 +114,7 @@
 |htmltools         |0.5.8.1       |2024-04-04 |CRAN (R 4.4.1) |
 |htmlwidgets       |1.6.4         |2023-12-06 |CRAN (R 4.4.0) |
 |httpuv            |1.6.16        |2025-04-16 |CRAN (R 4.4.1) |
+|httr2             |1.2.1         |2025-07-22 |CRAN (R 4.4.1) |
 |IDEAFilter        |0.2.0         |2024-04-15 |CRAN (R 4.4.0) |
 |insight           |1.3.1         |2025-06-30 |CRAN (R 4.4.1) |
 |iterators         |1.0.14        |2022-02-05 |CRAN (R 4.4.1) |
@@ -205,6 +210,7 @@
 |shinyWidgets      |0.9.0         |2025-02-21 |CRAN (R 4.4.1) |
 |stringi           |1.8.7         |2025-03-27 |CRAN (R 4.4.1) |
 |stringr           |1.5.1         |2023-11-14 |CRAN (R 4.4.0) |
+|sys               |3.4.3         |2024-10-04 |CRAN (R 4.4.1) |
 |systemfonts       |1.2.3         |2025-04-30 |CRAN (R 4.4.1) |
 |testthat          |3.2.3         |2025-01-13 |CRAN (R 4.4.1) |
 |textshaping       |1.0.1         |2025-05-01 |CRAN (R 4.4.1) |
