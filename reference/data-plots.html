@@ -25,7 +25,7 @@ Beatiful violin plot"><meta property="og:image" content="https://agdamsbo.github
 
     <a class="navbar-brand me-2" href="../index.html">FreesearchR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.7.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.7.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +56,7 @@ Beatiful violin plot"><meta property="og:image" content="https://agdamsbo.github
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Data correlations evaluation module</h1>
-      <small class="dont-index">Source: <a href="https://github.com/agdamsbo/FreesearchR/blob/v25.7.2/R/data_plots.R" class="external-link"><code>R/data_plots.R</code></a>, <a href="https://github.com/agdamsbo/FreesearchR/blob/v25.7.2/R/plot_box.R" class="external-link"><code>R/plot_box.R</code></a>, <a href="https://github.com/agdamsbo/FreesearchR/blob/v25.7.2/R/plot_hbar.R" class="external-link"><code>R/plot_hbar.R</code></a>, and 4 more</small>
+      <small class="dont-index">Source: <a href="https://github.com/agdamsbo/FreesearchR/blob/main/R/data_plots.R" class="external-link"><code>R/data_plots.R</code></a>, <a href="https://github.com/agdamsbo/FreesearchR/blob/main/R/plot_box.R" class="external-link"><code>R/plot_box.R</code></a>, <a href="https://github.com/agdamsbo/FreesearchR/blob/main/R/plot_hbar.R" class="external-link"><code>R/plot_hbar.R</code></a>, and 4 more</small>
       <div class="d-none name"><code>data-plots.Rd</code></div>
     </div>
 
@@ -166,34 +166,40 @@ Beatiful violin plot"><meta property="og:image" content="https://agdamsbo.github
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="default_parsing.html">default_parsing</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">plot_box</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"mpg"</span>, sec <span class="op">=</span> <span class="st">"cyl"</span>, ter <span class="op">=</span> <span class="st">"gear"</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="data-plots-3.png" alt="" width="700" height="433"></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in purrr::map(p, p, function(.x) {    out &lt;- .x    if (isTRUE(x.axis)) {        out &lt;- out + ggplot2::xlim(xr)    }    if (isTRUE(y.axis)) {        out &lt;- out + ggplot2::ylim(yr)    }    out}):</span> <span style="color: #00BBBB;">ℹ</span> In index: 1.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> With name: 3.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `pluck_raw()`:</span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Index 1 must have length 1, not 11.</span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="default_parsing.html">default_parsing</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">plot_box</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"mpg"</span>, sec <span class="op">=</span> <span class="st">"cyl"</span>, ter <span class="op">=</span> <span class="st">"gear"</span>,axis.font.family<span class="op">=</span><span class="st">"mono"</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="data-plots-4.png" alt="" width="700" height="433"></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in purrr::map(p, p, function(.x) {    out &lt;- .x    if (isTRUE(x.axis)) {        out &lt;- out + ggplot2::xlim(xr)    }    if (isTRUE(y.axis)) {        out &lt;- out + ggplot2::ylim(yr)    }    out}):</span> <span style="color: #00BBBB;">ℹ</span> In index: 1.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> With name: 3.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `pluck_raw()`:</span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Index 1 must have length 1, not 11.</span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_box_single</span><span class="op">(</span><span class="st">"mpg"</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="data-plots-5.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_box_single</span><span class="op">(</span><span class="st">"mpg"</span>,<span class="st">"cyl"</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="data-plots-6.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-4.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="fu">gtsummary</span><span class="fu">::</span><span class="va"><a href="https://www.danieldsjoberg.com/gtsummary/reference/trial.html" class="external-link">trial</a></span> <span class="op">|&gt;</span> <span class="fu">plot_box_single</span><span class="op">(</span><span class="st">"age"</span>,<span class="st">"trt"</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Removed 11 rows containing non-finite outside the scale range</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> (`stat_boxplot()`).</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Removed 11 rows containing missing values or values outside the scale range</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> (`geom_point()`).</span>
-<span class="r-plt img"><img src="data-plots-7.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-5.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_hbars</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"carb"</span>, sec <span class="op">=</span> <span class="st">"cyl"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Scale for <span style="color: #00BB00;">fill</span> is already present.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Adding another scale for <span style="color: #00BB00;">fill</span>, which will replace the existing scale.</span>
-<span class="r-plt img"><img src="data-plots-8.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-6.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_hbars</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"carb"</span>, sec <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Scale for <span style="color: #00BB00;">fill</span> is already present.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Adding another scale for <span style="color: #00BB00;">fill</span>, which will replace the existing scale.</span>
-<span class="r-plt img"><img src="data-plots-9.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-7.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="default_parsing.html">default_parsing</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">plot_ridge</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"mpg"</span>, y <span class="op">=</span> <span class="st">"cyl"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Picking joint bandwidth of 1.38</span>
-<span class="r-plt img"><img src="data-plots-10.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-8.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_ridge</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"mpg"</span>, y <span class="op">=</span> <span class="st">"cyl"</span>, z <span class="op">=</span> <span class="st">"gear"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Picking joint bandwidth of 1.52</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The following aesthetics were dropped during statistical transformation: <span style="color: #00BB00;">y</span> and</span>
@@ -273,21 +279,21 @@ Beatiful violin plot"><meta property="og:image" content="https://agdamsbo.github
 <span class="r-in"><span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>g <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>, <span class="fl">100</span>, <span class="cn">TRUE</span><span class="op">)</span>, first <span class="op">=</span> <span class="fu">REDCapCAST</span><span class="fu">::</span><span class="fu">as_factor</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="fl">100</span>, <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>, last <span class="op">=</span> <span class="fu">REDCapCAST</span><span class="fu">::</span><span class="fu">as_factor</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="fl">100</span>, <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ds</span> <span class="op">|&gt;</span> <span class="fu">plot_sankey</span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"last"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: ggplot2</span>
-<span class="r-plt img"><img src="data-plots-11.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-9.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">ds</span> <span class="op">|&gt;</span> <span class="fu">plot_sankey</span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"last"</span>, color.group <span class="op">=</span> <span class="st">"sec"</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="data-plots-12.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-10.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">ds</span> <span class="op">|&gt;</span> <span class="fu">plot_sankey</span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"last"</span>, ter <span class="op">=</span> <span class="st">"g"</span>, color.group <span class="op">=</span> <span class="st">"sec"</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
-<span class="r-plt img"><img src="data-plots-13.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-11.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="default_parsing.html">default_parsing</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">plot_sankey</span><span class="op">(</span><span class="st">"cyl"</span>, <span class="st">"gear"</span>, <span class="st">"am"</span>, color.group <span class="op">=</span> <span class="st">"pri"</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
-<span class="r-plt img"><img src="data-plots-14.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-12.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co">## In this case, the last plot as the secondary variable in wrong order</span></span></span>
 <span class="r-in"><span><span class="co">## Dont know why...</span></span></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span></span></span>
@@ -296,9 +302,9 @@ Beatiful violin plot"><meta property="og:image" content="https://agdamsbo.github
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
-<span class="r-plt img"><img src="data-plots-15.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-13.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_scatter</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"mpg"</span>, sec <span class="op">=</span> <span class="st">"wt"</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="data-plots-16.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-14.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_violin</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"mpg"</span>, sec <span class="op">=</span> <span class="st">"cyl"</span>, ter <span class="op">=</span> <span class="st">"gear"</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>There was 1 warning in `summarize()`.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In argument: `V1 = .fun(as.data.frame(pick(everything())), var)`.</span>
@@ -328,11 +334,10 @@ Beatiful violin plot"><meta property="og:image" content="https://agdamsbo.github
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Set `drop = FALSE` to consider such groups for position adjustment purposes.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Groups with fewer than two datapoints have been dropped.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Set `drop = FALSE` to consider such groups for position adjustment purposes.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Groups with fewer than two datapoints have been dropped.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Set `drop = FALSE` to consider such groups for position adjustment purposes.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Groups with fewer than two datapoints have been dropped.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Set `drop = FALSE` to consider such groups for position adjustment purposes.</span>
-<span class="r-plt img"><img src="data-plots-17.png" alt="" width="700" height="433"></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in purrr::map(p, p, function(.x) {    out &lt;- .x    if (isTRUE(x.axis)) {        out &lt;- out + ggplot2::xlim(xr)    }    if (isTRUE(y.axis)) {        out &lt;- out + ggplot2::ylim(yr)    }    out}):</span> <span style="color: #00BBBB;">ℹ</span> In index: 1.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> With name: 3.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `pluck_raw()`:</span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Index 1 must have length 1, not 11.</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
