@@ -1,6 +1,11 @@
-# FreesearchR 25.7.3 - DEV
+# FreesearchR 25.8.2 - DEV
 
 - *NEW* preparing to automatically only show relevant tabs to simplify interface. NOT IMPLEMENTED YET
+
+# FreesearchR 25.8.1
+
+- *NEW* improved the use of `wrap_plot_list()` to pass on additional arguments to `patchwork::wrap_plots()` and allowed to specify axes to align in `align_axes()`.
+- *FIX* fixed axis text printed in Euler diagrams
 
 # FreesearchR 25.7.2
 

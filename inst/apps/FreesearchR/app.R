@@ -2364,7 +2364,8 @@ wrap_plot_list <- function(data,
         patchwork::wrap_plots(
           guides = "collect",
           axes = "collect",
-          axis_titles = "collect"
+          axis_titles = "collect",
+          ...
         )
       if (!is.null(tag_levels)) {
         out <- out + patchwork::plot_annotation(tag_levels = tag_levels)
@@ -2400,7 +2401,7 @@ wrap_plot_list <- function(data,
 #' @returns list of ggplot2 objects
 #' @export
 #'
-align_axes <- function(...) {
+align_axes <- function(...,x.axis=TRUE,y.axis=TRUE) {
   # https://stackoverflow.com/questions/62818776/get-axis-limits-from-ggplot-object
   # https://github.com/thomasp85/patchwork/blob/main/R/plot_multipage.R#L150
   if (ggplot2::is_ggplot(..1)) {
@@ -2418,7 +2419,16 @@ align_axes <- function(...) {
   xr <- clean_common_axis(p, "x")
 
   suppressWarnings({
-    p |> purrr::map(~ .x + ggplot2::xlim(xr) + ggplot2::ylim(yr))
+      purrr::map(p, \(.x){
+      out <- .x
+      if (isTRUE(x.axis)){
+        out <- out + ggplot2::xlim(xr)
+      }
+      if (isTRUE(y.axis)){
+        out <- out + ggplot2::ylim(yr)
+      }
+      out
+    })
   })
 }
 
@@ -5029,7 +5039,7 @@ plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
       na.omit() |>
       plot_euler_single()
   })
-
+# browser()
   # names(out)
   wrap_plot_list(out,title=glue::glue("Grouped by {get_label(data,ter)}"))
   # patchwork::wrap_plots(out, guides = "collect")
@@ -5087,6 +5097,7 @@ plot_euler_single <- function(data) {
 #'
 #' @examples
 #' mtcars |> plot_hbars(pri = "carb", sec = "cyl")
+#' mtcars |> plot_hbars(pri = "carb", sec = "cyl", ter="am")
 #' mtcars |> plot_hbars(pri = "carb", sec = NULL)
 plot_hbars <- function(data, pri, sec, ter = NULL) {
   out <- vertical_stacked_bars(data = data, score = pri, group = sec, strata = ter)
@@ -5496,17 +5507,20 @@ plot_violin <- function(data, pri, sec, ter = NULL) {
     ds <- list(data)
   }
 
-  out <- lapply(ds, \(.ds){
-    rempsyc::nice_violin(
-      data = .ds,
-      group = sec,
-      response = pri,
-      xtitle = get_label(data, var = sec),
-      ytitle = get_label(data, var = pri)
-    )
-  })
+  # browser()
+  suppressWarnings({
+    out <- lapply(ds, \(.ds){
+      rempsyc::nice_violin(
+        data = .ds,
+        group = sec,
+        response = pri,
+        xtitle = get_label(data, var = sec),
+        ytitle = get_label(data, var = pri)
+      )
+    })
 
-  wrap_plot_list(out,title=glue::glue("Grouped by {get_label(data,ter)}"))
+    wrap_plot_list(out, title = glue::glue("Grouped by {get_label(data,ter)}"))
+  })
   # patchwork::wrap_plots(out,guides = "collect")
 }
 
