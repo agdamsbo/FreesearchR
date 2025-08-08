@@ -49,7 +49,7 @@ library(rlang)
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.7.3'
+app_version <- function()'25.8.1'
 
 
 ########
@@ -2338,7 +2338,10 @@ line_break <- function(data, lineLength = 20, force = FALSE) {
 #' @param data list of ggplot2 objects
 #' @param tag_levels passed to patchwork::plot_annotation if given. Default is NULL
 #' @param title panel title
-#' @param ... ignored for argument overflow
+#' @param guides passed to patchwork::wrap_plots()
+#' @param axes passed to patchwork::wrap_plots()
+#' @param axis_titles passed to patchwork::wrap_plots()
+#' @param ... passed to patchwork::wrap_plots()
 #'
 #' @returns list of ggplot2 objects
 #' @export
@@ -2347,6 +2350,9 @@ wrap_plot_list <- function(data,
                            tag_levels = NULL,
                            title = NULL,
                            axis.font.family = NULL,
+                           guides = "collect",
+                           axes = "collect",
+                           axis_titles = "collect",
                            ...) {
   if (ggplot2::is_ggplot(data[[1]])) {
     if (length(data) > 1) {
@@ -2362,9 +2368,9 @@ wrap_plot_list <- function(data,
         })() |>
         align_axes() |>
         patchwork::wrap_plots(
-          guides = "collect",
-          axes = "collect",
-          axis_titles = "collect",
+          guides = guides,
+          axes = axes,
+          axis_titles = axis_titles,
           ...
         )
       if (!is.null(tag_levels)) {
@@ -2384,13 +2390,17 @@ wrap_plot_list <- function(data,
     cli::cli_abort("Can only wrap lists of {.cls ggplot} objects")
   }
 
-  if (inherits(x = out, what = "patchwork")) {
-    out &
-      ggplot2::theme(axis.text = ggplot2::element_text(family = axis.font.family))
-  } else {
-    out +
-      ggplot2::theme(axis.text = ggplot2::element_text(family = axis.font.family))
+  if (!is.null(axis.font.family)) {
+    if (inherits(x = out, what = "patchwork")) {
+      out <- out &
+        ggplot2::theme(axis.text = ggplot2::element_text(family = axis.font.family))
+    } else {
+      out <- out +
+        ggplot2::theme(axis.text = ggplot2::element_text(family = axis.font.family))
+    }
   }
+
+  out
 }
 
 
@@ -2401,7 +2411,7 @@ wrap_plot_list <- function(data,
 #' @returns list of ggplot2 objects
 #' @export
 #'
-align_axes <- function(...,x.axis=TRUE,y.axis=TRUE) {
+align_axes <- function(..., x.axis = TRUE, y.axis = TRUE) {
   # https://stackoverflow.com/questions/62818776/get-axis-limits-from-ggplot-object
   # https://github.com/thomasp85/patchwork/blob/main/R/plot_multipage.R#L150
   if (ggplot2::is_ggplot(..1)) {
@@ -2419,12 +2429,12 @@ align_axes <- function(...,x.axis=TRUE,y.axis=TRUE) {
   xr <- clean_common_axis(p, "x")
 
   suppressWarnings({
-      purrr::map(p, \(.x){
+    purrr::map(p, \(.x){
       out <- .x
-      if (isTRUE(x.axis)){
+      if (isTRUE(x.axis)) {
         out <- out + ggplot2::xlim(xr)
       }
-      if (isTRUE(y.axis)){
+      if (isTRUE(y.axis)) {
         out <- out + ggplot2::ylim(yr)
       }
       out
@@ -4036,7 +4046,7 @@ simple_snake <- function(data){
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.7.3-250808'
+hosted_version <- function()'v25.8.1-250808'
 
 
 ########
@@ -5025,6 +5035,7 @@ ggeulerr <- function(
 #'   D = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE)
 #' ) |> plot_euler("A", c("B", "C"), "D", seed = 4)
 #' mtcars |> plot_euler("vs", "am", seed = 1)
+#' mtcars |> plot_euler("vs", "am", "cyl", seed = 1)
 plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
   set.seed(seed = seed)
   if (!is.null(ter)) {
@@ -5040,9 +5051,8 @@ plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
       plot_euler_single()
   })
 # browser()
-  # names(out)
   wrap_plot_list(out,title=glue::glue("Grouped by {get_label(data,ter)}"))
-  # patchwork::wrap_plots(out, guides = "collect")
+  # patchwork::wrap_plots(out)
 }
 
 #' Easily plot single euler diagrams
@@ -5072,8 +5082,8 @@ plot_euler_single <- function(data) {
       legend.position = "none",
       # panel.grid.major = element_blank(),
       # panel.grid.minor = element_blank(),
-      # axis.text.y = element_blank(),
-      # axis.title.y = element_blank(),
+      axis.text.y = ggplot2::element_blank(),
+      axis.title.y = ggplot2::element_blank(),
       text = ggplot2::element_text(size = 20),
       axis.text = ggplot2::element_blank(),
       # plot.title = element_blank(),
