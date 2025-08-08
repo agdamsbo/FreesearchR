@@ -111,6 +111,7 @@ mtcars |> plot_box_single("mpg")
 mtcars |> plot_box_single("mpg","cyl")
 gtsummary::trial |> plot_box_single("age","trt")
 mtcars |> plot_hbars(pri = "carb", sec = "cyl")
+mtcars |> plot_hbars(pri = "carb", sec = "cyl", ter="am")
 mtcars |> plot_hbars(pri = "carb", sec = NULL)
 mtcars |>
   default_parsing() |>

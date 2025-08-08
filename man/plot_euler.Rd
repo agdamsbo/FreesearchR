@@ -31,4 +31,5 @@ data.frame(
   D = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE)
 ) |> plot_euler("A", c("B", "C"), "D", seed = 4)
 mtcars |> plot_euler("vs", "am", seed = 1)
+mtcars |> plot_euler("vs", "am", "cyl", seed = 1)
 }

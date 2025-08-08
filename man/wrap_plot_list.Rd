@@ -9,6 +9,9 @@ wrap_plot_list(
   tag_levels = NULL,
   title = NULL,
   axis.font.family = NULL,
+  guides = "collect",
+  axes = "collect",
+  axis_titles = "collect",
   ...
 )
 }
@@ -19,7 +22,13 @@ wrap_plot_list(
 
 \item{title}{panel title}
 
-\item{...}{ignored for argument overflow}
+\item{guides}{passed to patchwork::wrap_plots()}
+
+\item{axes}{passed to patchwork::wrap_plots()}
+
+\item{axis_titles}{passed to patchwork::wrap_plots()}
+
+\item{...}{passed to patchwork::wrap_plots()}
 }
 \value{
 list of ggplot2 objects

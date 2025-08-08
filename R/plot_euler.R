@@ -76,6 +76,7 @@ ggeulerr <- function(
 #'   D = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE)
 #' ) |> plot_euler("A", c("B", "C"), "D", seed = 4)
 #' mtcars |> plot_euler("vs", "am", seed = 1)
+#' mtcars |> plot_euler("vs", "am", "cyl", seed = 1)
 plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
   set.seed(seed = seed)
   if (!is.null(ter)) {
@@ -90,10 +91,9 @@ plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
       na.omit() |>
       plot_euler_single()
   })
-
-  # names(out)
+# browser()
   wrap_plot_list(out,title=glue::glue("Grouped by {get_label(data,ter)}"))
-  # patchwork::wrap_plots(out, guides = "collect")
+  # patchwork::wrap_plots(out)
 }
 
 #' Easily plot single euler diagrams
@@ -123,8 +123,8 @@ plot_euler_single <- function(data) {
       legend.position = "none",
       # panel.grid.major = element_blank(),
       # panel.grid.minor = element_blank(),
-      # axis.text.y = element_blank(),
-      # axis.title.y = element_blank(),
+      axis.text.y = ggplot2::element_blank(),
+      axis.title.y = ggplot2::element_blank(),
       text = ggplot2::element_text(size = 20),
       axis.text = ggplot2::element_blank(),
       # plot.title = element_blank(),

@@ -7,6 +7,7 @@
 #'
 #' @examples
 #' mtcars |> plot_hbars(pri = "carb", sec = "cyl")
+#' mtcars |> plot_hbars(pri = "carb", sec = "cyl", ter="am")
 #' mtcars |> plot_hbars(pri = "carb", sec = NULL)
 plot_hbars <- function(data, pri, sec, ter = NULL) {
   out <- vertical_stacked_bars(data = data, score = pri, group = sec, strata = ter)
