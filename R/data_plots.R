@@ -764,7 +764,8 @@ wrap_plot_list <- function(data,
         patchwork::wrap_plots(
           guides = "collect",
           axes = "collect",
-          axis_titles = "collect"
+          axis_titles = "collect",
+          ...
         )
       if (!is.null(tag_levels)) {
         out <- out + patchwork::plot_annotation(tag_levels = tag_levels)
@@ -800,7 +801,7 @@ wrap_plot_list <- function(data,
 #' @returns list of ggplot2 objects
 #' @export
 #'
-align_axes <- function(...) {
+align_axes <- function(...,x.axis=TRUE,y.axis=TRUE) {
   # https://stackoverflow.com/questions/62818776/get-axis-limits-from-ggplot-object
   # https://github.com/thomasp85/patchwork/blob/main/R/plot_multipage.R#L150
   if (ggplot2::is_ggplot(..1)) {
@@ -818,7 +819,17 @@ align_axes <- function(...) {
   xr <- clean_common_axis(p, "x")
 
   suppressWarnings({
-    p |> purrr::map(~ .x + ggplot2::xlim(xr) + ggplot2::ylim(yr))
+    p |>
+      purrr::map(p, \(.x){
+      out <- .x
+      if (isTRUE(x.axis)){
+        out <- out + ggplot2::xlim(xr)
+      }
+      if (isTRUE(y.axis)){
+        out <- out + ggplot2::ylim(yr)
+      }
+      out
+    })
   })
 }
 
