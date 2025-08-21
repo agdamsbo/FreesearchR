@@ -153,7 +153,8 @@ dummy_Imports <- function() {
     cardx::all_of(),
     parameters::ci(),
     DT::addRow(),
-    bslib::accordion()
+    bslib::accordion(),
+    NHANES::NHANES()
   )
   # https://github.com/hadley/r-pkgs/issues/828
 }

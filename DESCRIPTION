@@ -64,7 +64,9 @@ Imports:
     RcppArmadillo,
     ggcorrplot,
     shinyjs,
-    emmeans
+    emmeans,
+    readxl,
+    NHANES
 Suggests: 
     styler,
     devtools,
