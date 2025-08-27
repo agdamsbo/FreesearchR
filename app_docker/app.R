@@ -3527,7 +3527,8 @@ dummy_Imports <- function() {
     cardx::all_of(),
     parameters::ci(),
     DT::addRow(),
-    bslib::accordion()
+    bslib::accordion(),
+    NHANES::NHANES()
   )
   # https://github.com/hadley/r-pkgs/issues/828
 }
@@ -4046,7 +4047,7 @@ simple_snake <- function(data){
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.8.1-250808'
+hosted_version <- function()'v25.8.1-250827'
 
 
 ########
@@ -8486,10 +8487,11 @@ ui_elements <- function(selection) {
       icon = shiny::icon("pen-to-square"),
       value = "nav_prepare",
       bslib::nav_panel(
-        title = "Overview",
+        title = "Overview and filter",
         icon = shiny::icon("eye"),
         value = "nav_prepare_overview",
         tags$h3("Overview and filtering"),
+        # validation_ui("validation_col"),
         fluidRow(
           shiny::column(
             width = 9,
@@ -10963,6 +10965,18 @@ server <- function(input, output, session) {
     # rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
   })
 
+
+  # validation_server(id = "validation_col",
+  #                   data = purrr::map2(
+  #                     .x = validation_lib()[1],
+  #                     .y = list(
+  #                       list(
+  #                         x =
+  #                           reactive(rv$data),
+  #                         y =
+  #                           reactive(rv$data_variables)
+  #                         )),
+  #                     make_validation))
 
   #########  Data filter
   # IDEAFilter has the least cluttered UI, but might have a License issue
