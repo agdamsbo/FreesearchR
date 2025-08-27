@@ -1,6 +1,10 @@
-# FreesearchR 25.8.2 - DEV
+# FreesearchR 25.8.2
 
-- *NEW* preparing to automatically only show relevant tabs to simplify interface. NOT IMPLEMENTED YET
+- *NEW* Including the [NHANES](https://cran.r-project.org/web/packages/NHANES/refman/NHANES.html#NHANES) dataset for experimentation.
+
+- *BUG* Improved JS to correctly handle menu drop downs on mobile devices
+
+- *DOCS* Updated "Prepare > Overview" to "Prepare > Overview and filter" to better reflect options.
 
 # FreesearchR 25.8.1
 

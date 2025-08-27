@@ -160,10 +160,11 @@ ui_elements <- function(selection) {
       icon = shiny::icon("pen-to-square"),
       value = "nav_prepare",
       bslib::nav_panel(
-        title = "Overview",
+        title = "Overview and filter",
         icon = shiny::icon("eye"),
         value = "nav_prepare_overview",
         tags$h3("Overview and filtering"),
+        # validation_ui("validation_col"),
         fluidRow(
           shiny::column(
             width = 9,
