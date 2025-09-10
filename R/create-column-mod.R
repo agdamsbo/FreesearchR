@@ -63,7 +63,7 @@ create_column_ui <- function(id) {
         width = 6,
         textInput(
           inputId = ns("new_column"),
-          label = i18n("New column name:"),
+          label = i18n$t("New column name:"),
           value = "new_column1",
           width = "100%"
         )
@@ -72,7 +72,7 @@ create_column_ui <- function(id) {
         width = 6,
         shinyWidgets::virtualSelectInput(
           inputId = ns("group_by"),
-          label = i18n("Group calculation by:"),
+          label = i18n$t("Group calculation by:"),
           choices = NULL,
           multiple = TRUE,
           disableSelectAll = TRUE,
@@ -83,7 +83,7 @@ create_column_ui <- function(id) {
     ),
     shiny::textAreaInput(
       inputId = ns("expression"),
-      label = i18n("Enter an expression to define new column:"),
+      label = i18n$t("Enter an expression to define new column:"),
       value = "",
       width = "100%",
       rows = 6
@@ -91,7 +91,7 @@ create_column_ui <- function(id) {
     tags$i(
       class = "d-block",
       phosphoricons::ph("info"),
-      datamods::i18n("Click on a column name to add it to the expression:")
+      i18n$t("Click on a column name to add it to the expression:")
     ),
     uiOutput(outputId = ns("columns")),
     uiOutput(outputId = ns("feedback")),
@@ -105,7 +105,7 @@ create_column_ui <- function(id) {
       actionButton(
         inputId = ns("compute"),
         label = tagList(
-          phosphoricons::ph("gear"), i18n("Create column")
+          phosphoricons::ph("gear"), i18n$t("Create column")
         ),
         class = "btn-outline-primary",
         width = "100%"
@@ -140,9 +140,9 @@ create_column_server <- function(id,
       info_alert <- shinyWidgets::alert(
         status = "info",
         phosphoricons::ph("question"),
-        datamods::i18n("Choose a name for the column to be created or modified,"),
-        datamods::i18n("then enter an expression before clicking on the button above to validate or on "),
-        phosphoricons::ph("trash"), datamods::i18n("to delete it.")
+        i18n$t("Choose a name for the column to be created or modified,"),
+        i18n$t("then enter an expression before clicking on the button above to validate or on "),
+        phosphoricons::ph("trash"), i18n$t("to delete it.")
       )
 
       rv <- reactiveValues(
@@ -187,7 +187,7 @@ create_column_server <- function(id,
         if (input$new_column == "") {
           rv$feedback <- shinyWidgets::alert(
             status = "warning",
-            phosphoricons::ph("warning"), datamods::i18n("New column name cannot be empty")
+            phosphoricons::ph("warning"), i18n$t("New column name cannot be empty")
           )
         }
       })
@@ -252,7 +252,7 @@ list_allowed_operations <- function() {
 #'
 #' @rdname create-column
 modal_create_column <- function(id,
-                                title = i18n("Create a new column"),
+                                title = i18n$t("Create a new column"),
                                 easyClose = TRUE,
                                 size = "l",
                                 footer = NULL) {
@@ -277,7 +277,7 @@ modal_create_column <- function(id,
 #' @importFrom htmltools tagList
 #' @rdname create-column
 winbox_create_column <- function(id,
-                                 title = i18n("Create a new column"),
+                                 title = i18n$t("Create a new column"),
                                  options = shinyWidgets::wbOptions(),
                                  controls = shinyWidgets::wbControls()) {
   ns <- NS(id)
@@ -311,7 +311,7 @@ try_compute_column <- function(expression,
   }
   funs <- unlist(c(extract_calls(parsed), lapply(parsed, extract_calls)), recursive = TRUE)
   if (!are_allowed_operations(funs, allowed_operations)) {
-    return(datamods:::alert_error(datamods::i18n("Some operations are not allowed")))
+    return(datamods:::alert_error(i18n$t("Some operations are not allowed")))
   }
   if (!isTruthy(by)) {
     result <- try(
@@ -351,7 +351,7 @@ try_compute_column <- function(expression,
   )
   shinyWidgets::alert(
     status = "success",
-    phosphoricons::ph("check"), datamods::i18n("Column added!")
+    phosphoricons::ph("check"), i18n$t("Column added!")
   )
 }
 
@@ -421,7 +421,7 @@ make_choices_with_infos <- function(data) {
       #   NULL
       # }
       description <- if (is.atomic(values)) {
-        paste(i18n("Unique values:"), data.table::uniqueN(values))
+        paste(i18n$t("Unique values:"), data.table::uniqueN(values))
       } else {
         ""
       }

@@ -13,7 +13,7 @@ update_variables_ui <- function(id, title = "") {
   ns <- NS(id)
   if (isTRUE(title)) {
     title <- htmltools::tags$h4(
-      i18n("Update & select variables"),
+      i18n$t("Update & select variables"),
       class = "datamods-title"
     )
   }
@@ -35,19 +35,19 @@ update_variables_ui <- function(id, title = "") {
             ),
             shinyWidgets::textInputIcon(
               inputId = ns("format"),
-              label = i18n("Date format:"),
+              label = i18n$t("Date format:"),
               value = "%Y-%m-%d",
               icon = list(phosphoricons::ph("clock"))
             ),
             shinyWidgets::textInputIcon(
               inputId = ns("origin"),
-              label = i18n("Date to use as origin to convert date/datetime:"),
+              label = i18n$t("Date to use as origin to convert date/datetime:"),
               value = "1970-01-01",
               icon = list(phosphoricons::ph("calendar"))
             ),
             shinyWidgets::textInputIcon(
               inputId = ns("dec"),
-              label = i18n("Decimal separator:"),
+              label = i18n$t("Decimal separator:"),
               value = ".",
               icon = list("0.00")
             )
@@ -75,8 +75,8 @@ update_variables_ui <- function(id, title = "") {
     shiny::actionButton(
       inputId = ns("validate"),
       label = htmltools::tagList(
-        phosphoricons::ph("arrow-circle-right", title = datamods::i18n("Apply changes")),
-        datamods::i18n("Apply changes")
+        phosphoricons::ph("arrow-circle-right", title = i18n$t("Apply changes")),
+        i18n$t("Apply changes")
       ),
       width = "100%"
     )
@@ -115,12 +115,12 @@ update_variables_server <- function(id,
       output$data_info <- shiny::renderUI({
         shiny::req(data_r())
         data_description(data_r())
-        # sprintf(i18n("Data has %s observations and %s variables."), nrow(data), ncol(data))
+        # sprintf(i18n$t("Data has %s observations and %s variables."), nrow(data), ncol(data))
       })
 
       variables_r <- shiny::reactive({
         shiny::validate(
-          shiny::need(data(), i18n("No data to display."))
+          shiny::need(data(), i18n$t("No data to display."))
         )
         data <- data_r()
         if (isTRUE(return_data_on_init)) {
@@ -225,7 +225,7 @@ update_variables_server <- function(id,
             datamods:::insert_alert(
               selector = ns("update"),
               status = "success",
-              tags$b(phosphoricons::ph("check"), datamods::i18n("Data successfully updated!"))
+              tags$b(phosphoricons::ph("check"), i18n$t("Data successfully updated!"))
             )
             updated_data$x <- data
             updated_data$list_rename <- list_rename
@@ -804,3 +804,4 @@ clean_date <- function(data) {
     }) |>
     unname()
 }
+#

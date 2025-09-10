@@ -14,7 +14,7 @@ update_factor_server(id, data_r = reactive(NULL))
 
 modal_update_factor(
   id,
-  title = i18n("Update levels of a factor"),
+  title = i18n$t("Update levels of a factor"),
   easyClose = TRUE,
   size = "l",
   footer = NULL
@@ -22,7 +22,7 @@ modal_update_factor(
 
 winbox_update_factor(
   id,
-  title = i18n("Update levels of a factor"),
+  title = i18n$t("Update levels of a factor"),
   options = shinyWidgets::wbOptions(),
   controls = shinyWidgets::wbControls()
 )

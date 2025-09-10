@@ -1,5 +1,13 @@
 // Automatically close drop-downs on navigation
 // Thanks to claude.ai
+$(document).ready(function() {
+ var language =  window.navigator.userLanguage || window.navigator.language;
+ var iso639Language = language.split('-')[0];
+ Shiny.onInputChange('browser_lang', iso639Language);
+ console.log('Browser language:',iso639Language);
+});
+
+
 $(document).on('shown.bs.tab', '#main_panel', function(e) {
   // Close dropdown in this specific navset only
   $('#main_panel .dropdown-menu').removeClass('show');
@@ -8,6 +16,12 @@ $(document).on('shown.bs.tab', '#main_panel', function(e) {
 
 
 $(document).on('shiny:sessioninitialized', function() {
+  // Function to get browser language
+  // var language =  window.navigator.userLanguage || window.navigator.language;
+  // var iso639Language = language.split('-')[0];
+  // Shiny.onInputChange('browser_lang', iso639Language);
+  // console.log('Browser language:',iso639Language);
+
   // Function to collapse navbar on mobile
   function collapseNavbar() {
     var navbar = $('.navbar-collapse');
@@ -54,4 +68,7 @@ $(document).on('shiny:sessioninitialized', function() {
       collapseNavbar();
     }
   });
+
+
 });
+

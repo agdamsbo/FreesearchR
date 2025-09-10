@@ -24,7 +24,7 @@ import_file_ui <- function(id,
 
   if (isTRUE(title)) {
     title <- shiny::tags$h4(
-      datamods:::i18n("Import a file"),
+      "Import a file",
       class = "datamods-title"
     )
   }
@@ -35,7 +35,7 @@ import_file_ui <- function(id,
       width = 6,
       shinyWidgets::numericInputIcon(
         inputId = ns("skip_rows"),
-        label = datamods:::i18n("Rows to skip before reading data:"),
+        label = i18n$t("Rows to skip before reading data:"),
         value = 0,
         min = 0,
         icon = list("n ="),
@@ -45,20 +45,20 @@ import_file_ui <- function(id,
       shiny::tagAppendChild(
         shinyWidgets::textInputIcon(
           inputId = ns("na_label"),
-          label = datamods:::i18n("Missing values character(s):"),
+          label = i18n$t("Missing values character(s):"),
           value = "NA,,'',na",
           icon = list("NA"),
           size = "sm",
           width = "100%"
         ),
-        shiny::helpText(phosphoricons::ph("info"), datamods:::i18n("if several use a comma (',') to separate them"))
+        shiny::helpText(phosphoricons::ph("info"), i18n$t("if several use a comma (',') to separate them"))
       )
     ),
     shiny::column(
       width = 6,
       shinyWidgets::textInputIcon(
         inputId = ns("dec"),
-        label = datamods:::i18n("Decimal separator:"),
+        label = i18n$t("Decimal separator:"),
         value = ".",
         icon = list("0.00"),
         size = "sm",
@@ -66,7 +66,7 @@ import_file_ui <- function(id,
       ),
       selectInputIcon(
         inputId = ns("encoding"),
-        label = datamods:::i18n("Encoding:"),
+        label = i18n$t("Encoding:"),
         choices = c(
           "UTF-8" = "UTF-8",
           "Latin1" = "latin1"
@@ -81,9 +81,9 @@ import_file_ui <- function(id,
   file_ui <- shiny::tagAppendAttributes(
     shiny::fileInput(
       inputId = ns("file"),
-      label = datamods:::i18n("Upload a file:"),
-      buttonLabel = datamods:::i18n("Browse..."),
-      placeholder = datamods:::i18n("No file selected; maximum file size is 5 mb"),
+      label = i18n$t("Upload a file:"),
+      buttonLabel = i18n$t("Browse..."),
+      placeholder = "No file selected; maximum file size is 5 mb",
       accept = file_extensions,
       width = "100%",
       ## A solution to allow multiple file upload is being considered
@@ -130,7 +130,7 @@ import_file_ui <- function(id,
       id = ns("sheet-container"),
       shinyWidgets::pickerInput(
         inputId = ns("sheet"),
-        label = datamods:::i18n("Select sheet to import:"),
+        label = i18n$t("Select sheet to import:"),
         choices = NULL,
         width = "100%",
         multiple = TRUE
@@ -141,8 +141,11 @@ import_file_ui <- function(id,
       shinyWidgets::alert(
         id = ns("import-result"),
         status = "info",
-        shiny::tags$b(datamods:::i18n("No file selected:")),
-        sprintf(datamods:::i18n("You can import %s files"), paste(file_extensions, collapse = ", ")),
+        shiny::tags$b(i18n$t("No file selected.")),
+        # shiny::textOutput(ns("trans_format_text")),
+        # This is the easiest solution, though not gramatically perfect
+        i18n$t("You can choose between these file types:"), paste(file_extensions,collapse=', '),
+        # sprintf("You can import %s files", paste(file_extensions, collapse = ", ")),
         dismissible = TRUE
       )
     ),
@@ -173,6 +176,7 @@ import_file_server <- function(id,
                                btn_show_data = TRUE,
                                show_data_in = c("popup", "modal"),
                                trigger_return = c("button", "change"),
+                               file_extensions_text = paste(c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat", ".sav"),collapse = ", "),
                                return_class = c("data.frame", "data.table", "tbl_df", "raw"),
                                reset = reactive(NULL)) {
   read_fns <- list(
@@ -205,6 +209,11 @@ import_file_server <- function(id,
         datamods:::button_import()
       }
     })
+
+    # ## Translations
+    # shiny::observe({
+    #   output$trans_format_text <- shiny::renderText(glue::glue(i18n$t("You can import {file_extensions_text} files")))
+    # })
 
     shiny::observeEvent(input$file, {
       ## Several steps are taken to ensure no errors on changed input file
@@ -270,7 +279,7 @@ import_file_server <- function(id,
 
         if (inherits(imported, "try-error") || NROW(imported) < 1) {
           datamods:::toggle_widget(inputId = "confirm", enable = FALSE)
-          datamods:::insert_error(mssg = datamods:::i18n(attr(imported, "condition")$message))
+          datamods:::insert_error(mssg = i18n$t(attr(imported, "condition")$message))
           temporary_rv$status <- "error"
           temporary_rv$data <- NULL
           temporary_rv$name <- NULL
@@ -285,7 +294,7 @@ import_file_server <- function(id,
               imported,
               trigger_return = trigger_return,
               btn_show_data = btn_show_data,
-              extra = if (isTRUE(input$preview_data)) datamods:::i18n("First five rows are shown below:")
+              extra = if (isTRUE(input$preview_data)) i18n$t("First five rows are shown below:")
             )
           )
           temporary_rv$status <- "success"
@@ -300,7 +309,7 @@ import_file_server <- function(id,
     observeEvent(input$see_data, {
       tryCatch(
         {
-          datamods:::show_data(default_parsing(temporary_rv$data), title = datamods:::i18n("Imported data"), type = show_data_in)
+          datamods:::show_data(default_parsing(temporary_rv$data), title = i18n$t("Imported data"), type = show_data_in)
         },
         # warning = function(warn) {
         #     showNotification(warn, type = "warning")

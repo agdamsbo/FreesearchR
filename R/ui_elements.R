@@ -17,6 +17,10 @@ ui_elements <- function(selection) {
       # title = shiny::div(htmltools::img(src="FreesearchR-logo-white-nobg-h80.png")),
       icon = shiny::icon("house"),
       shiny::fluidRow(
+        # "The browser language is",
+        # textOutput("your_lang"),
+        # p(i18n$t("Hello")),
+        # shiny::uiOutput(outputId = "language_select"),
         ## On building the dev-version for shinyapps.io, the dev_banner() is redefined
         ## Default just output "NULL"
         ## This could probably be achieved more legantly, but this works.
@@ -24,9 +28,12 @@ ui_elements <- function(selection) {
         shiny::column(width = 2),
         shiny::column(
           width = 8,
-          shiny::markdown(readLines("www/intro.md")),
-          shiny::column(width = 2)
-        )
+          shiny::uiOutput(outputId = "language_select"),
+          htmlOutput("intro_text")
+          # shiny::includeHTML(i18n$t("www/intro.html"))
+          # shiny::markdown(readLines(i18n$t("www/intro.md")))
+        ),
+        shiny::column(width = 2)
       )
     ),
     ##############################################################################
@@ -35,28 +42,32 @@ ui_elements <- function(selection) {
     #########
     ##############################################################################
     "import" = bslib::nav_panel(
-      title = "Get started",
+      title = i18n$t("Get started"),
       icon = shiny::icon("play"),
       value = "nav_import",
       shiny::fluidRow(
         shiny::column(width = 2),
         shiny::column(
           width = 8,
-          shiny::h4("Choose your data source"),
-          shiny::br(),
+          shiny::h4(i18n$t("Choose your data")),
+          # shiny::br(),
           # shiny::uiOutput(outputId = "source"),
-          shinyWidgets::radioGroupButtons(
+          # radioGroupButtons(
+          #   inputId = "source",
+          #   selected = "file",
+          #   choices = c("File" = "file"),
+          #   size = "lg"
+          # ),
+          shiny::selectInput(
             inputId = "source",
+            label="",
             selected = "file",
-            choices = c(
-              "File upload" = "file",
-              "REDCap server export" = "redcap",
-              "Local or sample data" = "env"
-            ),
-            size = "lg"
+            choices = "file",
+            width = "100%"
           ),
-          shiny::tags$script('document.querySelector("#source div").style.width = "100%"'),
-          shiny::helpText("Upload a file from your device, get data directly from REDCap or select a sample data set for testing from the app."),
+          # shiny::tags$script('document.querySelector("#source div").style.width = "100%"'),
+          ## Update this to change depending on run locally or hosted
+          shiny::helpText(i18n$t("Upload a file, get data directly from REDCap or use local or sample data.")),
           shiny::br(),
           shiny::br(),
           shiny::conditionalPanel(
@@ -70,13 +81,14 @@ ui_elements <- function(selection) {
           ),
           shiny::conditionalPanel(
             condition = "input.source=='redcap'",
-            shinyWidgets::alert(
-              id = "redcap-warning",
-              status = "info",
-              shiny::tags$h2(shiny::markdown("Careful with sensitive data")),
-              shiny::tags$p("The", shiny::tags$i(shiny::tags$b("FreesearchR")), "app only stores data for analyses, but please only use with sensitive data when running locally.", "", shiny::tags$a("Read more here", href = "https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine"), "."),
-              dismissible = TRUE
-            ),
+            shiny::uiOutput(outputId = "redcap_warning"),
+            # shinyWidgets::alert(
+            #   id = "redcap-warning",
+            #   status = "warning",
+            #   shiny::tags$h2(i18n$t("Please be mindfull handling sensitive data")),
+            #   shiny::HTML(i18n$t("<p>The <em><strong>FreesearchR</strong></em> app only stores data for analyses, but please only use with sensitive data when running locally. <a href='https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine'>Read more here</a></p>")),
+            #   dismissible = TRUE
+            # ),
             m_redcap_readUI(
               id = "redcap_import",
               title = ""
@@ -95,18 +107,18 @@ ui_elements <- function(selection) {
             shiny::br(),
             shiny::actionButton(
               inputId = "modal_initial_view",
-              label = "Quick overview",
+              label = i18n$t("Quick overview"),
               width = "100%",
               icon = shiny::icon("binoculars"),
               disabled = FALSE
             ),
             shiny::br(),
             shiny::br(),
-            shiny::h5("Select variables for final import"),
+            shiny::h5(i18n$t("Select variables for final import")),
             shiny::fluidRow(
               shiny::column(
                 width = 6,
-                shiny::p("Exclude incomplete variables:"),
+                shiny::p(i18n$t("Exclude incomplete variables:")),
                 shiny::br(),
                 shinyWidgets::noUiSliderInput(
                   inputId = "complete_cutoff",
@@ -119,12 +131,12 @@ ui_elements <- function(selection) {
                   format = shinyWidgets::wNumbFormat(decimals = 0),
                   color = datamods:::get_primary_color()
                 ),
-                shiny::helpText("Only include variables missing less observations than the specified percentage."),
+                shiny::helpText(i18n$t("Only include variables missing less observations than the specified percentage. At 0, only complete variables are included; at 100, all variables are included.")),
                 shiny::br()
               ),
               shiny::column(
                 width = 6,
-                shiny::p("Manual selection:"),
+                shiny::p(i18n$t("Manual selection:")),
                 shiny::br(),
                 shiny::uiOutput(outputId = "import_var"),
                 shiny::br()
@@ -135,12 +147,11 @@ ui_elements <- function(selection) {
             shiny::br(),
             shiny::actionButton(
               inputId = "act_start",
-              label = "Start",
+              label = i18n$t("Let's begin!"),
               width = "100%",
               icon = shiny::icon("play"),
               disabled = TRUE
             ),
-            shiny::helpText('After importing, hit "Start" or navigate to the desired tab.'),
             shiny::br(),
             shiny::br()
           ),
@@ -160,24 +171,23 @@ ui_elements <- function(selection) {
       icon = shiny::icon("pen-to-square"),
       value = "nav_prepare",
       bslib::nav_panel(
-        title = "Overview and filter",
+        title = i18n$t("Overview and filter"),
         icon = shiny::icon("eye"),
         value = "nav_prepare_overview",
-        tags$h3("Overview and filtering"),
-        # validation_ui("validation_col"),
+        tags$h3(i18n$t("Overview and filtering")),
         fluidRow(
           shiny::column(
             width = 9,
             shiny::uiOutput(outputId = "data_info", inline = TRUE),
             shiny::tags$p(
-              "Below is a short summary table, on the right you can click to visualise data classes or browse data and create different data filters."
+              i18n$t("Below you find a summary table for quick insigths, and on the right you can visualise data classes, browse data and apply different data filters.")
             )
           ),
           shiny::column(
             width = 3,
             shiny::actionButton(
               inputId = "modal_visual_overview",
-              label = "Visual overview",
+              label = i18n$t("Visual overview"),
               width = "100%",
               disabled = TRUE
             ),
@@ -185,7 +195,7 @@ ui_elements <- function(selection) {
             shiny::br(),
             shiny::actionButton(
               inputId = "modal_browse",
-              label = "Browse data",
+              label = i18n$t("Browse data"),
               width = "100%",
               disabled = TRUE
             ),
@@ -205,21 +215,24 @@ ui_elements <- function(selection) {
           ),
           shiny::column(
             width = 3,
-            shiny::tags$h6("Filter data types"),
+            shiny::tags$h6(i18n$t("Filter data types")),
             shiny::uiOutput(
               outputId = "column_filter"
             ),
+            ## This needs to run in server for translation
             shiny::helpText("Read more on how ", tags$a(
               "data types",
               href = "https://agdamsbo.github.io/FreesearchR/articles/data-types.html",
               target = "_blank",
               rel = "noopener noreferrer"
             ), " are defined."),
+            validation_ui("validation_var"),
             shiny::br(),
             shiny::br(),
-            shiny::tags$h6("Filter observations"),
-            shiny::tags$p("Filter on observation level"),
+            shiny::tags$h6(i18n$t("Filter observations")),
+            shiny::tags$p(i18n$t("Apply filter on observation")),
             IDEAFilter::IDEAFilter_ui("data_filter"),
+            validation_ui("validation_obs"),
             shiny::br(),
             shiny::br()
           )
@@ -229,24 +242,24 @@ ui_elements <- function(selection) {
         shiny::br()
       ),
       bslib::nav_panel(
-        title = "Modify",
+        title = i18n$t("Edit and create data"),
         icon = shiny::icon("file-pen"),
-        tags$h3("Subset, rename and convert variables"),
+        tags$h3(i18n$t("Subset, rename and convert variables")),
         fluidRow(
           shiny::column(
             width = 9,
             shiny::tags$p(
-              shiny::markdown("Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."),
-              shiny::markdown("There are more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with *R* code. At the bottom you can restore the original data."),
-              shiny::markdown("Please note that data modifications are applied before any filtering.")
+              i18n$t("Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."),
+              i18n$t("There are more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with R code. At the bottom you can restore the original data."),
+              i18n$t("Please note that data modifications are applied before any filtering.")
             )
           )
         ),
         update_variables_ui("modal_variables"),
         shiny::tags$br(),
         shiny::tags$br(),
-        shiny::tags$h4("Advanced data manipulation"),
-        shiny::tags$p("Below options allow more advanced varaible manipulations."),
+        shiny::tags$h4(i18n$t("Advanced data manipulation")),
+        shiny::tags$p(i18n$t("Below options allow more advanced varaible manipulations.")),
         shiny::tags$br(),
         shiny::tags$br(),
         shiny::fluidRow(
@@ -254,11 +267,11 @@ ui_elements <- function(selection) {
             width = 4,
             shiny::actionButton(
               inputId = "modal_update",
-              label = "Reorder factor levels",
+              label = i18n$t("Reorder factor levels"),
               width = "100%"
             ),
             shiny::tags$br(),
-            shiny::helpText("Reorder the levels of factor/categorical variables."),
+            shiny::helpText(i18n$t("Reorder the levels of factor/categorical variables.")),
             shiny::tags$br(),
             shiny::tags$br()
           ),
@@ -266,11 +279,11 @@ ui_elements <- function(selection) {
             width = 4,
             shiny::actionButton(
               inputId = "modal_cut",
-              label = "New factor",
+              label = i18n$t("New factor"),
               width = "100%"
             ),
             shiny::tags$br(),
-            shiny::helpText("Create factor/categorical variable from a continous variable (number/date/time)."),
+            shiny::helpText(i18n$t("Create factor/categorical variable from a continous variable (number/date/time).")),
             shiny::tags$br(),
             shiny::tags$br()
           ),
@@ -278,30 +291,30 @@ ui_elements <- function(selection) {
             width = 4,
             shiny::actionButton(
               inputId = "modal_column",
-              label = "New variable",
+              label = i18n$t("New variable"),
               width = "100%"
             ),
             shiny::tags$br(),
-            shiny::helpText(shiny::markdown("Create a new variable/column based on an *R*-expression.")),
+            shiny::helpText(i18n$t("Create a new variable based on an R-expression.")),
             shiny::tags$br(),
             shiny::tags$br()
           )
         ),
-        tags$h4("Compare modified data to original"),
+        tags$h4(i18n$t("Compare modified data to original")),
         shiny::tags$br(),
         shiny::tags$p(
-          "Raw print of the original vs the modified data."
+          i18n$t("Raw print of the original vs the modified data.")
         ),
         shiny::tags$br(),
         shiny::fluidRow(
           shiny::column(
             width = 6,
-            shiny::tags$b("Original data:"),
+            shiny::tags$b(i18n$t("Original data:")),
             shiny::verbatimTextOutput("original_str")
           ),
           shiny::column(
             width = 6,
-            shiny::tags$b("Modified data:"),
+            shiny::tags$b(i18n$t("Modified data:")),
             shiny::verbatimTextOutput("modified_str")
           )
         ),
@@ -431,7 +444,7 @@ ui_elements <- function(selection) {
       ),
     ##############################################################################
     #########
-    #########  Download panel
+    #########  Visuals panel
     #########
     ##############################################################################
     "visuals" = do.call(
@@ -481,11 +494,13 @@ ui_elements <- function(selection) {
           shiny::column(width = 2),
           shiny::column(
             width = 8,
+            shiny::h4(i18n$t("Analysis validation")),
+            validation_ui("validation_all"),
             shiny::fluidRow(
               shiny::column(
                 width = 6,
-                shiny::h4("Report"),
-                shiny::helpText("Choose your favourite output file format for further work, and download, when the analyses are done."),
+                shiny::h4(i18n$t("Report")),
+                shiny::helpText(i18n$t("Choose your favourite output file format for further work, and download, when the analyses are done.")),
                 shiny::br(),
                 shiny::br(),
                 shiny::selectInput(
@@ -590,13 +605,12 @@ ui_elements <- function(selection) {
     #   shiny::br()
     # )
   )
-if (!is.null(selection)){
-  out[[selection]]
-} else {
-  out
-}
-
+  if (!is.null(selection)) {
+    out[[selection]]
+  } else {
+    out
   }
+}
 
 
 # ls <- list("home"=1:4,

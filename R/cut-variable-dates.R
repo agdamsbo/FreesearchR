@@ -208,7 +208,7 @@ cut_variable_ui <- function(id) {
         width = 3,
         shinyWidgets::virtualSelectInput(
           inputId = ns("variable"),
-          label = datamods:::i18n("Variable to cut:"),
+          label = i18n$t("Variable to cut:"),
           choices = NULL,
           width = "100%"
         )
@@ -221,7 +221,7 @@ cut_variable_ui <- function(id) {
         width = 3,
         numericInput(
           inputId = ns("n_breaks"),
-          label = datamods:::i18n("Number of breaks:"),
+          label = i18n$t("Number of breaks:"),
           value = 3,
           min = 2,
           max = 12,
@@ -232,12 +232,12 @@ cut_variable_ui <- function(id) {
         width = 3,
         checkboxInput(
           inputId = ns("right"),
-          label = datamods:::i18n("Close intervals on the right"),
+          label = i18n$t("Close intervals on the right"),
           value = TRUE
         ),
         checkboxInput(
           inputId = ns("include_lowest"),
-          label = datamods:::i18n("Include lowest value"),
+          label = i18n$t("Include lowest value"),
           value = TRUE
         )
       )
@@ -251,7 +251,7 @@ cut_variable_ui <- function(id) {
     toastui::datagridOutput2(outputId = ns("count")),
     actionButton(
       inputId = ns("create"),
-      label = tagList(phosphoricons::ph("scissors"), datamods:::i18n("Create factor variable")),
+      label = tagList(phosphoricons::ph("scissors"), i18n$t("Create factor variable")),
       class = "btn-outline-primary float-end"
     ),
     tags$div(class = "clearfix")
@@ -321,7 +321,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
 
         shinyWidgets::noUiSliderInput(
           inputId = session$ns("fixed_brks"),
-          label = datamods:::i18n("Fixed breaks:"),
+          label = i18n$t("Fixed breaks:"),
           min = lower,
           max = upper,
           value = brks,
@@ -376,7 +376,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
 
         shinyWidgets::virtualSelectInput(
           inputId = session$ns("method"),
-          label = datamods:::i18n("Method:"),
+          label = i18n$t("Method:"),
           choices = choices,
           selected = NULL,
           width = "100%"
@@ -570,7 +570,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
 #'
 #' @rdname cut-variable
 modal_cut_variable <- function(id,
-                               title = datamods:::i18n("Convert Numeric to Factor"),
+                               title = i18n$t("Convert Numeric to Factor"),
                                easyClose = TRUE,
                                size = "l",
                                footer = NULL) {

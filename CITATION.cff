@@ -9,7 +9,7 @@ type: software
 license: AGPL-3.0-or-later
 title: 'FreesearchR: A free and open-source browser based data analysis tool for researchers
   with publication ready output'
-version: 25.8.2
+version: 25.8.3
 doi: 10.5281/zenodo.14527429
 identifiers:
 - type: url
@@ -1030,6 +1030,27 @@ references:
     email: rpruim@calvin.edu
   year: '2025'
   doi: 10.32614/CRAN.package.NHANES
+- type: software
+  title: shiny.i18n
+  abstract: 'shiny.i18n: Shiny Applications Internationalization'
+  notes: Imports
+  url: https://appsilon.github.io/shiny.i18n/
+  repository: https://CRAN.R-project.org/package=shiny.i18n
+  authors:
+  - family-names: Nowicki
+    given-names: Jakub
+    email: opensource+kuba@appsilon.com
+  - family-names: Krzemiński
+    given-names: Dominik
+    email: raymon92@gmail.com
+  - family-names: Igras
+    given-names: Krystian
+    email: krystian8207@gmail.com
+  - family-names: Sobolewski
+    given-names: Jakub
+    email: jakub.sobolewski@appsilon.com
+  year: '2025'
+  doi: 10.32614/CRAN.package.shiny.i18n
 - type: software
   title: styler
   abstract: 'styler: Non-Invasive Pretty Printing of R Code'

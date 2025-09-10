@@ -20,6 +20,8 @@ import_file_server(
   btn_show_data = TRUE,
   show_data_in = c("popup", "modal"),
   trigger_return = c("button", "change"),
+  file_extensions_text = paste(c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst",
+    ".sas7bdat", ".sav"), collapse = ", "),
   return_class = c("data.frame", "data.table", "tbl_df", "raw"),
   reset = reactive(NULL)
 )

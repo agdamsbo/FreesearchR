@@ -2,7 +2,7 @@
 output: html_fragment
 ---
 
-# Welcome <img src="FreesearchR-logo.png" style="float: right;"/>
+# Karibu <img src="FreesearchR-logo.png" style="float: right;"/>
 
 This is the ***FreesearchR*** data analysis tool, a free tool for basic data evaluation and analysis. If you need more advanced tools, start with ***FreesearchR*** and then you'll probably be better off using *R* or similar directly.
 
