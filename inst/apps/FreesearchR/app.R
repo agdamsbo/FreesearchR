@@ -1,6 +1,13 @@
 
 
 ########
+#### Current file: /Users/au301842/FreesearchR/app/global_vars.R 
+########
+
+trans_path <- here::here("inst/translations")
+
+
+########
 #### Current file: /Users/au301842/FreesearchR/app/libs.R 
 ########
 
@@ -40,7 +47,7 @@ library(rlang)
 library(shiny.i18n)
 
 ## Translation init
-i18n <- shiny.i18n::Translator$new(translation_csvs_path = here::here("inst/translations"))
+i18n <- shiny.i18n::Translator$new(translation_csvs_path = trans_path)
 
 i18n$set_translation_language("en")
 
@@ -4253,7 +4260,6 @@ import_file_server <- function(id,
                                btn_show_data = TRUE,
                                show_data_in = c("popup", "modal"),
                                trigger_return = c("button", "change"),
-                               file_extensions_text = paste(c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat", ".sav"),collapse = ", "),
                                return_class = c("data.frame", "data.table", "tbl_df", "raw"),
                                reset = reactive(NULL)) {
   read_fns <- list(
@@ -11213,7 +11219,6 @@ server <- function(input, output, session) {
     id = "file_import",
     show_data_in = "popup",
     trigger_return = "change",
-    file_extensions_text = sentence_paste(c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".ods", ".dta"), i18n$t("or")),
     return_class = "data.frame"
   )
 
@@ -11518,7 +11523,8 @@ server <- function(input, output, session) {
     list(
       rv$data,
       rv$data_filtered,
-      rv$data_variables
+      rv$data_variables,
+      input$language_select
     ),
     {
       if (!is.null(rv$data_filtered)) {

@@ -93,7 +93,6 @@
 "Only include variables missing less observations than the specified percentage. At 0, only complete variables are included; at 100, all variables are included.","Only include variables missing less observations than the specified percentage. At 0, only complete variables are included; at 100, all variables are included."
 "You removed {p_out} % of observations.","You removed {p_out} % of observations."
 "You removed {p_out} % of variables.","You removed {p_out} % of variables."
-"or","or"
 "You can import {file_extensions_text} files","You can import {file_extensions_text} files"
 "You can choose between these file types:","You can choose between these file types:"
 "Rows to skip before reading data:","Rows to skip before reading data:"

@@ -91,7 +91,6 @@
 "No data to display.","No data to display."
 "Data successfully updated!","Data successfully updated!"
 "Only include variables missing less observations than the specified percentage. At 0, only complete variables are included; at 100, all variables are included.","Only include variables missing less observations than the specified percentage. At 0, only complete variables are included; at 100, all variables are included."
-"or","eller"
 "You removed {p_out} % of observations.","Du har fjernet {p_out} % af observationerne."
 "You removed {p_out} % of variables.","Du har fjernet {p_out} % af variablerne."
 "You can import {file_extensions_text} files","Du kan vælge mellem disse filtyper: {file_extensions_text}."
