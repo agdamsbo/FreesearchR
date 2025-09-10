@@ -3748,16 +3748,17 @@ data_description <- function(data, data_text = "Data") {
   n <- nrow(data)
   n_var <- ncol(data)
   n_complete <- sum(complete.cases(data))
-  p_complete <- n_complete / n
+  p_complete <- signif(100 * n_complete / n, 3)
 
-  sprintf(
-    "%s has %s observations and %s variables, with %s (%s%%) complete cases.",
-    data_text,
-    n,
-    n_var,
-    n_complete,
-    signif(100 * p_complete, 3)
-  )
+  glue::glue(i18n$t("{data_text} has {n} observations and {n_var} variables, with {n_complete} ({p_complete} %) complete cases."))
+  # sprintf(
+  #   "%s has %s observations and %s variables, with %s (%s%%) complete cases.",
+  #   data_text,
+  #   n,
+  #   n_var,
+  #   n_complete,
+  #   p_complete
+  # )
 }
 
 
@@ -8493,7 +8494,7 @@ ui_elements <- function(selection) {
                   format = shinyWidgets::wNumbFormat(decimals = 0),
                   color = datamods:::get_primary_color()
                 ),
-                shiny::helpText(i18n$t("Only include variables missing less observations than the specified percentage. At 0, only complete variables are included; at 100, all variables are included.")),
+                shiny::helpText(i18n$t("At 0, only complete variables are included; at 100, all variables are included.")),
                 shiny::br()
               ),
               shiny::column(
@@ -8529,7 +8530,7 @@ ui_elements <- function(selection) {
     #########
     ##############################################################################
     "prepare" = bslib::nav_menu(
-      title = "Prepare",
+      title = i18n$t("Prepare"),
       icon = shiny::icon("pen-to-square"),
       value = "nav_prepare",
       bslib::nav_panel(
@@ -8699,7 +8700,7 @@ ui_elements <- function(selection) {
     ##############################################################################
     "describe" =
       bslib::nav_menu(
-        title = "Evaluate",
+        title = i18n$t("Evaluate"),
         icon = shiny::icon("magnifying-glass-chart"),
         value = "nav_describe",
         # id = "navdescribe",
@@ -8813,7 +8814,7 @@ ui_elements <- function(selection) {
       bslib::nav_panel,
       c(
         list(
-          title = "Visuals",
+          title = i18n$t("Visuals"),
           icon = shiny::icon("chart-line"),
           value = "nav_visuals"
         ),
@@ -8834,7 +8835,7 @@ ui_elements <- function(selection) {
     ##############################################################################
     "analyze" =
       bslib::nav_panel(
-        title = "Regression",
+        title = i18n$t("Regression"),
         icon = shiny::icon("calculator"),
         value = "nav_analyses",
         do.call(
@@ -8849,7 +8850,7 @@ ui_elements <- function(selection) {
     ##############################################################################
     "download" =
       bslib::nav_panel(
-        title = "Download",
+        title = i18n$t("Download"),
         icon = shiny::icon("download"),
         value = "nav_download",
         shiny::fluidRow(
@@ -9398,7 +9399,6 @@ update_variables_server <- function(id,
       output$data_info <- shiny::renderUI({
         shiny::req(data_r())
         data_description(data_r())
-        # sprintf(i18n$t("Data has %s observations and %s variables."), nrow(data), ncol(data))
       })
 
       variables_r <- shiny::reactive({

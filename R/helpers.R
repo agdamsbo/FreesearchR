@@ -361,16 +361,17 @@ data_description <- function(data, data_text = "Data") {
   n <- nrow(data)
   n_var <- ncol(data)
   n_complete <- sum(complete.cases(data))
-  p_complete <- n_complete / n
+  p_complete <- signif(100 * n_complete / n, 3)
 
-  sprintf(
-    "%s has %s observations and %s variables, with %s (%s%%) complete cases.",
-    data_text,
-    n,
-    n_var,
-    n_complete,
-    signif(100 * p_complete, 3)
-  )
+  glue::glue(i18n$t("{data_text} has {n} observations and {n_var} variables, with {n_complete} ({p_complete} %) complete cases."))
+  # sprintf(
+  #   "%s has %s observations and %s variables, with %s (%s%%) complete cases.",
+  #   data_text,
+  #   n,
+  #   n_var,
+  #   n_complete,
+  #   p_complete
+  # )
 }
 
 

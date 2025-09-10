@@ -115,7 +115,6 @@ update_variables_server <- function(id,
       output$data_info <- shiny::renderUI({
         shiny::req(data_r())
         data_description(data_r())
-        # sprintf(i18n$t("Data has %s observations and %s variables."), nrow(data), ncol(data))
       })
 
       variables_r <- shiny::reactive({
