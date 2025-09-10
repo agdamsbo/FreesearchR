@@ -49,6 +49,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/data_types.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/default_format_arguments.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/default_parsing.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/dim_change_call.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/drop_empty_event.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/expression_string.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/factorize.html</loc></url>
@@ -78,11 +79,15 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/launch_FreesearchR.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/limit_log.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/line_break.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/make_validation.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/make_validation_alerts.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/merge_expression.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/merge_long.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/missing_fraction.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/missings_apex_plot.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/missings_validate.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/modify_qmd.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/obs_filter_validate.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/overview_vars.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/pipe_string.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/plot.tbl_regression.html</loc></url>
@@ -117,6 +122,9 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/update-factor.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/update-variables.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/update_variables_datagrid.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/validation.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/validation_lib.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/vars_filter_validate.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/vectorSelectInput.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/vertical_stacked_bars.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/visual_summary.html</loc></url>
