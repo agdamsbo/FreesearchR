@@ -20,7 +20,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
             title = "Creating plot",
             icon = bsicons::bs_icon("graph-up"),
             shiny::uiOutput(outputId = ns("primary")),
-            shiny::helpText('Only non-text variables are available for plotting. Go the "Data" to reclass data to plot.'),
+            shiny::helpText(i18n$t('Only non-text variables are available for plotting. Go the "Data" to reclass data to plot.')),
             shiny::tags$br(),
             shiny::uiOutput(outputId = ns("type")),
             shiny::uiOutput(outputId = ns("secondary")),
@@ -28,19 +28,19 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
             shiny::br(),
             shiny::actionButton(
               inputId = ns("act_plot"),
-              label = "Plot",
+              label = i18n$t("Plot"),
               width = "100%",
               icon = shiny::icon("palette"),
               disabled = FALSE
             ),
-            shiny::helpText('Adjust settings, then press "Plot".')
+            shiny::helpText(i18n$t('Adjust settings, then press "Plot".'))
           ),
           bslib::accordion_panel(
             title = "Download",
             icon = bsicons::bs_icon("download"),
             shinyWidgets::noUiSliderInput(
               inputId = ns("height_slide"),
-              label = "Plot height (mm)",
+              label = i18n$t("Plot height (mm)"),
               min = 50,
               max = 300,
               value = 100,
@@ -58,7 +58,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
             # ),
             shinyWidgets::noUiSliderInput(
               inputId = ns("width"),
-              label = "Plot width (mm)",
+              label = i18n$t("Plot width (mm)"),
               min = 50,
               max = 300,
               value = 100,
@@ -68,7 +68,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
             ),
             shiny::selectInput(
               inputId = ns("plot_type"),
-              label = "File format",
+              label = i18n$t("File format"),
               choices = list(
                 "png",
                 "tiff",
@@ -82,7 +82,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
             # Button
             shiny::downloadButton(
               outputId = ns("download_plot"),
-              label = "Download plot",
+              label = i18n$t("Download plot"),
               icon = shiny::icon("download")
             )
           )
@@ -225,8 +225,8 @@ data_visuals_server <- function(id,
           inputId = ns("primary"),
           col_subset = names(data())[sapply(data(), data_type) != "text"],
           data = data,
-          placeholder = "Select variable",
-          label = "Response variable",
+          placeholder = i18n$t("Select variable"),
+          label = i18n$t("Response variable"),
           multiple = FALSE
         )
       })
@@ -263,7 +263,7 @@ data_visuals_server <- function(id,
         vectorSelectInput(
           inputId = ns("type"),
           selected = NULL,
-          label = shiny::h4("Plot type"),
+          label = shiny::h4(i18n$t("Plot type")),
           choices = Reduce(c, plots_named),
           multiple = FALSE
         )
@@ -291,12 +291,12 @@ data_visuals_server <- function(id,
           inputId = ns("secondary"),
           data = data,
           selected = cols[1],
-          placeholder = "Please select",
-          label = if (isTRUE(rv$plot.params()[["secondary.multi"]])) "Additional variables" else "Secondary variable",
+          placeholder = i18n$t("Please select"),
+          label = if (isTRUE(rv$plot.params()[["secondary.multi"]])) i18n$t("Additional variables") else i18n$t("Secondary variable"),
           multiple = rv$plot.params()[["secondary.multi"]],
           maxItems = rv$plot.params()[["secondary.max"]],
           col_subset = cols,
-          none_label = "No variable"
+          none_label = i18n$t("No variable")
         )
       })
 
@@ -305,8 +305,8 @@ data_visuals_server <- function(id,
         columnSelectInput(
           inputId = ns("tertiary"),
           data = data,
-          placeholder = "Please select",
-          label = "Grouping variable",
+          placeholder = i18n$t("Please select"),
+          label = i18n$t("Grouping variable"),
           multiple = FALSE,
           col_subset = c(
             "none",
@@ -319,7 +319,7 @@ data_visuals_server <- function(id,
               input$secondary
             )
           ),
-          none_label = "No stratification"
+          none_label = i18n$t("No stratification")
         )
       })
 
@@ -335,7 +335,7 @@ data_visuals_server <- function(id,
                   ter = input$tertiary
                 )
 
-                shiny::withProgress(message = "Drawing the plot. Hold tight for a moment..", {
+                shiny::withProgress(message = i18n$t("Drawing the plot. Hold tight for a moment.."), {
                   rv$plot <- rlang::exec(
                     create_plot,
                     !!!append_list(
@@ -362,7 +362,7 @@ data_visuals_server <- function(id,
 
       output$code_plot <- shiny::renderUI({
         shiny::req(rv$code)
-        prismCodeBlock(paste0("#Plotting\n", rv$code))
+        prismCodeBlock(paste0(i18n$t("#Plotting\n"), rv$code))
       })
 
       shiny::observeEvent(
@@ -407,7 +407,7 @@ data_visuals_server <- function(id,
             plot <- rv$plot[[1]]
           }
           # browser()
-          shiny::withProgress(message = "Drawing the plot. Hold on for a moment..", {
+          shiny::withProgress(message = i18n$t("Drawing the plot. Hold on for a moment.."), {
             ggplot2::ggsave(
               filename = file,
               plot = plot,
@@ -486,8 +486,8 @@ supported_plots <- function() {
   list(
     plot_hbars = list(
       fun = "plot_hbars",
-      descr = "Stacked horizontal bars",
-      note = "A classical way of visualising the distribution of an ordinal scale like the modified Ranking Scale and known as Grotta bars",
+      descr = i18n$t("Stacked horizontal bars"),
+      note = i18n$t("A classical way of visualising the distribution of an ordinal scale like the modified Ranking Scale and known as Grotta bars"),
       primary.type = c("dichotomous", "categorical"),
       secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
@@ -496,8 +496,8 @@ supported_plots <- function() {
     ),
     plot_violin = list(
       fun = "plot_violin",
-      descr = "Violin plot",
-      note = "A modern alternative to the classic boxplot to visualise data distribution",
+      descr = i18n$t("Violin plot"),
+      note = i18n$t("A modern alternative to the classic boxplot to visualise data distribution"),
       primary.type = c("datatime", "continuous", "dichotomous", "categorical"),
       secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
@@ -514,8 +514,8 @@ supported_plots <- function() {
     # ),
     plot_sankey = list(
       fun = "plot_sankey",
-      descr = "Sankey plot",
-      note = "A way of visualising change between groups",
+      descr = i18n$t("Sankey plot"),
+      note = i18n$t("A way of visualising change between groups"),
       primary.type = c("dichotomous", "categorical"),
       secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
@@ -524,8 +524,8 @@ supported_plots <- function() {
     ),
     plot_scatter = list(
       fun = "plot_scatter",
-      descr = "Scatter plot",
-      note = "A classic way of showing the association between to variables",
+      descr = i18n$t("Scatter plot"),
+      note = i18n$t("A classic way of showing the association between to variables"),
       primary.type = c("datatime", "continuous"),
       secondary.type = c("datatime", "continuous", "categorical"),
       secondary.multi = FALSE,
@@ -534,8 +534,8 @@ supported_plots <- function() {
     ),
     plot_box = list(
       fun = "plot_box",
-      descr = "Box plot",
-      note = "A classic way to plot data distribution by groups",
+      descr = i18n$t("Box plot"),
+      note = i18n$t("A classic way to plot data distribution by groups"),
       primary.type = c("datatime", "continuous", "dichotomous", "categorical"),
       secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
@@ -544,8 +544,8 @@ supported_plots <- function() {
     ),
     plot_euler = list(
       fun = "plot_euler",
-      descr = "Euler diagram",
-      note = "Generate area-proportional Euler diagrams to display set relationships",
+      descr = i18n$t("Euler diagram"),
+      note = i18n$t("Generate area-proportional Euler diagrams to display set relationships"),
       primary.type = c("dichotomous", "categorical"),
       secondary.type = c("dichotomous", "categorical"),
       secondary.multi = TRUE,

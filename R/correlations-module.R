@@ -16,9 +16,13 @@ data_correlations_ui <- function(id, ...) {
 
 
 #'
+#' @param id id
 #' @param data data
-#' @param color.main main color
-#' @param color.sec secondary color
+#' @param include.class character vector of classes to include. Default is NULL
+#' @param cutoff numeric
+#' @param warning_str Character string. Exposed to allow dynamic translations
+#' @param warning_no_str Character string. Exposed to allow dynamic translations
+#' @param and_strCharacter string. Exposed to allow dynamic translations
 #' @param ... arguments passed to toastui::datagrid
 #'
 #' @name data-correlations
@@ -28,6 +32,9 @@ data_correlations_server <- function(id,
                                      data,
                                      include.class = NULL,
                                      cutoff = .7,
+                                     warning_str = i18n$t("The following variable pairs are highly correlated: {sentence_paste(.x,and_str)}.\nConsider excluding one {more}from the dataset to ensure variables are independent."),
+                                     warning_no_str = i18n$t("No variables have a correlation measure above the threshold."),
+                                     and_str = i18n$t("and"),
                                      ...) {
   shiny::moduleServer(
     id = id,
@@ -59,17 +66,17 @@ data_correlations_server <- function(id,
         shiny::req(cutoff)
         pairs <- correlation_pairs(rv$data(), threshold = cutoff())
 
-        more <- ifelse(nrow(pairs) > 1, "from each pair ", "")
+        more <- ifelse(nrow(pairs) > 1, i18n$t("from each pair"), "")
 
         if (nrow(pairs) == 0) {
-          out <- glue::glue("No variables have a correlation measure above the threshold.")
+          out <- glue::glue(warning_no_str)
         } else {
           out <- pairs |>
             apply(1, \(.x){
-              glue::glue("'{.x[1]}'x'{.x[2]}'({round(as.numeric(.x[3]),2)})")
+              glue::glue("'{.x[1]}'x'{.x[2]}' ({round(as.numeric(.x[3]),2)})")
             }) |>
             (\(.x){
-              glue::glue("The following variable pairs are highly correlated: {sentence_paste(.x)}.\nConsider excluding one {more}from the dataset to ensure variables are independent.")
+              glue::glue(warning_str)
             })()
         }
         out

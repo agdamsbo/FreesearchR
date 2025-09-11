@@ -8,18 +8,34 @@
 \usage{
 data_correlations_ui(id, ...)
 
-data_correlations_server(id, data, include.class = NULL, cutoff = 0.7, ...)
+data_correlations_server(
+  id,
+  data,
+  include.class = NULL,
+  cutoff = 0.7,
+  warning_str =
+    i18n$t("The following variable pairs are highly correlated: {sentence_paste(.x,and_str)}.\\nConsider excluding one {more}from the dataset to ensure variables are independent."),
+  warning_no_str = i18n$t("No variables have a correlation measure above the threshold."),
+  and_str = i18n$t("and"),
+  ...
+)
 }
 \arguments{
-\item{id}{Module id. (Use 'ns("id")')}
+\item{id}{id}
 
 \item{...}{arguments passed to toastui::datagrid}
 
 \item{data}{data}
 
-\item{color.main}{main color}
+\item{include.class}{character vector of classes to include. Default is NULL}
 
-\item{color.sec}{secondary color}
+\item{cutoff}{numeric}
+
+\item{warning_str}{Character string. Exposed to allow dynamic translations}
+
+\item{warning_no_str}{Character string. Exposed to allow dynamic translations}
+
+\item{and_strCharacter}{string. Exposed to allow dynamic translations}
 }
 \value{
 Shiny ui module
