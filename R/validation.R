@@ -97,13 +97,17 @@ validation_server <- function(id,
         {
           # browser()
           to_validate <- data_r()
-          if (is.reactivevalues(to_validate))
+          if (is.reactivevalues(to_validate)) {
+            to_validate <- reactiveValuesToList(to_validate)
+          }
+          if (!is.data.frame(to_validate)) {
+            # browser()
             out <- lapply(
-              reactiveValuesToList(to_validate),
-              make_validation_alerts) |>
-            purrr::list_flatten()
-
-          if (length(to_validate) > 0) {
+              to_validate,
+              make_validation_alerts
+            ) |>
+              purrr::list_flatten()
+          } else if (length(to_validate) > 0) {
             out <- make_validation_alerts(to_validate)
           }
           valid_ui$x <- tagList(out)
@@ -193,12 +197,12 @@ obs_filter_validate <- function(before, after) {
 #'
 #' @examples
 #' df <- mtcars
-#' df[1,2:4] <- NA
+#' df[1, 2:4] <- NA
 #' missings_validate(df)
-missings_validate <- function(data){
+missings_validate <- function(data) {
   if (!0 %in% dim(data)) {
     # browser()
-    p_miss <- sum(is.na(data))/prod(dim(data))*100
+    p_miss <- sum(is.na(data)) / prod(dim(data)) * 100
     data.frame(
       p_miss = p_miss
     ) |>
@@ -215,13 +219,46 @@ missings_validate <- function(data){
   }
 }
 
-corr_pairs_validate <- function(data){
+#' Correlation pairs validation
+#'
+#' @param data data.frame
+#'
+#' @returns data.frame
+#' @export
+#'
+#' @examples
+#' # correlation_pairs(mtcars) |> corr_pairs_validate()
+corr_pairs_validate <- function(data) {
   data_s <- if (shiny::is.reactive(data)) data() else data
   if (!0 %in% dim(data_s)) {
     # browser()
     n_pairs <- nrow(data_s)
     data.frame(
       n_pairs = n_pairs
+    )
+  } else {
+    data.frame(NULL)
+  }
+}
+
+#' MCAR validation based on a gtsummary table bady
+#'
+#' @param data data
+#' @param outcome outcome variable
+#'
+#' @returns data.frame
+#' @export
+#'
+mcar_validate <- function(data, outcome=NULL) {
+  data_s <- if (shiny::is.reactive(data)) data() else data
+
+  if (is.data.frame(data_s) && "p.value" %in% names(data_s) && !is.null(outcome)) {
+    # browser()
+    n_nonmcar <- sum(data_s["p.value"][!is.na(data_s["p.value"])] < 0.05)
+
+    data.frame(
+      n_nonmcar = n_nonmcar,
+      outcome = outcome
     )
   } else {
     data.frame(NULL)
@@ -243,7 +280,7 @@ corr_pairs_validate <- function(data){
 #' @examples
 #' validation_lib()
 #' validation_lib("missings")
-validation_lib <- function(name=NULL) {
+validation_lib <- function(name = NULL) {
   ls <- list(
     "obs_filter" = function(x, y) {
       ## Validation function for observations filter
@@ -292,21 +329,22 @@ validation_lib <- function(name=NULL) {
         test.fun.args = list(var = "p_miss", cut = 30)
       )
     },
-    # "mcar" = function(x) {
-    #   ### Placeholder for missingness validation
-    #   list(
-    #     string = i18n$t("There are {p_miss} % missing observations."),
-    #     summary.fun = missings_validate,
-    #     summary.fun.args = list(
-    #       data = x
-    #     ),
-    #     test.fun = function(x, var, cut) {
-    #       test.var <- x[var]
-    #       ifelse(test.var > cut, "warning", "succes")
-    #     },
-    #     test.fun.args = list(var = "p_miss", cut = 30)
-    #   )
-    # },
+    "mcar" = function(x, y) {
+      ### Placeholder for missingness validation
+      list(
+        string = i18n$t("There is a significant correlation between {n_nonmcar} variables and missing observations in the outcome variable {outcome}."),
+        summary.fun = mcar_validate,
+        summary.fun.args = list(
+          data = x,
+          outcome = y
+        ),
+        test.fun = function(x, var, cut) {
+          test.var <- x[var]
+          ifelse(test.var > cut, "warning", "succes")
+        },
+        test.fun.args = list(var = "n_nonmcar", cut = 0)
+      )
+    },
     "corr_pairs" = function(x) {
       ### Placeholder for missingness validation
       list(
@@ -324,8 +362,8 @@ validation_lib <- function(name=NULL) {
     }
   )
 
-  if (!is.null(name)){
-    name <- match.arg(name,choices = names(ls))
+  if (!is.null(name)) {
+    name <- match.arg(name, choices = names(ls))
     ls[[name]]
   } else {
     ls
@@ -349,15 +387,16 @@ validation_lib <- function(name=NULL) {
 #' i18n <- shiny.i18n::Translator$new(translation_csvs_path = here::here("inst/translations"))
 #' i18n$set_translation_language("en")
 #' df_original <- mtcars
-#' df_original[1,2:4] <- NA
-#' df_obs <- df_original |> dplyr::filter(carb==4)
+#' df_original[1, 2:4] <- NA
+#' df_obs <- df_original |> dplyr::filter(carb == 4)
 #' df_vars <- df_original[1:7]
 #' val <- purrr::map2(
 #'   .x = validation_lib(),
 #'   .y = list(
-#'   list(x = df_original, y = df_obs),
-#'   list(x = df_original, y = df_vars),
-#'   list(x=df_original)),
+#'     list(x = df_original, y = df_obs),
+#'     list(x = df_original, y = df_vars),
+#'     list(x = df_original)
+#'   ),
 #'   make_validation
 #' )
 #' val |> make_validation_alerts()
@@ -403,7 +442,7 @@ make_validation <- function(ls, ...) {
 #' @export
 make_validation_alerts <- function(data) {
   # browser()
-  if (is.data.frame(data)){
+  if (is.data.frame(data)) {
     ls <- list(data)
   } else {
     ls <- data

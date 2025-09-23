@@ -1,10 +1,10 @@
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/app/global_vars.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//Rtmp4BY9Rb/file17e654c25f197.R 
 ########
 
-trans_path <- here::here("inst/translations")
+trans_path <- system.file("translations", package = "FreesearchR")
 
 
 ########
@@ -4068,7 +4068,7 @@ simple_snake <- function(data){
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.8.3-250911'
+hosted_version <- function()'v25.8.3-250922'
 
 
 ########
@@ -8398,7 +8398,7 @@ ui_elements <- function(selection) {
         shiny::column(width = 2),
         shiny::column(
           width = 8,
-          shiny::uiOutput(outputId = "language_select"),
+          # shiny::uiOutput(outputId = "language_select"),
           htmlOutput("intro_text")
           # shiny::includeHTML(i18n$t("www/intro.html"))
           # shiny::markdown(readLines(i18n$t("www/intro.md")))
@@ -10955,6 +10955,7 @@ grepl_fix <- function(data, pattern, type = c("prefix", "infix", "suffix")) {
 
 header_include <- function(){
   shiny::tags$head(
+    includeHTML("www/umami-app.html"),
     tags$link(rel = "stylesheet", type = "text/css", href = "style.css"),
     tags$script(src="scripts.js"))
 }
@@ -11026,6 +11027,7 @@ ui <- bslib::page_fixed(
         fillable = FALSE,
         footer = shiny::tags$footer(
           style = "background-color: #14131326; padding: 4px; text-align: center; bottom: 0; width: 100%;",
+          shiny::uiOutput(outputId = "language_select"),
           shiny::p(
             style = "margin: 1",
             "Data is only stored for analyses and deleted when the app is closed.", shiny::markdown("Consider [running ***FreesearchR*** locally](https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine) if working with sensitive data.")
@@ -11142,7 +11144,7 @@ server <- function(input, output, session) {
       inputId = "language_select",
       label = "",
       selected = "en",
-      choices = language_choices(),
+      choices = language_choices()
     )
   })
 
