@@ -215,6 +215,19 @@ missings_validate <- function(data){
   }
 }
 
+corr_pairs_validate <- function(data){
+  data_s <- if (shiny::is.reactive(data)) data() else data
+  if (!0 %in% dim(data_s)) {
+    # browser()
+    n_pairs <- nrow(data_s)
+    data.frame(
+      n_pairs = n_pairs
+    )
+  } else {
+    data.frame(NULL)
+  }
+}
+
 
 ########################################################################
 ############# Collected validation functions in a library-like function
@@ -264,10 +277,10 @@ validation_lib <- function(name=NULL) {
         test.fun.args = list(var = "p_out", cut = 50)
       )
     },
-    "missings" = function(x, y) {
+    "missings" = function(x) {
       ### Placeholder for missingness validation
       list(
-        string = "There are {p_miss} % missing observations.",
+        string = i18n$t("There are {p_miss} % missing observations."),
         summary.fun = missings_validate,
         summary.fun.args = list(
           data = x
@@ -277,6 +290,36 @@ validation_lib <- function(name=NULL) {
           ifelse(test.var > cut, "warning", "succes")
         },
         test.fun.args = list(var = "p_miss", cut = 30)
+      )
+    },
+    # "mcar" = function(x) {
+    #   ### Placeholder for missingness validation
+    #   list(
+    #     string = i18n$t("There are {p_miss} % missing observations."),
+    #     summary.fun = missings_validate,
+    #     summary.fun.args = list(
+    #       data = x
+    #     ),
+    #     test.fun = function(x, var, cut) {
+    #       test.var <- x[var]
+    #       ifelse(test.var > cut, "warning", "succes")
+    #     },
+    #     test.fun.args = list(var = "p_miss", cut = 30)
+    #   )
+    # },
+    "corr_pairs" = function(x) {
+      ### Placeholder for missingness validation
+      list(
+        string = i18n$t("Data includes {n_pairs} pairs of highly correlated variables."),
+        summary.fun = corr_pairs_validate,
+        summary.fun.args = list(
+          data = x
+        ),
+        test.fun = function(x, var, cut) {
+          test.var <- x[var]
+          ifelse(test.var > cut, "warning", "succes")
+        },
+        test.fun.args = list(var = "n_pairs", cut = 0)
       )
     }
   )
