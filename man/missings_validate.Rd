@@ -17,6 +17,6 @@ Validate function of missingness in data
 }
 \examples{
 df <- mtcars
-df[1,2:4] <- NA
+df[1, 2:4] <- NA
 missings_validate(df)
 }

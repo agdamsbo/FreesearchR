@@ -7,17 +7,16 @@ cff-version: 1.2.0
 message: 'To cite package "FreesearchR" in publications use:'
 type: software
 license: AGPL-3.0-or-later
-title: 'FreesearchR: A free and open-source browser based data analysis tool for researchers
-  with publication ready output'
-version: 25.8.3
+title: 'FreesearchR: Easy data analysis for clinicians'
+version: 25.9.1
 doi: 10.5281/zenodo.14527429
 identifiers:
 - type: url
   value: https://app.FreesearchR.org/
-abstract: Easily evaluate and analysis clinical health data in your browser on a server
-  or on your own device. Import data from multiple sources, summarise, modify and
-  visualise data and export key metrics and regression analysis results in a publication
-  ready format.
+abstract: Easily evaluate and analyse clinical health data in your browser, either
+  based on a hosted version or run on your own device. Import data from multiple sources,
+  summarise, modify and visualise data and create regression models. Export key metrics
+  and regression analysis results in a publication ready document format.
 authors:
 - family-names: Damsbo
   given-names: Andreas Gammelgaard

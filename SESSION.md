@@ -11,11 +11,11 @@
 |collate     |en_US.UTF-8                                |
 |ctype       |en_US.UTF-8                                |
 |tz          |Europe/Copenhagen                          |
-|date        |2025-09-10                                 |
+|date        |2025-09-23                                 |
 |rstudio     |2025.05.0+496 Mariposa Orchid (desktop)    |
 |pandoc      |3.6.4 @ /opt/homebrew/bin/ (via rmarkdown) |
 |quarto      |1.7.30 @ /usr/local/bin/quarto             |
-|FreesearchR |25.8.3.250910                              |
+|FreesearchR |25.9.1.250923                              |
                                                                                 
                                                                                 
 --------------------------------------------------------------------------------
@@ -43,7 +43,6 @@
 |cardx             |0.2.5         |2025-07-03 |CRAN (R 4.4.1) |
 |caTools           |1.18.3        |2024-09-04 |CRAN (R 4.4.1) |
 |cellranger        |1.1.0         |2016-07-27 |CRAN (R 4.4.0) |
-|cffr              |1.2.0         |2025-01-25 |CRAN (R 4.4.1) |
 |checkmate         |2.3.2         |2024-07-29 |CRAN (R 4.4.0) |
 |class             |7.3-23        |2025-01-01 |CRAN (R 4.4.1) |
 |classInt          |0.4-11        |2025-01-08 |CRAN (R 4.4.1) |
@@ -53,7 +52,6 @@
 |colorspace        |2.1-1         |2024-07-26 |CRAN (R 4.4.1) |
 |commonmark        |2.0.0         |2025-07-07 |CRAN (R 4.4.1) |
 |crayon            |1.5.3         |2024-06-20 |CRAN (R 4.4.1) |
-|curl              |6.4.0         |2025-06-22 |CRAN (R 4.4.1) |
 |data.table        |1.17.8        |2025-07-10 |CRAN (R 4.4.1) |
 |datamods          |1.5.3         |2024-10-02 |CRAN (R 4.4.1) |
 |datawizard        |1.2.0         |2025-07-17 |CRAN (R 4.4.1) |
@@ -84,7 +82,7 @@
 |foreach           |1.5.2         |2022-02-02 |CRAN (R 4.4.0) |
 |foreign           |0.8-90        |2025-03-31 |CRAN (R 4.4.1) |
 |Formula           |1.2-5         |2023-02-24 |CRAN (R 4.4.1) |
-|FreesearchR       |25.8.3        |NA         |NA             |
+|FreesearchR       |25.9.1        |NA         |NA             |
 |fs                |1.6.6         |2025-04-12 |CRAN (R 4.4.1) |
 |gdtools           |0.4.2         |2025-03-27 |CRAN (R 4.4.1) |
 |generics          |0.1.4         |2025-05-09 |CRAN (R 4.4.1) |
@@ -112,16 +110,18 @@
 |iterators         |1.0.14        |2022-02-05 |CRAN (R 4.4.1) |
 |jquerylib         |0.1.4         |2021-04-26 |CRAN (R 4.4.0) |
 |jsonlite          |2.0.0         |2025-03-27 |CRAN (R 4.4.1) |
-|jsonvalidate      |1.5.0         |2025-02-07 |CRAN (R 4.4.1) |
 |KernSmooth        |2.23-26       |2025-01-01 |CRAN (R 4.4.1) |
 |keyring           |1.4.1         |2025-06-15 |CRAN (R 4.4.1) |
 |knitr             |1.50          |2025-03-16 |CRAN (R 4.4.1) |
+|labeling          |0.4.3         |2023-08-29 |CRAN (R 4.4.1) |
 |later             |1.4.2         |2025-04-08 |CRAN (R 4.4.1) |
 |lattice           |0.22-7        |2025-04-02 |CRAN (R 4.4.1) |
 |lifecycle         |1.0.4         |2023-11-07 |CRAN (R 4.4.1) |
+|litedown          |0.7           |2025-04-08 |CRAN (R 4.4.1) |
 |lme4              |1.1-37        |2025-03-26 |CRAN (R 4.4.1) |
 |lubridate         |1.9.4         |2024-12-08 |CRAN (R 4.4.1) |
 |magrittr          |2.0.3         |2022-03-30 |CRAN (R 4.4.1) |
+|markdown          |2.0           |2025-03-23 |CRAN (R 4.4.1) |
 |MASS              |7.3-65        |2025-02-28 |CRAN (R 4.4.1) |
 |Matrix            |1.7-3         |2025-03-11 |CRAN (R 4.4.1) |
 |memoise           |2.0.1         |2021-11-26 |CRAN (R 4.4.0) |
@@ -165,7 +165,6 @@
 |R6                |2.6.1         |2025-02-15 |CRAN (R 4.4.1) |
 |ragg              |1.4.0         |2025-04-10 |CRAN (R 4.4.1) |
 |rankinPlot        |1.1.0         |2023-01-30 |CRAN (R 4.4.0) |
-|rappdirs          |0.3.3         |2021-01-31 |CRAN (R 4.4.1) |
 |rbibutils         |2.3           |2024-10-04 |CRAN (R 4.4.1) |
 |RColorBrewer      |1.1-3         |2022-04-03 |CRAN (R 4.4.1) |
 |Rcpp              |1.1.0         |2025-07-02 |CRAN (R 4.4.1) |
@@ -220,8 +219,9 @@
 |usethis           |3.1.0         |2024-11-26 |CRAN (R 4.4.1) |
 |utf8              |1.2.6         |2025-06-08 |CRAN (R 4.4.1) |
 |uuid              |1.2-1         |2024-07-29 |CRAN (R 4.4.1) |
-|V8                |6.0.6         |2025-08-18 |CRAN (R 4.4.1) |
 |vctrs             |0.6.5         |2023-12-01 |CRAN (R 4.4.0) |
+|viridis           |0.6.5         |2024-01-29 |CRAN (R 4.4.0) |
+|viridisLite       |0.4.2         |2023-05-02 |CRAN (R 4.4.1) |
 |vroom             |1.6.5         |2023-12-05 |CRAN (R 4.4.0) |
 |withr             |3.0.2         |2024-10-28 |CRAN (R 4.4.1) |
 |writexl           |1.5.4         |2025-04-15 |CRAN (R 4.4.1) |

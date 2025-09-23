@@ -12,6 +12,7 @@ docs
 inst/doc
 app_dev
 app_stable
+app_test
 app
 page
 demo

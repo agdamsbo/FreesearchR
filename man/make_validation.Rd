@@ -21,15 +21,16 @@ Create validation data.frame
 i18n <- shiny.i18n::Translator$new(translation_csvs_path = here::here("inst/translations"))
 i18n$set_translation_language("en")
 df_original <- mtcars
-df_original[1,2:4] <- NA
-df_obs <- df_original |> dplyr::filter(carb==4)
+df_original[1, 2:4] <- NA
+df_obs <- df_original |> dplyr::filter(carb == 4)
 df_vars <- df_original[1:7]
 val <- purrr::map2(
   .x = validation_lib(),
   .y = list(
-  list(x = df_original, y = df_obs),
-  list(x = df_original, y = df_vars),
-  list(x=df_original)),
+    list(x = df_original, y = df_obs),
+    list(x = df_original, y = df_vars),
+    list(x = df_original)
+  ),
   make_validation
 )
 val |> make_validation_alerts()

@@ -1,8 +1,8 @@
-# FreesearchR 25.8.3 - DEV
+# FreesearchR 25.9.1
 
 *NEW* Language has been revised to make the app more accessible and easier to understand.
 
-*NEW* Initial and very rudimentary translation for Danish and Swahili is introduced. Other languages can be added as well.
+*NEW* Foundations for introducing an internationalised UI has been introduced. Initial and very rudimentary translation for Danish and Swahili is included. Other languages can be added as well.
 
 *NEW* Alerts as to guide on select important steps and aspects are introduced. This is expected to expand.
 
