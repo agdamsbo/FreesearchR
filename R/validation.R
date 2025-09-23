@@ -317,7 +317,7 @@ validation_lib <- function(name = NULL) {
     "missings" = function(x) {
       ### Placeholder for missingness validation
       list(
-        string = i18n$t("There are {p_miss} % missing observations."),
+        string = i18n$t("There is a total of {p_miss} % missing observations."),
         summary.fun = missings_validate,
         summary.fun.args = list(
           data = x

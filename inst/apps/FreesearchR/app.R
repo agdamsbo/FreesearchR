@@ -1,10 +1,10 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//Rtmp4BY9Rb/file17e654c25f197.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmphmfdDq/filea00a3587a79a.R 
 ########
 
-trans_path <- system.file("translations", package = "FreesearchR")
+i18n_path <- system.file("translations", package = "FreesearchR")
 
 
 ########
@@ -47,7 +47,7 @@ library(rlang)
 library(shiny.i18n)
 
 ## Translation init
-i18n <- shiny.i18n::Translator$new(translation_csvs_path = trans_path)
+i18n <- shiny.i18n::Translator$new(translation_csvs_path = i18n_path)
 
 i18n$set_translation_language("en")
 
@@ -62,7 +62,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.8.3'
+app_version <- function()'25.9.1'
 
 
 ########
@@ -254,7 +254,8 @@ data_correlations_server <- function(id,
       # ns <- session$ns
 
       rv <- shiny::reactiveValues(
-        data = NULL
+        data = NULL,
+        pairs = NULL
       )
 
       rv$data <- shiny::reactive({
@@ -266,17 +267,30 @@ data_correlations_server <- function(id,
           out <- data()
         }
         # out |> dplyr::mutate(dplyr::across(tidyselect::everything(),as.numeric))
-        sapply(out,as.numeric)
+        sapply(out, as.numeric)
         # as.numeric()
       })
 
       # rv <- list()
       # rv$data <- mtcars
 
+      rv$pairs <- shiny::reactive({
+        shiny::req(rv$data)
+        shiny::req(cutoff)
+        # tryCatch(
+        #   {
+        correlation_pairs(rv$data(), threshold = cutoff())
+        #   },
+        #   error = function(err) {
+        #     showNotification(paste0(i18n$t("The following error occured on determining correlations: "), err), type = "err")
+        #   }
+        # )
+      })
+
       output$suggest <- shiny::renderPrint({
         shiny::req(rv$data)
         shiny::req(cutoff)
-        pairs <- correlation_pairs(rv$data(), threshold = cutoff())
+        pairs <- rv$pairs()
 
         more <- ifelse(nrow(pairs) > 1, i18n$t("from each pair"), "")
 
@@ -315,19 +329,40 @@ data_correlations_server <- function(id,
           )
         # psych::pairs.panels(rv$data())
       })
+
+      return(shiny::isolate(rv$pairs))
     }
   )
 }
 
+
+#' Determine significant correlations in the data set
+#'
+#' @param data data.frame
+#' @param threshold correlation threshold
+#'
+#' @returns data.frame
+#' @export
+#'
+#' @examples
+#' correlation_pairs(mtcars)
+#' correlation_pairs(mtcars,.9)
+#' correlation_pairs(mtcars[c(1:4),])
 correlation_pairs <- function(data, threshold = .8) {
   data <- as.data.frame(data)[!sapply(as.data.frame(data), is.character)]
-  data <- sapply(data,\(.x)if (is.factor(.x)) as.numeric(.x) else .x) |> as.data.frame()
+  data <- sapply(data, \(.x)if (is.factor(.x)) as.numeric(.x) else .x) |> as.data.frame()
   # data <- data |> dplyr::mutate(dplyr::across(dplyr::where(is.factor), as.numeric))
-  cor <- Hmisc::rcorr(as.matrix(data))
-  r <- cor$r %>% as.table()
-  d <- r |>
-    as.data.frame() |>
-    dplyr::filter(abs(Freq) > threshold, Freq != 1)
+  if (nrow(data) > 4) {
+    cor <- Hmisc::rcorr(as.matrix(data))
+    r <- cor$r %>% as.table()
+    d <- r |>
+      as.data.frame() |>
+      dplyr::filter(abs(Freq) > threshold, Freq != 1)
+  } else {
+    expand.grid(names(data),names(data))
+    d <- data.frame(matrix(ncol = 3))
+    d <- d[!is.na(d[3]),]
+  }
 
   d[1:2] |>
     apply(1, \(.x){
@@ -352,10 +387,6 @@ sentence_paste <- function(data, and.str = "and") {
     paste(paste(data[-length(data)], collapse = ", "), data[length(data)], sep = glue::glue(" {and.str} "))
   }
 }
-
-
-
-
 
 
 ########
@@ -1635,9 +1666,11 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
     bslib::layout_sidebar(
       sidebar = bslib::sidebar(
         bslib::accordion(
+          id = "acc_plot",
           multiple = FALSE,
           bslib::accordion_panel(
-            title = "Creating plot",
+            value = "acc_pan_plot",
+            title = "Create plot",
             icon = bsicons::bs_icon("graph-up"),
             shiny::uiOutput(outputId = ns("primary")),
             shiny::helpText(i18n$t('Only non-text variables are available for plotting. Go the "Data" to reclass data to plot.')),
@@ -1656,6 +1689,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
             shiny::helpText(i18n$t('Adjust settings, then press "Plot".'))
           ),
           bslib::accordion_panel(
+            value = "acc_pan_download",
             title = "Download",
             icon = bsicons::bs_icon("download"),
             shinyWidgets::noUiSliderInput(
@@ -1744,6 +1778,11 @@ data_visuals_server <- function(id,
         plot = NULL,
         code = NULL
       )
+
+      shiny::observe({
+        bslib::accordion_panel_update(id = "acc_plot", target = "acc_pan_plot",title = i18n$t("Create plot"))
+        bslib::accordion_panel_update(id = "acc_plot", target = "acc_pan_download",title = i18n$t("Download"))
+      })
 
       # ## --- New attempt
       #
@@ -2027,7 +2066,7 @@ data_visuals_server <- function(id,
             plot <- rv$plot[[1]]
           }
           # browser()
-          shiny::withProgress(message = i18n$t("Drawing the plot. Hold on for a moment.."), {
+          shiny::withProgress(message = i18n$t("Drawing the plot. Hold tight for a moment.."), {
             ggplot2::ggsave(
               filename = file,
               plot = plot,
@@ -4068,7 +4107,7 @@ simple_snake <- function(data){
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.8.3-250922'
+hosted_version <- function()'v25.9.1-250923'
 
 
 ########
@@ -4801,12 +4840,12 @@ data_missings_server <- function(id,
 
         if (is.null(variabler()) || variabler() == "" || !variabler() %in% names(datar())) {
           if (anyNA(datar())){
-            title <- "No variable chosen for analysis"
+            title <- i18n$t("No variable chosen for analysis")
           } else {
-          title <- "No missing observations"
+          title <- i18n$t("No missing observations")
           }
         } else {
-          title <- glue::glue("Missing vs non-missing observations in the variable **'{variabler()}'**")
+          title <- glue::glue(i18n$t("Missing vs non-missing observations in the variable **'{variabler()}'**"))
         }
 
         out <- rv$data() |>
@@ -7481,10 +7520,11 @@ regression_ui <- function(id, ...) {
         sidebar = bslib::sidebar(
           shiny::uiOutput(outputId = ns("data_info"), inline = TRUE),
           bslib::accordion(
+            id = "acc_reg",
             open = "acc_reg",
             multiple = FALSE,
             bslib::accordion_panel(
-              value = "acc_reg",
+              value = "acc_pan_reg",
               title = "Regression",
               icon = bsicons::bs_icon("calculator"),
               shiny::uiOutput(outputId = ns("outcome_var")),
@@ -7563,14 +7603,15 @@ regression_ui <- function(id, ...) {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::accordion(
-            open = "acc_reg",
+            id = "acc_coef_plot",
+            open = "acc_pan_coef_plot",
             multiple = FALSE,
             do.call(
               bslib::accordion_panel,
               c(
                 list(
-                  value = "acc_plot",
-                  title = "Coefficient plot",
+                  value = "acc_pan_coef_plot",
+                  title = "Coefficients plot",
                   icon = bsicons::bs_icon("bar-chart-steps"),
                   shiny::tags$br(),
                   shiny::uiOutput(outputId = ns("plot_model"))
@@ -7629,10 +7670,11 @@ regression_ui <- function(id, ...) {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::accordion(
-            open = "acc_reg",
+            id = "acc_checks",
+            open = "acc_pan_checks",
             multiple = FALSE,
             bslib::accordion_panel(
-              value = "acc_checks",
+              value = "acc_pan_checks",
               title = "Checks",
               icon = bsicons::bs_icon("clipboard-check"),
               shiny::uiOutput(outputId = ns("plot_checks"))
@@ -7667,6 +7709,12 @@ regression_server <- function(id,
         } else {
           data
         }
+      })
+
+      shiny::observe({
+        bslib::accordion_panel_update(id = "acc_reg", target = "acc_pan_reg", title = i18n$t("Regression"))
+        bslib::accordion_panel_update(id = "acc_coef_plot", target = "acc_pan_coef_plot", title = i18n$t("Coefficients plot"))
+        bslib::accordion_panel_update(id = "acc_checks", target = "acc_pan_checks", title = i18n$t("Checks"))
       })
 
       output$data_info <- shiny::renderUI({
@@ -8550,7 +8598,7 @@ ui_elements <- function(selection) {
             width = 9,
             shiny::uiOutput(outputId = "data_info", inline = TRUE),
             shiny::tags$p(
-              i18n$t("Below you find a summary table for quick insigths, and on the right you can visualise data classes, browse data and apply different data filters.")
+              i18n$t("Below you find a summary table for quick insigths, and on the right you can visualise data classes, browse observations and apply different data filters.")
             )
           ),
           shiny::column(
@@ -8565,7 +8613,7 @@ ui_elements <- function(selection) {
             shiny::br(),
             shiny::actionButton(
               inputId = "modal_browse",
-              label = i18n$t("Browse data"),
+              label = i18n$t("Browse observations"),
               width = "100%",
               disabled = TRUE
             ),
@@ -8720,11 +8768,12 @@ ui_elements <- function(selection) {
             sidebar = bslib::sidebar(
               shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
               bslib::accordion(
+                id="acc_chars",
                 open = "acc_chars",
                 multiple = FALSE,
                 bslib::accordion_panel(
                   open = TRUE,
-                  value = "acc_chars",
+                  value = "acc_pan_chars",
                   title = "Settings",
                   icon = bsicons::bs_icon("table"),
                   shiny::uiOutput("strat_var"),
@@ -8765,11 +8814,12 @@ ui_elements <- function(selection) {
             sidebar = bslib::sidebar(
               # shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
               bslib::accordion(
+                id="acc_cor",
                 open = "acc_chars",
                 multiple = FALSE,
                 bslib::accordion_panel(
-                  value = "acc_cor",
-                  title = "Correlations",
+                  value = "acc_pan_cor",
+                  title = "Settings",
                   icon = bsicons::bs_icon("bounding-box"),
                   shiny::uiOutput("outcome_var_cor"),
                   shiny::helpText("To avoid evaluating the correlation of the outcome variable, this can be excluded from the plot or select 'none'."),
@@ -8797,17 +8847,19 @@ ui_elements <- function(selection) {
           bslib::layout_sidebar(
             sidebar = bslib::sidebar(
               bslib::accordion(
+                id = "acc_mis",
                 open = "acc_chars",
                 multiple = FALSE,
                 bslib::accordion_panel(
-                  vlaue = "acc_mis",
-                  title = "Missings",
+                  value = "acc_pan_mis",
+                  title = "Settings",
                   icon = bsicons::bs_icon("x-circle"),
                   shiny::uiOutput("missings_var"),
                   shiny::helpText("To consider if data is missing by random, choose the outcome/dependent variable, if it has any missings to evaluate if there is a significant difference across other variables depending on missing data or not.")
                 )
               )
             ),
+            validation_ui("validation_mcar"),
             data_missings_ui(id = "missingness")
           )
         )
@@ -10200,13 +10252,17 @@ validation_server <- function(id,
         {
           # browser()
           to_validate <- data_r()
-          if (is.reactivevalues(to_validate))
+          if (is.reactivevalues(to_validate)) {
+            to_validate <- reactiveValuesToList(to_validate)
+          }
+          if (!is.data.frame(to_validate)) {
+            # browser()
             out <- lapply(
-              reactiveValuesToList(to_validate),
-              make_validation_alerts) |>
-            purrr::list_flatten()
-
-          if (length(to_validate) > 0) {
+              to_validate,
+              make_validation_alerts
+            ) |>
+              purrr::list_flatten()
+          } else if (length(to_validate) > 0) {
             out <- make_validation_alerts(to_validate)
           }
           valid_ui$x <- tagList(out)
@@ -10296,12 +10352,12 @@ obs_filter_validate <- function(before, after) {
 #'
 #' @examples
 #' df <- mtcars
-#' df[1,2:4] <- NA
+#' df[1, 2:4] <- NA
 #' missings_validate(df)
-missings_validate <- function(data){
+missings_validate <- function(data) {
   if (!0 %in% dim(data)) {
     # browser()
-    p_miss <- sum(is.na(data))/prod(dim(data))*100
+    p_miss <- sum(is.na(data)) / prod(dim(data)) * 100
     data.frame(
       p_miss = p_miss
     ) |>
@@ -10313,6 +10369,52 @@ missings_validate <- function(data){
           \(.y) signif(.y, 2)
         )
       )
+  } else {
+    data.frame(NULL)
+  }
+}
+
+#' Correlation pairs validation
+#'
+#' @param data data.frame
+#'
+#' @returns data.frame
+#' @export
+#'
+#' @examples
+#' # correlation_pairs(mtcars) |> corr_pairs_validate()
+corr_pairs_validate <- function(data) {
+  data_s <- if (shiny::is.reactive(data)) data() else data
+  if (!0 %in% dim(data_s)) {
+    # browser()
+    n_pairs <- nrow(data_s)
+    data.frame(
+      n_pairs = n_pairs
+    )
+  } else {
+    data.frame(NULL)
+  }
+}
+
+#' MCAR validation based on a gtsummary table bady
+#'
+#' @param data data
+#' @param outcome outcome variable
+#'
+#' @returns data.frame
+#' @export
+#'
+mcar_validate <- function(data, outcome=NULL) {
+  data_s <- if (shiny::is.reactive(data)) data() else data
+
+  if (is.data.frame(data_s) && "p.value" %in% names(data_s) && !is.null(outcome)) {
+    # browser()
+    n_nonmcar <- sum(data_s["p.value"][!is.na(data_s["p.value"])] < 0.05)
+
+    data.frame(
+      n_nonmcar = n_nonmcar,
+      outcome = outcome
+    )
   } else {
     data.frame(NULL)
   }
@@ -10333,7 +10435,7 @@ missings_validate <- function(data){
 #' @examples
 #' validation_lib()
 #' validation_lib("missings")
-validation_lib <- function(name=NULL) {
+validation_lib <- function(name = NULL) {
   ls <- list(
     "obs_filter" = function(x, y) {
       ## Validation function for observations filter
@@ -10367,10 +10469,10 @@ validation_lib <- function(name=NULL) {
         test.fun.args = list(var = "p_out", cut = 50)
       )
     },
-    "missings" = function(x, y) {
+    "missings" = function(x) {
       ### Placeholder for missingness validation
       list(
-        string = "There are {p_miss} % missing observations.",
+        string = i18n$t("There is a total of {p_miss} % missing observations."),
         summary.fun = missings_validate,
         summary.fun.args = list(
           data = x
@@ -10381,11 +10483,42 @@ validation_lib <- function(name=NULL) {
         },
         test.fun.args = list(var = "p_miss", cut = 30)
       )
+    },
+    "mcar" = function(x, y) {
+      ### Placeholder for missingness validation
+      list(
+        string = i18n$t("There is a significant correlation between {n_nonmcar} variables and missing observations in the outcome variable {outcome}."),
+        summary.fun = mcar_validate,
+        summary.fun.args = list(
+          data = x,
+          outcome = y
+        ),
+        test.fun = function(x, var, cut) {
+          test.var <- x[var]
+          ifelse(test.var > cut, "warning", "succes")
+        },
+        test.fun.args = list(var = "n_nonmcar", cut = 0)
+      )
+    },
+    "corr_pairs" = function(x) {
+      ### Placeholder for missingness validation
+      list(
+        string = i18n$t("Data includes {n_pairs} pairs of highly correlated variables."),
+        summary.fun = corr_pairs_validate,
+        summary.fun.args = list(
+          data = x
+        ),
+        test.fun = function(x, var, cut) {
+          test.var <- x[var]
+          ifelse(test.var > cut, "warning", "succes")
+        },
+        test.fun.args = list(var = "n_pairs", cut = 0)
+      )
     }
   )
 
-  if (!is.null(name)){
-    name <- match.arg(name,choices = names(ls))
+  if (!is.null(name)) {
+    name <- match.arg(name, choices = names(ls))
     ls[[name]]
   } else {
     ls
@@ -10409,15 +10542,16 @@ validation_lib <- function(name=NULL) {
 #' i18n <- shiny.i18n::Translator$new(translation_csvs_path = here::here("inst/translations"))
 #' i18n$set_translation_language("en")
 #' df_original <- mtcars
-#' df_original[1,2:4] <- NA
-#' df_obs <- df_original |> dplyr::filter(carb==4)
+#' df_original[1, 2:4] <- NA
+#' df_obs <- df_original |> dplyr::filter(carb == 4)
 #' df_vars <- df_original[1:7]
 #' val <- purrr::map2(
 #'   .x = validation_lib(),
 #'   .y = list(
-#'   list(x = df_original, y = df_obs),
-#'   list(x = df_original, y = df_vars),
-#'   list(x=df_original)),
+#'     list(x = df_original, y = df_obs),
+#'     list(x = df_original, y = df_vars),
+#'     list(x = df_original)
+#'   ),
 #'   make_validation
 #' )
 #' val |> make_validation_alerts()
@@ -10463,7 +10597,7 @@ make_validation <- function(ls, ...) {
 #' @export
 make_validation_alerts <- function(data) {
   # browser()
-  if (is.data.frame(data)){
+  if (is.data.frame(data)) {
     ls <- list(data)
   } else {
     ls <- data
@@ -11025,18 +11159,7 @@ ui <- bslib::page_fixed(
         # ui_elements$feedback,
         # ui_elements$docs,
         fillable = FALSE,
-        footer = shiny::tags$footer(
-          style = "background-color: #14131326; padding: 4px; text-align: center; bottom: 0; width: 100%;",
-          shiny::uiOutput(outputId = "language_select"),
-          shiny::p(
-            style = "margin: 1",
-            "Data is only stored for analyses and deleted when the app is closed.", shiny::markdown("Consider [running ***FreesearchR*** locally](https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine) if working with sensitive data.")
-          ),
-          shiny::p(
-            style = "margin: 1; color: #888;",
-            shiny::tags$a("Documentation", href = "https://agdamsbo.github.io/FreesearchR/", target = "_blank", rel = "noopener noreferrer"), " | ", hosted_version(), " | ", shiny::tags$a("License: AGPLv3", href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Source", href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a("Share feedback", href = "https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8", target = "_blank", rel = "noopener noreferrer")
-          ),
-        )
+        footer = shiny::uiOutput("footer_text_div")
       )
     )
   )
@@ -11112,7 +11235,8 @@ server <- function(input, output, session) {
     data_variables = NULL,
     data_filtered = NULL,
     models = NULL,
-    code = list()
+    code = list(),
+    corr_pairs = NULL
   )
 
   ##############################################################################
@@ -11123,7 +11247,10 @@ server <- function(input, output, session) {
 
   rv_validations <- shiny::reactiveValues(
     obs_filter = NULL,
-    vars_filter = NULL,
+    var_filter = NULL,
+    # missings = NULL,
+    corr_pairs = NULL,
+    mcar = NULL,
     validations = NULL
   )
 
@@ -11144,7 +11271,9 @@ server <- function(input, output, session) {
       inputId = "language_select",
       label = "",
       selected = "en",
-      choices = language_choices()
+      choices = language_choices(),
+      # selectize = TRUE,
+      width = "140px"
     )
   })
 
@@ -11197,9 +11326,44 @@ server <- function(input, output, session) {
     output$intro_text <- renderUI(includeHTML(i18n$t("www/intro.html")))
   })
 
+  shiny::observe(
+    output$footer_text_div <- renderUI({
+      shiny::tags$footer(
+        style = "background-color: #14131326; padding: 4px; text-align: center; bottom: 0; width: 100%;",
+        shiny::p(
+          style = "margin: 1",
+          i18n$t("Data is only stored for analyses and deleted when the app is closed."), shiny::markdown(i18n$t("Consider [running ***FreesearchR*** locally](https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine) if working with sensitive data."))
+        ),
+        # shiny::p(
+        #   style = "margin: 1; color: #888;",
+        div(
+          style = "display: inline-flex; align-items: center; gap: 1px;",
+          shiny::tags$a(i18n$t("Documentation"), href = "https://agdamsbo.github.io/FreesearchR/", target = "_blank", rel = "noopener noreferrer"), " | ", div(
+            style = "display: inline-block;",
+            class = c("smart-dropdown", "text-select"),
+            shiny::uiOutput(outputId = "language_select")
+          ), " | ", shiny::tags$a(i18n$t("Feedback"), href = "https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8", target = "_blank", rel = "noopener noreferrer")
+        ),
+        br(),
+        p(
+          style = "display: inline-flex; align-items: center; gap: 1px;",
+          hosted_version(), " | ", shiny::tags$a(i18n$t("License: AGPLv3"), href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a(i18n$t("Source"), href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer"),
+        )
+      )
+    })
+  )
+
+  shiny::observeEvent(input$language_select, {
+    bslib::accordion_panel_update(id = "acc_chars", title = i18n$t("Settings"), target = "acc_pan_chars")
+    bslib::accordion_panel_update(id = "acc_cor", title = i18n$t("Settings"), target = "acc_pan_cor")
+    bslib::accordion_panel_update(id = "acc_mis", title = i18n$t("Settings"), target = "acc_pan_mis")
+  })
+
+
   output$redcap_warning <- shiny::renderUI({
     rv_alerts$redcap_alert
   })
+
 
   ##############################################################################
   #########
@@ -11526,15 +11690,16 @@ server <- function(input, output, session) {
     # rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
   })
 
-  shiny::observeEvent(
+  shiny::observe(
     ## This could possibly be rewritten to include all validations
     ## and rendering would just subset relevant or all
-    list(
-      rv$data,
-      rv$data_filtered,
-      rv$data_variables,
-      input$language_select
-    ),
+    # list(
+    #   rv$data,
+    #   rv$data_filtered,
+    #   rv$data_variables,
+    #   rv$corr_pairs,
+    #   input$language_select
+    # ),
     {
       if (!is.null(rv$data_filtered)) {
         rv_validations$obs_filter <- make_validation(
@@ -11561,6 +11726,29 @@ server <- function(input, output, session) {
           ls = validation_lib("missings"),
           list(
             x = rv$data
+          )
+        )
+      }
+
+      if (!is.null(rv$corr_pairs())) {
+        req(rv$corr_pairs())
+        rv_validations$corr_pairs <- make_validation(
+          ls = validation_lib("corr_pairs"),
+          list(
+            x = rv$corr_pairs
+          )
+        )
+      }
+
+      # mcar_validate(data=rv$missings()[["_data"]],outcome = input$missings_var)
+      if (!is.null(rv$missings())) {
+        req(rv$missings())
+        req(input$missings_var)
+        rv_validations$mcar <- make_validation(
+          ls = validation_lib("mcar"),
+          list(
+            x = rv$missings()[["_data"]],
+            y = input$missings_var
           )
         )
       }
@@ -11592,10 +11780,22 @@ server <- function(input, output, session) {
   )
 
   shiny::observeEvent(
+    rv_validations$mcar,
+    {
+      validation_server(
+        id = "validation_mcar",
+        data = rv_validations$mcar
+      )
+    }
+  )
+
+  shiny::observeEvent(
     list(
-    rv_validations$var_filter,
-    rv_validations$obs_filter,
-    rv_validations$missings
+      rv_validations$var_filter,
+      rv_validations$obs_filter,
+      rv_validations$missings,
+      rv_validations$mcar,
+      rv_validations$corr_pairs
     ),
     {
       validation_server(
@@ -11881,7 +12081,7 @@ server <- function(input, output, session) {
     )
   })
 
-  data_correlations_server(
+  rv$corr_pairs <- data_correlations_server(
     id = "correlations",
     data = shiny::reactive({
       shiny::req(rv$list$data)
@@ -11894,22 +12094,32 @@ server <- function(input, output, session) {
     cutoff = shiny::reactive(input$cor_cutoff)
   )
 
-  output$missings_var <- shiny::renderUI({
-    columnSelectInput(
-      inputId = "missings_var",
-      label = "Select variable to stratify analysis",
-      data = shiny::reactive({
-        shiny::req(rv$data_filtered)
-        rv$data_filtered[apply(rv$data_filtered, 2, anyNA)]
-      })()
-    )
-  })
+  shiny::observe(
+    output$missings_var <- shiny::renderUI({
+      columnSelectInput(
+        inputId = "missings_var",
+        label = "Select variable to stratify analysis",
+        data = shiny::reactive({
+          shiny::req(rv$data_filtered)
+          rv$data_filtered[apply(rv$data_filtered, 2, anyNA)]
+        })()
+      )
+    })
+  )
 
   rv$missings <- data_missings_server(
     id = "missingness",
     data = shiny::reactive(rv$data_filtered),
     variable = shiny::reactive(input$missings_var)
   )
+
+  #   shiny::observe({
+  # req(rv$missings())
+  #     browser()
+  # # table <- rv$missings()
+  #
+  #     mcar_validate(data=rv$missings()[["_data"]],outcome = input$missings_var)
+  #   })
 
 
   ##############################################################################
@@ -11999,7 +12209,7 @@ server <- function(input, output, session) {
               )
           },
           error = function(err) {
-            showNotification(paste0("We encountered the following error creating your report: ", err), type = "err")
+            showNotification(paste0(i18n$t("We encountered the following error creating your report: "), err), type = "err")
           }
         )
       })
