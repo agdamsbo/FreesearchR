@@ -124,4 +124,94 @@
   color: #FFFFFF;
 }
 
+/* Flip-down flip-up */
 
+.smart-dropdown .selectize-dropdown {
+  position: absolute;
+}
+
+    /* When near bottom of viewport, flip up */
+.flip-up .selectize-dropdown {
+  top: auto !important;
+  bottom: 100% !important;
+  margin-bottom: 5px;
+  margin-top: 0;
+}
+
+
+/* Text-like select input */
+.text-select .control-label {
+  display: none !important;
+}
+
+.text-select .form-group.shiny-input-container {
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
+  margin: 2px !important;
+  padding: 2px !important;
+  display: inline-block;
+  vertical-align: top;
+  overflow: visible;
+}
+
+.text-select {
+  display: inline-block;
+  vertical-align: top;
+  position: relative;
+  top: 0;
+}
+
+.text-select .selectize-control {
+  margin: 0;
+  width: 140px !important;
+  padding: 0;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.text-select .selectize-input {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  width: 100% !important;
+  min-width: auto !important;
+  padding: 0 18px 0 2px !important;
+  margin: 0 !important;
+  height: 1em !important;
+  line-height: 1em !important;
+  font-size: inherit !important;
+  font-family: inherit !important;
+  color: inherit !important;
+  min-height: 1em !important;
+  max-height: 1em !important;
+  display: inline-block !important;
+  vertical-align: top !important;
+  position: relative;
+  top: 0;
+}
+
+.text-select .selectize-input > div {
+  line-height: 1em !important;
+  height: 1em !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  vertical-align: top !important;
+}
+
+.text-select .selectize-input::after {
+  content: '▼';
+  position: absolute;
+  right: 3px;
+  top: 0;
+  font-size: 0.8em;
+  color: #666;
+  pointer-events: none;
+  line-height: 1em;
+}
+
+.text-select .form-group {
+  margin: 0 !important;
+  display: inline-block;
+  vertical-align: top;
+}

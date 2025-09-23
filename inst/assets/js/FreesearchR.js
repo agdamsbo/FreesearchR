@@ -72,3 +72,22 @@ $(document).on('shiny:sessioninitialized', function() {
 
 });
 
+// Flip-down flip-up
+
+$(document).on('focus', '.smart-dropdown .selectize-control input', function() {
+      var $dropdown = $(this).closest('.selectize-control').find('.selectize-dropdown');
+      var $container = $(this).closest('.smart-dropdown');
+
+      var containerBottom = $container.offset().top + $container.outerHeight();
+      var windowHeight = $(window).height();
+      var scrollTop = $(window).scrollTop();
+      var viewportBottom = scrollTop + windowHeight;
+
+      // If there's not enough space below, flip up
+      if (containerBottom + 200 > viewportBottom) {
+        $container.addClass('flip-up');
+      } else {
+        $container.removeClass('flip-up');
+      }
+    });
+
