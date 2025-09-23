@@ -42,7 +42,8 @@ data_correlations_server <- function(id,
       # ns <- session$ns
 
       rv <- shiny::reactiveValues(
-        data = NULL
+        data = NULL,
+        pairs = NULL
       )
 
       rv$data <- shiny::reactive({
@@ -54,17 +55,30 @@ data_correlations_server <- function(id,
           out <- data()
         }
         # out |> dplyr::mutate(dplyr::across(tidyselect::everything(),as.numeric))
-        sapply(out,as.numeric)
+        sapply(out, as.numeric)
         # as.numeric()
       })
 
       # rv <- list()
       # rv$data <- mtcars
 
+      rv$pairs <- shiny::reactive({
+        shiny::req(rv$data)
+        shiny::req(cutoff)
+        # tryCatch(
+        #   {
+        correlation_pairs(rv$data(), threshold = cutoff())
+        #   },
+        #   error = function(err) {
+        #     showNotification(paste0(i18n$t("The following error occured on determining correlations: "), err), type = "err")
+        #   }
+        # )
+      })
+
       output$suggest <- shiny::renderPrint({
         shiny::req(rv$data)
         shiny::req(cutoff)
-        pairs <- correlation_pairs(rv$data(), threshold = cutoff())
+        pairs <- rv$pairs()
 
         more <- ifelse(nrow(pairs) > 1, i18n$t("from each pair"), "")
 
@@ -103,19 +117,40 @@ data_correlations_server <- function(id,
           )
         # psych::pairs.panels(rv$data())
       })
+
+      return(shiny::isolate(rv$pairs))
     }
   )
 }
 
+
+#' Determine significant correlations in the data set
+#'
+#' @param data data.frame
+#' @param threshold correlation threshold
+#'
+#' @returns data.frame
+#' @export
+#'
+#' @examples
+#' correlation_pairs(mtcars)
+#' correlation_pairs(mtcars,.9)
+#' correlation_pairs(mtcars[c(1:4),])
 correlation_pairs <- function(data, threshold = .8) {
   data <- as.data.frame(data)[!sapply(as.data.frame(data), is.character)]
-  data <- sapply(data,\(.x)if (is.factor(.x)) as.numeric(.x) else .x) |> as.data.frame()
+  data <- sapply(data, \(.x)if (is.factor(.x)) as.numeric(.x) else .x) |> as.data.frame()
   # data <- data |> dplyr::mutate(dplyr::across(dplyr::where(is.factor), as.numeric))
-  cor <- Hmisc::rcorr(as.matrix(data))
-  r <- cor$r %>% as.table()
-  d <- r |>
-    as.data.frame() |>
-    dplyr::filter(abs(Freq) > threshold, Freq != 1)
+  if (nrow(data) > 4) {
+    cor <- Hmisc::rcorr(as.matrix(data))
+    r <- cor$r %>% as.table()
+    d <- r |>
+      as.data.frame() |>
+      dplyr::filter(abs(Freq) > threshold, Freq != 1)
+  } else {
+    expand.grid(names(data),names(data))
+    d <- data.frame(matrix(ncol = 3))
+    d <- d[!is.na(d[3]),]
+  }
 
   d[1:2] |>
     apply(1, \(.x){
@@ -140,7 +175,3 @@ sentence_paste <- function(data, and.str = "and") {
     paste(paste(data[-length(data)], collapse = ", "), data[length(data)], sep = glue::glue(" {and.str} "))
   }
 }
-
-
-
-
