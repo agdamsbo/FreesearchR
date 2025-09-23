@@ -51,10 +51,11 @@ regression_ui <- function(id, ...) {
         sidebar = bslib::sidebar(
           shiny::uiOutput(outputId = ns("data_info"), inline = TRUE),
           bslib::accordion(
+            id = "acc_reg",
             open = "acc_reg",
             multiple = FALSE,
             bslib::accordion_panel(
-              value = "acc_reg",
+              value = "acc_pan_reg",
               title = "Regression",
               icon = bsicons::bs_icon("calculator"),
               shiny::uiOutput(outputId = ns("outcome_var")),
@@ -133,14 +134,15 @@ regression_ui <- function(id, ...) {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::accordion(
-            open = "acc_reg",
+            id = "acc_coef_plot",
+            open = "acc_pan_coef_plot",
             multiple = FALSE,
             do.call(
               bslib::accordion_panel,
               c(
                 list(
-                  value = "acc_plot",
-                  title = "Coefficient plot",
+                  value = "acc_pan_coef_plot",
+                  title = "Coefficients plot",
                   icon = bsicons::bs_icon("bar-chart-steps"),
                   shiny::tags$br(),
                   shiny::uiOutput(outputId = ns("plot_model"))
@@ -199,10 +201,11 @@ regression_ui <- function(id, ...) {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::accordion(
-            open = "acc_reg",
+            id = "acc_checks",
+            open = "acc_pan_checks",
             multiple = FALSE,
             bslib::accordion_panel(
-              value = "acc_checks",
+              value = "acc_pan_checks",
               title = "Checks",
               icon = bsicons::bs_icon("clipboard-check"),
               shiny::uiOutput(outputId = ns("plot_checks"))
@@ -237,6 +240,12 @@ regression_server <- function(id,
         } else {
           data
         }
+      })
+
+      shiny::observe({
+        bslib::accordion_panel_update(id = "acc_reg", target = "acc_pan_reg", title = i18n$t("Regression"))
+        bslib::accordion_panel_update(id = "acc_coef_plot", target = "acc_pan_coef_plot", title = i18n$t("Coefficients plot"))
+        bslib::accordion_panel_update(id = "acc_checks", target = "acc_pan_checks", title = i18n$t("Checks"))
       })
 
       output$data_info <- shiny::renderUI({

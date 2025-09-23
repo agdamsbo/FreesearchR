@@ -60,12 +60,12 @@ data_missings_server <- function(id,
 
         if (is.null(variabler()) || variabler() == "" || !variabler() %in% names(datar())) {
           if (anyNA(datar())){
-            title <- "No variable chosen for analysis"
+            title <- i18n$t("No variable chosen for analysis")
           } else {
-          title <- "No missing observations"
+          title <- i18n$t("No missing observations")
           }
         } else {
-          title <- glue::glue("Missing vs non-missing observations in the variable **'{variabler()}'**")
+          title <- glue::glue(i18n$t("Missing vs non-missing observations in the variable **'{variabler()}'**"))
         }
 
         out <- rv$data() |>

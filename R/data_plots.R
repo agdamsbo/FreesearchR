@@ -15,9 +15,11 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
     bslib::layout_sidebar(
       sidebar = bslib::sidebar(
         bslib::accordion(
+          id = "acc_plot",
           multiple = FALSE,
           bslib::accordion_panel(
-            title = "Creating plot",
+            value = "acc_pan_plot",
+            title = "Create plot",
             icon = bsicons::bs_icon("graph-up"),
             shiny::uiOutput(outputId = ns("primary")),
             shiny::helpText(i18n$t('Only non-text variables are available for plotting. Go the "Data" to reclass data to plot.')),
@@ -36,6 +38,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
             shiny::helpText(i18n$t('Adjust settings, then press "Plot".'))
           ),
           bslib::accordion_panel(
+            value = "acc_pan_download",
             title = "Download",
             icon = bsicons::bs_icon("download"),
             shinyWidgets::noUiSliderInput(
@@ -124,6 +127,11 @@ data_visuals_server <- function(id,
         plot = NULL,
         code = NULL
       )
+
+      shiny::observe({
+        bslib::accordion_panel_update(id = "acc_plot", target = "acc_pan_plot",title = i18n$t("Create plot"))
+        bslib::accordion_panel_update(id = "acc_plot", target = "acc_pan_download",title = i18n$t("Download"))
+      })
 
       # ## --- New attempt
       #
@@ -407,7 +415,7 @@ data_visuals_server <- function(id,
             plot <- rv$plot[[1]]
           }
           # browser()
-          shiny::withProgress(message = i18n$t("Drawing the plot. Hold on for a moment.."), {
+          shiny::withProgress(message = i18n$t("Drawing the plot. Hold tight for a moment.."), {
             ggplot2::ggsave(
               filename = file,
               plot = plot,

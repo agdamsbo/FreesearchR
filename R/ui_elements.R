@@ -28,7 +28,7 @@ ui_elements <- function(selection) {
         shiny::column(width = 2),
         shiny::column(
           width = 8,
-          shiny::uiOutput(outputId = "language_select"),
+          # shiny::uiOutput(outputId = "language_select"),
           htmlOutput("intro_text")
           # shiny::includeHTML(i18n$t("www/intro.html"))
           # shiny::markdown(readLines(i18n$t("www/intro.md")))
@@ -180,7 +180,7 @@ ui_elements <- function(selection) {
             width = 9,
             shiny::uiOutput(outputId = "data_info", inline = TRUE),
             shiny::tags$p(
-              i18n$t("Below you find a summary table for quick insigths, and on the right you can visualise data classes, browse data and apply different data filters.")
+              i18n$t("Below you find a summary table for quick insigths, and on the right you can visualise data classes, browse observations and apply different data filters.")
             )
           ),
           shiny::column(
@@ -195,7 +195,7 @@ ui_elements <- function(selection) {
             shiny::br(),
             shiny::actionButton(
               inputId = "modal_browse",
-              label = i18n$t("Browse data"),
+              label = i18n$t("Browse observations"),
               width = "100%",
               disabled = TRUE
             ),
@@ -350,11 +350,12 @@ ui_elements <- function(selection) {
             sidebar = bslib::sidebar(
               shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
               bslib::accordion(
+                id="acc_chars",
                 open = "acc_chars",
                 multiple = FALSE,
                 bslib::accordion_panel(
                   open = TRUE,
-                  value = "acc_chars",
+                  value = "acc_pan_chars",
                   title = "Settings",
                   icon = bsicons::bs_icon("table"),
                   shiny::uiOutput("strat_var"),
@@ -395,11 +396,12 @@ ui_elements <- function(selection) {
             sidebar = bslib::sidebar(
               # shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
               bslib::accordion(
+                id="acc_cor",
                 open = "acc_chars",
                 multiple = FALSE,
                 bslib::accordion_panel(
-                  value = "acc_cor",
-                  title = "Correlations",
+                  value = "acc_pan_cor",
+                  title = "Settings",
                   icon = bsicons::bs_icon("bounding-box"),
                   shiny::uiOutput("outcome_var_cor"),
                   shiny::helpText("To avoid evaluating the correlation of the outcome variable, this can be excluded from the plot or select 'none'."),
@@ -427,17 +429,19 @@ ui_elements <- function(selection) {
           bslib::layout_sidebar(
             sidebar = bslib::sidebar(
               bslib::accordion(
+                id = "acc_mis",
                 open = "acc_chars",
                 multiple = FALSE,
                 bslib::accordion_panel(
-                  vlaue = "acc_mis",
-                  title = "Missings",
+                  value = "acc_pan_mis",
+                  title = "Settings",
                   icon = bsicons::bs_icon("x-circle"),
                   shiny::uiOutput("missings_var"),
                   shiny::helpText("To consider if data is missing by random, choose the outcome/dependent variable, if it has any missings to evaluate if there is a significant difference across other variables depending on missing data or not.")
                 )
               )
             ),
+            validation_ui("validation_mcar"),
             data_missings_ui(id = "missingness")
           )
         )
