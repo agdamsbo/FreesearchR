@@ -1,13 +1,13 @@
 Package: FreesearchR
-Title: A free and open-source browser based data analysis tool for researchers with publication ready output
-Version: 25.8.3
+Title: Easy data analysis for clinicians
+Version: 25.9.1
 Authors@R: c(
     person("Andreas Gammelgaard", "Damsbo",email="agdamsbo@clin.au.dk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7559-1154")),
     person("Jutta Mari Adelin", "Jørgensen", role="ctb"),       
     person("Anne Brink", "Behrndtz", role="ctb")
     )
-Description: Easily evaluate and analysis clinical health data in your browser on a server or on your own device. Import data from multiple sources, summarise, modify and visualise data and export key metrics and regression analysis results in a publication ready format.
+Description: Easily evaluate and analyse clinical health data in your browser, either based on a hosted version or run on your own device. Import data from multiple sources, summarise, modify and visualise data and create regression models. Export key metrics and regression analysis results in a publication ready document format.
 License: AGPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
