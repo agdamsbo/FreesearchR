@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmphmfdDq/filea00a3587a79a.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpZNW8fR/filee8e87e53d0c0.R 
 ########
 
 i18n_path <- system.file("translations", package = "FreesearchR")
@@ -11187,12 +11187,15 @@ load_data <- function() {
 
 # is_local = is.na(Sys.getenv('SHINY_SERVER_VERSION', NA))
 
-
-
 server <- function(input, output, session) {
   ## Listing files in www in session start to keep when ending and removing
   ## everything else.
   files.to.keep <- list.files("www/")
+
+  ## This works in a minimal working example, but not here. Will investigate.
+#   shinyjs::runjs("var language =  window.navigator.userLanguage || window.navigator.language;
+# var shortLang = language.split('-')[0];
+# Shiny.onInputChange('browser_lang', shortLang);")
 
   load_data()
 
@@ -11277,7 +11280,7 @@ server <- function(input, output, session) {
     )
   })
 
-  observe({
+  shiny::observe({
     updateSelectInput(
       session,
       "language_select",

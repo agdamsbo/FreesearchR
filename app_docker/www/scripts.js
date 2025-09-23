@@ -1,5 +1,13 @@
 // Automatically close drop-downs on navigation
 // Thanks to claude.ai
+$(document).ready(function() {
+ var language =  window.navigator.userLanguage || window.navigator.language || navigator.language;
+ var shortLang = language.split('-')[0];
+ Shiny.onInputChange('browser_lang', shortLang, {priority: 'event'});
+ console.log('Browser language:',language);
+});
+
+
 $(document).on('shown.bs.tab', '#main_panel', function(e) {
   // Close dropdown in this specific navset only
   $('#main_panel .dropdown-menu').removeClass('show');
@@ -8,6 +16,12 @@ $(document).on('shown.bs.tab', '#main_panel', function(e) {
 
 
 $(document).on('shiny:sessioninitialized', function() {
+  // Function to get browser language
+  // var language =  window.navigator.userLanguage || window.navigator.language;
+  // var iso639Language = language.split('-')[0];
+  // Shiny.onInputChange('browser_lang', iso639Language);
+  // console.log('Browser language:',iso639Language);
+
   // Function to collapse navbar on mobile
   function collapseNavbar() {
     var navbar = $('.navbar-collapse');
@@ -54,4 +68,26 @@ $(document).on('shiny:sessioninitialized', function() {
       collapseNavbar();
     }
   });
+
+
 });
+
+// Flip-down flip-up
+
+$(document).on('focus', '.smart-dropdown .selectize-control input', function() {
+      var $dropdown = $(this).closest('.selectize-control').find('.selectize-dropdown');
+      var $container = $(this).closest('.smart-dropdown');
+
+      var containerBottom = $container.offset().top + $container.outerHeight();
+      var windowHeight = $(window).height();
+      var scrollTop = $(window).scrollTop();
+      var viewportBottom = scrollTop + windowHeight;
+
+      // If there's not enough space below, flip up
+      if (containerBottom + 200 > viewportBottom) {
+        $container.addClass('flip-up');
+      } else {
+        $container.removeClass('flip-up');
+      }
+    });
+

@@ -2,11 +2,11 @@
 output: html_fragment
 ---
 
-# Welcome <img src="FreesearchR-logo.png" style="float: right;"/>
+# Velkommen <img src="FreesearchR-logo.png" style="float: right;"/>
 
-This is the ***FreesearchR*** data analysis tool, a free tool for basic data evaluation and analysis. If you need more advanced tools, start with ***FreesearchR*** and then you'll probably be better off using *R* or similar directly.
+Dette er ***FreesearchR***-værktøjet, et gratis værktøj til databehandling og -analyse. Har du brug for mere avancerede værktøjer, så kan du starte ***FreesearchR*** og senere selv hente *R* og *RStudio* eller lignende.
 
-With this tool you can:
+Herunder kan du helt kort se, hvad du kan bruge ***FreesearchR*** til:
 
 1.  **Import data** from a spreadsheet/file on your machine, directly from a [REDCap](https://projectredcap.org/ "Read more on the data capture tool REDCap") server, try it with sample data or access data directly [if run in R locally](https://agdamsbo.github.io/FreesearchR//#run-locally-on-your-own-machine "Read about running FreesearchR on your local machine")
 

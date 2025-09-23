@@ -1,10 +1,10 @@
 // Automatically close drop-downs on navigation
 // Thanks to claude.ai
 $(document).ready(function() {
- var language =  window.navigator.userLanguage || window.navigator.language;
- var iso639Language = language.split('-')[0];
- Shiny.onInputChange('browser_lang', iso639Language);
- console.log('Browser language:',iso639Language);
+ var language =  window.navigator.userLanguage || window.navigator.language || navigator.language;
+ var shortLang = language.split('-')[0];
+ Shiny.onInputChange('browser_lang', shortLang, {priority: 'event'});
+ console.log('Browser language:',language);
 });
 
 
