@@ -146,7 +146,6 @@
 "Feedback","Feedback"
 "License: AGPLv3","License: AGPLv3"
 "Source","Source"
-"There are {p_miss} % missing observations.","There are {p_miss} % missing observations."
 "Data includes {n_pairs} pairs of highly correlated variables.","Data includes {n_pairs} pairs of highly correlated variables."
 "Create plot","Create plot"
 "Coefficients plot","Coefficients plot"
@@ -160,3 +159,4 @@
 "No missing observations","No missing observations"
 "Missing vs non-missing observations in the variable **'{variabler()}'**","Missing vs non-missing observations in the variable **'{variabler()}'**"
 "There is a significant correlation between {n_nonmcar} variables and missing observations in the outcome variable {outcome}.","There is a significant correlation between {n_nonmcar} variables and missing observations in the outcome variable {outcome}."
+"There is a total of {p_miss} % missing observations.","There is a total of {p_miss} % missing observations."
