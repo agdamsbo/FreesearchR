@@ -30,6 +30,8 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/columnSelectInput.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/compare_missings.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/contrast_text.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/corr_pairs_validate.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/correlation_pairs.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/create-column.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/create_baseline.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/create_log_tics.html</loc></url>
@@ -81,6 +83,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/line_break.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/make_validation.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/make_validation_alerts.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/mcar_validate.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/merge_expression.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/merge_long.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/missing_fraction.html</loc></url>
