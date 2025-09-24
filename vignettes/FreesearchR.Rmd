@@ -8,8 +8,11 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,eval = FALSE)
+knitr::opts_chunk$set(echo = TRUE,eval = TRUE)
 library(FreesearchR)
+i18n_path <- system.file("translations", package = "FreesearchR")
+i18n <- shiny.i18n::Translator$new(translation_csvs_path = i18n_path)
+i18n$set_translation_language("en")
 ```
 
 # Getting started with ***FreesearchR***
@@ -20,7 +23,7 @@ Below is a simple walk-trough and basic descriptions on the different features o
 
 The easiest way to get started is to launch [the onlie version of the app (click this link)](https://app.freesearchr.org/). Please be aware not to upload sensitive data in this version as data security can not be guaranteed in this online environment. The app can easily be run from *R* on your own computer by running the code below ([read more on running locally here](https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine)):
 
-```{r}
+```{r eval = FALSE}
 require("pak")
 pak::pak("agdamsbo/FreesearchR")
 library(FreesearchR)
@@ -89,7 +92,7 @@ There are a number of plotting options to visualise different aspects of the dat
 
 Below are the available plot types listed.
 
-```{r echo = FALSE, eval = TRUE}
+```{r echo = FALSE}
 c("continuous", "dichotomous", "categorical") |> 
   lapply(\(.x){
     dplyr::bind_cols(
@@ -118,7 +121,7 @@ This section is only intended for very simple explorative analyses and as a proo
 
 Below are the available regression types listed.
 
-```{r echo = FALSE, eval = TRUE}
+```{r echo = FALSE}
 c("continuous", "dichotomous", "categorical") |> 
   lapply(\(.x){
     dplyr::bind_cols(

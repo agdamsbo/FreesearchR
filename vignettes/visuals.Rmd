@@ -10,6 +10,7 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
+  eval = TRUE,
   comment = "#>"
 )
 options(rmarkdown.html_vignette.check_title = FALSE)
@@ -17,6 +18,9 @@ options(rmarkdown.html_vignette.check_title = FALSE)
 
 ```{r setup}
 library(FreesearchR)
+i18n_path <- system.file("translations", package = "FreesearchR")
+i18n <- shiny.i18n::Translator$new(translation_csvs_path = i18n_path)
+i18n$set_translation_language("en")
 ```
 
 ## Basic visualisations
@@ -36,7 +40,7 @@ If you want to go further, have a look at these sites with suggestions and sampl
 
 Below are the available plot types listed.
 
-```{r echo = FALSE, eval = TRUE}
+```{r echo = FALSE}
 c("continuous", "dichotomous", "categorical") |> 
   lapply(\(.x){
     dplyr::bind_cols(

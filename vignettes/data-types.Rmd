@@ -10,6 +10,7 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
+  eval = TRUE,
   comment = "#>"
 )
 options(rmarkdown.html_vignette.check_title = FALSE)
@@ -17,13 +18,16 @@ options(rmarkdown.html_vignette.check_title = FALSE)
 
 ```{r setup}
 library(FreesearchR)
+i18n_path <- system.file("translations", package = "FreesearchR")
+i18n <- shiny.i18n::Translator$new(translation_csvs_path = i18n_path)
+i18n$set_translation_language("en")
 ```
 
 ## A clinical data class
 
 Traditionally in *R*, data is identified by classes, like numeric, integer, double, logical, factor etc. These classes can be a little confusing from a clinical or operational standpoint. In the ***FreesearchR*** app, these classes has been simplified and modified to the following data types, that are assigned on a prioritised order like the following:
 
-```{r echo = FALSE, eval = TRUE}
+```{r echo = FALSE}
 data_types() |> purrr::imap(\(.x,.i){
   dplyr::bind_cols("type"=.i,.x,.name_repair = "unique_quiet")
   }) |> dplyr::bind_rows() |> 
