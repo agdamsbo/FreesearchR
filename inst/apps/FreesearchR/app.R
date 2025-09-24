@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpZNW8fR/filee8e87e53d0c0.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//Rtmp3H4zCa/file58ea40c26989.R 
 ########
 
 i18n_path <- system.file("translations", package = "FreesearchR")
@@ -62,7 +62,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.9.1'
+app_version <- function()'25.9.2'
 
 
 ########
@@ -4107,7 +4107,7 @@ simple_snake <- function(data){
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.9.1-250923'
+hosted_version <- function()'v25.9.2-250924'
 
 
 ########

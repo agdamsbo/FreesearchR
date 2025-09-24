@@ -1,3 +1,7 @@
+# FreesearchR 25.9.2 - DEV
+
+*NEW* Improvements to translations with more strings having been translated.
+
 # FreesearchR 25.9.1
 
 *NEW* Language has been revised to make the app more accessible and easier to understand.
