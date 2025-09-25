@@ -554,11 +554,11 @@ supported_plots <- function() {
       fun = "plot_euler",
       descr = i18n$t("Euler diagram"),
       note = i18n$t("Generate area-proportional Euler diagrams to display set relationships"),
-      primary.type = c("dichotomous", "categorical"),
-      secondary.type = c("dichotomous", "categorical"),
+      primary.type = c("dichotomous"),
+      secondary.type = c("dichotomous"),
       secondary.multi = TRUE,
       secondary.max = 4,
-      tertiary.type = c("dichotomous", "categorical"),
+      tertiary.type = c("dichotomous"),
       secondary.extra = NULL
     )
   )
