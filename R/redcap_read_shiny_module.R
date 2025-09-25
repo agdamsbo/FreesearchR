@@ -12,20 +12,20 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
 
   if (isTRUE(title)) {
     title <- shiny::tags$h4(
-      "Import data from REDCap",
+      i18n$t("Import data from REDCap"),
       class = "redcap-module-title"
     )
   }
 
   server_ui <- shiny::tagList(
-    shiny::tags$h4("REDCap server"),
+    shiny::tags$h4(i18n$t("REDCap server")),
     shiny::textInput(
       inputId = ns("uri"),
-      label = "Web address",
+      label = i18n$t("Web address"),
       value = if_not_missing(url, "https://redcap.your.institution/"),
       width = "100%"
     ),
-    shiny::helpText("Format should be either 'https://redcap.your.institution/' or 'https://your.institution/redcap/'"),
+    shiny::helpText(i18n$t("Format should be either 'https://redcap.your.institution/' or 'https://your.institution/redcap/'")),
     # shiny::textInput(
     #   inputId = ns("api"),
     #   label = "API token",
@@ -34,16 +34,16 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
     # ),
     shiny::passwordInput(
       inputId = ns("api"),
-      label = "API token",
+      label = i18n$t("API token"),
       value = "",
       width = "100%"
     ),
-    shiny::helpText("The token is a string of 32 numbers and letters."),
+    shiny::helpText(i18n$t("The token is a string of 32 numbers and letters.")),
     shiny::br(),
     shiny::br(),
     shiny::actionButton(
       inputId = ns("data_connect"),
-      label = "Connect",
+      label = i18n$t("Connect"),
       icon = shiny::icon("link", lib = "glyphicon"),
       width = "100%",
       disabled = TRUE
@@ -68,13 +68,13 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
       shiny::uiOutput(outputId = ns("arms")),
       shiny::textInput(
         inputId = ns("filter"),
-        label = "Optional filter logic (e.g., ⁠[gender] = 'female')"
-      )
+        label = i18n$t("Optional filter logic (e.g., ⁠[gender] = 'female')"
+      ))
     )
 
   params_ui <-
     shiny::tagList(
-      shiny::tags$h4("Data import parameters"),
+      shiny::tags$h4(i18n$t("Data import parameters")),
       shiny::tags$div(
         style = htmltools::css(
           display = "grid",
@@ -100,14 +100,14 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
           )
         )
       ),
-      shiny::helpText("Select fields/variables to import and click the funnel to apply optional filters"),
+      shiny::helpText(i18n$t("Select fields/variables to import and click the funnel to apply optional filters")),
       shiny::tags$br(),
       shiny::tags$br(),
       shiny::uiOutput(outputId = ns("data_type")),
       shiny::uiOutput(outputId = ns("fill")),
       shiny::actionButton(
         inputId = ns("data_import"),
-        label = "Import",
+        label = i18n$t("Import"),
         icon = shiny::icon("download", lib = "glyphicon"),
         width = "100%",
         disabled = TRUE
@@ -226,11 +226,11 @@ m_redcap_readServer <- function(id) {
                 selector = ns("connect"),
                 status = "success",
                 include_data_alert(
-                  see_data_text = "Click to see data dictionary",
+                  see_data_text = i18n$t("Click to see data dictionary"),
                   dataIdName = "see_dd",
                   extra = tags$p(
-                    tags$b(phosphoricons::ph("check", weight = "bold"), "Connected to server!"),
-                    glue::glue("The {data_rv$info$project_title} project is loaded.")
+                    tags$b(phosphoricons::ph("check", weight = "bold"), i18n$t("Connected to server!")),
+                    glue::glue(i18n$t("The {data_rv$info$project_title} project is loaded."))
                   ),
                   btn_show_data = TRUE
                 )
@@ -257,10 +257,10 @@ m_redcap_readServer <- function(id) {
     shiny::observeEvent(input$see_dd, {
       show_data(
         purrr::pluck(data_rv$dd_list, "data"),
-        title = "Data dictionary",
+        title = i18n$t("Data dictionary"),
         type = "modal",
         show_classes = FALSE,
-        tags$b("Preview:")
+        tags$b(i18n$t("Preview:"))
       )
     })
 
@@ -268,10 +268,10 @@ m_redcap_readServer <- function(id) {
       show_data(
         # purrr::pluck(data_rv$dd_list, "data"),
         data_rv$data,
-        title = "Imported data set",
+        title = i18n$t("Imported data set"),
         type = "modal",
         show_classes = FALSE,
-        tags$b("Preview:")
+        tags$b(i18n$t("Preview:"))
       )
     })
 
@@ -289,7 +289,7 @@ m_redcap_readServer <- function(id) {
       shiny::req(data_rv$dd_list)
       shinyWidgets::virtualSelectInput(
         inputId = ns("fields"),
-        label = "Select fields/variables to import:",
+        label = i18n$t("Select fields/variables to import:"),
         choices = purrr::pluck(data_rv$dd_list, "data") |>
           dplyr::select(field_name, form_name) |>
           (\(.x){
@@ -308,7 +308,7 @@ m_redcap_readServer <- function(id) {
       if (isTRUE(data_rv$info$has_repeating_instruments_or_events)) {
         vectorSelectInput(
           inputId = ns("data_type"),
-          label = "Specify the data format",
+          label = i18n$t("Specify the data format"),
           choices = c(
             "Wide data (One row for each subject)" = "wide",
             "Long data for project with repeating instruments (default REDCap)" = "long"
@@ -335,7 +335,7 @@ m_redcap_readServer <- function(id) {
       if (input$data_type == "long" && isTRUE(any(input$fields %in% data_rv$rep_fields))) {
         vectorSelectInput(
           inputId = ns("fill"),
-          label = "Fill missing values?",
+          label = i18n$t("Fill missing values?"),
           choices = c(
             "Yes, fill missing, non-repeated values" = "yes",
             "No, leave the data as is" = "no"
@@ -417,7 +417,7 @@ m_redcap_readServer <- function(id) {
         data_rv$data_message <- imported$raw_text
       } else {
         data_rv$data_status <- "success"
-        data_rv$data_message <- "Requested data was retrieved!"
+        data_rv$data_message <- i18n$t("Requested data was retrieved!")
 
         ## The data management below should be separated to allow for changing
         ## "wide"/"long" without re-importing data
@@ -452,12 +452,12 @@ m_redcap_readServer <- function(id) {
 
         if (!any(in_data_check[-1])) {
           data_rv$data_status <- "warning"
-          data_rv$data_message <- "Data retrieved, but it looks like only the ID was retrieved from the server. Please check with your REDCap administrator that you have required permissions for data access."
+          data_rv$data_message <- i18n$t("Data retrieved, but it looks like only the ID was retrieved from the server. Please check with your REDCap administrator that you have required permissions for data access.")
         }
 
         if (!all(in_data_check)) {
           data_rv$data_status <- "warning"
-          data_rv$data_message <- "Data retrieved, but it looks like not all requested fields were retrieved from the server. Please check with your REDCap administrator that you have required permissions for data access."
+          data_rv$data_message <- i18n$t("Data retrieved, but it looks like not all requested fields were retrieved from the server. Please check with your REDCap administrator that you have required permissions for data access.")
         }
 
         data_rv$code <- code
@@ -484,7 +484,7 @@ m_redcap_readServer <- function(id) {
             #   data_rv$data_message
             # ),
             include_data_alert(
-              see_data_text = "Click to see the imported data",
+              see_data_text = i18n$t("Click to see the imported data"),
               dataIdName = "see_data",
               extra = tags$p(
                 tags$b(phosphoricons::ph("check", weight = "bold"), data_rv$data_message)

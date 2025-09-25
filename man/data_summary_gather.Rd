@@ -7,16 +7,22 @@
 data_summary_gather(
   data,
   summary.fun = class,
-  palette.fun = viridisLite::viridis
+  palette.fun = viridisLite::viridis,
+  na.label = "NA",
+  ...
 )
 }
 \arguments{
 \item{data}{data.frame}
 
+\item{summary.fun}{fun for summarising}
+
 \item{palette.fun}{optionally use specific palette functions. First argument
 has to be the length.}
 
-\item{fun}{summary function. Default is "class"}
+\item{na.label}{label for NA}
+
+\item{...}{overflow}
 }
 \value{
 data.frame

@@ -46,7 +46,7 @@ regression_ui <- function(id, ...) {
   shiny::tagList(
     # title = "",
     bslib::nav_panel(
-      title = "Regression table",
+      title = i18n$t("Regression table"),
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           shiny::uiOutput(outputId = ns("data_info"), inline = TRUE),
@@ -56,7 +56,7 @@ regression_ui <- function(id, ...) {
             multiple = FALSE,
             bslib::accordion_panel(
               value = "acc_pan_reg",
-              title = "Regression",
+              title = i18n$t("Regression"),
               icon = bsicons::bs_icon("calculator"),
               shiny::uiOutput(outputId = ns("outcome_var")),
               # shiny::selectInput(
@@ -71,7 +71,7 @@ regression_ui <- function(id, ...) {
               shiny::uiOutput(outputId = ns("regression_type")),
               shiny::radioButtons(
                 inputId = ns("all"),
-                label = "Specify covariables",
+                label = i18n$t("Specify covariables"),
                 inline = TRUE, selected = 2,
                 choiceNames = c(
                   "Yes",
@@ -82,15 +82,15 @@ regression_ui <- function(id, ...) {
               shiny::conditionalPanel(
                 condition = "input.all==1",
                 shiny::uiOutput(outputId = ns("regression_vars")),
-                shiny::helpText("If none are selected, all are included."),
+                shiny::helpText(i18n$t("If none are selected, all are included.")),
                 shiny::tags$br(),
                 ns = ns
               ),
               bslib::input_task_button(
                 id = ns("load"),
-                label = "Analyse",
+                label = i18n$t("Analyse"),
                 icon = bsicons::bs_icon("pencil"),
-                label_busy = "Working...",
+                label_busy = i18n$t("Working..."),
                 icon_busy = fontawesome::fa_i("arrows-rotate",
                   class = "fa-spin",
                   "aria-hidden" = "true"
@@ -98,17 +98,18 @@ regression_ui <- function(id, ...) {
                 type = "secondary",
                 auto_reset = TRUE
               ),
-              shiny::helpText("Press 'Analyse' to create the regression model and after changing parameters."),
+              shiny::helpText(i18n$t("Press 'Analyse' to create the regression model and after changing parameters.")),
               shiny::tags$br(),
               shiny::radioButtons(
                 inputId = ns("add_regression_p"),
-                label = "Show p-value",
+                label = i18n$t("Show p-value"),
                 inline = TRUE,
                 selected = "yes",
-                choices = list(
-                  "Yes" = "yes",
-                  "No" = "no"
-                )
+                choiceNames = c(
+                  "Yes",
+                  "No"
+                ),
+                choiceValues = c("yes", "no")
               ),
               # shiny::tags$br(),
               # shiny::radioButtons(
@@ -151,7 +152,7 @@ regression_ui <- function(id, ...) {
                 shiny::tagList(
                   shinyWidgets::noUiSliderInput(
                     inputId = ns("plot_height"),
-                    label = "Plot height (mm)",
+                    label = i18n$t("Plot height (mm)"),
                     min = 50,
                     max = 300,
                     value = 100,
@@ -161,7 +162,7 @@ regression_ui <- function(id, ...) {
                   ),
                   shinyWidgets::noUiSliderInput(
                     inputId = ns("plot_width"),
-                    label = "Plot width (mm)",
+                    label = i18n$t("Plot width (mm)"),
                     min = 50,
                     max = 300,
                     value = 100,
@@ -171,7 +172,7 @@ regression_ui <- function(id, ...) {
                   ),
                   shiny::selectInput(
                     inputId = ns("plot_type"),
-                    label = "File format",
+                    label = i18n$t("File format"),
                     choices = list(
                       "png",
                       "tiff",
@@ -185,7 +186,7 @@ regression_ui <- function(id, ...) {
                   # Button
                   shiny::downloadButton(
                     outputId = ns("download_plot"),
-                    label = "Download plot",
+                    label = i18n$t("Download plot"),
                     icon = shiny::icon("download")
                   )
                 )
@@ -197,7 +198,7 @@ regression_ui <- function(id, ...) {
       )
     ),
     bslib::nav_panel(
-      title = "Model checks",
+      title = i18n$t("Model checks"),
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::accordion(

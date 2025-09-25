@@ -321,11 +321,11 @@ ui_elements <- function(selection) {
         shiny::tags$br(),
         shiny::actionButton(
           inputId = "data_reset",
-          label = "Restore original data",
+          label = i18n$t("Restore original data"),
           width = "100%"
         ),
         shiny::tags$br(),
-        shiny::helpText("Reset to original imported dataset. Careful! There is no un-doing."),
+        shiny::helpText(i18n$t("Reset to original imported dataset. Careful! There is no un-doing.")),
         shiny::tags$br()
       )
       # )
@@ -344,7 +344,7 @@ ui_elements <- function(selection) {
         # bslib::navset_bar(
         #   title = "",
         bslib::nav_panel(
-          title = "Characteristics",
+          title = i18n$t("Characteristics"),
           icon = bsicons::bs_icon("table"),
           bslib::layout_sidebar(
             sidebar = bslib::sidebar(
@@ -359,12 +359,12 @@ ui_elements <- function(selection) {
                   title = "Settings",
                   icon = bsicons::bs_icon("table"),
                   shiny::uiOutput("strat_var"),
-                  shiny::helpText("Only factor/categorical variables are available for stratification. Go back to the 'Prepare' tab to reclass a variable if it's not on the list."),
+                  shiny::helpText(i18n$t("Only factor/categorical variables are available for stratification. Go back to the 'Prepare' tab to reclass a variable if it's not on the list.")),
                   shiny::conditionalPanel(
                     condition = "input.strat_var!='none'",
                     shiny::radioButtons(
                       inputId = "add_p",
-                      label = "Compare strata?",
+                      label = i18n$t("Compare strata?"),
                       selected = "no",
                       inline = TRUE,
                       choices = list(
@@ -378,7 +378,7 @@ ui_elements <- function(selection) {
                   shiny::br(),
                   shiny::actionButton(
                     inputId = "act_eval",
-                    label = "Evaluate",
+                    label = i18n$t("Evaluate"),
                     width = "100%",
                     icon = shiny::icon("calculator"),
                     disabled = TRUE
@@ -390,7 +390,7 @@ ui_elements <- function(selection) {
           )
         ),
         bslib::nav_panel(
-          title = "Correlations",
+          title = i18n$t("Correlations"),
           icon = bsicons::bs_icon("bounding-box"),
           bslib::layout_sidebar(
             sidebar = bslib::sidebar(
@@ -404,11 +404,11 @@ ui_elements <- function(selection) {
                   title = "Settings",
                   icon = bsicons::bs_icon("bounding-box"),
                   shiny::uiOutput("outcome_var_cor"),
-                  shiny::helpText("To avoid evaluating the correlation of the outcome variable, this can be excluded from the plot or select 'none'."),
+                  shiny::helpText(i18n$t("To avoid evaluating the correlation of the outcome variable, this can be excluded from the plot or select 'none'.")),
                   shiny::br(),
                   shinyWidgets::noUiSliderInput(
                     inputId = "cor_cutoff",
-                    label = "Correlation cut-off",
+                    label = i18n$t("Correlation cut-off"),
                     min = 0,
                     max = 1,
                     step = .01,
@@ -416,7 +416,7 @@ ui_elements <- function(selection) {
                     format = shinyWidgets::wNumbFormat(decimals = 2),
                     color = datamods:::get_primary_color()
                   ),
-                  shiny::helpText("Set the cut-off for considered 'highly correlated'.")
+                  shiny::helpText(i18n$t("Set the cut-off for considered 'highly correlated'."))
                 )
               )
             ),
@@ -424,7 +424,7 @@ ui_elements <- function(selection) {
           )
         ),
         bslib::nav_panel(
-          title = "Missings",
+          title = i18n$t("Missings"),
           icon = bsicons::bs_icon("x-circle"),
           bslib::layout_sidebar(
             sidebar = bslib::sidebar(
@@ -437,7 +437,7 @@ ui_elements <- function(selection) {
                   title = "Settings",
                   icon = bsicons::bs_icon("x-circle"),
                   shiny::uiOutput("missings_var"),
-                  shiny::helpText("To consider if data is missing by random, choose the outcome/dependent variable, if it has any missings to evaluate if there is a significant difference across other variables depending on missing data or not.")
+                  shiny::helpText(i18n$t("To consider if data is missing by random, choose the outcome/dependent variable, if it has any missings to evaluate if there is a significant difference across other variables depending on missing data or not."))
                 )
               )
             ),

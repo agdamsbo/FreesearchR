@@ -207,6 +207,9 @@ describe_col_num <- function(x, with_summary = TRUE) {
           i18n$t("Mean:"), round(mean(x, na.rm = TRUE), 2)
         ),
         tags$div(
+          i18n$t("Median:"), round(median(x, na.rm = TRUE), 2)
+        ),
+        tags$div(
           i18n$t("Max:"), round(max(x, na.rm = TRUE), 2)
         ),
         tags$div(

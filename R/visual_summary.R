@@ -1,10 +1,12 @@
 #' Data correlations evaluation module
 #'
-#' @param id Module id
+#' @param id id
 #'
-#' @name data-missings
+#' @name visual-summary
 #' @returns Shiny ui module
 #' @export
+#'
+#' @example examples/visual_summary_demo.R
 visual_summary_ui <- function(id) {
   ns <- shiny::NS(id)
 
@@ -13,8 +15,17 @@ visual_summary_ui <- function(id) {
   )
 }
 
+#' Visual summary server
+#'
+#' @param data_r reactive data
+#' @param ... passed on to the visual_summary() function
+#'
+#' @name visual-summary
+#' @returns shiny server
+#' @export
+#'
 visual_summary_server <- function(id,
-                                  data_r=shiny::reactive(NULL),
+                                  data_r = shiny::reactive(NULL),
                                   ...) {
   shiny::moduleServer(
     id = id,
@@ -43,45 +54,26 @@ visual_summary_server <- function(id,
       #   missings_apex_plot(datar(), ...)
       # })
       output$visual_plot <- shiny::renderPlot(expr = {
-        visual_summary(data = rv$data,...)
+        visual_summary(data = rv$data, na.label = i18n$t("Missings"), legend.title = i18n$t("Class"), ylab = i18n$t("Observations"), ...)
       })
     }
   )
 }
 
-visual_summary_demo_app <- function() {
-  ui <- shiny::fluidPage(
-    shiny::actionButton(
-      inputId = "modal_missings",
-      label = "Visual summary",
-      width = "100%",
-      disabled = FALSE
-    )
-  )
-  server <- function(input, output, session) {
-    data_demo <- mtcars
-    data_demo[sample(1:32, 10), "cyl"] <- NA
-    data_demo[sample(1:32, 8), "vs"] <- NA
 
-    visual_summary_server(id = "data", data = shiny::reactive(data_demo))
-
-    observeEvent(input$modal_missings, {
-      tryCatch(
-        {
-          modal_visual_summary(id = "data")
-        },
-        error = function(err) {
-          showNotification(paste0("We encountered the following error browsing your data: ", err), type = "err")
-        }
-      )
-    })
-  }
-  shiny::shinyApp(ui, server)
-}
-
-visual_summary_demo_app()
-
-
+#' Visual summary modal
+#'
+#' @param title title
+#' @param easyClose easyClose
+#' @param size modal size
+#' @param footer modal footer
+#' @param ... ignored
+#'
+#' @name visual-summary
+#'
+#' @returns shiny modal
+#' @export
+#'
 modal_visual_summary <- function(id,
                                  title = "Visual overview of data classes and missing observations",
                                  easyClose = TRUE,
@@ -100,9 +92,10 @@ modal_visual_summary <- function(id,
 
 ## Slow with many observations...
 
-#' Plot missings and class with apexcharter
+#' Plot missings and class with apexcharter. Not in use with FreesearchR.
 #'
 #' @param data data frame
+#' @name visual-summary
 #'
 #' @returns An [apexchart()] `htmlwidget` object.
 #' @export
@@ -157,6 +150,10 @@ missings_apex_plot <- function(data, animation = FALSE, ...) {
 #'
 #' @param data data
 #' @param ... optional arguments passed to data_summary_gather()
+#' @param legend.title Legend title
+#' @param ylab Y axis label
+#'
+#' @name visual-summary
 #'
 #' @returns ggplot2 object
 #' @export
@@ -167,10 +164,14 @@ missings_apex_plot <- function(data, animation = FALSE, ...) {
 #' data_demo[sample(1:32, 8), "vs"] <- NA
 #' visual_summary(data_demo)
 #' visual_summary(data_demo, palette.fun = scales::hue_pal())
-#' visual_summary(dplyr::storms)
 #' visual_summary(dplyr::storms, summary.fun = data_type)
-visual_summary <- function(data, legend.title = "Data class", ...) {
+#' visual_summary(dplyr::storms, summary.fun = data_type, na.label = "Missings", legend.title = "Class")
+visual_summary <- function(data, legend.title = NULL, ylab = "Observations", ...) {
   l <- data_summary_gather(data, ...)
+
+  if (is.null(legend.title)) {
+    legend.title <- l$summary.fun
+  }
 
   df <- l$data
 
@@ -185,13 +186,13 @@ visual_summary <- function(data, legend.title = "Data class", ...) {
       vjust = 1, hjust = 1
     )) +
     ggplot2::scale_fill_manual(values = l$colors) +
-    ggplot2::labs(x = "", y = "Observations") +
+    ggplot2::labs(x = "", y = ylab) +
     ggplot2::scale_y_reverse() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(hjust = 0.5)) +
     ggplot2::guides(colour = "none") +
     ggplot2::guides(fill = ggplot2::guide_legend(title = legend.title)) +
     # change the limits etc.
-    ggplot2::guides(fill = ggplot2::guide_legend(title = "Type")) +
+    # ggplot2::guides(fill = ggplot2::guide_legend(title = guide.lab)) +
     # add info about the axes
     ggplot2::scale_x_discrete(position = "top") +
     ggplot2::theme(axis.text.x = ggplot2::element_text(hjust = 0)) +
@@ -206,16 +207,18 @@ visual_summary <- function(data, legend.title = "Data class", ...) {
 #' Data summary for printing visual summary
 #'
 #' @param data data.frame
-#' @param fun summary function. Default is "class"
 #' @param palette.fun optionally use specific palette functions. First argument
 #' has to be the length.
+#' @param summary.fun fun for summarising
+#' @param na.label label for NA
+#' @param ... overflow
 #'
 #' @returns data.frame
 #' @export
 #'
 #' @examples
 #' mtcars |> data_summary_gather()
-data_summary_gather <- function(data, summary.fun = class, palette.fun = viridisLite::viridis) {
+data_summary_gather <- function(data, summary.fun = class, palette.fun = viridisLite::viridis, na.label = "NA", ...) {
   df_plot <- setNames(data, unique_short(names(data))) |>
     purrr::map_df(\(x){
       ifelse(is.na(x),
@@ -237,12 +240,12 @@ data_summary_gather <- function(data, summary.fun = class, palette.fun = viridis
     forcats::as_factor() |>
     as.numeric()
 
-  df_plot$valueType[is.na(df_plot$valueType)] <- "NA"
+  df_plot$valueType[is.na(df_plot$valueType)] <- na.label
   df_plot$valueType_num[is.na(df_plot$valueType_num)] <- max(df_plot$valueType_num, na.rm = TRUE) + 1
 
   labels <- setNames(unique(df_plot$valueType_num), unique(df_plot$valueType)) |> sort()
 
-  if (any(df_plot$valueType == "NA")) {
+  if (any(df_plot$valueType == na.label)) {
     colors <- setNames(c(palette.fun(length(labels) - 1), "#999999"), names(labels))
   } else {
     colors <- setNames(palette.fun(length(labels)), names(labels))
@@ -260,7 +263,7 @@ data_summary_gather <- function(data, summary.fun = class, palette.fun = viridis
     }) |>
     setNames(NULL)
 
-  list(data = df_plot, colors = colors, labels = label_list)
+  list(data = df_plot, colors = colors, labels = label_list, summary.fun = deparse(substitute(summary.fun)))
 }
 
 
