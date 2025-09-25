@@ -1,6 +1,8 @@
-# FreesearchR 25.9.2 - DEV
+# FreesearchR 25.9.2
 
 *NEW* Improvements to translations with more strings having been translated.
+
+The Euler visualisation option has been limited to only plot dichotomous variables. This is also what makes the most sense.
 
 # FreesearchR 25.9.1
 

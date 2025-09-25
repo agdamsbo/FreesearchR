@@ -11,11 +11,11 @@
 |collate     |en_US.UTF-8                                |
 |ctype       |en_US.UTF-8                                |
 |tz          |Europe/Copenhagen                          |
-|date        |2025-09-24                                 |
+|date        |2025-09-25                                 |
 |rstudio     |2025.05.0+496 Mariposa Orchid (desktop)    |
 |pandoc      |3.6.4 @ /opt/homebrew/bin/ (via rmarkdown) |
 |quarto      |1.7.30 @ /usr/local/bin/quarto             |
-|FreesearchR |25.9.2.250924                              |
+|FreesearchR |25.9.2.250925                              |
                                                                                 
                                                                                 
 --------------------------------------------------------------------------------
@@ -26,6 +26,8 @@
 |apexcharter       |0.4.4         |2024-09-06 |CRAN (R 4.4.1) |
 |askpass           |1.2.1         |2024-10-04 |CRAN (R 4.4.1) |
 |assertthat        |0.2.1         |2019-03-21 |CRAN (R 4.4.1) |
+|attachment        |0.4.5         |2025-03-14 |CRAN (R 4.4.1) |
+|attempt           |0.3.1         |2020-05-03 |CRAN (R 4.4.1) |
 |backports         |1.5.0         |2024-05-23 |CRAN (R 4.4.1) |
 |base64enc         |0.1-3         |2015-07-28 |CRAN (R 4.4.1) |
 |bayestestR        |0.16.1        |2025-07-01 |CRAN (R 4.4.1) |
@@ -39,7 +41,6 @@
 |bsicons           |0.1.2         |2023-11-04 |CRAN (R 4.4.0) |
 |bslib             |0.9.0         |2025-01-30 |CRAN (R 4.4.1) |
 |cachem            |1.1.0         |2024-05-16 |CRAN (R 4.4.1) |
-|callr             |3.7.6         |2024-03-25 |CRAN (R 4.4.0) |
 |cards             |0.6.1         |2025-07-03 |CRAN (R 4.4.1) |
 |cardx             |0.2.5         |2025-07-03 |CRAN (R 4.4.1) |
 |caTools           |1.18.3        |2024-09-04 |CRAN (R 4.4.1) |
@@ -61,6 +62,7 @@
 |devtools          |2.4.5         |2022-10-11 |CRAN (R 4.4.0) |
 |DHARMa            |0.4.7         |2024-10-18 |CRAN (R 4.4.1) |
 |digest            |0.6.37        |2024-08-19 |CRAN (R 4.4.1) |
+|dockerfiler       |0.2.5         |2025-05-07 |CRAN (R 4.4.1) |
 |doParallel        |1.0.17        |2022-02-07 |CRAN (R 4.4.0) |
 |dplyr             |1.1.4         |2023-11-17 |CRAN (R 4.4.0) |
 |DT                |0.33          |2024-04-04 |CRAN (R 4.4.0) |
@@ -114,6 +116,7 @@
 |KernSmooth        |2.23-26       |2025-01-01 |CRAN (R 4.4.1) |
 |keyring           |1.4.1         |2025-06-15 |CRAN (R 4.4.1) |
 |knitr             |1.50          |2025-03-16 |CRAN (R 4.4.1) |
+|labeling          |0.4.3         |2023-08-29 |CRAN (R 4.4.1) |
 |later             |1.4.2         |2025-04-08 |CRAN (R 4.4.1) |
 |lattice           |0.22-7        |2025-04-02 |CRAN (R 4.4.1) |
 |lifecycle         |1.0.4         |2023-11-07 |CRAN (R 4.4.1) |
@@ -144,10 +147,10 @@
 |pillar            |1.11.0        |2025-07-04 |CRAN (R 4.4.1) |
 |pkgbuild          |1.4.8         |2025-05-26 |CRAN (R 4.4.1) |
 |pkgconfig         |2.0.3         |2019-09-22 |CRAN (R 4.4.1) |
-|pkgdown           |2.1.3         |2025-05-25 |CRAN (R 4.4.1) |
 |pkgload           |1.4.0         |2024-06-28 |CRAN (R 4.4.0) |
 |plyr              |1.8.9         |2023-10-02 |CRAN (R 4.4.1) |
 |polyclip          |1.10-7        |2024-07-23 |CRAN (R 4.4.1) |
+|polylabelr        |0.3.0         |2024-11-19 |CRAN (R 4.4.1) |
 |pracma            |2.4.4         |2023-11-10 |CRAN (R 4.4.1) |
 |processx          |3.8.6         |2025-02-21 |CRAN (R 4.4.1) |
 |profvis           |0.4.0         |2024-09-20 |CRAN (R 4.4.1) |
@@ -158,9 +161,6 @@
 |qqconf            |1.3.2         |2023-04-14 |CRAN (R 4.4.0) |
 |qqplotr           |0.0.6         |2023-01-25 |CRAN (R 4.4.0) |
 |quarto            |1.5.0         |2025-07-28 |RSPM (R 4.4.0) |
-|R.methodsS3       |1.8.2         |2022-06-13 |CRAN (R 4.4.1) |
-|R.oo              |1.27.1        |2025-05-02 |CRAN (R 4.4.1) |
-|R.utils           |2.13.0        |2025-02-24 |CRAN (R 4.4.1) |
 |R6                |2.6.1         |2025-02-15 |CRAN (R 4.4.1) |
 |ragg              |1.4.0         |2025-04-10 |CRAN (R 4.4.1) |
 |rankinPlot        |1.1.0         |2023-01-30 |CRAN (R 4.4.0) |
@@ -195,6 +195,7 @@
 |sessioninfo       |1.2.3         |2025-02-05 |CRAN (R 4.4.1) |
 |shiny             |1.11.1        |2025-07-03 |CRAN (R 4.4.1) |
 |shiny.i18n        |0.3.0         |2023-01-16 |CRAN (R 4.4.0) |
+|shiny2docker      |0.0.3         |2025-06-28 |CRAN (R 4.4.1) |
 |shinybusy         |0.3.3         |2024-03-09 |CRAN (R 4.4.0) |
 |shinyjs           |2.1.0         |2021-12-23 |CRAN (R 4.4.0) |
 |shinyTime         |1.0.3         |2022-08-19 |CRAN (R 4.4.0) |
@@ -224,4 +225,5 @@
 |xml2              |1.3.8         |2025-03-14 |CRAN (R 4.4.1) |
 |xtable            |1.8-4         |2019-04-21 |CRAN (R 4.4.1) |
 |yaml              |2.3.10        |2024-07-26 |CRAN (R 4.4.1) |
+|yesno             |0.1.3         |2024-07-26 |CRAN (R 4.4.1) |
 |zip               |2.3.3         |2025-05-13 |CRAN (R 4.4.1) |

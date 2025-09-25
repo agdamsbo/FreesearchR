@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpCENEZ9/file6e544faf2ed5.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//Rtmpo2rU34/file15cb31846160a.R 
 ########
 
 i18n_path <- system.file("translations", package = "FreesearchR")
@@ -2205,11 +2205,11 @@ supported_plots <- function() {
       fun = "plot_euler",
       descr = i18n$t("Euler diagram"),
       note = i18n$t("Generate area-proportional Euler diagrams to display set relationships"),
-      primary.type = c("dichotomous", "categorical"),
-      secondary.type = c("dichotomous", "categorical"),
+      primary.type = c("dichotomous"),
+      secondary.type = c("dichotomous"),
       secondary.multi = TRUE,
       secondary.max = 4,
-      tertiary.type = c("dichotomous", "categorical"),
+      tertiary.type = c("dichotomous"),
       secondary.extra = NULL
     )
   )
@@ -8790,7 +8790,8 @@ ui_elements <- function(selection) {
                   outputId = "report",
                   label = "Download report",
                   icon = shiny::icon("download")
-                )
+                ),
+                shiny::br()
                 # shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
               ),
               shiny::column(
