@@ -72,13 +72,15 @@ regression_ui <- function(id, ...) {
               shiny::radioButtons(
                 inputId = ns("all"),
                 label = i18n$t("Specify covariables"),
-                inline = TRUE, selected = 2,
+                inline = TRUE,
+                selected = 2,
                 choiceNames = c(
                   "Yes",
                   "No"
                 ),
                 choiceValues = c(1, 2)
               ),
+              # shiny::uiOutput(outputId = ns("all")),
               shiny::conditionalPanel(
                 condition = "input.all==1",
                 shiny::uiOutput(outputId = ns("regression_vars")),
@@ -131,7 +133,7 @@ regression_ui <- function(id, ...) {
       )
     ),
     bslib::nav_panel(
-      title = "Coefficient plot",
+      title = i18n$t("Coefficient plot"),
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::accordion(
@@ -243,17 +245,37 @@ regression_server <- function(id,
         }
       })
 
-      shiny::observe({
-        bslib::accordion_panel_update(id = "acc_reg", target = "acc_pan_reg", title = i18n$t("Regression"))
-        bslib::accordion_panel_update(id = "acc_coef_plot", target = "acc_pan_coef_plot", title = i18n$t("Coefficients plot"))
-        bslib::accordion_panel_update(id = "acc_checks", target = "acc_pan_checks", title = i18n$t("Checks"))
-      })
 
       output$data_info <- shiny::renderUI({
         shiny::req(regression_vars())
         shiny::req(data_r())
         data_description(data_r()[regression_vars()])
       })
+
+      ## Update on laguage change
+
+      shiny::observe({
+        bslib::accordion_panel_update(id = "acc_reg", target = "acc_pan_reg", title = i18n$t("Regression"))
+        bslib::accordion_panel_update(id = "acc_coef_plot", target = "acc_pan_coef_plot", title = i18n$t("Coefficients plot"))
+        bslib::accordion_panel_update(id = "acc_checks", target = "acc_pan_checks", title = i18n$t("Checks"))
+      })
+
+      # shiny::observe({
+      #   shiny::updateRadioButtons(
+      #     session = session,
+      #     inputId = "all",
+      #     label = i18n$t("Specify covariables"),
+      #     # inline = TRUE,
+      #     # selected = 2,
+      #     choiceNames = c(
+      #       i18n$t("Yes"),
+      #       i18n$t("No")
+      #     ),
+      #     choiceValues = c(1, 2)
+      #   )
+      # })
+
+
 
       ##############################################################################
       #########
@@ -278,7 +300,7 @@ regression_server <- function(id,
         columnSelectInput(
           inputId = ns("outcome_var"),
           selected = NULL,
-          label = "Select outcome variable",
+          label = i18n$t("Select outcome variable"),
           data = data_r(),
           multiple = FALSE
         )
@@ -288,7 +310,7 @@ regression_server <- function(id,
         shiny::req(input$outcome_var)
         shiny::selectizeInput(
           inputId = ns("regression_type"),
-          label = "Choose regression analysis",
+          label = i18n$t("Choose regression analysis"),
           ## The below ifelse statement handles the case of loading a new dataset
           choices = possible_functions(
             data = dplyr::select(
@@ -307,7 +329,7 @@ regression_server <- function(id,
         shiny::selectizeInput(
           inputId = ns("factor_vars"),
           selected = colnames(data_r())[sapply(data_r(), is.factor)],
-          label = "Covariables to format as categorical",
+          label = i18n$t("Covariables to format as categorical"),
           choices = colnames(data_r()),
           multiple = TRUE
         )
@@ -327,7 +349,7 @@ regression_server <- function(id,
         columnSelectInput(
           inputId = ns("strat_var"),
           selected = "none",
-          label = "Select variable to stratify baseline",
+          label = i18n$t("Select variable to stratify baseline"),
           data = data_r(),
           col_subset = c(
             "none",
@@ -342,7 +364,7 @@ regression_server <- function(id,
         shiny::selectInput(
           inputId = ns("plot_model"),
           selected = 1,
-          label = "Select models to plot",
+          label = i18n$t("Select models to plot"),
           choices = names(rv$list$regression$tables),
           multiple = TRUE
         )
@@ -392,7 +414,7 @@ regression_server <- function(id,
               rv$list$regression$models <- model_lists
             },
             error = function(err) {
-              showNotification(paste0("Creating regression models failed with the following error: ", err), type = "err")
+              showNotification(paste(i18n$t("Creating regression models failed with the following error:"), err), type = "err")
             }
           )
         }
@@ -457,7 +479,7 @@ regression_server <- function(id,
               showNotification(paste0(warn), type = "warning")
             },
             error = function(err) {
-              showNotification(paste0("Creating a regression table failed with the following error: ", err), type = "err")
+              showNotification(paste(i18n$t("Creating a regression table failed with the following error:"), err), type = "err")
             }
           )
         }
@@ -558,7 +580,7 @@ regression_server <- function(id,
       output$download_plot <- shiny::downloadHandler(
         filename = paste0("regression_plot.", input$plot_type),
         content = function(file) {
-          shiny::withProgress(message = "Saving the plot. Hold on for a moment..", {
+          shiny::withProgress(message = i18n$t("Saving the plot. Hold on for a moment.."), {
             ggplot2::ggsave(
               filename = file,
               plot = rv$plot,
@@ -595,7 +617,7 @@ regression_server <- function(id,
             #   showNotification(paste0(warn), type = "warning")
             # },
             error = function(err) {
-              showNotification(paste0("Running model assumptions checks failed with the following error: ", err), type = "err")
+              showNotification(paste(i18n$t("Running model assumptions checks failed with the following error:"), err), type = "err")
             }
           )
         }
@@ -616,7 +638,7 @@ regression_server <- function(id,
         vectorSelectInput(
           inputId = ns("plot_checks"),
           selected = 1,
-          label = "Select checks to plot",
+          label = i18n$t("Select checks to plot"),
           choices = names,
           multiple = TRUE
         )
@@ -631,7 +653,7 @@ regression_server <- function(id,
           if (!is.null(rv$list$regression$tables)) {
             p <- rv$check_plot() +
               # patchwork::wrap_plots() +
-              patchwork::plot_annotation(title = "Multivariable regression model checks")
+              patchwork::plot_annotation(title = i18n$t("Multivariable regression model checks"))
 
 
             layout <- sapply(seq_len(length(p)), \(.x){

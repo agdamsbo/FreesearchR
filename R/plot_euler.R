@@ -1,7 +1,7 @@
 #' Area proportional venn diagrams
 #'
 #' @description
-#' THis is slightly modified from https://gist.github.com/danlooo/d23d8bcf8856c7dd8e86266097404ded
+#' This is slightly modified from https://gist.github.com/danlooo/d23d8bcf8856c7dd8e86266097404ded
 #'
 #' This functions uses eulerr::euler to plot area proportional venn diagramms
 #' but plots it using ggplot2
@@ -11,17 +11,26 @@
 #' @param show_quantities whether to show number of intersecting elements
 #' @param show_labels whether to show set names
 #' @param ... further arguments passed to eulerr::euler
+#'
+#' @include data_plots.R
 ggeulerr <- function(
     combinations,
     show_quantities = TRUE,
     show_labels = TRUE,
     ...) {
-  # browser()
+
+  ## Extracting labels
+  labs <- sapply(names(combinations),\(.x){
+    # browser()
+    get_label(combinations,.x)
+  })
+
   data <-
-    eulerr::euler(combinations = combinations, ...) |>
+    ## Set labels as variable names for nicer plotting
+    setNames(as.data.frame(combinations),labs) |>
+    eulerr::euler(...) |>
     plot(quantities = show_quantities) |>
     purrr::pluck("data")
-
 
   tibble::as_tibble(data$ellipses, rownames = "Variables") |>
     ggplot2::ggplot() +
@@ -38,7 +47,8 @@ ggeulerr <- function(
           dplyr::mutate(
             label = labels |> purrr::map2(quantities, ~ {
               if (!is.na(.x) && !is.na(.y) && show_labels) {
-                paste0(.x, "\n", sprintf(.y, fmt = "%.2g"))
+                paste0(.x, "\n", sprintf(.y, fmt = "%.4g"))
+                # glue::glue("{.x}\n{round(.y,0)}")
               } else if (!is.na(.x) && show_labels) {
                 .x
               } else if (!is.na(.y)) {
@@ -77,6 +87,21 @@ ggeulerr <- function(
 #' ) |> plot_euler("A", c("B", "C"), "D", seed = 4)
 #' mtcars |> plot_euler("vs", "am", seed = 1)
 #' mtcars |> plot_euler("vs", "am", "cyl", seed = 1)
+#' stRoke::trial |>
+#'   dplyr::mutate(
+#'     mfi_cut = cut(mfi_6, c(0, 12, max(mfi_6, na.rm = TRUE))),
+#'     mdi_cut = cut(mdi_6, c(0, 20, max(mdi_6, na.rm = TRUE)))
+#'   ) |>
+#'   purrr::map2(
+#'     c(sapply(stRoke::trial, \(.x)REDCapCAST::get_attr(.x, attr = "label")), "Fatigue", "Depression"),
+#'     \(.x, .y){
+#'       REDCapCAST::set_attr(.x, .y, "label")
+#'     }
+#'   ) |>
+#'   dplyr::bind_cols() |>
+#'   plot_euler("mfi_cut", "mdi_cut")
+#' stRoke::trial |>
+#'   plot_euler(pri="male", sec=c("hypertension"))
 plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
   set.seed(seed = seed)
   if (!is.null(ter)) {
@@ -84,16 +109,13 @@ plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
   } else {
     ds <- list(data)
   }
-
   out <- lapply(ds, \(.x){
     .x[c(pri, sec)] |>
-      as.data.frame() |>
       na.omit() |>
       plot_euler_single()
   })
-# browser()
-  wrap_plot_list(out,title=glue::glue("Grouped by {get_label(data,ter)}"))
-  # patchwork::wrap_plots(out)
+
+  wrap_plot_list(out, title = glue::glue(i18n$t("Grouped by {get_label(data,ter)}")))
 }
 
 #' Easily plot single euler diagrams

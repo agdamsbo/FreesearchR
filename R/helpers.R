@@ -154,7 +154,8 @@ dummy_Imports <- function() {
     parameters::ci(),
     DT::addRow(),
     bslib::accordion(),
-    NHANES::NHANES()
+    NHANES::NHANES(),
+    stRoke::add_padding()
   )
   # https://github.com/hadley/r-pkgs/issues/828
 }
@@ -667,4 +668,85 @@ is_identical_to_previous <- function(data, no.name = TRUE) {
 #' c("foo bar", "fooBar21", "!!Foo'B'a-r", "foo_bar", "F  OO bar") |> simple_snake()
 simple_snake <- function(data){
   gsub("[\\s+]","_",gsub("[^\\w\\s:-]", "", tolower(data), perl=TRUE), perl=TRUE)
+}
+
+#' Data type assessment.
+#'
+#' @description
+#' These are more overall than the native typeof. This is used to assess a more
+#' meaningful "clinical" data type.
+#'
+#' @param data vector or data.frame. if data frame, each column is evaluated.
+#'
+#' @returns outcome type
+#' @export
+#'
+#' @examples
+#' mtcars |>
+#'   default_parsing() |>
+#'   lapply(data_type)
+#' mtcars |>
+#'   default_parsing() |>
+#'   data_type()
+#' c(1, 2) |> data_type()
+#' 1 |> data_type()
+#' c(rep(NA, 10)) |> data_type()
+#' sample(1:100, 50) |> data_type()
+#' factor(letters[1:20]) |> data_type()
+#' as.Date(1:20) |> data_type()
+data_type <- function(data) {
+  if (is.data.frame(data)) {
+    sapply(data, data_type)
+  } else {
+    cl_d <- class(data)
+    l_unique <- length(unique(na.omit(data)))
+    if (all(is.na(data))) {
+      out <- "empty"
+    } else if (l_unique < 2) {
+      out <- "monotone"
+    } else if (any(c("factor", "logical") %in% cl_d) | l_unique == 2) {
+      if (identical("logical", cl_d) | l_unique == 2) {
+        out <- "dichotomous"
+      } else {
+        # if (is.ordered(data)) {
+        #   out <- "ordinal"
+        # } else {
+        out <- "categorical"
+        # }
+      }
+    } else if (identical(cl_d, "character")) {
+      out <- "text"
+    } else if (any(c("hms", "Date", "POSIXct", "POSIXt") %in% cl_d)) {
+      out <- "datetime"
+    } else if (l_unique > 2) {
+      ## Previously had all thinkable classes
+      ## Now just assumes the class has not been defined above
+      ## any(c("numeric", "integer", "hms", "Date", "timediff") %in% cl_d) &
+      out <- "continuous"
+    } else {
+      out <- "unknown"
+    }
+
+    out
+  }
+}
+
+#' Recognised data types from data_type
+#'
+#' @returns vector
+#' @export
+#'
+#' @examples
+#' data_types()
+data_types <- function() {
+  list(
+    "empty" = list(descr="Variable of all NAs",classes="Any class"),
+    "monotone" = list(descr="Variable with only one unique value",classes="Any class"),
+    "dichotomous" = list(descr="Variable with only two unique values",classes="Any class"),
+    "categorical"= list(descr="Factor variable",classes="factor (ordered or unordered)"),
+    "text"= list(descr="Character variable",classes="character"),
+    "datetime"= list(descr="Variable of time, date or datetime values",classes="hms, Date, POSIXct and POSIXt"),
+    "continuous"= list(descr="Numeric variable",classes="numeric, integer or double"),
+    "unknown"= list(descr="Anything not falling within the previous",classes="Any other class")
+  )
 }
