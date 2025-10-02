@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//Rtmpo2rU34/file15cb36d55cf55.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpWiu9wh/file1e994fcc5757.R 
 ########
 
 i18n_path <- here::here("translations")
@@ -62,7 +62,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.9.2'
+app_version <- function()'25.10.1'
 
 
 ########
@@ -3433,7 +3433,8 @@ dummy_Imports <- function() {
     parameters::ci(),
     DT::addRow(),
     bslib::accordion(),
-    NHANES::NHANES()
+    NHANES::NHANES(),
+    stRoke::add_padding()
   )
   # https://github.com/hadley/r-pkgs/issues/828
 }
@@ -3948,12 +3949,93 @@ simple_snake <- function(data){
   gsub("[\\s+]","_",gsub("[^\\w\\s:-]", "", tolower(data), perl=TRUE), perl=TRUE)
 }
 
+#' Data type assessment.
+#'
+#' @description
+#' These are more overall than the native typeof. This is used to assess a more
+#' meaningful "clinical" data type.
+#'
+#' @param data vector or data.frame. if data frame, each column is evaluated.
+#'
+#' @returns outcome type
+#' @export
+#'
+#' @examples
+#' mtcars |>
+#'   default_parsing() |>
+#'   lapply(data_type)
+#' mtcars |>
+#'   default_parsing() |>
+#'   data_type()
+#' c(1, 2) |> data_type()
+#' 1 |> data_type()
+#' c(rep(NA, 10)) |> data_type()
+#' sample(1:100, 50) |> data_type()
+#' factor(letters[1:20]) |> data_type()
+#' as.Date(1:20) |> data_type()
+data_type <- function(data) {
+  if (is.data.frame(data)) {
+    sapply(data, data_type)
+  } else {
+    cl_d <- class(data)
+    l_unique <- length(unique(na.omit(data)))
+    if (all(is.na(data))) {
+      out <- "empty"
+    } else if (l_unique < 2) {
+      out <- "monotone"
+    } else if (any(c("factor", "logical") %in% cl_d) | l_unique == 2) {
+      if (identical("logical", cl_d) | l_unique == 2) {
+        out <- "dichotomous"
+      } else {
+        # if (is.ordered(data)) {
+        #   out <- "ordinal"
+        # } else {
+        out <- "categorical"
+        # }
+      }
+    } else if (identical(cl_d, "character")) {
+      out <- "text"
+    } else if (any(c("hms", "Date", "POSIXct", "POSIXt") %in% cl_d)) {
+      out <- "datetime"
+    } else if (l_unique > 2) {
+      ## Previously had all thinkable classes
+      ## Now just assumes the class has not been defined above
+      ## any(c("numeric", "integer", "hms", "Date", "timediff") %in% cl_d) &
+      out <- "continuous"
+    } else {
+      out <- "unknown"
+    }
+
+    out
+  }
+}
+
+#' Recognised data types from data_type
+#'
+#' @returns vector
+#' @export
+#'
+#' @examples
+#' data_types()
+data_types <- function() {
+  list(
+    "empty" = list(descr="Variable of all NAs",classes="Any class"),
+    "monotone" = list(descr="Variable with only one unique value",classes="Any class"),
+    "dichotomous" = list(descr="Variable with only two unique values",classes="Any class"),
+    "categorical"= list(descr="Factor variable",classes="factor (ordered or unordered)"),
+    "text"= list(descr="Character variable",classes="character"),
+    "datetime"= list(descr="Variable of time, date or datetime values",classes="hms, Date, POSIXct and POSIXt"),
+    "continuous"= list(descr="Numeric variable",classes="numeric, integer or double"),
+    "unknown"= list(descr="Anything not falling within the previous",classes="Any other class")
+  )
+}
+
 
 ########
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.9.2-250925'
+hosted_version <- function()'v25.10.1-251002'
 
 
 ########
@@ -3966,8 +4048,372 @@ html_dependency_FreesearchR <- function() {
     version = packageVersion("FreesearchR"),
     src = list(href = "FreesearchR", file = "assets"),
     package = "FreesearchR",
+    script = "js/FreesearchR.js",
     stylesheet = "css/FreesearchR.css"
   )
+}
+
+
+########
+#### Current file: /Users/au301842/FreesearchR/R//import_globalenv-ext.R 
+########
+
+
+#' @title Import data from an Environment
+#'
+#' @description Let the user select a dataset from its own environment or from a package's environment.
+#' Modified from datamods
+#'
+#' @param id Module's ID.
+#' @param globalenv Search for data in Global environment.
+#' @param packages Name of packages in which to search data.
+#' @param title Module's title, if `TRUE` use the default title,
+#'  use `NULL` for no title or a `shiny.tag` for a custom one.
+#'
+#' @export
+#'
+#' @name import-globalenv
+#'
+import_globalenv_ui <- function(id,
+                                globalenv = TRUE,
+                                packages = datamods::get_data_packages(),
+                                title = TRUE) {
+
+  ns <- NS(id)
+
+  choices <- list()
+  if (isTRUE(globalenv)) {
+    choices <- append(choices, "Global Environment")
+  }
+  if (!is.null(packages)) {
+    choices <- append(choices, list(Packages = as.character(packages)))
+  }
+
+  if (isTRUE(globalenv)) {
+    selected <- "Global Environment"
+  } else {
+    selected <- packages[1]
+  }
+
+  if (isTRUE(title)) {
+    title <- tags$h4(
+      i18n$t("Import a dataset from an environment"),
+      class = "datamods-title"
+    )
+  }
+
+  tags$div(
+    class = "datamods-import",
+    datamods:::html_dependency_datamods(),
+    title,
+    shinyWidgets::pickerInput(
+      inputId = ns("env"),
+      label = i18n$t("Select a data source:"),
+      choices = choices,
+      selected = selected,
+      width = "100%",
+      options = list(
+        "title" = i18n$t("Select source"),
+        "live-search" = TRUE,
+        "size" = 10
+      )
+    ),
+    shinyWidgets::pickerInput(
+      inputId = ns("data"),
+      label = i18n$t("Select a dataset:"),
+      # selected = character(0),
+      choices = NULL,
+      # options = list(title = i18n$t("List of datasets...")),
+      width = "100%"
+    ),
+
+    tags$div(
+      id = ns("import-placeholder"),
+      shinyWidgets::alert(
+        id = ns("import-result"),
+        status = "info",
+        tags$b(i18n$t("No data selected!")),
+        i18n$t("Use a datasat from your environment or from the environment of a package."),
+        dismissible = TRUE
+      )
+    ),
+    uiOutput(
+      outputId = ns("container_valid_btn"),
+      style = "margin-top: 20px;"
+    )
+  )
+}
+
+
+
+#' @param btn_show_data Display or not a button to display data in a modal window if import is successful.
+#' @param show_data_in Where to display data: in a `"popup"` or in a `"modal"` window.
+#' @param trigger_return When to update selected data:
+#'  `"button"` (when user click on button) or
+#'  `"change"` (each time user select a dataset in the list).
+#' @param return_class Class of returned data: `data.frame`, `data.table`, `tbl_df` (tibble) or `raw`.
+#' @param reset A `reactive` function that when triggered resets the data.
+#'
+#' @export
+#'
+#' @importFrom shiny moduleServer reactiveValues observeEvent reactive removeUI is.reactive icon actionLink isTruthy
+#' @importFrom htmltools tags tagList
+#' @importFrom shinyWidgets updatePickerInput
+#'
+#' @rdname import-globalenv
+import_globalenv_server <- function(id,
+                                    btn_show_data = TRUE,
+                                    show_data_in = c("popup", "modal"),
+                                    trigger_return = c("button", "change"),
+                                    return_class = c("data.frame", "data.table", "tbl_df", "raw"),
+                                    reset = reactive(NULL)) {
+
+  trigger_return <- match.arg(trigger_return)
+  return_class <- match.arg(return_class)
+
+  module <- function(input, output, session) {
+
+    ns <- session$ns
+    imported_rv <- reactiveValues(data = NULL, name = NULL)
+    temporary_rv <- reactiveValues(data = NULL, name = NULL, status = NULL)
+
+    observeEvent(reset(), {
+      temporary_rv$data <- NULL
+      temporary_rv$name <- NULL
+      temporary_rv$status <- NULL
+    })
+
+    output$container_valid_btn <- renderUI({
+      if (identical(trigger_return, "button")) {
+        button_import()
+      }
+    })
+
+    observeEvent(input$env, {
+      if (identical(input$env, "Global Environment")) {
+        choices <- datamods:::search_obj("data.frame")
+      } else {
+        choices <- datamods:::list_pkg_data(input$env)
+      }
+      if (is.null(choices)) {
+        choices <- i18n$t("No dataset here...")
+        choicesOpt <- list(disabled = TRUE)
+      } else {
+        choicesOpt <- list(
+          subtext = datamods:::get_dimensions(choices)
+        )
+      }
+      temporary_rv$package <- attr(choices, "package")
+      shinyWidgets::updatePickerInput(
+        session = session,
+        inputId = "data",
+        selected = character(0),
+        choices = choices,
+        choicesOpt = choicesOpt,
+        options = list(title = i18n$t("List of datasets..."))
+      )
+    })
+
+    observe(
+      shinyWidgets::alert(
+        id = "import-result",
+        status = "info",
+        tags$b(i18n$t("No data selected!")),
+        i18n$t("Use a datasat from your environment or from the environment of a package."),
+        dismissible = TRUE
+      )
+    )
+
+
+    observeEvent(input$trigger, {
+      if (identical(trigger_return, "change")) {
+        datamods:::hideUI(selector = paste0("#", ns("container_valid_btn")))
+      }
+    })
+
+
+
+    observeEvent(input$data, {
+      if (!isTruthy(input$data)) {
+        datamods:::toggle_widget(inputId = "confirm", enable = FALSE)
+        datamods:::insert_alert(
+          selector = ns("import"),
+          status = "info",
+          tags$b(i18n$t("No data selected!")),
+          i18n$t("Use a dataset from your environment or from the environment of a package.")
+        )
+      } else {
+        name_df <- input$data
+
+        if (!is.null(temporary_rv$package)) {
+          attr(name_df, "package") <- temporary_rv$package
+        }
+
+        imported <- try(get_env_data(name_df), silent = TRUE)
+
+        if (inherits(imported, "try-error") || NROW(imported) < 1) {
+          datamods:::toggle_widget(inputId = "confirm", enable = FALSE)
+          datamods:::insert_error(mssg = i18n$t(attr(imported, "condition")$message))
+          temporary_rv$status <- "error"
+          temporary_rv$data <- NULL
+          temporary_rv$name <- NULL
+        } else {
+          datamods:::toggle_widget(inputId = "confirm", enable = TRUE)
+          datamods:::insert_alert(
+            selector = ns("import"),
+            status = "success",
+            datamods:::make_success_alert(
+              imported,
+              trigger_return = trigger_return,
+              btn_show_data = btn_show_data
+            )
+          )
+          pkg <- attr(name_df, "package")
+          if (!is.null(pkg)) {
+            name <- paste(pkg, input$data, sep = "::")
+          } else {
+            name <- input$data
+          }
+          name <- trimws(sub("\\(([^\\)]+)\\)", "", name))
+          temporary_rv$status <- "success"
+          temporary_rv$data <- imported
+          temporary_rv$name <- name
+        }
+      }
+    }, ignoreInit = TRUE, ignoreNULL = FALSE)
+
+
+    observeEvent(input$see_data, {
+      show_data(temporary_rv$data, title = i18n$t("Imported data"), type = show_data_in)
+    })
+
+    observeEvent(input$confirm, {
+      imported_rv$data <- temporary_rv$data
+      imported_rv$name <- temporary_rv$name
+    })
+
+
+    if (identical(trigger_return, "button")) {
+      return(list(
+        status = reactive(temporary_rv$status),
+        name = reactive(imported_rv$name),
+        data = reactive(datamods:::as_out(imported_rv$data, return_class))
+      ))
+    } else {
+      return(list(
+        status = reactive(temporary_rv$status),
+        name = reactive(temporary_rv$name),
+        data = reactive(datamods:::as_out(temporary_rv$data, return_class))
+      ))
+    }
+  }
+
+  moduleServer(
+    id = id,
+    module = module
+  )
+}
+
+
+
+
+
+
+
+# utils -------------------------------------------------------------------
+
+
+#' Get packages containing datasets
+#'
+#' @return a character vector of packages names
+#' @export
+#'
+#' @importFrom utils data
+#'
+#' @examples
+#' if (interactive()) {
+#'
+#'   get_data_packages()
+#'
+#' }
+get_data_packages <- function() {
+  suppressWarnings({
+    pkgs <- data(package = .packages(all.available = TRUE))
+  })
+  unique(pkgs$results[, 1])
+}
+
+
+#' List dataset contained in a package
+#'
+#' @param pkg Name of the package, must be installed.
+#'
+#' @return a \code{character} vector or \code{NULL}.
+#' @export
+#'
+#' @importFrom utils data
+#'
+#' @examples
+#'
+#' list_pkg_data("ggplot2")
+list_pkg_data <- function(pkg) {
+  if (isTRUE(requireNamespace(pkg, quietly = TRUE))) {
+    list_data <- data(package = pkg, envir = environment())$results[, "Item"]
+    list_data <- sort(list_data)
+    attr(list_data, "package") <- pkg
+    if (length(list_data) < 1) {
+      NULL
+    } else {
+      unname(list_data)
+    }
+  } else {
+    NULL
+  }
+}
+
+#' @importFrom utils data
+get_env_data <- function(obj, env = globalenv()) {
+  pkg <- attr(obj, "package")
+  re <- regexpr(pattern = "\\(([^\\)]+)\\)", text = obj)
+  obj_ <- substr(x = obj, start = re + 1, stop = re + attr(re, "match.length") - 2)
+  obj <- gsub(pattern = "\\s.*", replacement = "", x = obj)
+  if (obj %in% ls(name = env)) {
+    get(x = obj, envir = env)
+  } else if (!is.null(pkg) && !identical(pkg, "")) {
+    res <- suppressWarnings(try(
+      get(utils::data(list = obj, package = pkg, envir = environment())), silent = TRUE
+    ))
+    if (!inherits(res, "try-error"))
+      return(res)
+    data(list = obj_, package = pkg, envir = environment())
+    get(obj, envir = environment())
+  } else {
+    NULL
+  }
+}
+
+
+get_dimensions <- function(objs) {
+  if (is.null(objs))
+    return(NULL)
+  dataframes_dims <- Map(
+    f = function(name, pkg) {
+      attr(name, "package") <- pkg
+      tmp <- suppressWarnings(get_env_data(name))
+      if (is.data.frame(tmp)) {
+        sprintf("%d obs. of  %d variables", nrow(tmp), ncol(tmp))
+      } else {
+        i18n$t("Not a data.frame")
+      }
+    },
+    name = objs,
+    pkg = if (!is.null(attr(objs, "package"))) {
+      attr(objs, "package")
+    } else {
+      character(1)
+    }
+  )
+  unlist(dataframes_dims)
 }
 
 
@@ -4685,16 +5131,19 @@ data_missings_server <- function(id,
         shiny::req(variabler)
 
         if (is.null(variabler()) || variabler() == "" || !variabler() %in% names(datar())) {
+          tbl <- rv$data()
           if (anyNA(datar())){
             title <- i18n$t("No variable chosen for analysis")
           } else {
           title <- i18n$t("No missing observations")
           }
         } else {
+          tbl <- rv$data()|>
+            gtsummary::bold_p()
           title <- glue::glue(i18n$t("Missing vs non-missing observations in the variable **'{variabler()}'**"))
         }
 
-        out <- rv$data() |>
+        out <-  tbl |>
           gtsummary::as_gt() |>
           gt::tab_header(title = gt::md(title))
 
@@ -4875,7 +5324,7 @@ plot_box_single <- function(data, pri, sec=NULL, seed = 2103) {
 #' Area proportional venn diagrams
 #'
 #' @description
-#' THis is slightly modified from https://gist.github.com/danlooo/d23d8bcf8856c7dd8e86266097404ded
+#' This is slightly modified from https://gist.github.com/danlooo/d23d8bcf8856c7dd8e86266097404ded
 #'
 #' This functions uses eulerr::euler to plot area proportional venn diagramms
 #' but plots it using ggplot2
@@ -4885,17 +5334,26 @@ plot_box_single <- function(data, pri, sec=NULL, seed = 2103) {
 #' @param show_quantities whether to show number of intersecting elements
 #' @param show_labels whether to show set names
 #' @param ... further arguments passed to eulerr::euler
+#'
+#' @include data_plots.R
 ggeulerr <- function(
     combinations,
     show_quantities = TRUE,
     show_labels = TRUE,
     ...) {
-  # browser()
+
+  ## Extracting labels
+  labs <- sapply(names(combinations),\(.x){
+    # browser()
+    get_label(combinations,.x)
+  })
+
   data <-
-    eulerr::euler(combinations = combinations, ...) |>
+    ## Set labels as variable names for nicer plotting
+    setNames(as.data.frame(combinations),labs) |>
+    eulerr::euler(...) |>
     plot(quantities = show_quantities) |>
     purrr::pluck("data")
-
 
   tibble::as_tibble(data$ellipses, rownames = "Variables") |>
     ggplot2::ggplot() +
@@ -4912,7 +5370,8 @@ ggeulerr <- function(
           dplyr::mutate(
             label = labels |> purrr::map2(quantities, ~ {
               if (!is.na(.x) && !is.na(.y) && show_labels) {
-                paste0(.x, "\n", sprintf(.y, fmt = "%.2g"))
+                paste0(.x, "\n", sprintf(.y, fmt = "%.4g"))
+                # glue::glue("{.x}\n{round(.y,0)}")
               } else if (!is.na(.x) && show_labels) {
                 .x
               } else if (!is.na(.y)) {
@@ -4951,6 +5410,21 @@ ggeulerr <- function(
 #' ) |> plot_euler("A", c("B", "C"), "D", seed = 4)
 #' mtcars |> plot_euler("vs", "am", seed = 1)
 #' mtcars |> plot_euler("vs", "am", "cyl", seed = 1)
+#' stRoke::trial |>
+#'   dplyr::mutate(
+#'     mfi_cut = cut(mfi_6, c(0, 12, max(mfi_6, na.rm = TRUE))),
+#'     mdi_cut = cut(mdi_6, c(0, 20, max(mdi_6, na.rm = TRUE)))
+#'   ) |>
+#'   purrr::map2(
+#'     c(sapply(stRoke::trial, \(.x)REDCapCAST::get_attr(.x, attr = "label")), "Fatigue", "Depression"),
+#'     \(.x, .y){
+#'       REDCapCAST::set_attr(.x, .y, "label")
+#'     }
+#'   ) |>
+#'   dplyr::bind_cols() |>
+#'   plot_euler("mfi_cut", "mdi_cut")
+#' stRoke::trial |>
+#'   plot_euler(pri="male", sec=c("hypertension"))
 plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
   set.seed(seed = seed)
   if (!is.null(ter)) {
@@ -4958,16 +5432,13 @@ plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
   } else {
     ds <- list(data)
   }
-
   out <- lapply(ds, \(.x){
     .x[c(pri, sec)] |>
-      as.data.frame() |>
       na.omit() |>
       plot_euler_single()
   })
-# browser()
-  wrap_plot_list(out,title=glue::glue("Grouped by {get_label(data,ter)}"))
-  # patchwork::wrap_plots(out)
+
+  wrap_plot_list(out, title = glue::glue(i18n$t("Grouped by {get_label(data,ter)}")))
 }
 
 #' Easily plot single euler diagrams
@@ -6475,87 +6946,6 @@ regression_model_uv <- function(data,
 
 ### HELPERS
 
-#' Data type assessment.
-#'
-#' @description
-#' These are more overall than the native typeof. This is used to assess a more
-#' meaningful "clinical" data type.
-#'
-#' @param data vector or data.frame. if data frame, each column is evaluated.
-#'
-#' @returns outcome type
-#' @export
-#'
-#' @examples
-#' mtcars |>
-#'   default_parsing() |>
-#'   lapply(data_type)
-#' mtcars |>
-#'   default_parsing() |>
-#'   data_type()
-#' c(1, 2) |> data_type()
-#' 1 |> data_type()
-#' c(rep(NA, 10)) |> data_type()
-#' sample(1:100, 50) |> data_type()
-#' factor(letters[1:20]) |> data_type()
-#' as.Date(1:20) |> data_type()
-data_type <- function(data) {
-  if (is.data.frame(data)) {
-    sapply(data, data_type)
-  } else {
-    cl_d <- class(data)
-    l_unique <- length(unique(na.omit(data)))
-    if (all(is.na(data))) {
-      out <- "empty"
-    } else if (l_unique < 2) {
-      out <- "monotone"
-    } else if (any(c("factor", "logical") %in% cl_d) | l_unique == 2) {
-      if (identical("logical", cl_d) | l_unique == 2) {
-        out <- "dichotomous"
-      } else {
-        # if (is.ordered(data)) {
-        #   out <- "ordinal"
-        # } else {
-          out <- "categorical"
-        # }
-      }
-    } else if (identical(cl_d, "character")) {
-      out <- "text"
-    } else if (any(c("hms", "Date", "POSIXct", "POSIXt") %in% cl_d)) {
-      out <- "datetime"
-    } else if (l_unique > 2) {
-      ## Previously had all thinkable classes
-      ## Now just assumes the class has not been defined above
-      ## any(c("numeric", "integer", "hms", "Date", "timediff") %in% cl_d) &
-      out <- "continuous"
-    } else {
-      out <- "unknown"
-    }
-
-    out
-  }
-}
-
-#' Recognised data types from data_type
-#'
-#' @returns vector
-#' @export
-#'
-#' @examples
-#' data_types()
-data_types <- function() {
-  list(
-    "empty" = list(descr="Variable of all NAs",classes="Any class"),
-    "monotone" = list(descr="Variable with only one unique value",classes="Any class"),
-    "dichotomous" = list(descr="Variable with only two unique values",classes="Any class"),
-    "categorical"= list(descr="Factor variable",classes="factor (ordered or unordered)"),
-    "text"= list(descr="Character variable",classes="character"),
-    "datetime"= list(descr="Variable of time, date or datetime values",classes="hms, Date, POSIXct and POSIXt"),
-    "continuous"= list(descr="Numeric variable",classes="numeric, integer or double"),
-    "unknown"= list(descr="Anything not falling within the previous",classes="Any other class")
-    )
-}
-
 
 #' Implemented functions
 #'
@@ -7196,38 +7586,6 @@ symmetrical_scale_x_log10 <- function(plot, breaks = c(1, 2, 3, 5, 10), ...) {
 #'   purrr::map(regression_table) |>
 #'   tbl_merge()
 #' }
-#' regression_table <- function(x, ...) {
-#'   UseMethod("regression_table")
-#' }
-#'
-#' #' @rdname regression_table
-#' #' @export
-#' regression_table.list <- function(x, ...) {
-#'   x |>
-#'     purrr::map(\(.m){
-#'       regression_table(x = .m, ...) |>
-#'         gtsummary::add_n()
-#'     }) |>
-#'     gtsummary::tbl_stack()
-#' }
-#'
-#' #' @rdname regression_table
-#' #' @export
-#' regression_table.default <- function(x, ..., args.list = NULL, fun = "gtsummary::tbl_regression") {
-#'   # Stripping custom class
-#'   class(x) <- class(x)[class(x) != "freesearchr_model"]
-#'
-#'   if (any(c(length(class(x)) != 1, class(x) != "lm"))) {
-#'     if (!"exponentiate" %in% names(args.list)) {
-#'       args.list <- c(args.list, list(exponentiate = TRUE))
-#'     }
-#'   }
-#'
-#'   out <- do.call(getfun(fun), c(list(x = x), args.list))
-#'   out |>
-#'     gtsummary::add_glance_source_note() # |>
-#'   # gtsummary::bold_p()
-#' }
 regression_table <- function(x, ...) {
   args <- list(...)
 
@@ -7305,8 +7663,6 @@ tbl_merge <- function(data) {
   }
 }
 
-# as_kable(tbl) |> write_lines(file=here::here("inst/apps/data_analysis_modules/www/_table1.md"))
-# as_kable_extra(tbl)|> write_lines(file=here::here("inst/apps/data_analysis_modules/www/table1.md"))
 
 
 ########
@@ -7387,13 +7743,15 @@ regression_ui <- function(id, ...) {
               shiny::radioButtons(
                 inputId = ns("all"),
                 label = i18n$t("Specify covariables"),
-                inline = TRUE, selected = 2,
+                inline = TRUE,
+                selected = 2,
                 choiceNames = c(
                   "Yes",
                   "No"
                 ),
                 choiceValues = c(1, 2)
               ),
+              # shiny::uiOutput(outputId = ns("all")),
               shiny::conditionalPanel(
                 condition = "input.all==1",
                 shiny::uiOutput(outputId = ns("regression_vars")),
@@ -7446,7 +7804,7 @@ regression_ui <- function(id, ...) {
       )
     ),
     bslib::nav_panel(
-      title = "Coefficient plot",
+      title = i18n$t("Coefficient plot"),
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::accordion(
@@ -7558,17 +7916,37 @@ regression_server <- function(id,
         }
       })
 
-      shiny::observe({
-        bslib::accordion_panel_update(id = "acc_reg", target = "acc_pan_reg", title = i18n$t("Regression"))
-        bslib::accordion_panel_update(id = "acc_coef_plot", target = "acc_pan_coef_plot", title = i18n$t("Coefficients plot"))
-        bslib::accordion_panel_update(id = "acc_checks", target = "acc_pan_checks", title = i18n$t("Checks"))
-      })
 
       output$data_info <- shiny::renderUI({
         shiny::req(regression_vars())
         shiny::req(data_r())
         data_description(data_r()[regression_vars()])
       })
+
+      ## Update on laguage change
+
+      shiny::observe({
+        bslib::accordion_panel_update(id = "acc_reg", target = "acc_pan_reg", title = i18n$t("Regression"))
+        bslib::accordion_panel_update(id = "acc_coef_plot", target = "acc_pan_coef_plot", title = i18n$t("Coefficients plot"))
+        bslib::accordion_panel_update(id = "acc_checks", target = "acc_pan_checks", title = i18n$t("Checks"))
+      })
+
+      # shiny::observe({
+      #   shiny::updateRadioButtons(
+      #     session = session,
+      #     inputId = "all",
+      #     label = i18n$t("Specify covariables"),
+      #     # inline = TRUE,
+      #     # selected = 2,
+      #     choiceNames = c(
+      #       i18n$t("Yes"),
+      #       i18n$t("No")
+      #     ),
+      #     choiceValues = c(1, 2)
+      #   )
+      # })
+
+
 
       ##############################################################################
       #########
@@ -7593,7 +7971,7 @@ regression_server <- function(id,
         columnSelectInput(
           inputId = ns("outcome_var"),
           selected = NULL,
-          label = "Select outcome variable",
+          label = i18n$t("Select outcome variable"),
           data = data_r(),
           multiple = FALSE
         )
@@ -7603,7 +7981,7 @@ regression_server <- function(id,
         shiny::req(input$outcome_var)
         shiny::selectizeInput(
           inputId = ns("regression_type"),
-          label = "Choose regression analysis",
+          label = i18n$t("Choose regression analysis"),
           ## The below ifelse statement handles the case of loading a new dataset
           choices = possible_functions(
             data = dplyr::select(
@@ -7622,7 +8000,7 @@ regression_server <- function(id,
         shiny::selectizeInput(
           inputId = ns("factor_vars"),
           selected = colnames(data_r())[sapply(data_r(), is.factor)],
-          label = "Covariables to format as categorical",
+          label = i18n$t("Covariables to format as categorical"),
           choices = colnames(data_r()),
           multiple = TRUE
         )
@@ -7642,7 +8020,7 @@ regression_server <- function(id,
         columnSelectInput(
           inputId = ns("strat_var"),
           selected = "none",
-          label = "Select variable to stratify baseline",
+          label = i18n$t("Select variable to stratify baseline"),
           data = data_r(),
           col_subset = c(
             "none",
@@ -7657,7 +8035,7 @@ regression_server <- function(id,
         shiny::selectInput(
           inputId = ns("plot_model"),
           selected = 1,
-          label = "Select models to plot",
+          label = i18n$t("Select models to plot"),
           choices = names(rv$list$regression$tables),
           multiple = TRUE
         )
@@ -7707,7 +8085,7 @@ regression_server <- function(id,
               rv$list$regression$models <- model_lists
             },
             error = function(err) {
-              showNotification(paste0("Creating regression models failed with the following error: ", err), type = "err")
+              showNotification(paste(i18n$t("Creating regression models failed with the following error:"), err), type = "err")
             }
           )
         }
@@ -7772,7 +8150,7 @@ regression_server <- function(id,
               showNotification(paste0(warn), type = "warning")
             },
             error = function(err) {
-              showNotification(paste0("Creating a regression table failed with the following error: ", err), type = "err")
+              showNotification(paste(i18n$t("Creating a regression table failed with the following error:"), err), type = "err")
             }
           )
         }
@@ -7873,7 +8251,7 @@ regression_server <- function(id,
       output$download_plot <- shiny::downloadHandler(
         filename = paste0("regression_plot.", input$plot_type),
         content = function(file) {
-          shiny::withProgress(message = "Saving the plot. Hold on for a moment..", {
+          shiny::withProgress(message = i18n$t("Saving the plot. Hold on for a moment.."), {
             ggplot2::ggsave(
               filename = file,
               plot = rv$plot,
@@ -7910,7 +8288,7 @@ regression_server <- function(id,
             #   showNotification(paste0(warn), type = "warning")
             # },
             error = function(err) {
-              showNotification(paste0("Running model assumptions checks failed with the following error: ", err), type = "err")
+              showNotification(paste(i18n$t("Running model assumptions checks failed with the following error:"), err), type = "err")
             }
           )
         }
@@ -7931,7 +8309,7 @@ regression_server <- function(id,
         vectorSelectInput(
           inputId = ns("plot_checks"),
           selected = 1,
-          label = "Select checks to plot",
+          label = i18n$t("Select checks to plot"),
           choices = names,
           multiple = TRUE
         )
@@ -7946,7 +8324,7 @@ regression_server <- function(id,
           if (!is.null(rv$list$regression$tables)) {
             p <- rv$check_plot() +
               # patchwork::wrap_plots() +
-              patchwork::plot_annotation(title = "Multivariable regression model checks")
+              patchwork::plot_annotation(title = i18n$t("Multivariable regression model checks"))
 
 
             layout <- sapply(seq_len(length(p)), \(.x){
@@ -8325,7 +8703,7 @@ ui_elements <- function(selection) {
           # ),
           shiny::selectInput(
             inputId = "source",
-            label="",
+            label = "",
             selected = "file",
             choices = "file",
             width = "100%"
@@ -8361,7 +8739,11 @@ ui_elements <- function(selection) {
           ),
           shiny::conditionalPanel(
             condition = "input.source=='env'",
-            import_globalenv_ui(id = "env", title = NULL)
+            import_globalenv_ui(
+              id = "env",
+              title = NULL,
+              packages = c("NHANES", "stRoke")
+            )
           ),
           # shiny::conditionalPanel(
           #   condition = "input.source=='redcap'",
@@ -8615,7 +8997,7 @@ ui_elements <- function(selection) {
             sidebar = bslib::sidebar(
               shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
               bslib::accordion(
-                id="acc_chars",
+                id = "acc_chars",
                 open = "acc_chars",
                 multiple = FALSE,
                 bslib::accordion_panel(
@@ -8661,7 +9043,7 @@ ui_elements <- function(selection) {
             sidebar = bslib::sidebar(
               # shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
               bslib::accordion(
-                id="acc_cor",
+                id = "acc_cor",
                 open = "acc_chars",
                 multiple = FALSE,
                 bslib::accordion_panel(
@@ -10979,6 +11361,7 @@ ui <- bslib::page_fixed(
   ## Code formatting dependencies
   prismDependencies,
   prismRDependency,
+  html_dependency_FreesearchR(),
   ## Version dependent header
   header_include(),
   ## This adds the actual favicon
@@ -11264,7 +11647,8 @@ server <- function(input, output, session) {
     rv$code <- modifyList(x = rv$code, list(import = from_redcap$code()))
   })
 
-  from_env <- datamods::import_globalenv_server(
+  # from_env <- datamods::import_globalenv_server(
+  from_env <- import_globalenv_server(
     id = "env",
     trigger_return = "change",
     btn_show_data = FALSE,

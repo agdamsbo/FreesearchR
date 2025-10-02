@@ -1,8 +1,10 @@
-# FreesearchR 25.9.3 -DEV
+# FreesearchR 25.10.1
 
 *NEW* Improvements to translations with more strings having been translated.
 
 *NEW* Sample data has been filtered to only include a few select packages (NHANES and stRoke).
+
+*NEW* Missings evaluations slightly tweaked to include bold significant p-values for easier overview.
 
 # FreesearchR 25.9.2
 
