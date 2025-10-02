@@ -8292,7 +8292,7 @@
     },
     "stRoke": {
       "Package": "stRoke",
-      "Version": "25.9.1",
+      "Version": "25.9.2",
       "Source": "Repository",
       "Title": "Clinical Stroke Research",
       "Authors@R": "person(\"Andreas Gammelgaard\", \"Damsbo\", , \"agdamsbo@clin.au.dk\", role = c(\"aut\", \"cre\"), comment = c(ORCID = \"0000-0002-7559-1154\"))",

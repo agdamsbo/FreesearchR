@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpWiu9wh/file1e994fcc5757.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpWiu9wh/file1e9944acd364.R 
 ########
 
 i18n_path <- here::here("translations")
@@ -11361,7 +11361,7 @@ ui <- bslib::page_fixed(
   ## Code formatting dependencies
   prismDependencies,
   prismRDependency,
-  html_dependency_FreesearchR(),
+  # html_dependency_FreesearchR(),
   ## Version dependent header
   header_include(),
   ## This adds the actual favicon
