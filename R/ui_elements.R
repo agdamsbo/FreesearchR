@@ -60,7 +60,7 @@ ui_elements <- function(selection) {
           # ),
           shiny::selectInput(
             inputId = "source",
-            label="",
+            label = "",
             selected = "file",
             choices = "file",
             width = "100%"
@@ -96,7 +96,11 @@ ui_elements <- function(selection) {
           ),
           shiny::conditionalPanel(
             condition = "input.source=='env'",
-            import_globalenv_ui(id = "env", title = NULL)
+            import_globalenv_ui(
+              id = "env",
+              title = NULL,
+              packages = c("NHANES", "stRoke")
+            )
           ),
           # shiny::conditionalPanel(
           #   condition = "input.source=='redcap'",
@@ -350,7 +354,7 @@ ui_elements <- function(selection) {
             sidebar = bslib::sidebar(
               shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
               bslib::accordion(
-                id="acc_chars",
+                id = "acc_chars",
                 open = "acc_chars",
                 multiple = FALSE,
                 bslib::accordion_panel(
@@ -396,7 +400,7 @@ ui_elements <- function(selection) {
             sidebar = bslib::sidebar(
               # shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
               bslib::accordion(
-                id="acc_cor",
+                id = "acc_cor",
                 open = "acc_chars",
                 multiple = FALSE,
                 bslib::accordion_panel(

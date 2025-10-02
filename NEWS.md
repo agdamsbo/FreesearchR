@@ -1,3 +1,9 @@
+# FreesearchR 25.9.3 -DEV
+
+*NEW* Improvements to translations with more strings having been translated.
+
+*NEW* Sample data has been filtered to only include a few select packages (NHANES and stRoke).
+
 # FreesearchR 25.9.2
 
 *NEW* Improvements to translations with more strings having been translated.

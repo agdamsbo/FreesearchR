@@ -1,6 +1,6 @@
 Package: FreesearchR
 Title: Easy data analysis for clinicians
-Version: 25.9.2
+Version: 25.9.3
 Authors@R: c(
     person("Andreas Gammelgaard", "Damsbo",email="agdamsbo@clin.au.dk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7559-1154")),
@@ -67,7 +67,8 @@ Imports:
     emmeans,
     readxl,
     NHANES,
-    shiny.i18n
+    shiny.i18n,
+    stRoke
 Suggests: 
     styler,
     devtools,
@@ -91,3 +92,44 @@ Config/testthat/edition: 3
 Depends: 
     R (>= 3.5)
 LazyData: true
+Collate: 
+    'app_version.R'
+    'baseline_table.R'
+    'contrast_text.R'
+    'correlations-module.R'
+    'create-column-mod.R'
+    'custom_SelectInput.R'
+    'cut-variable-dates.R'
+    'data-summary.R'
+    'data_plots.R'
+    'datagrid-infos-mod.R'
+    'helpers.R'
+    'hosted_version.R'
+    'html_dependency_freesearchr.R'
+    'import-file-ext.R'
+    'import_globalenv-ext.R'
+    'launch_FreesearchR.R'
+    'missings-module.R'
+    'plot-download-module.R'
+    'plot_box.R'
+    'plot_euler.R'
+    'plot_hbar.R'
+    'plot_ridge.R'
+    'plot_sankey.R'
+    'plot_scatter.R'
+    'plot_violin.R'
+    'redcap_read_shiny_module.R'
+    'regression-module.R'
+    'regression_model.R'
+    'regression_plot.R'
+    'regression_table.R'
+    'report.R'
+    'syntax_highlight.R'
+    'theme.R'
+    'translate.R'
+    'ui_elements.R'
+    'update-factor-ext.R'
+    'update-variables-ext.R'
+    'validation.R'
+    'visual_summary.R'
+    'wide2long.R'
