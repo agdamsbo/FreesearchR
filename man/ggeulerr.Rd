@@ -17,7 +17,7 @@ data.frame(See \code{eulerr::euler})}
 \item{...}{further arguments passed to eulerr::euler}
 }
 \description{
-THis is slightly modified from https://gist.github.com/danlooo/d23d8bcf8856c7dd8e86266097404ded
+This is slightly modified from https://gist.github.com/danlooo/d23d8bcf8856c7dd8e86266097404ded
 
 This functions uses eulerr::euler to plot area proportional venn diagramms
 but plots it using ggplot2
