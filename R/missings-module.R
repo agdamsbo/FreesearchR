@@ -59,16 +59,19 @@ data_missings_server <- function(id,
         shiny::req(variabler)
 
         if (is.null(variabler()) || variabler() == "" || !variabler() %in% names(datar())) {
+          tbl <- rv$data()
           if (anyNA(datar())){
             title <- i18n$t("No variable chosen for analysis")
           } else {
           title <- i18n$t("No missing observations")
           }
         } else {
+          tbl <- rv$data()|>
+            gtsummary::bold_p()
           title <- glue::glue(i18n$t("Missing vs non-missing observations in the variable **'{variabler()}'**"))
         }
 
-        out <- rv$data() |>
+        out <-  tbl |>
           gtsummary::as_gt() |>
           gt::tab_header(title = gt::md(title))
 
