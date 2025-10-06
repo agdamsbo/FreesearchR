@@ -34,7 +34,8 @@ vertical_stacked_bars <- function(data,
                                   t.size = 10,
                                   l.color = "black",
                                   l.size = .5,
-                                  draw.lines = TRUE) {
+                                  draw.lines = TRUE,
+                                  label.str="{n}\n{round(100 * p,0)}%") {
   if (is.null(group)) {
     df.table <- data[c(score, group, strata)] |>
       dplyr::mutate("All" = 1) |>
@@ -79,7 +80,8 @@ vertical_stacked_bars <- function(data,
             y = p_prev + 0.49 * p,
             color = as.numeric(score) > contrast_cut,
             # label = paste0(sprintf("%2.0f", 100 * p),"%"),
-            label = sprintf("%2.0f", 100 * p)
+            # label = sprintf("%2.0f", 100 * p)
+            label = glue::glue(label.str)
           )
         ) +
         ggplot2::labs(fill = score_label) +
