@@ -144,7 +144,7 @@ import_file_ui <- function(id,
         shiny::tags$b(i18n$t("No file selected.")),
         # shiny::textOutput(ns("trans_format_text")),
         # This is the easiest solution, though not gramatically perfect
-        i18n$t("You can choose between these file types:"), paste(file_extensions,collapse=', '),
+        i18n$t("You can choose between these file types:"), paste(file_extensions, collapse = ", "),
         # sprintf("You can import %s files", paste(file_extensions, collapse = ", ")),
         dismissible = TRUE
       )
@@ -177,7 +177,8 @@ import_file_server <- function(id,
                                show_data_in = c("popup", "modal"),
                                trigger_return = c("button", "change"),
                                return_class = c("data.frame", "data.table", "tbl_df", "raw"),
-                               reset = reactive(NULL)) {
+                               reset = reactive(NULL),
+                               limit=100000) {
   read_fns <- list(
     ods = "import_ods",
     dta = "import_dta",
@@ -296,6 +297,10 @@ import_file_server <- function(id,
               extra = if (isTRUE(input$preview_data)) i18n$t("First five rows are shown below:")
             )
           )
+
+          ## As a protective measure, the dataset size is capped at cell limit
+          imported <- limit_data_size(imported,limit = limit)
+
           temporary_rv$status <- "success"
           temporary_rv$data <- imported
           temporary_rv$name <- input$file$name
@@ -508,9 +513,9 @@ import_rds <- function(file) {
     file = file
   )
 
-  if (is.data.frame(out)){
+  if (is.data.frame(out)) {
     out
-  } else if (is.vector(out) && !is.null(dim(out))){
+  } else if (is.vector(out) && !is.null(dim(out))) {
     ## If the data is a simple vector (simple test), it is coerced to a data.frame
     as.data.frame(out)
   } else {
@@ -620,4 +625,40 @@ import_file_demo_app <- function() {
     })
   }
   shiny::shinyApp(ui, server)
+}
+
+
+#' Limit the allowed data set size by number of cells
+#'
+#' @description
+#' This function may act to guard a hosted app against very large data sets in
+#' addition to the file size limitations.
+#' The function will limit the data set by dropping rows.
+#'
+#'
+#' @param data data.frame
+#' @param limit cell number limit. Default is NULL.
+#'
+#' @returns data.frame
+#' @export
+#'
+#' @examples
+#' prod(dim(mtcars))
+#' limit_data_size(mtcars)
+#' limit_data_size(mtcars,100)
+limit_data_size <- function(data, limit = NULL) {
+  ## Add security to only allow dataset of 100.000 cells
+  ## Ideally this should only go for the hosted version
+
+  if (is.null(limit)){
+    return(data)
+  }
+
+  data_dim <- dim(data)
+
+  if (prod(data_dim) > limit) {
+    head(data, floor(limit / data_dim[2]))
+  } else {
+    data
+  }
 }

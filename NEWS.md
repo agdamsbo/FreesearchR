@@ -1,3 +1,14 @@
+# FreesearchR 25.10.2 - DEV
+
+*NEW* Improvements to translations with more strings having been translated.
+
+*NEW* More detailed label for the stacked horizontal bar plot.
+
+*NEW* Better .rds import that will import the first element as data.frame if a list-type element is supplied.
+
+*NEW* A limit to the imported dataset size was added to ensure performance on hosted version. The data is limited to 100.000 cells by dropping rows to fit. The vast majority of users will never experience this capping, but adds a layer of security and stability to the hosting framework.
+
+
 # FreesearchR 25.10.1
 
 *NEW* Improvements to translations with more strings having been translated.

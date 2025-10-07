@@ -4,9 +4,11 @@ output: html_fragment
 
 # Karibu <img src="FreesearchR-logo.png" style="float: right;"/>
 
-This is the ***FreesearchR*** data analysis tool, a free tool for basic data evaluation and analysis. If you need more advanced tools, start with ***FreesearchR*** and then you'll probably be better off using *R* or similar directly.
+Hii ni ***FreesearchR*** zana ya kuchanganua data, zana isiyolipishwa ya kutathmini na kuchanganua data msingi. Iwapo unahitaji zana za kina zaidi, anza na ***FreesearchR*** na basi pengine utakuwa bora kutumia *R* au sawa moja kwa moja.
 
-With this tool you can:
+Tunajitahidi kutambulisha tafsiri kamili kwa Kiswahili. Ikiwa ungependa kuchangia, tafadhali wasiliana na [info@freesearchr.org](mailto:info@freesearchr.org).
+
+Na ***FreesearchR*** unaweza:
 
 1.  **Import data** from a spreadsheet/file on your machine, directly from a [REDCap](https://projectredcap.org/ "Read more on the data capture tool REDCap") server, try it with sample data or access data directly [if run in R locally](https://agdamsbo.github.io/FreesearchR//#run-locally-on-your-own-machine "Read about running FreesearchR on your local machine")
 

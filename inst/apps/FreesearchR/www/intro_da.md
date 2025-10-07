@@ -6,11 +6,13 @@ output: html_fragment
 
 Dette er ***FreesearchR***-værktøjet, et gratis værktøj til databehandling og -analyse. Har du brug for mere avancerede værktøjer, så kan du starte ***FreesearchR*** og senere selv hente *R* og *RStudio* eller lignende.
 
+Vi arbejder hårdt på at introducere en komplet oversættelse til dansk. Hvis du har lyst til at bidrage, er du velkommen til at kontakte os på [info@freesearchr.org](mailto:info@freesearchr.org).
+
 Herunder kan du helt kort se, hvad du kan bruge ***FreesearchR*** til:
 
-1.  **Import data** from a spreadsheet/file on your machine, directly from a [REDCap](https://projectredcap.org/ "Read more on the data capture tool REDCap") server, try it with sample data or access data directly [if run in R locally](https://agdamsbo.github.io/FreesearchR//#run-locally-on-your-own-machine "Read about running FreesearchR on your local machine")
+1.  **Importér data** fra regneark/fil på din enhed, direkte fra en [REDCap-server](https://projectredcap.org/ "Læs mere of REDCap-værktøjet"), afprøv med eksempel-data eller tilgå data direkte [hvis du afvikler i R lokalt](https://agdamsbo.github.io/FreesearchR//#run-locally-on-your-own-machine "Læs mere om at køre FreesearchR på din egen maskine")
 
-2.  **Prepare** data for analysis by filtering data, modifying variables or create new variables
+2.  **Forbered** data til analys ved at filtrere, ændre variabler eller opret helt nye variabler
 
 3.  **Evaluate data** using descriptive analyses methods and inspect cross-correlations as well as [missing observations](https://agdamsbo.github.io/FreesearchR/articles/missingness.html "Read more about missing data")
 

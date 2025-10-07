@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpWiu9wh/file1e99785ae783.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmprKaNhO/file2c957fe45e09.R 
 ########
 
 i18n_path <- system.file("translations", package = "FreesearchR")
@@ -62,7 +62,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.10.1'
+app_version <- function()'25.10.2'
 
 
 ########
@@ -4035,7 +4035,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.10.1-251002'
+hosted_version <- function()'v25.10.2-251007'
 
 
 ########
@@ -4567,7 +4567,7 @@ import_file_ui <- function(id,
         shiny::tags$b(i18n$t("No file selected.")),
         # shiny::textOutput(ns("trans_format_text")),
         # This is the easiest solution, though not gramatically perfect
-        i18n$t("You can choose between these file types:"), paste(file_extensions,collapse=', '),
+        i18n$t("You can choose between these file types:"), paste(file_extensions, collapse = ", "),
         # sprintf("You can import %s files", paste(file_extensions, collapse = ", ")),
         dismissible = TRUE
       )
@@ -4600,7 +4600,8 @@ import_file_server <- function(id,
                                show_data_in = c("popup", "modal"),
                                trigger_return = c("button", "change"),
                                return_class = c("data.frame", "data.table", "tbl_df", "raw"),
-                               reset = reactive(NULL)) {
+                               reset = reactive(NULL),
+                               limit=100000) {
   read_fns <- list(
     ods = "import_ods",
     dta = "import_dta",
@@ -4719,6 +4720,10 @@ import_file_server <- function(id,
               extra = if (isTRUE(input$preview_data)) i18n$t("First five rows are shown below:")
             )
           )
+
+          ## As a protective measure, the dataset size is capped at cell limit
+          imported <- limit_data_size(imported,limit = limit)
+
           temporary_rv$status <- "success"
           temporary_rv$data <- imported
           temporary_rv$name <- input$file$name
@@ -4927,9 +4932,20 @@ import_dta <- function(file) {
 #' @export
 #'
 import_rds <- function(file) {
-  readr::read_rds(
+  out <- readr::read_rds(
     file = file
   )
+
+  if (is.data.frame(out)) {
+    out
+  } else if (is.vector(out) && !is.null(dim(out))) {
+    ## If the data is a simple vector (simple test), it is coerced to a data.frame
+    as.data.frame(out)
+  } else {
+    ## If not a data.frame and not a vector (probably a list of elements)
+    ## Flattened to ensure no nested lists
+    as.data.frame(purrr::list_flatten(out)[[1]])
+  }
 }
 
 #' @title Create a select input control with icon(s)
@@ -5032,6 +5048,42 @@ import_file_demo_app <- function() {
     })
   }
   shiny::shinyApp(ui, server)
+}
+
+
+#' Limit the allowed data set size by number of cells
+#'
+#' @description
+#' This function may act to guard a hosted app against very large data sets in
+#' addition to the file size limitations.
+#' The function will limit the data set by dropping rows.
+#'
+#'
+#' @param data data.frame
+#' @param limit cell number limit. Default is NULL.
+#'
+#' @returns data.frame
+#' @export
+#'
+#' @examples
+#' prod(dim(mtcars))
+#' limit_data_size(mtcars)
+#' limit_data_size(mtcars,100)
+limit_data_size <- function(data, limit = NULL) {
+  ## Add security to only allow dataset of 100.000 cells
+  ## Ideally this should only go for the hosted version
+
+  if (is.null(limit)){
+    return(data)
+  }
+
+  data_dim <- dim(data)
+
+  if (prod(data_dim) > limit) {
+    head(data, floor(limit / data_dim[2]))
+  } else {
+    data
+  }
 }
 
 
@@ -5520,7 +5572,8 @@ vertical_stacked_bars <- function(data,
                                   t.size = 10,
                                   l.color = "black",
                                   l.size = .5,
-                                  draw.lines = TRUE) {
+                                  draw.lines = TRUE,
+                                  label.str="{n}\n{round(100 * p,0)}%") {
   if (is.null(group)) {
     df.table <- data[c(score, group, strata)] |>
       dplyr::mutate("All" = 1) |>
@@ -5565,7 +5618,8 @@ vertical_stacked_bars <- function(data,
             y = p_prev + 0.49 * p,
             color = as.numeric(score) > contrast_cut,
             # label = paste0(sprintf("%2.0f", 100 * p),"%"),
-            label = sprintf("%2.0f", 100 * p)
+            # label = sprintf("%2.0f", 100 * p)
+            label = glue::glue(label.str)
           )
         ) +
         ggplot2::labs(fill = score_label) +
@@ -9019,7 +9073,7 @@ ui_elements <- function(selection) {
                         "Yes" = "yes"
                       )
                     ),
-                    shiny::helpText("Option to perform statistical comparisons between strata in baseline table.")
+                    shiny::helpText(i18n$t("Option to perform statistical comparisons between strata in baseline table."))
                   ),
                   shiny::br(),
                   shiny::br(),
@@ -9029,7 +9083,8 @@ ui_elements <- function(selection) {
                     width = "100%",
                     icon = shiny::icon("calculator"),
                     disabled = TRUE
-                  )
+                  ),
+                  shiny::helpText(i18n$t("Press 'Evaluate' to create the comparison table."))
                 )
               )
             ),
@@ -11361,7 +11416,7 @@ ui <- bslib::page_fixed(
   ## Code formatting dependencies
   prismDependencies,
   prismRDependency,
-  html_dependency_FreesearchR(),
+  # html_dependency_FreesearchR(),
   ## Version dependent header
   header_include(),
   ## This adds the actual favicon
@@ -11427,9 +11482,9 @@ server <- function(input, output, session) {
   files.to.keep <- list.files("www/")
 
   ## This works in a minimal working example, but not here. Will investigate.
-#   shinyjs::runjs("var language =  window.navigator.userLanguage || window.navigator.language;
-# var shortLang = language.split('-')[0];
-# Shiny.onInputChange('browser_lang', shortLang);")
+  #   shinyjs::runjs("var language =  window.navigator.userLanguage || window.navigator.language;
+  # var shortLang = language.split('-')[0];
+  # Shiny.onInputChange('browser_lang', shortLang);")
 
   load_data()
 
@@ -11563,6 +11618,7 @@ server <- function(input, output, session) {
     output$intro_text <- renderUI(includeHTML(i18n$t("www/intro.html")))
   })
 
+  ## This is not working but kept to try to solve if deemed necessary
   shiny::observe(
     output$footer_text_div <- renderUI({
       shiny::tags$footer(
@@ -11629,7 +11685,9 @@ server <- function(input, output, session) {
     id = "file_import",
     show_data_in = "popup",
     trigger_return = "change",
-    return_class = "data.frame"
+    return_class = "data.frame",
+    ## Added data.frame size limit (number of cells), rows are dropped to fit
+    limit = 100000
   )
 
   shiny::observeEvent(data_file$data(), {
@@ -11677,7 +11735,7 @@ server <- function(input, output, session) {
         modal_visual_summary(
           id = "initial_summary",
           footer = NULL,
-          size = "xl",title = i18n$t("Data classes and missing observations")
+          size = "xl", title = i18n$t("Data classes and missing observations")
         )
       },
       error = function(err) {
@@ -12275,6 +12333,19 @@ server <- function(input, output, session) {
     data_description(rv$list$data, data_text = "The dataset without text variables")
   })
 
+  ## Only allow evaluation if the dataset has fewer then 50 variables
+  ##
+
+  # shiny::observeEvent(
+  #   list(
+  #     rv$list$data
+  #   ),
+  #   {
+  #     shiny::req(rv$list$data)
+  #
+  #   })
+
+
   shiny::observeEvent(
     list(
       input$act_eval
@@ -12289,9 +12360,25 @@ server <- function(input, output, session) {
         add.overall = TRUE
       )
 
-      shiny::withProgress(message = "Creating the table. Hold on for a moment..", {
-        rv$list$table1 <- rlang::exec(create_baseline, !!!append_list(rv$list$data, parameters, "data"))
-      })
+
+      # Attempt to introduce error on analysing too large dataset
+      # tryCatch(
+      #   {
+      #     if (ncol(rv$list$data) > 10) {
+      #       n_col <- ncol(rv$list$data)
+      #       # stop(glue::glue(i18n$t("The data includes {n_col} variables. Please limit to 100.")))
+      #       print("Please limit to 100.")
+      #     } else {
+            shiny::withProgress(message = "Creating the table. Hold on for a moment..", {
+              rv$list$table1 <- rlang::exec(create_baseline, !!!append_list(rv$list$data, parameters, "data"))
+            })
+      #     }
+      #   },
+      #   error = function(err) {
+      #     showNotification(err, type = "err")
+      #   }
+      # )
+
 
       rv$code$table1 <- glue::glue("FreesearchR::create_baseline(df,{list2str(parameters)})")
     }

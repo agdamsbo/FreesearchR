@@ -21,7 +21,8 @@ import_file_server(
   show_data_in = c("popup", "modal"),
   trigger_return = c("button", "change"),
   return_class = c("data.frame", "data.table", "tbl_df", "raw"),
-  reset = reactive(NULL)
+  reset = reactive(NULL),
+  limit = 1e+05
 )
 }
 \arguments{

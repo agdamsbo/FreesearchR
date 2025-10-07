@@ -244,3 +244,6 @@
 "Select checks to plot","Select checks to plot"
 "Multivariable regression model checks","Multivariable regression model checks"
 "Grouped by {get_label(data,ter)}","Grouped by {get_label(data,ter)}"
+"Option to perform statistical comparisons between strata in baseline table.","Option to perform statistical comparisons between strata in baseline table."
+"Press 'Evaluate' to create the comparison table.","Press 'Evaluate' to create the comparison table."
+"The data includes {n_col} variables. Please limit to 100.","The data includes {n_col} variables. Please limit to 100."

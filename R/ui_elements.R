@@ -376,7 +376,7 @@ ui_elements <- function(selection) {
                         "Yes" = "yes"
                       )
                     ),
-                    shiny::helpText("Option to perform statistical comparisons between strata in baseline table.")
+                    shiny::helpText(i18n$t("Option to perform statistical comparisons between strata in baseline table."))
                   ),
                   shiny::br(),
                   shiny::br(),
@@ -386,7 +386,8 @@ ui_elements <- function(selection) {
                     width = "100%",
                     icon = shiny::icon("calculator"),
                     disabled = TRUE
-                  )
+                  ),
+                  shiny::helpText(i18n$t("Press 'Evaluate' to create the comparison table."))
                 )
               )
             ),
