@@ -1,4 +1,4 @@
-# FreesearchR 25.10.2 - DEV
+# FreesearchR 25.10.2
 
 *NEW* Improvements to translations with more strings having been translated.
 
