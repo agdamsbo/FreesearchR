@@ -504,9 +504,20 @@ import_dta <- function(file) {
 #' @export
 #'
 import_rds <- function(file) {
-  readr::read_rds(
+  out <- readr::read_rds(
     file = file
   )
+
+  if (is.data.frame(out)){
+    out
+  } else if (is.vector(out) && !is.null(dim(out))){
+    ## If the data is a simple vector (simple test), it is coerced to a data.frame
+    as.data.frame(out)
+  } else {
+    ## If not a data.frame and not a vector (probably a list of elements)
+    ## Flattened to ensure no nested lists
+    as.data.frame(purrr::list_flatten(out)[[1]])
+  }
 }
 
 #' @title Create a select input control with icon(s)
