@@ -105,7 +105,7 @@ create_column_ui <- function(id) {
       actionButton(
         inputId = ns("compute"),
         label = tagList(
-          phosphoricons::ph("gear"), i18n$t("Create column")
+          phosphoricons::ph("pencil"), i18n$t("Create column")
         ),
         class = "btn-outline-primary",
         width = "100%"
@@ -113,7 +113,8 @@ create_column_ui <- function(id) {
       actionButton(
         inputId = ns("remove"),
         label = tagList(
-          phosphoricons::ph("trash")
+          phosphoricons::ph("x-circle"),
+          i18n$t("Cancel")
         ),
         class = "btn-outline-danger",
         width = "100%"
@@ -140,9 +141,7 @@ create_column_server <- function(id,
       info_alert <- shinyWidgets::alert(
         status = "info",
         phosphoricons::ph("question"),
-        i18n$t("Choose a name for the column to be created or modified,"),
-        i18n$t("then enter an expression before clicking on the button above to validate or on "),
-        phosphoricons::ph("trash"), i18n$t("to delete it.")
+        i18n$t("Choose a name for the column to be created or modified, then enter an expression before clicking on the button below to create the variable, or cancel to exit without saving anything.")
       )
 
       rv <- reactiveValues(
@@ -242,6 +241,7 @@ list_allowed_operations <- function() {
     "as.factor", "factor"
   )
 }
+
 
 
 #' @inheritParams shiny::modalDialog

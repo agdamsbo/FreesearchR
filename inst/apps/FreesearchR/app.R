@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmprKaNhO/file2c953618a132.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpQghyAd/file101dc71002b73.R 
 ########
 
 i18n_path <- system.file("translations", package = "FreesearchR")
@@ -62,7 +62,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.10.2'
+app_version <- function()'25.10.3'
 
 
 ########
@@ -500,7 +500,7 @@ create_column_ui <- function(id) {
       actionButton(
         inputId = ns("compute"),
         label = tagList(
-          phosphoricons::ph("gear"), i18n$t("Create column")
+          phosphoricons::ph("pencil"), i18n$t("Create column")
         ),
         class = "btn-outline-primary",
         width = "100%"
@@ -508,7 +508,8 @@ create_column_ui <- function(id) {
       actionButton(
         inputId = ns("remove"),
         label = tagList(
-          phosphoricons::ph("trash")
+          phosphoricons::ph("x-circle"),
+          i18n$t("Cancel")
         ),
         class = "btn-outline-danger",
         width = "100%"
@@ -535,9 +536,7 @@ create_column_server <- function(id,
       info_alert <- shinyWidgets::alert(
         status = "info",
         phosphoricons::ph("question"),
-        i18n$t("Choose a name for the column to be created or modified,"),
-        i18n$t("then enter an expression before clicking on the button above to validate or on "),
-        phosphoricons::ph("trash"), i18n$t("to delete it.")
+        i18n$t("Choose a name for the column to be created or modified, then enter an expression before clicking on the button below to create the variable, or cancel to exit without saving anything.")
       )
 
       rv <- reactiveValues(
@@ -637,6 +636,7 @@ list_allowed_operations <- function() {
     "as.factor", "factor"
   )
 }
+
 
 
 #' @inheritParams shiny::modalDialog
@@ -3093,7 +3093,7 @@ describe_col_factor <- function(x, with_summary = TRUE) {
       style = htmltools::css(fontStyle = "italic"),
       get_var_icon(x),
       # phosphoricons::ph("list-bullets"),
-      "factor"
+      class(x)
     ),
     if (with_summary) {
       tagList(
@@ -3246,7 +3246,7 @@ construct_col_summary <- function(data) {
         values <- data[[col]]
         content <- if (inherits(values, "character")) {
           describe_col_char(values)
-        } else if (inherits(values, "factor")) {
+        } else if (inherits(values, c("factor","logical"))) {
           describe_col_factor(values)
         } else if (inherits(values, c("numeric", "integer"))) {
           describe_col_num(values)
@@ -4035,7 +4035,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.10.2-251007'
+hosted_version <- function()'v25.10.3-251008'
 
 
 ########
@@ -4133,7 +4133,7 @@ import_globalenv_ui <- function(id,
         id = ns("import-result"),
         status = "info",
         tags$b(i18n$t("No data selected!")),
-        i18n$t("Use a datasat from your environment or from the environment of a package."),
+        i18n$t("Use a dataset from your environment or from the environment of a package."),
         dismissible = TRUE
       )
     ),
@@ -4210,7 +4210,9 @@ import_globalenv_server <- function(id,
         selected = character(0),
         choices = choices,
         choicesOpt = choicesOpt,
-        options = list(title = i18n$t("List of datasets..."))
+        options = list(
+          title = i18n$t("List of datasets..."),
+                       "live-search" = TRUE)
       )
     })
 
@@ -4219,7 +4221,7 @@ import_globalenv_server <- function(id,
         id = "import-result",
         status = "info",
         tags$b(i18n$t("No data selected!")),
-        i18n$t("Use a datasat from your environment or from the environment of a package."),
+        i18n$t("Use a dataset from your environment or from the environment of a package."),
         dismissible = TRUE
       )
     )
@@ -5311,7 +5313,7 @@ plot_box <- function(data, pri, sec, ter = NULL,...) {
     )
   })
 
-  wrap_plot_list(out,title=glue::glue("Grouped by {get_label(data,ter)}"),...)
+  wrap_plot_list(out,title=glue::glue(i18n$t("Grouped by {get_label(data,ter)}")),...)
 }
 
 
@@ -5794,7 +5796,7 @@ plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors 
 #'   plot_sankey_single("first", "last", color.group = "pri")
 #' mtcars |>
 #'   default_parsing() |>
-#' plot_sankey_single("cyl", "vs", color.group = "pri")
+#'   plot_sankey_single("cyl", "vs", color.group = "pri")
 plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), colors = NULL, ...) {
   color.group <- match.arg(color.group)
 
@@ -5969,7 +5971,7 @@ plot_violin <- function(data, pri, sec, ter = NULL) {
       )
     })
 
-    wrap_plot_list(out, title = glue::glue("Grouped by {get_label(data,ter)}"))
+    wrap_plot_list(out, title = glue::glue(i18n$t("Grouped by {get_label(data,ter)}")))
   })
   # patchwork::wrap_plots(out,guides = "collect")
 }
@@ -6088,12 +6090,6 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
       width = "100%"
     ),
     shiny::helpText(i18n$t("Format should be either 'https://redcap.your.institution/' or 'https://your.institution/redcap/'")),
-    # shiny::textInput(
-    #   inputId = ns("api"),
-    #   label = "API token",
-    #   value = "",
-    #   width = "100%"
-    # ),
     shiny::passwordInput(
       inputId = ns("api"),
       label = i18n$t("API token"),
@@ -6117,7 +6113,7 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
       shinyWidgets::alert(
         id = ns("connect-result"),
         status = "info",
-        tags$p(phosphoricons::ph("info", weight = "bold"), "Please fill in server address (URI) and API token, then press 'Connect'.")
+        tags$p(phosphoricons::ph("info", weight = "bold"), i18n$t("Please fill in web address and API token, then press 'Connect'."))
       ),
       dismissible = TRUE
     ),
@@ -7794,18 +7790,18 @@ regression_ui <- function(id, ...) {
               #   )
               # ),
               shiny::uiOutput(outputId = ns("regression_type")),
-              shiny::radioButtons(
-                inputId = ns("all"),
-                label = i18n$t("Specify covariables"),
-                inline = TRUE,
-                selected = 2,
-                choiceNames = c(
-                  "Yes",
-                  "No"
-                ),
-                choiceValues = c(1, 2)
-              ),
-              # shiny::uiOutput(outputId = ns("all")),
+              # shiny::radioButtons(
+              #   inputId = ns("all"),
+              #   label = i18n$t("Specify covariables"),
+              #   inline = TRUE,
+              #   selected = 2,
+              #   choiceNames = c(
+              #     "Yes",
+              #     "No"
+              #   ),
+              #   choiceValues = c(1, 2)
+              # ),
+              shiny::uiOutput(outputId = ns("all_vars")),
               shiny::conditionalPanel(
                 condition = "input.all==1",
                 shiny::uiOutput(outputId = ns("regression_vars")),
@@ -7827,17 +7823,7 @@ regression_ui <- function(id, ...) {
               ),
               shiny::helpText(i18n$t("Press 'Analyse' to create the regression model and after changing parameters.")),
               shiny::tags$br(),
-              shiny::radioButtons(
-                inputId = ns("add_regression_p"),
-                label = i18n$t("Show p-value"),
-                inline = TRUE,
-                selected = "yes",
-                choiceNames = c(
-                  "Yes",
-                  "No"
-                ),
-                choiceValues = c("yes", "no")
-              ),
+              shiny::uiOutput(outputId = ns("add_regression_p")),
               # shiny::tags$br(),
               # shiny::radioButtons(
               #   inputId = ns("tbl_theme"),
@@ -7985,20 +7971,32 @@ regression_server <- function(id,
         bslib::accordion_panel_update(id = "acc_checks", target = "acc_pan_checks", title = i18n$t("Checks"))
       })
 
-      # shiny::observe({
-      #   shiny::updateRadioButtons(
-      #     session = session,
-      #     inputId = "all",
-      #     label = i18n$t("Specify covariables"),
-      #     # inline = TRUE,
-      #     # selected = 2,
-      #     choiceNames = c(
-      #       i18n$t("Yes"),
-      #       i18n$t("No")
-      #     ),
-      #     choiceValues = c(1, 2)
-      #   )
-      # })
+      output$all_vars <- shiny::renderUI(
+        shiny::radioButtons(
+          inputId = ns("all"),
+          label = i18n$t("Specify covariables"),
+          inline = TRUE,
+          selected = 2,
+          choiceNames = c(
+            i18n$t("Yes"),
+            i18n$t("No")
+          ),
+          choiceValues = c(1, 2)
+        ),
+      )
+
+      output$add_regression_p <- shiny::renderUI(
+        shiny::radioButtons(
+        inputId = ns("add_regression_p"),
+        label = i18n$t("Show p-value"),
+        inline = TRUE,
+        selected = "yes",
+        choiceNames = c(
+          i18n$t("Yes"),
+          i18n$t("No")
+        ),
+        choiceValues = c("yes", "no")
+      ))
 
 
 
@@ -8796,7 +8794,7 @@ ui_elements <- function(selection) {
             import_globalenv_ui(
               id = "env",
               title = NULL,
-              packages = c("NHANES", "stRoke")
+              packages = c("NHANES", "stRoke", "datasets")
             )
           ),
           # shiny::conditionalPanel(
@@ -9027,6 +9025,7 @@ ui_elements <- function(selection) {
         ),
         shiny::tags$br(),
         shiny::helpText(i18n$t("Reset to original imported dataset. Careful! There is no un-doing.")),
+        shiny::tags$br(),
         shiny::tags$br()
       )
       # )
@@ -9139,7 +9138,7 @@ ui_elements <- function(selection) {
                   title = "Settings",
                   icon = bsicons::bs_icon("x-circle"),
                   shiny::uiOutput("missings_var"),
-                  shiny::helpText(i18n$t("To consider if data is missing by random, choose the outcome/dependent variable, if it has any missings to evaluate if there is a significant difference across other variables depending on missing data or not."))
+                  shiny::helpText(i18n$t("To consider if data is missing by random, choose the outcome/dependent variable (only variables with any missings are available). If there is a significant difference across other variables depending on missing observations, it may not be missing at random."))
                 )
               )
             ),
@@ -11459,7 +11458,8 @@ ui <- bslib::page_fixed(
 #### Current file: /Users/au301842/FreesearchR/app/server.R 
 ########
 
-data(mtcars)
+data("mtcars")
+data("iris")
 
 # trial <- gtsummary::trial
 # starwars <- dplyr::starwars
@@ -11739,7 +11739,7 @@ server <- function(input, output, session) {
         )
       },
       error = function(err) {
-        showNotification(paste0("We encountered the following error showing missingness: ", err), type = "err")
+        showNotification(paste(i18n$t("We encountered the following error showing missingness:"), err), type = "err")
       }
     )
   })
@@ -12176,7 +12176,7 @@ server <- function(input, output, session) {
         show_data(REDCapCAST::fct_drop(rv$data_filtered), title = i18n$t("Uploaded data overview"), type = "modal")
       },
       error = function(err) {
-        showNotification(paste0("We encountered the following error browsing your data: ", err), type = "err")
+        showNotification(paste(i18n$t("We encountered the following error browsing your data:"), err), type = "err")
       }
     )
   })
@@ -12200,7 +12200,7 @@ server <- function(input, output, session) {
         )
       },
       error = function(err) {
-        showNotification(paste0("We encountered the following error showing missingness: ", err), type = "err")
+        showNotification(paste(i18n$t("We encountered the following error showing missingness:"), err), type = "err")
       }
     )
   })
@@ -12247,12 +12247,12 @@ server <- function(input, output, session) {
 
   output$code_import <- shiny::renderUI({
     shiny::req(rv$code$import)
-    prismCodeBlock(paste0(i18n$t("#Data import\n"), rv$code$import))
+    prismCodeBlock(paste0("#", i18n$t("Data import"), "\n", rv$code$import))
   })
 
   output$code_format <- shiny::renderUI({
     shiny::req(rv$code$format)
-    prismCodeBlock(paste0(i18n$t("#Data import formatting\n"), rv$code$format))
+    prismCodeBlock(paste0("#", i18n$t("Data import formatting"), "\n", rv$code$format))
   })
 
   output$code_data <- shiny::renderUI({
@@ -12270,23 +12270,23 @@ server <- function(input, output, session) {
       pipe_string() |>
       expression_string(assign.str = "df <- df |>\n")
 
-    prismCodeBlock(paste0("#Data modifications\n", out))
+    prismCodeBlock(paste0("#", i18n$t("Data modifications"), "\n", out))
   })
 
   output$code_variables <- shiny::renderUI({
     shiny::req(rv$code$variables)
     out <- expression_string(rv$code$variables, assign.str = "df <- df |>\n")
-    prismCodeBlock(paste0("#Variables filter\n", out))
+    prismCodeBlock(paste0("#", i18n$t("Variables filter"), "\n", out))
   })
 
   output$code_filter <- shiny::renderUI({
     shiny::req(rv$code$filter)
-    prismCodeBlock(paste0("#Data filter\n", rv$code$filter))
+    prismCodeBlock(paste0("#", i18n$t("Data filter"), "\n", rv$code$filter))
   })
 
   output$code_table1 <- shiny::renderUI({
     shiny::req(rv$code$table1)
-    prismCodeBlock(paste0("#Data characteristics table\n", rv$code$table1))
+    prismCodeBlock(paste0("#", i18n$t("Data characteristics table"), "\n", rv$code$table1))
   })
 
 
@@ -12330,7 +12330,7 @@ server <- function(input, output, session) {
 
   output$data_info_nochar <- shiny::renderUI({
     shiny::req(rv$list$data)
-    data_description(rv$list$data, data_text = "The dataset without text variables")
+    data_description(rv$list$data, data_text = i18n$t("The dataset without text variables"))
   })
 
   ## Only allow evaluation if the dataset has fewer then 50 variables
@@ -12369,9 +12369,9 @@ server <- function(input, output, session) {
       #       # stop(glue::glue(i18n$t("The data includes {n_col} variables. Please limit to 100.")))
       #       print("Please limit to 100.")
       #     } else {
-            shiny::withProgress(message = "Creating the table. Hold on for a moment..", {
-              rv$list$table1 <- rlang::exec(create_baseline, !!!append_list(rv$list$data, parameters, "data"))
-            })
+      shiny::withProgress(message = i18n$t("Creating the table. Hold on for a moment.."), {
+        rv$list$table1 <- rlang::exec(create_baseline, !!!append_list(rv$list$data, parameters, "data"))
+      })
       #     }
       #   },
       #   error = function(err) {
@@ -12399,7 +12399,7 @@ server <- function(input, output, session) {
       inputId = "outcome_var_cor",
       selected = "none",
       data = rv$list$data,
-      label = "Select outcome variable",
+      label = i18n$t("Select outcome variable"),
       col_subset = c(
         "none",
         colnames(rv$list$data)
@@ -12425,7 +12425,7 @@ server <- function(input, output, session) {
     output$missings_var <- shiny::renderUI({
       columnSelectInput(
         inputId = "missings_var",
-        label = "Select variable to stratify analysis",
+        label = i18n$t("Select variable to stratify analysis"),
         data = shiny::reactive({
           shiny::req(rv$data_filtered)
           rv$data_filtered[apply(rv$data_filtered, 2, anyNA)]
@@ -12523,7 +12523,7 @@ server <- function(input, output, session) {
       rv$list$regression <- rv$regression()
       rv$list$missings <- rv$missings()
 
-      shiny::withProgress(message = "Generating the report. Hold on for a moment..", {
+      shiny::withProgress(message = i18n$t("Generating the report. Hold on for a moment.."), {
         tryCatch(
           {
             rv$list |>

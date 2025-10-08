@@ -14,12 +14,12 @@ Herunder kan du helt kort se, hvad du kan bruge ***FreesearchR*** til:
 
 2.  **Forbered** data til analys ved at filtrere, ændre variabler eller opret helt nye variabler
 
-3.  **Evaluate data** using descriptive analyses methods and inspect cross-correlations as well as [missing observations](https://agdamsbo.github.io/FreesearchR/articles/missingness.html "Read more about missing data")
+3. **Evaluer data** ved hjælp af beskrivende analysemetoder og inspicer krydskorrelationer samt [manglende observationer](https://agdamsbo.github.io/FreesearchR/articles/missingness.html "Læs mere om manglende data")
 
-4.  **Visualise data** by [creating simple, clean plots](https://agdamsbo.github.io/FreesearchR/articles/visuals.html "See available plot types") for overview and quick insights
+4. **Visualiser data** ved at [oprette enkle, rene plots](https://agdamsbo.github.io/FreesearchR/articles/visuals.html "Se tilgængelige plottyper") for overblik og hurtig indsigt
 
-5.  **Create simple regression models** for even more advanced data analyses
+5. **Opret simple regressionsmodeller** til endnu mere avancerede dataanalyser
 
-6.  **Download** results as a report, get the modified data set and save the code for learning and to reproduce the results later
+6. **Download** resultater som en rapport, hent det ændrede datasæt og gem koden til læring og til senere reproduktion af resultaterne
 
-The full [project documentation is here](https://agdamsbo.github.io/FreesearchR/) where you'll find detailed descriptions of the app and link to the source code! If you want to [share feedback, please follow this link to a simple survey](https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8).
+Den fulde [projektdokumentation er her](https://agdamsbo.github.io/FreesearchR/), hvor du finder detaljerede beskrivelser af appen og et link til kildekoden! Hvis du vil [dele feedback, kan du følge dette link til et enkelt spørgeskema](https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8).

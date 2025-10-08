@@ -73,7 +73,7 @@ import_globalenv_ui <- function(id,
         id = ns("import-result"),
         status = "info",
         tags$b(i18n$t("No data selected!")),
-        i18n$t("Use a datasat from your environment or from the environment of a package."),
+        i18n$t("Use a dataset from your environment or from the environment of a package."),
         dismissible = TRUE
       )
     ),
@@ -150,7 +150,9 @@ import_globalenv_server <- function(id,
         selected = character(0),
         choices = choices,
         choicesOpt = choicesOpt,
-        options = list(title = i18n$t("List of datasets..."))
+        options = list(
+          title = i18n$t("List of datasets..."),
+                       "live-search" = TRUE)
       )
     })
 
@@ -159,7 +161,7 @@ import_globalenv_server <- function(id,
         id = "import-result",
         status = "info",
         tags$b(i18n$t("No data selected!")),
-        i18n$t("Use a datasat from your environment or from the environment of a package."),
+        i18n$t("Use a dataset from your environment or from the environment of a package."),
         dismissible = TRUE
       )
     )

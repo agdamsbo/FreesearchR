@@ -166,7 +166,7 @@ describe_col_factor <- function(x, with_summary = TRUE) {
       style = htmltools::css(fontStyle = "italic"),
       get_var_icon(x),
       # phosphoricons::ph("list-bullets"),
-      "factor"
+      class(x)
     ),
     if (with_summary) {
       tagList(
@@ -319,7 +319,7 @@ construct_col_summary <- function(data) {
         values <- data[[col]]
         content <- if (inherits(values, "character")) {
           describe_col_char(values)
-        } else if (inherits(values, "factor")) {
+        } else if (inherits(values, c("factor","logical"))) {
           describe_col_factor(values)
         } else if (inherits(values, c("numeric", "integer"))) {
           describe_col_num(values)

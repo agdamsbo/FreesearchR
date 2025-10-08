@@ -1,3 +1,7 @@
+# FreesearchR 25.10.3
+
+*NEW* Improvements to translations with more strings having been translated. Nearing completion of marking strings for translation, which means (almost) the complete interface is now translatable.
+
 # FreesearchR 25.10.2
 
 *NEW* Improvements to translations with more strings having been translated.

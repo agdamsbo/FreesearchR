@@ -69,18 +69,18 @@ regression_ui <- function(id, ...) {
               #   )
               # ),
               shiny::uiOutput(outputId = ns("regression_type")),
-              shiny::radioButtons(
-                inputId = ns("all"),
-                label = i18n$t("Specify covariables"),
-                inline = TRUE,
-                selected = 2,
-                choiceNames = c(
-                  "Yes",
-                  "No"
-                ),
-                choiceValues = c(1, 2)
-              ),
-              # shiny::uiOutput(outputId = ns("all")),
+              # shiny::radioButtons(
+              #   inputId = ns("all"),
+              #   label = i18n$t("Specify covariables"),
+              #   inline = TRUE,
+              #   selected = 2,
+              #   choiceNames = c(
+              #     "Yes",
+              #     "No"
+              #   ),
+              #   choiceValues = c(1, 2)
+              # ),
+              shiny::uiOutput(outputId = ns("all_vars")),
               shiny::conditionalPanel(
                 condition = "input.all==1",
                 shiny::uiOutput(outputId = ns("regression_vars")),
@@ -102,17 +102,7 @@ regression_ui <- function(id, ...) {
               ),
               shiny::helpText(i18n$t("Press 'Analyse' to create the regression model and after changing parameters.")),
               shiny::tags$br(),
-              shiny::radioButtons(
-                inputId = ns("add_regression_p"),
-                label = i18n$t("Show p-value"),
-                inline = TRUE,
-                selected = "yes",
-                choiceNames = c(
-                  "Yes",
-                  "No"
-                ),
-                choiceValues = c("yes", "no")
-              ),
+              shiny::uiOutput(outputId = ns("add_regression_p")),
               # shiny::tags$br(),
               # shiny::radioButtons(
               #   inputId = ns("tbl_theme"),
@@ -260,20 +250,32 @@ regression_server <- function(id,
         bslib::accordion_panel_update(id = "acc_checks", target = "acc_pan_checks", title = i18n$t("Checks"))
       })
 
-      # shiny::observe({
-      #   shiny::updateRadioButtons(
-      #     session = session,
-      #     inputId = "all",
-      #     label = i18n$t("Specify covariables"),
-      #     # inline = TRUE,
-      #     # selected = 2,
-      #     choiceNames = c(
-      #       i18n$t("Yes"),
-      #       i18n$t("No")
-      #     ),
-      #     choiceValues = c(1, 2)
-      #   )
-      # })
+      output$all_vars <- shiny::renderUI(
+        shiny::radioButtons(
+          inputId = ns("all"),
+          label = i18n$t("Specify covariables"),
+          inline = TRUE,
+          selected = 2,
+          choiceNames = c(
+            i18n$t("Yes"),
+            i18n$t("No")
+          ),
+          choiceValues = c(1, 2)
+        ),
+      )
+
+      output$add_regression_p <- shiny::renderUI(
+        shiny::radioButtons(
+        inputId = ns("add_regression_p"),
+        label = i18n$t("Show p-value"),
+        inline = TRUE,
+        selected = "yes",
+        choiceNames = c(
+          i18n$t("Yes"),
+          i18n$t("No")
+        ),
+        choiceValues = c("yes", "no")
+      ))
 
 
 

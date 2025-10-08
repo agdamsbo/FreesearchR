@@ -6,6 +6,8 @@ output: html_fragment
 
 This is the ***FreesearchR*** data analysis tool, a free tool for basic data evaluation and analysis. If you need more advanced tools, start with ***FreesearchR*** and then you'll probably be better off using *R* or similar directly.
 
+The ***FreesearchR*** app should be available to as many people as possible, and the interface can be translated to any language. If you have suggestions or want to help translate, please reach out on [info@freesearchr.org](mailto:info@freesearchr.org).
+
 With this tool you can:
 
 1.  **Import data** from a spreadsheet/file on your machine, directly from a [REDCap](https://projectredcap.org/ "Read more on the data capture tool REDCap") server, try it with sample data or access data directly [if run in R locally](https://agdamsbo.github.io/FreesearchR//#run-locally-on-your-own-machine "Read about running FreesearchR on your local machine")

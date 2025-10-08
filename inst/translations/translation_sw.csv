@@ -217,7 +217,6 @@
 "Select a dataset:","Select a dataset:"
 "List of datasets...","List of datasets..."
 "No data selected!","No data selected!"
-"Use a datasat from your environment or from the environment of a package.","Use a datasat from your environment or from the environment of a package."
 "No dataset here...","No dataset here..."
 "Use a dataset from your environment or from the environment of a package.","Use a dataset from your environment or from the environment of a package."
 "Not a data.frame","Not a data.frame"
@@ -255,3 +254,4 @@
 "We encountered the following error browsing your data:","We encountered the following error browsing your data:"
 "To consider if data is missing by random, choose the outcome/dependent variable (only variables with any missings are available). If there is a significant difference across other variables depending on missing observations, it may not be missing at random.","To consider if data is missing by random, choose the outcome/dependent variable (only variables with any missings are available). If there is a significant difference across other variables depending on missing observations, it may not be missing at random."
 "Choose a name for the column to be created or modified, then enter an expression before clicking on the button below to create the variable, or cancel to exit without saving anything.","Choose a name for the column to be created or modified, then enter an expression before clicking on the button below to create the variable, or cancel to exit without saving anything."
+"Please fill in web address and API token, then press 'Connect'.","Please fill in web address and API token, then press 'Connect'."

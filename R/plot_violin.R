@@ -26,7 +26,7 @@ plot_violin <- function(data, pri, sec, ter = NULL) {
       )
     })
 
-    wrap_plot_list(out, title = glue::glue("Grouped by {get_label(data,ter)}"))
+    wrap_plot_list(out, title = glue::glue(i18n$t("Grouped by {get_label(data,ter)}")))
   })
   # patchwork::wrap_plots(out,guides = "collect")
 }

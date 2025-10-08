@@ -26,12 +26,6 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
       width = "100%"
     ),
     shiny::helpText(i18n$t("Format should be either 'https://redcap.your.institution/' or 'https://your.institution/redcap/'")),
-    # shiny::textInput(
-    #   inputId = ns("api"),
-    #   label = "API token",
-    #   value = "",
-    #   width = "100%"
-    # ),
     shiny::passwordInput(
       inputId = ns("api"),
       label = i18n$t("API token"),
@@ -55,7 +49,7 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
       shinyWidgets::alert(
         id = ns("connect-result"),
         status = "info",
-        tags$p(phosphoricons::ph("info", weight = "bold"), "Please fill in server address (URI) and API token, then press 'Connect'.")
+        tags$p(phosphoricons::ph("info", weight = "bold"), i18n$t("Please fill in web address and API token, then press 'Connect'."))
       ),
       dismissible = TRUE
     ),

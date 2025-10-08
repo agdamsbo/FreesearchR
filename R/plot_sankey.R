@@ -119,7 +119,7 @@ plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors 
 #'   plot_sankey_single("first", "last", color.group = "pri")
 #' mtcars |>
 #'   default_parsing() |>
-#' plot_sankey_single("cyl", "vs", color.group = "pri")
+#'   plot_sankey_single("cyl", "vs", color.group = "pri")
 plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), colors = NULL, ...) {
   color.group <- match.arg(color.group)
 

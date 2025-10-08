@@ -99,7 +99,7 @@ ui_elements <- function(selection) {
             import_globalenv_ui(
               id = "env",
               title = NULL,
-              packages = c("NHANES", "stRoke")
+              packages = c("NHANES", "stRoke", "datasets")
             )
           ),
           # shiny::conditionalPanel(
@@ -330,6 +330,7 @@ ui_elements <- function(selection) {
         ),
         shiny::tags$br(),
         shiny::helpText(i18n$t("Reset to original imported dataset. Careful! There is no un-doing.")),
+        shiny::tags$br(),
         shiny::tags$br()
       )
       # )
@@ -442,7 +443,7 @@ ui_elements <- function(selection) {
                   title = "Settings",
                   icon = bsicons::bs_icon("x-circle"),
                   shiny::uiOutput("missings_var"),
-                  shiny::helpText(i18n$t("To consider if data is missing by random, choose the outcome/dependent variable, if it has any missings to evaluate if there is a significant difference across other variables depending on missing data or not."))
+                  shiny::helpText(i18n$t("To consider if data is missing by random, choose the outcome/dependent variable (only variables with any missings are available). If there is a significant difference across other variables depending on missing observations, it may not be missing at random."))
                 )
               )
             ),
