@@ -83,7 +83,7 @@ str_remove_last <- function(data, pattern = "\n") {
 #' mtcars |>
 #'   default_parsing() |>
 #'   plot_sankey("cyl", "gear", "vs", color.group = "pri")
-plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors = NULL) {
+plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors = NULL,missing.level="Missing") {
   if (!is.null(ter)) {
     ds <- split(data, data[ter])
   } else {
@@ -91,7 +91,7 @@ plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors 
   }
 
   out <- lapply(ds, \(.ds){
-    plot_sankey_single(.ds, pri = pri, sec = sec, color.group = color.group, colors = colors)
+    plot_sankey_single(.ds, pri = pri, sec = sec, color.group = color.group, colors = colors,missing.level=missing.level)
   })
 
   patchwork::wrap_plots(out)
@@ -120,14 +120,21 @@ plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors 
 #' mtcars |>
 #'   default_parsing() |>
 #'   plot_sankey_single("cyl", "vs", color.group = "pri")
-plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), colors = NULL, ...) {
+#' stRoke::trial |>
+#'   default_parsing() |>
+#'   plot_sankey_single("diabetes", "hypertension")
+plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), colors = NULL,missing.level="Missing", ...) {
   color.group <- match.arg(color.group)
 
+  browser()
   data_orig <- data
   data[c(pri, sec)] <- data[c(pri, sec)] |>
-    dplyr::mutate(dplyr::across(dplyr::where(is.factor), forcats::fct_drop))
+    dplyr::mutate(
+      # dplyr::across(dplyr::where(is.logical), as.factor),
+      dplyr::across(dplyr::where(is.factor), forcats::fct_drop)#,
+      # dplyr::across(dplyr::where(is.factor), \(.x){forcats::fct_na_value_to_level(.x,missing.level)})
+    )
 
-  # browser()
 
   data <- data |> sankey_ready(pri = pri, sec = sec, ...)
 

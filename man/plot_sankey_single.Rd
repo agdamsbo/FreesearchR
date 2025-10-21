@@ -10,6 +10,7 @@ plot_sankey_single(
   sec,
   color.group = c("pri", "sec"),
   colors = NULL,
+  missing.level = "Missing",
   ...
 )
 }
@@ -40,4 +41,7 @@ data.frame(
 mtcars |>
   default_parsing() |>
   plot_sankey_single("cyl", "vs", color.group = "pri")
+stRoke::trial |>
+  default_parsing() |>
+  plot_sankey_single("diabetes", "hypertension")
 }

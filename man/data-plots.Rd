@@ -32,7 +32,15 @@ plot_ridge(data, x, y, z = NULL, ...)
 
 sankey_ready(data, pri, sec, numbers = "count", ...)
 
-plot_sankey(data, pri, sec, ter = NULL, color.group = "pri", colors = NULL)
+plot_sankey(
+  data,
+  pri,
+  sec,
+  ter = NULL,
+  color.group = "pri",
+  colors = NULL,
+  missing.level = "Missing"
+)
 
 plot_scatter(data, pri, sec, ter = NULL)
 
