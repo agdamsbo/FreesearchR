@@ -26,6 +26,8 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
       width = "100%"
     ),
     shiny::helpText(i18n$t("Format should be either 'https://redcap.your.institution/' or 'https://your.institution/redcap/'")),
+    shiny::br(),
+    shiny::br(),
     shiny::passwordInput(
       inputId = ns("api"),
       label = i18n$t("API token"),

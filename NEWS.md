@@ -1,3 +1,11 @@
+# FreesearchR 25.10.4
+
+*NEW* Two new options to create new simplified factors from factors. The "top" option will keep only the top N levels, while the "bottom" option will combine all levels occurring below set percentage.
+
+*NEW* The "New factor" function received some updates to include detailed information on the methods for creating new factors.
+
+*LANGUAGE* Updated Swahili strings. All Danish strings are translated. New languages are on track.
+
 # FreesearchR 25.10.3
 
 *NEW* Improvements to translations with more strings having been translated. Nearing completion of marking strings for translation, which means (almost) the complete interface is now translatable.

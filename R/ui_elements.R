@@ -254,7 +254,7 @@ ui_elements <- function(selection) {
             width = 9,
             shiny::tags$p(
               i18n$t("Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."),
-              i18n$t("There are more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with R code. At the bottom you can restore the original data."),
+              i18n$t("There are more advanced options to modify factor/categorical variables as well as create new factor from an existing variable or new variables with R code. At the bottom you can restore the original data."),
               i18n$t("Please note that data modifications are applied before any filtering.")
             )
           )

@@ -68,6 +68,10 @@ services:
 
 Please note that the ***FreesearchR*** project is published with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
 
+## Translators
+
+Thank you very much to all translators having helped to translate and validate translation drafts.
+
 ## Acknowledgements
 
 Like any other project, this project was never possible without the great work of others. These are some of the sources and packages I have used:

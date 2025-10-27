@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpQghyAd/file101dc4d580c74.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//Rtmp5UwPqh/filef21e3b42c1c3.R 
 ########
 
 i18n_path <- here::here("translations")
@@ -62,7 +62,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.10.3'
+app_version <- function()'25.10.4'
 
 
 ########
@@ -1027,7 +1027,7 @@ vectorSelectInput <- function(inputId,
 
 
 ########
-#### Current file: /Users/au301842/FreesearchR/R//cut-variable-dates.R 
+#### Current file: /Users/au301842/FreesearchR/R//cut_var.R 
 ########
 
 #' Extended cutting function with fall-back to the native base::cut
@@ -1081,8 +1081,8 @@ cut_var.hms <- function(x, breaks, ...) {
 #' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(2)
 #' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = "weekday")
 #' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = "month_only")
-#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks=NULL,format = "%A-%H")
-#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks=NULL,format = "%W")
+#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = NULL, format = "%A-%H")
+#' readr::parse_datetime(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = NULL, format = "%W")
 cut_var.POSIXt <- function(x, breaks, right = FALSE, include.lowest = TRUE, start.on.monday = TRUE, ...) {
   breaks_o <- breaks
   args <- list(...)
@@ -1097,14 +1097,14 @@ cut_var.POSIXt <- function(x, breaks, right = FALSE, include.lowest = TRUE, star
     )
   }
 
-  if ("format" %in% names(args)){
+  if ("format" %in% names(args)) {
     assertthat::assert_that(is.character(args$format))
-    out <- forcats::as_factor(format(x,format=args$format))
+    out <- forcats::as_factor(format(x, format = args$format))
   } else if (identical(breaks, "weekday")) {
     ## This is
     ds <- as.Date(1:7) |>
       (\(.x){
-        sort_by(format(.x,"%A"),as.numeric(format(.x,"%w")))
+        sort_by(format(.x, "%A"), as.numeric(format(.x, "%w")))
       })()
 
     if (start.on.monday) {
@@ -1154,16 +1154,16 @@ cut_var.POSIXct <- cut_var.POSIXt
 #' as.Date(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(2)
 #' as.Date(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(breaks = "weekday")
 #' as.Date(c("1992-02-01 01:00:20", "1992-02-06 03:00:20", "1992-05-01 01:20:20", "1992-09-01 08:20:20", "1999-02-01 21:20:20", "1992-12-01 03:02:20")) |> cut_var(format = "%W")
-cut_var.Date <- function(x, breaks=NULL, start.on.monday = TRUE, ...) {
+cut_var.Date <- function(x, breaks = NULL, start.on.monday = TRUE, ...) {
   args <- list(...)
 
-  if ("format" %in% names(args)){
+  if ("format" %in% names(args)) {
     assertthat::assert_that(is.character(args$format))
-    out <- forcats::as_factor(format(x,format=args$format))
+    out <- forcats::as_factor(format(x, format = args$format))
   } else if (identical(breaks, "weekday")) {
     ds <- as.Date(1:7) |>
       (\(.x){
-        sort_by(format(.x,"%A"),as.numeric(format(.x,"%w")))
+        sort_by(format(.x, "%A"), as.numeric(format(.x, "%w")))
       })()
 
     if (start.on.monday) {
@@ -1183,6 +1183,61 @@ cut_var.Date <- function(x, breaks=NULL, start.on.monday = TRUE, ...) {
   }
   out
 }
+
+
+#' Simplify a factor to only the top or bottom n levels
+#'
+#' @param type
+#'
+#' @name cut_var
+#'
+#' @returns factor
+#' @export
+#'
+#' @examples
+#' mtcars$carb |>
+#'   as.factor() |>
+#'   cut_var(2) |>
+#'   table()
+#'
+#' mtcars$carb |>
+#'   as.factor() |>
+#'   cut_var(20, "bottom") |>
+#'   table()
+cut_var.factor <- function(x, breaks = NULL, type = c("top", "bottom"), other = "Other", ...) {
+  args <- list(...)
+
+  if (is.null(breaks)) {
+    return(x)
+  }
+
+  type <- match.arg(type)
+
+  tbl <- sort(table(x), decreasing = TRUE)
+
+  if (type == "top") {
+    lvls <- names(tbl[seq_len(breaks)])
+  } else if (type == "bottom") {
+    lvls <- names(tbl)[!tbl / NROW(x) * 100 < breaks]
+  }
+
+  if (other %in% lvls) {
+    other <- paste(other, "_freesearchr")
+  }
+
+  ## Relabel and relevel
+  out <- forcats::fct_relabel(
+    x,
+    \(.x){
+      ifelse(.x %in% lvls, .x, other)
+    }
+  ) |>
+    forcats::fct_relevel(lvls, other)
+
+  attr(out, which = "brks") <- breaks
+  out
+}
+
 
 #' Test class
 #'
@@ -1215,6 +1270,11 @@ is_datetime <- function(data) {
   is_any_class(data, class.vec = c("hms", "Date", "POSIXct", "POSIXt"))
 }
 
+
+########
+#### Current file: /Users/au301842/FreesearchR/R//cut-variable-ext.R 
+########
+
 #' @title Module to Convert Numeric to Factor
 #'
 #' @description
@@ -1238,12 +1298,13 @@ cut_variable_ui <- function(id) {
     shiny::fluidRow(
       column(
         width = 3,
-        shinyWidgets::virtualSelectInput(
-          inputId = ns("variable"),
-          label = i18n$t("Variable to cut:"),
-          choices = NULL,
-          width = "100%"
-        )
+        shiny::uiOutput(outputId = ns("variable"))
+        # shinyWidgets::virtualSelectInput(
+        #   inputId = ns("variable"),
+        #   label = i18n$t("Variable to cut:"),
+        #   choices = NULL,
+        #   width = "100%"
+        # )
       ),
       column(
         width = 3,
@@ -1262,15 +1323,19 @@ cut_variable_ui <- function(id) {
       ),
       column(
         width = 3,
-        checkboxInput(
-          inputId = ns("right"),
-          label = i18n$t("Close intervals on the right"),
-          value = TRUE
-        ),
-        checkboxInput(
-          inputId = ns("include_lowest"),
-          label = i18n$t("Include lowest value"),
-          value = TRUE
+        shiny::conditionalPanel(
+          condition = "input.method != 'top' && input.method != 'bottom'",
+          ns = ns,
+          checkboxInput(
+            inputId = ns("right"),
+            label = i18n$t("Close intervals on the right"),
+            value = TRUE
+          ),
+          checkboxInput(
+            inputId = ns("include_lowest"),
+            label = i18n$t("Include lowest value"),
+            value = TRUE
+          )
         )
       )
     ),
@@ -1307,18 +1372,32 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
     function(input, output, session) {
       rv <- reactiveValues(data = NULL, new_var_name = NULL)
 
+      ns <- session$ns
+
       bindEvent(observe({
         data <- data_r()
         rv$data <- data
         vars_num <- vapply(data, \(.x){
-          is.numeric(.x) || is_datetime(.x)
+          is.numeric(.x) || is_datetime(.x) || (is.factor(.x) && length(levels(.x)) > 2)
         }, logical(1))
         vars_num <- names(vars_num)[vars_num]
-        shinyWidgets::updateVirtualSelect(
-          inputId = "variable",
-          choices = vars_num,
-          selected = if (isTruthy(input$variable)) input$variable else vars_num[1]
+
+        output$variable <- shiny::renderUI(
+          columnSelectInput(
+            inputId = ns("variable"),
+            data = data,
+            label = i18n$t("Variable to cut:"),
+            width = "100%",
+            col_subset = vars_num,
+            selected = if (isTruthy(input$variable)) input$variable else vars_num[1]
+          )
         )
+
+        # shinyWidgets::updateVirtualSelect(
+        #   inputId = "variable",
+        #   choices = vars_num,
+        #   selected = if (isTruthy(input$variable)) input$variable else vars_num[1]
+        # )
       }), data_r(), input$hidden)
 
       output$slider_fixed <- renderUI({
@@ -1326,7 +1405,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         variable <- req(input$variable)
         req(hasName(data, variable))
 
-        if (is_datetime(data[[variable]])) {
+        if (is_datetime(data[[variable]]) || is.factor(data[[variable]])) {
           brks <- cut_var(data[[variable]],
             breaks = input$n_breaks
           )$brks
@@ -1371,7 +1450,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           # "quantile"
         )
 
-        if (any(c("hms","POSIXct") %in% class(data[[variable]]))) {
+        if (any(c("hms", "POSIXct") %in% class(data[[variable]]))) {
           choices <- c(choices, "hour")
         } else if (any(c("POSIXt", "Date") %in% class(data[[variable]]))) {
           choices <- c(
@@ -1385,11 +1464,17 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
             "quarter",
             "year"
           )
+        } else if ("factor" %in% class(data[[variable]])) {
+          choices <- c(
+            choices,
+            "top",
+            "bottom"
+          )
         } else {
           choices <- c(
             choices,
             "fixed",
-            "quantile",
+            "quantile" # ,
             # "sd",
             # "equal",
             # "pretty",
@@ -1398,7 +1483,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
             # "bclust",
             # "fisher",
             # "jenks",
-            "headtails" # ,
+            # "headtails" # ,
             # "maximum",
             # "box"
           )
@@ -1406,13 +1491,28 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
 
         choices <- unique(choices)
 
-        shinyWidgets::virtualSelectInput(
-          inputId = session$ns("method"),
+        ## Implement labeled vector selection of cut methods to include descriptions
+        ##
+        ## cut_methods()
+        ##
+
+
+
+        vectorSelectInput(
+          inputId = ns("method"),
           label = i18n$t("Method:"),
-          choices = choices,
+          choices = names2val(get_list_elements(choices, "descr", dict = cut_methods())),
           selected = NULL,
           width = "100%"
         )
+
+        # shinyWidgets::virtualSelectInput(
+        #   inputId = session$ns("method"),
+        #   label = i18n$t("Method:"),
+        #   choices = choices,
+        #   selected = NULL,
+        #   width = "100%"
+        # )
       })
 
 
@@ -1461,16 +1561,23 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           # cut.POSIXct <- cut.POSIXt
           f <- cut_var(data[[variable]], breaks = input$method)
           list(var = f, brks = levels(f))
+        } else if (input$method %in% c(
+          "top",
+          "bottom"
+        )) {
+          # This allows factor simplification to get the top or bottom count
+          f <- cut_var(data[[variable]], breaks = input$n_breaks)
+          list(var = f, brks = input$n_breaks, type = input$method)
         } else if (input$method %in% c("hour")) {
           # To enable datetime cutting
           # cut.POSIXct <- cut.POSIXt
           f <- cut_var(data[[variable]], breaks = "hour")
           list(var = f, brks = levels(f))
-        # } else if (input$method %in% c("week_only")) {
-        #   # As a proof of concept a single option to use "format" parameter
-        #   # https://www.stat.berkeley.edu/~s133/dates.html
-        #   f <- cut_var(data[[variable]], format = "%W")
-        #   list(var = f, brks = levels(f))
+          # } else if (input$method %in% c("week_only")) {
+          #   # As a proof of concept a single option to use "format" parameter
+          #   # https://www.stat.berkeley.edu/~s133/dates.html
+          #   f <- cut_var(data[[variable]], format = "%W")
+          #   list(var = f, brks = levels(f))
         } else {
           classInt::classIntervals(
             var = as.numeric(data[[variable]]),
@@ -1494,7 +1601,17 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         variable <- req(input$variable)
 
 
-        if (input$method %in% c("day", "weekday", "week", "month", "month_only", "quarter", "year", "hour")) {
+        if (input$method %in% c(
+          "day",
+          "weekday",
+          "week",
+          "month",
+          "month_only",
+          "quarter",
+          "year",
+          "hour"
+        )
+        ) {
           breaks <- input$method
         } else {
           breaks <- breaks_r()$brks
@@ -1507,47 +1624,40 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           right = input$right
         )
 
+        if ("type" %in% names(breaks_r())) {
+          parameters <- modifyList(
+            parameters,
+            list(
+              type = breaks_r()$type,
+              other = i18n$t("Other")
+            )
+          )
+        }
+
         new_variable <- tryCatch(
           {
             rlang::exec(cut_var, !!!parameters)
           },
           error = function(err) {
-            showNotification(paste0("We encountered the following error creating your report: ", err), type = "err")
+            showNotification(paste("We encountered the following error creating the new factor:", err), type = "err")
           }
         )
 
-        # new_variable <- do.call(
-        #   cut,
-        #   parameters
-        # )
-
-
         data <- append_column(data, column = new_variable, name = paste0(variable, "_cut"), index = "right")
 
-        # setNames(paste0(variable, "_cut"))
-        #
-        #   data <- dplyr::bind_cols(data, new_variable, .name_repair = "unique_quiet")
-
-        # rv$new_var_name <- names(data)[length(data)]
-        # browser()
-
-        # browser()
         code <- rlang::call2(
           "append_column",
           !!!list(
             column = rlang::call2("cut_var",
-                                  !!!modifyList(parameters, list(x = as.symbol(paste0("data$", variable)))),
-                                  .ns = "FreesearchR"),
+              !!!modifyList(parameters, list(x = as.symbol(paste0("data$", variable)))),
+              .ns = "FreesearchR"
+            ),
             name = paste0(variable, "_cut"), index = "right"
           ),
           .ns = "FreesearchR"
         )
         attr(data, "code") <- code
 
-        # attr(data, "code") <- Reduce(
-        #   f = function(x, y) expr(!!x %>% !!y),
-        #   x = c(attr(data, "code"), code)
-        # )
         data
       })
 
@@ -1622,12 +1732,11 @@ modal_cut_variable <- function(id,
 
 
 #' @importFrom graphics abline axis hist par plot.new plot.window
-plot_histogram <- function(data, column=NULL, bins = 30, breaks = NULL, color = "#112466") {
-  if (is.vector(data)){
+plot_histogram <- function(data, column = NULL, bins = 30, breaks = NULL, color = "#112466") {
+  if (is.vector(data)) {
     x <- data
   } else {
-  x <- data[[column]]
-
+    x <- data[[column]]
   }
   x <- as.numeric(x)
   op <- par(mar = rep(1.5, 4))
@@ -1643,6 +1752,107 @@ plot_histogram <- function(data, column=NULL, bins = 30, breaks = NULL, color = 
   abline(v = breaks, col = "#2E2E2E", lty = 2, lwd = 1.5)
 }
 
+
+#### Helpers
+####
+####
+
+#' Library of cut methods with descriptions
+#'
+#' @returns vector
+#' @export
+#'
+cut_methods <- function() {
+  list(
+    "hour" = list(
+      descr = i18n$t("Hour of the day"),
+      # class = c("hms", "POSIXct"), # Not implemented yet, but will during rewrite at some point...
+      breaks = i18n$t("Breaks")
+    ),
+    "day" = list(
+      descr = i18n$t("By day of the week"),
+      breaks = i18n$t("Breaks")
+    ),
+    "weekday" = list(
+      descr = i18n$t("By weekday"),
+      breaks = i18n$t("Breaks")
+    ),
+    "week" = list(
+      descr = i18n$t("By week number and year"),
+      breaks = i18n$t("Breaks")
+    ),
+    "week_only" = list(
+      descr = i18n$t("By week number"),
+      breaks = i18n$t("Breaks")
+    ),
+    "month" = list(
+      descr = i18n$t("By month and year"),
+      breaks = i18n$t("Breaks")
+    ),
+    "month_only" = list(
+      descr = i18n$t("By month only"),
+      breaks = i18n$t("Breaks")
+    ),
+    "quarter" = list(
+      descr = i18n$t("By quarter of the year"),
+      breaks = i18n$t("Breaks")
+    ),
+    "year" = list(
+      descr = i18n$t("By year"),
+      breaks = i18n$t("Breaks")
+    ),
+    "top" = list(
+      descr = i18n$t("Keep only most common"),
+      breaks = i18n$t("Number")
+    ),
+    "bottom" = list(
+      descr = i18n$t("Combine below percentage"),
+      breaks = i18n$t("Percentage")
+    ),
+    "fixed" = list(
+      descr = i18n$t("By specified numbers"),
+      breaks = i18n$t("Breaks")
+    ),
+    "quantile" = list(
+      descr = i18n$t("By quantiles (groups of equal size)"),
+      breaks = i18n$t("Breaks")
+    )
+  )
+}
+
+#' Subset elements from list of lists
+#'
+#' @description
+#' General function to sub-setting details stored in list dictionaries.
+#'
+#'
+#' @param name list name to lookup
+#' @param element element to get
+#' @param dict dictionary to use
+#'
+#' @returns named vector
+#' @export
+#'
+#' @examples
+#' get_list_elements(c("top", "bottom"), "descr")
+get_list_elements <- function(name, element, dict = cut_methods()) {
+  sapply(dict[name], \(.x){
+    .x[[element]]
+  })
+}
+
+#' Set values as names and names as values
+#'
+#' @param data data
+#'
+#' @returns named vector
+#' @export
+#'
+#' @examples
+#' names2val(c("Cylinders" = "cyl", "Transmission" = "am", "Gears" = "gear"))
+names2val <- function(data) {
+  setNames(names(data), data)
+}
 
 
 ########
@@ -4035,7 +4245,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.10.3-251008'
+hosted_version <- function()'v25.10.4-251027'
 
 
 ########
@@ -5760,7 +5970,7 @@ str_remove_last <- function(data, pattern = "\n") {
 #' mtcars |>
 #'   default_parsing() |>
 #'   plot_sankey("cyl", "gear", "vs", color.group = "pri")
-plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors = NULL) {
+plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors = NULL,missing.level="Missing") {
   if (!is.null(ter)) {
     ds <- split(data, data[ter])
   } else {
@@ -5768,7 +5978,7 @@ plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors 
   }
 
   out <- lapply(ds, \(.ds){
-    plot_sankey_single(.ds, pri = pri, sec = sec, color.group = color.group, colors = colors)
+    plot_sankey_single(.ds, pri = pri, sec = sec, color.group = color.group, colors = colors,missing.level=missing.level)
   })
 
   patchwork::wrap_plots(out)
@@ -5797,14 +6007,21 @@ plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors 
 #' mtcars |>
 #'   default_parsing() |>
 #'   plot_sankey_single("cyl", "vs", color.group = "pri")
-plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), colors = NULL, ...) {
+#' stRoke::trial |>
+#'   default_parsing() |>
+#'   plot_sankey_single("diabetes", "hypertension")
+plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), colors = NULL,missing.level="Missing", ...) {
   color.group <- match.arg(color.group)
 
+  # browser()
   data_orig <- data
   data[c(pri, sec)] <- data[c(pri, sec)] |>
-    dplyr::mutate(dplyr::across(dplyr::where(is.factor), forcats::fct_drop))
+    dplyr::mutate(
+      # dplyr::across(dplyr::where(is.logical), as.factor),
+      dplyr::across(dplyr::where(is.factor), forcats::fct_drop)#,
+      # dplyr::across(dplyr::where(is.factor), \(.x){forcats::fct_na_value_to_level(.x,missing.level)})
+    )
 
-  # browser()
 
   data <- data |> sankey_ready(pri = pri, sec = sec, ...)
 
@@ -6090,6 +6307,8 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
       width = "100%"
     ),
     shiny::helpText(i18n$t("Format should be either 'https://redcap.your.institution/' or 'https://your.institution/redcap/'")),
+    shiny::br(),
+    shiny::br(),
     shiny::passwordInput(
       inputId = ns("api"),
       label = i18n$t("API token"),
@@ -8949,7 +9168,7 @@ ui_elements <- function(selection) {
             width = 9,
             shiny::tags$p(
               i18n$t("Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."),
-              i18n$t("There are more advanced options to modify factor/categorical variables as well as create new factor from a continous variable or new variables with R code. At the bottom you can restore the original data."),
+              i18n$t("There are more advanced options to modify factor/categorical variables as well as create new factor from an existing variable or new variables with R code. At the bottom you can restore the original data."),
               i18n$t("Please note that data modifications are applied before any filtering.")
             )
           )

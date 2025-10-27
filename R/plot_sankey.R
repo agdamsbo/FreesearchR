@@ -126,7 +126,7 @@ plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors 
 plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), colors = NULL,missing.level="Missing", ...) {
   color.group <- match.arg(color.group)
 
-  browser()
+  # browser()
   data_orig <- data
   data[c(pri, sec)] <- data[c(pri, sec)] |>
     dplyr::mutate(

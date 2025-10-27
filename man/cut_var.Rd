@@ -75,4 +75,9 @@ mtcars$carb |>
   as.factor() |>
   cut_var(2) |>
   table()
+
+mtcars$carb |>
+  as.factor() |>
+  cut_var(20, "bottom") |>
+  table()
 }
