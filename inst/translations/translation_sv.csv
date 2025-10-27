@@ -1,4 +1,4 @@
-"en","se"
+"en","sv"
 "Hello","Hei"
 "The following variable pairs are highly correlated: {sentence_paste(.x,and_str)}.\nConsider excluding one {more}from the dataset to ensure variables are independent.","The following variable pairs are highly correlated: {sentence_paste(.x,and_str)}.\nConsider excluding one {more}from the dataset to ensure variables are independent."
 "No variables have a correlation measure above the threshold.","No variables have a correlation measure above the threshold."
