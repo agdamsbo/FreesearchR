@@ -167,6 +167,11 @@ cut_var.Date <- function(x, breaks = NULL, start.on.monday = TRUE, ...) {
 #'   as.factor() |>
 #'   cut_var(2) |>
 #'   table()
+#'
+#' mtcars$carb |>
+#'   as.factor() |>
+#'   cut_var(20, "bottom") |>
+#'   table()
 cut_var.factor <- function(x, breaks = NULL, type = c("top", "bottom"), other = "Other", ...) {
   args <- list(...)
 
@@ -176,10 +181,12 @@ cut_var.factor <- function(x, breaks = NULL, type = c("top", "bottom"), other = 
 
   type <- match.arg(type)
 
+  tbl <- sort(table(x), decreasing = TRUE)
+
   if (type == "top") {
-    lvls <- names(sort(table(x), decreasing = TRUE)[seq_len(breaks)])
+    lvls <- names(tbl[seq_len(breaks)])
   } else if (type == "bottom") {
-    lvls <- names(sort(table(x), decreasing = FALSE)[seq_len(breaks)])
+    lvls <- names(tbl)[!tbl / NROW(x) * 100 < breaks]
   }
 
   if (other %in% lvls) {
@@ -193,7 +200,7 @@ cut_var.factor <- function(x, breaks = NULL, type = c("top", "bottom"), other = 
       ifelse(.x %in% lvls, .x, other)
     }
   ) |>
-    forcats::fct_relevel(lvls,other)
+    forcats::fct_relevel(lvls, other)
 
   attr(out, which = "brks") <- breaks
   out

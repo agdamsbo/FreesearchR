@@ -21,13 +21,13 @@ cut_variable_ui <- function(id) {
     shiny::fluidRow(
       column(
         width = 3,
-        # shiny::uiOutput(outputId = ns("variable"))
-        shinyWidgets::virtualSelectInput(
-          inputId = ns("variable"),
-          label = i18n$t("Variable to cut:"),
-          choices = NULL,
-          width = "100%"
-        )
+        shiny::uiOutput(outputId = ns("variable"))
+        # shinyWidgets::virtualSelectInput(
+        #   inputId = ns("variable"),
+        #   label = i18n$t("Variable to cut:"),
+        #   choices = NULL,
+        #   width = "100%"
+        # )
       ),
       column(
         width = 3,
@@ -46,15 +46,19 @@ cut_variable_ui <- function(id) {
       ),
       column(
         width = 3,
-        checkboxInput(
-          inputId = ns("right"),
-          label = i18n$t("Close intervals on the right"),
-          value = TRUE
-        ),
-        checkboxInput(
-          inputId = ns("include_lowest"),
-          label = i18n$t("Include lowest value"),
-          value = TRUE
+        shiny::conditionalPanel(
+          condition = "input.method != 'top' && input.method != 'bottom'",
+          ns = ns,
+          checkboxInput(
+            inputId = ns("right"),
+            label = i18n$t("Close intervals on the right"),
+            value = TRUE
+          ),
+          checkboxInput(
+            inputId = ns("include_lowest"),
+            label = i18n$t("Include lowest value"),
+            value = TRUE
+          )
         )
       )
     ),
@@ -91,6 +95,8 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
     function(input, output, session) {
       rv <- reactiveValues(data = NULL, new_var_name = NULL)
 
+      ns <- session$ns
+
       bindEvent(observe({
         data <- data_r()
         rv$data <- data
@@ -99,21 +105,22 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         }, logical(1))
         vars_num <- names(vars_num)[vars_num]
 
-        # shiny::renderUI(
-        # columnSelectInput(
+        output$variable <- shiny::renderUI(
+          columnSelectInput(
+            inputId = ns("variable"),
+            data = data,
+            label = i18n$t("Variable to cut:"),
+            width = "100%",
+            col_subset = vars_num,
+            selected = if (isTruthy(input$variable)) input$variable else vars_num[1]
+          )
+        )
+
+        # shinyWidgets::updateVirtualSelect(
         #   inputId = "variable",
-        #   data = data,
-        #   label = i18n$t("Variable to cut:"),
-        #   width = "100%",
         #   choices = vars_num,
         #   selected = if (isTruthy(input$variable)) input$variable else vars_num[1]
-        # ))
-
-        shinyWidgets::updateVirtualSelect(
-          inputId = "variable",
-          choices = vars_num,
-          selected = if (isTruthy(input$variable)) input$variable else vars_num[1]
-        )
+        # )
       }), data_r(), input$hidden)
 
       output$slider_fixed <- renderUI({
@@ -183,8 +190,8 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         } else if ("factor" %in% class(data[[variable]])) {
           choices <- c(
             choices,
-            "top" # ,
-            # "bottom",
+            "top",
+            "bottom"
           )
         } else {
           choices <- c(
@@ -207,13 +214,28 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
 
         choices <- unique(choices)
 
-        shinyWidgets::virtualSelectInput(
-          inputId = session$ns("method"),
+        ## Implement labeled vector selection of cut methods to include descriptions
+        ##
+        ## cut_methods()
+        ##
+
+
+
+        vectorSelectInput(
+          inputId = ns("method"),
           label = i18n$t("Method:"),
-          choices = choices,
+          choices = names2val(get_list_elements(choices, "descr", dict = cut_methods())),
           selected = NULL,
           width = "100%"
         )
+
+        # shinyWidgets::virtualSelectInput(
+        #   inputId = session$ns("method"),
+        #   label = i18n$t("Method:"),
+        #   choices = choices,
+        #   selected = NULL,
+        #   width = "100%"
+        # )
       })
 
 
@@ -326,7 +348,13 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         )
 
         if ("type" %in% names(breaks_r())) {
-          parameters <- modifyList(parameters, list(type = breaks_r()$type))
+          parameters <- modifyList(
+            parameters,
+            list(
+              type = breaks_r()$type,
+              other = i18n$t("Other")
+            )
+          )
         }
 
         new_variable <- tryCatch(
@@ -445,4 +473,106 @@ plot_histogram <- function(data, column = NULL, bins = 30, breaks = NULL, color 
   axis(side = 2, at = pretty(hist(x, breaks = bins, plot = FALSE)$counts), pos = min(pretty(x)))
   abline(v = breaks, col = "#FFFFFF", lty = 1, lwd = 1.5)
   abline(v = breaks, col = "#2E2E2E", lty = 2, lwd = 1.5)
+}
+
+
+#### Helpers
+####
+####
+
+#' Library of cut methods with descriptions
+#'
+#' @returns vector
+#' @export
+#'
+cut_methods <- function() {
+  list(
+    "hour" = list(
+      descr = i18n$t("Hour of the day"),
+      # class = c("hms", "POSIXct"), # Not implemented yet, but will during rewrite at some point...
+      breaks = i18n$t("Breaks")
+    ),
+    "day" = list(
+      descr = i18n$t("By day of the week"),
+      breaks = i18n$t("Breaks")
+    ),
+    "weekday" = list(
+      descr = i18n$t("By weekday"),
+      breaks = i18n$t("Breaks")
+    ),
+    "week" = list(
+      descr = i18n$t("By week number and year"),
+      breaks = i18n$t("Breaks")
+    ),
+    "week_only" = list(
+      descr = i18n$t("By week number"),
+      breaks = i18n$t("Breaks")
+    ),
+    "month" = list(
+      descr = i18n$t("By month and year"),
+      breaks = i18n$t("Breaks")
+    ),
+    "month_only" = list(
+      descr = i18n$t("By month only"),
+      breaks = i18n$t("Breaks")
+    ),
+    "quarter" = list(
+      descr = i18n$t("By quarter of the year"),
+      breaks = i18n$t("Breaks")
+    ),
+    "year" = list(
+      descr = i18n$t("By year"),
+      breaks = i18n$t("Breaks")
+    ),
+    "top" = list(
+      descr = i18n$t("Keep only most common"),
+      breaks = i18n$t("Number")
+    ),
+    "bottom" = list(
+      descr = i18n$t("Combine below percentage"),
+      breaks = i18n$t("Percentage")
+    ),
+    "fixed" = list(
+      descr = i18n$t("By specified numbers"),
+      breaks = i18n$t("Breaks")
+    ),
+    "quantile" = list(
+      descr = i18n$t("By quantiles (groups of equal size)"),
+      breaks = i18n$t("Breaks")
+    )
+  )
+}
+
+#' Subset elements from list of lists
+#'
+#' @description
+#' General function to sub-setting details stored in list dictionaries.
+#'
+#'
+#' @param name list name to lookup
+#' @param element element to get
+#' @param dict dictionary to use
+#'
+#' @returns named vector
+#' @export
+#'
+#' @examples
+#' get_list_elements(c("top", "bottom"), "descr")
+get_list_elements <- function(name, element, dict = cut_methods()) {
+  sapply(dict[name], \(.x){
+    .x[[element]]
+  })
+}
+
+#' Set values as names and names as values
+#'
+#' @param data data
+#'
+#' @returns named vector
+#' @export
+#'
+#' @examples
+#' names2val(c("Cylinders" = "cyl", "Transmission" = "am", "Gears" = "gear"))
+names2val <- function(data) {
+  setNames(names(data), data)
 }
