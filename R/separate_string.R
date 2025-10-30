@@ -2,6 +2,7 @@ string_split_ui <- function(id) {
   ns <- NS(id)
   tagList(
     shiny::fluidRow(
+      # shiny::textOutput(outputId = ns("no_splits")),
       column(
         width = 4,
         shiny::uiOutput(outputId = ns("variable"))
@@ -13,7 +14,7 @@ string_split_ui <- function(id) {
       column(
         width = 4,
         shiny::uiOutput(outputId = ns("direction"))
-      )#,
+      ) # ,
       # column(
       #   width = 3,
       #   actionButton(
@@ -28,8 +29,10 @@ string_split_ui <- function(id) {
         width = 3,
         shiny::h4(i18n$t("Original data")),
         shiny::tableOutput(outputId = ns("orig_data"))
+        # This doesn't render...
+        # toastui::datagridOutput2(outputId = ns("orig_data_2"))
       ),
-      column(width=1),
+      column(width = 1),
       column(
         width = 8,
         shiny::h4(i18n$t("Preview of result")),
@@ -38,7 +41,7 @@ string_split_ui <- function(id) {
     ),
     actionButton(
       inputId = ns("create"),
-      label = tagList(phosphoricons::ph("pencil"), i18n$t("Save new data")),
+      label = tagList(phosphoricons::ph("pencil"), i18n$t("Apply split")),
       class = "btn-outline-primary float-end"
     ),
     tags$div(class = "clearfix")
@@ -51,16 +54,29 @@ string_split_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
     id,
     function(input, output, session) {
-      rv <- reactiveValues(data = NULL, temp = NULL, out = NULL)
+      rv <- reactiveValues(data = NULL, temp = NULL, out=NULL)
 
       ns <- session$ns
 
-      bindEvent(observe({
+      # output$no_splits <- shiny::renderText({
+      #   req({
+      #     data_r()
+      #   })
+      #
+      #   if (any(is_splittable(data_r()))) {
+      #     i18n$t("No character variables with accepted delimiters detected.")
+      #   }
+      # })
+
+      shiny::observe({
+        req(data_r())
+
+        # if (any(is_splittable(data_r()))) {
         data <- data_r()
         rv$data <- data
-        # browser()
+
         vars_num <- vapply(data, \(.x){
-          is.character(.x)
+          is_splittable(.x)
         }, logical(1))
         vars_num <- names(vars_num)[vars_num]
 
@@ -74,19 +90,23 @@ string_split_server <- function(id, data_r = reactive(NULL)) {
             selected = if (isTruthy(input$variable)) input$variable else vars_num[1]
           )
         )
-
+        # }
         # shinyWidgets::updateVirtualSelect(
         #   inputId = "variable",
         #   choices = vars_num,
         #   selected = if (isTruthy(input$variable)) input$variable else vars_num[1]
         # )
-      }), data_r(), input$hidden)
+      })
 
       output$delim <- shiny::renderUI({
         req(rv$data)
         req(input$variable)
         # browser()
 
+        # req({
+        #   any(apply(data_r(),2,is_splittable))
+        # })
+        # if (any(is_splittable(data_r()))) {
         data <- rv$data |>
           dplyr::select(tidyselect::all_of(input$variable))
 
@@ -98,12 +118,18 @@ string_split_server <- function(id, data_r = reactive(NULL)) {
           choices = setNames(
             delimiters,
             glue::glue("'{delimiters}'")
-          ),selected = 1
+          ), selected = 1
         )
+        # }
       })
 
 
       output$direction <- shiny::renderUI({
+        # req({
+        #   rv$data
+        # })
+
+        # if (any(is_splittable(data_r()))) {
         vectorSelectInput(
           inputId = ns("direction"),
           label = i18n$t("Direction:"),
@@ -120,6 +146,7 @@ string_split_server <- function(id, data_r = reactive(NULL)) {
           selected = "wide",
           width = "100%"
         )
+        # }
       })
 
       observeEvent(
@@ -146,9 +173,9 @@ string_split_server <- function(id, data_r = reactive(NULL)) {
         }
       )
 
-      shiny::observeEvent(input$split, {
-        show_data(rv$temp, title = i18n$t("Browse data preview"), type = "modal")
-      })
+      # shiny::observeEvent(input$split, {
+      #   show_data(rv$temp, title = i18n$t("Browse data preview"), type = "modal")
+      # })
 
       ## Toastui would not render the original data, so the solution was to go
       ## with native table rendering, which works, but doesn't please the eye
@@ -156,11 +183,22 @@ string_split_server <- function(id, data_r = reactive(NULL)) {
       output$orig_data <- shiny::renderTable({
         req(data_r())
         req(input$variable)
-        data <- data_r()|>
+        data <- data_r() |>
           dplyr::select(tidyselect::all_of(input$variable))
         # browser()
-        head(data , 10)
+        head(data, 10)
       })
+
+      # output$orig_data_2 <- toastui::renderDatagrid2({
+      #   req(data_r())
+      #   req(input$variable)
+      #   data <- data_r() |>
+      #     dplyr::select(tidyselect::all_of(input$variable))
+      #   # browser()
+      #   toastui::datagrid(head(data, 10))
+      # })
+
+
 
       output$new_data <- shiny::renderTable({
         shiny::req(rv$temp)
@@ -179,19 +217,40 @@ string_split_server <- function(id, data_r = reactive(NULL)) {
 
         data <- rv$data
 
-        separate_string(
-          data = data,
+        parameters <- list(
           col = input$variable,
           delim = input$delim,
           direction = input$direction
         )
-      })
+
+        out <- tryCatch({
+          rlang::exec(separate_string, !!!modifyList(
+            parameters,
+            list(
+              data = data
+            )
+          ))
+        })
+        # browser()
+
+        # separate_string(
+        #   data = data,
+        #
+        # )
+
+        code <- rlang::call2(
+          "separate_string",
+          !!!parameters,
+          .ns = "FreesearchR"
+        )
+        attr(out, "code") <- code
+      out})
 
       data_returned_r <- observeEvent(input$create, {
-        rv$data <- data_split_r()
+        rv$out <- data_split_r()
       })
 
-      return(reactive(rv$data))
+      return(reactive(rv$out))
     }
   )
 }
@@ -273,7 +332,7 @@ separate_string <- function(data, col, delim, direction = c("wide", "long")) {
 #'
 #' @examples
 #' sapply(c("Walk - run", "Sel__Re", "what;now"), detect_delimiter)
-detect_delimiter <- function(data, delimiters = c("_", "-", ";", "\n",",")) {
+detect_delimiter <- function(data, delimiters = c("_", "-", ";", "\n", ",")) {
   # Create patterns for each delimiter with potential surrounding whitespace
   patterns <- paste0("\\s*\\", delimiters, "+\\s*")
 
@@ -286,4 +345,31 @@ detect_delimiter <- function(data, delimiters = c("_", "-", ";", "\n",",")) {
   })
 
   Reduce(c, out)
+}
+
+
+#' Determine if any variable in data frame character and contains recognized delimiters
+#'
+#' @param data vector or data.frame
+#'
+#' @returns logical
+#' @export
+#'
+#' @examples
+#' any(apply(mtcars, 2, is_splittable))
+#' is_splittable(mtcars)
+is_splittable <- function(data) {
+  if (is.data.frame(data)) {
+    return(apply(data, 2, is_splittable))
+  }
+
+  if (is.character(data)) {
+    if (length(Reduce(c, unique(sapply(data, detect_delimiter)))) > 0) {
+      TRUE
+    } else {
+      FALSE
+    }
+  } else {
+    FALSE
+  }
 }

@@ -299,7 +299,7 @@ ui_elements <- function(selection) {
               width = "100%"
             ),
             shiny::tags$br(),
-            shiny::helpText(i18n$t("Split a text column by a custom delimiter.")),
+            shiny::helpText(i18n$t("Split a text column by a recognised delimiter.")),
             shiny::tags$br(),
             shiny::tags$br()
           ),
