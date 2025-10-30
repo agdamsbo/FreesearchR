@@ -8,7 +8,7 @@ message: 'To cite package "FreesearchR" in publications use:'
 type: software
 license: AGPL-3.0-or-later
 title: 'FreesearchR: Easy data analysis for clinicians'
-version: 25.10.4
+version: 25.10.5
 doi: 10.5281/zenodo.14527429
 identifiers:
 - type: url

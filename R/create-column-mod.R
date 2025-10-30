@@ -29,35 +29,6 @@ create_column_ui <- function(id) {
    shiny::tags$head(
     shiny::tags$link(rel = "stylesheet", type = "text/css", href = "FreesearchR/inst/assets/css/FreesearchR.css")
   ),
-    # tags$head(
-    #   # Note the wrapping of the string in HTML()
-    #   tags$style(HTML("
-    #   /* modified from esquisse for data types */
-    #   .btn-column-categorical {
-    #     background-color: #EF562D;
-    #     color: #FFFFFF;
-    #   }
-    #   .btn-column-continuous {
-    #     background-color: #0C4C8A;
-    #     color: #FFFFFF;
-    #   }
-    #   .btn-column-dichotomous {
-    #     background-color: #97D5E0;
-    #     color: #FFFFFF;
-    #   }
-    #   .btn-column-datetime {
-    #     background-color: #97D5E0;
-    #     color: #FFFFFF;
-    #   }
-    #   .btn-column-id {
-    #     background-color: #848484;
-    #     color: #FFFFFF;
-    #   }
-    #   .btn-column-text {
-    #     background-color: #2E2E2E;
-    #     color: #FFFFFF;
-    #   }"))
-    # ),
     fluidRow(
       column(
         width = 6,

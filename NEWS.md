@@ -1,3 +1,7 @@
+# FreesearchR 25.10.5
+
+*NEW* New character/text split function available. A selection of delimiters are recognised and selectable. Function only available if splittable variables are present. This was the last big function to implement after workshops at Jitimai in Zanzibar.
+
 # FreesearchR 25.10.4
 
 *NEW* Two new options to create new simplified factors from factors. The "top" option will keep only the top N levels, while the "bottom" option will combine all levels occurring below set percentage.
