@@ -99,7 +99,7 @@ ui_elements <- function(selection) {
             import_globalenv_ui(
               id = "env",
               title = NULL,
-              packages = c("NHANES", "stRoke", "datasets")
+              packages = c("NHANES", "stRoke", "datasets", "MASS")
             )
           ),
           # shiny::conditionalPanel(
@@ -268,7 +268,7 @@ ui_elements <- function(selection) {
         shiny::tags$br(),
         shiny::fluidRow(
           shiny::column(
-            width = 4,
+            width = 3,
             shiny::actionButton(
               inputId = "modal_update",
               label = i18n$t("Reorder factor levels"),
@@ -280,7 +280,7 @@ ui_elements <- function(selection) {
             shiny::tags$br()
           ),
           shiny::column(
-            width = 4,
+            width = 3,
             shiny::actionButton(
               inputId = "modal_cut",
               label = i18n$t("New factor"),
@@ -292,7 +292,19 @@ ui_elements <- function(selection) {
             shiny::tags$br()
           ),
           shiny::column(
-            width = 4,
+            width = 3,
+            shiny::actionButton(
+              inputId = "modal_string",
+              label = i18n$t("Split text"),
+              width = "100%"
+            ),
+            shiny::tags$br(),
+            shiny::helpText(i18n$t("Split a text column by a custom delimiter.")),
+            shiny::tags$br(),
+            shiny::tags$br()
+          ),
+          shiny::column(
+            width = 3,
             shiny::actionButton(
               inputId = "modal_column",
               label = i18n$t("New variable"),
