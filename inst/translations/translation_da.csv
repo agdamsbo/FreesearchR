@@ -275,7 +275,6 @@
 "Split the variable","Split the variable"
 "Original data","Original data"
 "Preview of result","Preview of result"
-"Save new data","Save new data"
 "No character variables with accepted delimiters detected.","No character variables with accepted delimiters detected."
 "Variable to split:","Variable to split:"
 "Text or character to split string by","Text or character to split string by"
@@ -288,3 +287,4 @@
 "Split text","Split text"
 "Split a text column by a recognised delimiter.","Split a text column by a recognised delimiter."
 "Split a character string by a common delimiter","Split a character string by a common delimiter"
+"Apply split","Apply split"

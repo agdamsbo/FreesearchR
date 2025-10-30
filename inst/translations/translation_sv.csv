@@ -274,7 +274,6 @@
 "There are more advanced options to modify factor/categorical variables as well as create new factor from an existing variable or new variables with R code. At the bottom you can restore the original data.","There are more advanced options to modify factor/categorical variables as well as create new factor from an existing variable or new variables with R code. At the bottom you can restore the original data."
 "Text or character to split string by","Text or character to split string by"
 "Split the variable","Split the variable"
-"Save new data","Save new data"
 "Variable to split:","Variable to split:"
 "Direction:","Direction:"
 "Split string to multiple columns. Keep number of rows.","Split string to multiple columns. Keep number of rows."
@@ -288,3 +287,4 @@
 "Preview of result","Preview of result"
 "No character variables with accepted delimiters detected.","No character variables with accepted delimiters detected."
 "Split a text column by a recognised delimiter.","Split a text column by a recognised delimiter."
+"Apply split","Apply split"
