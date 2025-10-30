@@ -214,13 +214,6 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
 
         choices <- unique(choices)
 
-        ## Implement labeled vector selection of cut methods to include descriptions
-        ##
-        ## cut_methods()
-        ##
-
-
-
         vectorSelectInput(
           inputId = ns("method"),
           label = i18n$t("Method:"),
@@ -388,6 +381,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         # shiny::req(rv$new_var_name)
         data <- req(data_cutted_r())
         # variable <- req(input$variable)
+
         count_data <- as.data.frame(
           table(
             breaks = data[[length(data)]],
@@ -395,6 +389,8 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           ),
           responseName = "count"
         )
+        count_data$freq <- paste(signif(count_data$count/nrow(data)*100,3),"%")
+        # browser()
         gridTheme <- getOption("datagrid.theme")
         if (length(gridTheme) < 1) {
           datamods:::apply_grid_theme()
