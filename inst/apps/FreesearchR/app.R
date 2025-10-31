@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//Rtmp5UwPqh/filef21e56757ae4.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpigVRui/file787d74b713ef.R 
 ########
 
 i18n_path <- system.file("translations", package = "FreesearchR")
@@ -62,7 +62,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.10.4'
+app_version <- function()'25.10.5'
 
 
 ########
@@ -424,35 +424,6 @@ create_column_ui <- function(id) {
    shiny::tags$head(
     shiny::tags$link(rel = "stylesheet", type = "text/css", href = "FreesearchR/inst/assets/css/FreesearchR.css")
   ),
-    # tags$head(
-    #   # Note the wrapping of the string in HTML()
-    #   tags$style(HTML("
-    #   /* modified from esquisse for data types */
-    #   .btn-column-categorical {
-    #     background-color: #EF562D;
-    #     color: #FFFFFF;
-    #   }
-    #   .btn-column-continuous {
-    #     background-color: #0C4C8A;
-    #     color: #FFFFFF;
-    #   }
-    #   .btn-column-dichotomous {
-    #     background-color: #97D5E0;
-    #     color: #FFFFFF;
-    #   }
-    #   .btn-column-datetime {
-    #     background-color: #97D5E0;
-    #     color: #FFFFFF;
-    #   }
-    #   .btn-column-id {
-    #     background-color: #848484;
-    #     color: #FFFFFF;
-    #   }
-    #   .btn-column-text {
-    #     background-color: #2E2E2E;
-    #     color: #FFFFFF;
-    #   }"))
-    # ),
     fluidRow(
       column(
         width = 6,
@@ -1216,9 +1187,16 @@ cut_var.factor <- function(x, breaks = NULL, type = c("top", "bottom"), other = 
   tbl <- sort(table(x), decreasing = TRUE)
 
   if (type == "top") {
+    if (length(levels(x)) <= breaks){
+      return(x)
+    }
     lvls <- names(tbl[seq_len(breaks)])
   } else if (type == "bottom") {
-    lvls <- names(tbl)[!tbl / NROW(x) * 100 < breaks]
+    freqs_check <- tbl / NROW(x) * 100 < breaks
+    if (!any(freqs_check)){
+      return(x)
+    }
+    lvls <- names(tbl)[!freqs_check]
   }
 
   if (other %in% lvls) {
@@ -1312,14 +1290,7 @@ cut_variable_ui <- function(id) {
       ),
       column(
         width = 3,
-        numericInput(
-          inputId = ns("n_breaks"),
-          label = i18n$t("Number of breaks:"),
-          value = 3,
-          min = 2,
-          max = 12,
-          width = "100%"
-        )
+        shiny::uiOutput(ns("n_breaks"))
       ),
       column(
         width = 3,
@@ -1400,8 +1371,38 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         # )
       }), data_r(), input$hidden)
 
+      output$n_breaks <- shiny::renderUI({
+        req(input$method)
+          # req(!is.null(get_list_elements(name = input$cut_method,element = "breaks")))
+          # browser()
+
+          break_text <- get_list_elements(name = input$method, element = "breaks")
+
+          if (is.null(get_list_elements(name = input$method, element = "min"))) {
+            min <- 2
+          } else {
+            min <- get_list_elements(name = input$method, element = "min")
+          }
+
+          if (is.null(get_list_elements(name = input$method, element = "max"))) {
+            max <- 10
+          } else {
+            max <- get_list_elements(name = input$method, element = "max")
+          }
+
+          numericInput(
+            inputId = ns("n_breaks"),
+            label = break_text,
+            value = 3,
+            min = min,
+            max = max,
+            width = "100%"
+          )
+        })
+
       output$slider_fixed <- renderUI({
         data <- req(data_r())
+        req(input$n_breaks)
         variable <- req(input$variable)
         req(hasName(data, variable))
 
@@ -1491,13 +1492,6 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
 
         choices <- unique(choices)
 
-        ## Implement labeled vector selection of cut methods to include descriptions
-        ##
-        ## cut_methods()
-        ##
-
-
-
         vectorSelectInput(
           inputId = ns("method"),
           label = i18n$t("Method:"),
@@ -1505,14 +1499,6 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           selected = NULL,
           width = "100%"
         )
-
-        # shinyWidgets::virtualSelectInput(
-        #   inputId = session$ns("method"),
-        #   label = i18n$t("Method:"),
-        #   choices = choices,
-        #   selected = NULL,
-        #   width = "100%"
-        # )
       })
 
 
@@ -1665,6 +1651,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         # shiny::req(rv$new_var_name)
         data <- req(data_cutted_r())
         # variable <- req(input$variable)
+
         count_data <- as.data.frame(
           table(
             breaks = data[[length(data)]],
@@ -1672,6 +1659,8 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           ),
           responseName = "count"
         )
+        count_data$freq <- paste(signif(count_data$count / nrow(data) * 100, 3), "%")
+        # browser()
         gridTheme <- getOption("datagrid.theme")
         if (length(gridTheme) < 1) {
           datamods:::apply_grid_theme()
@@ -1679,7 +1668,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         on.exit(toastui::reset_grid_theme())
         grid <- toastui::datagrid(
           data = count_data,
-          colwidths = "guess",
+          colwidths = "fit",
           theme = "default",
           bodyHeight = "auto"
         )
@@ -1767,55 +1756,63 @@ cut_methods <- function() {
     "hour" = list(
       descr = i18n$t("Hour of the day"),
       # class = c("hms", "POSIXct"), # Not implemented yet, but will during rewrite at some point...
-      breaks = i18n$t("Breaks")
+      breaks = NULL
     ),
     "day" = list(
       descr = i18n$t("By day of the week"),
-      breaks = i18n$t("Breaks")
+      breaks = NULL
     ),
     "weekday" = list(
       descr = i18n$t("By weekday"),
-      breaks = i18n$t("Breaks")
+      breaks = NULL
     ),
     "week" = list(
       descr = i18n$t("By week number and year"),
-      breaks = i18n$t("Breaks")
+      breaks = NULL
     ),
     "week_only" = list(
       descr = i18n$t("By week number"),
-      breaks = i18n$t("Breaks")
+      breaks = NULL
     ),
     "month" = list(
       descr = i18n$t("By month and year"),
-      breaks = i18n$t("Breaks")
+      breaks = NULL
     ),
     "month_only" = list(
       descr = i18n$t("By month only"),
-      breaks = i18n$t("Breaks")
+      breaks = NULL
     ),
     "quarter" = list(
       descr = i18n$t("By quarter of the year"),
-      breaks = i18n$t("Breaks")
+      breaks = NULL
     ),
     "year" = list(
       descr = i18n$t("By year"),
-      breaks = i18n$t("Breaks")
+      breaks = NULL
     ),
     "top" = list(
       descr = i18n$t("Keep only most common"),
-      breaks = i18n$t("Number")
+      breaks = i18n$t("Number"),
+      min = 1,
+      max = 20
     ),
     "bottom" = list(
       descr = i18n$t("Combine below percentage"),
-      breaks = i18n$t("Percentage")
+      breaks = i18n$t("Percentage"),
+      min = 1,
+      max = 50
     ),
     "fixed" = list(
       descr = i18n$t("By specified numbers"),
-      breaks = i18n$t("Breaks")
+      breaks = i18n$t("Breaks"),
+      min = 2,
+      max = 12
     ),
     "quantile" = list(
       descr = i18n$t("By quantiles (groups of equal size)"),
-      breaks = i18n$t("Breaks")
+      breaks = i18n$t("Breaks"),
+      min = 2,
+      max = 10
     )
   )
 }
@@ -1836,9 +1833,13 @@ cut_methods <- function() {
 #' @examples
 #' get_list_elements(c("top", "bottom"), "descr")
 get_list_elements <- function(name, element, dict = cut_methods()) {
-  sapply(dict[name], \(.x){
-    .x[[element]]
-  })
+  if (is.null(name)) {
+    return(NULL)
+  } else {
+    sapply(dict[name], \(.x){
+      .x[[element]]
+    })
+  }
 }
 
 #' Set values as names and names as values
@@ -2204,6 +2205,12 @@ data_visuals_server <- function(id,
                   ter = input$tertiary
                 )
 
+                ## If the dictionary holds additional arguments to pass to the
+                ## plotting function, these are included
+                if (!is.null(rv$plot.params()[["fun.args"]])){
+                  parameters <- modifyList(parameters,rv$plot.params()[["fun.args"]])
+                }
+
                 shiny::withProgress(message = i18n$t("Drawing the plot. Hold tight for a moment.."), {
                   rv$plot <- rlang::exec(
                     create_plot,
@@ -2353,6 +2360,28 @@ subset_types <- function(data, types, type.fun = data_type) {
 #' supported_plots() |> str()
 supported_plots <- function() {
   list(
+    plot_bar_rel = list(
+      fun = "plot_bar",
+      fun.args =list(style="fill"),
+      descr = i18n$t("Stacked relative barplot"),
+      note = i18n$t("Create relative stacked barplots to show the distribution of categorical levels"),
+      primary.type = c("dichotomous", "categorical"),
+      secondary.type = c("dichotomous", "categorical"),
+      secondary.multi = FALSE,
+      tertiary.type = c("dichotomous", "categorical"),
+      secondary.extra = NULL
+    ),
+    plot_bar_abs = list(
+      fun = "plot_bar",
+      fun.args =list(style="dodge"),
+      descr = i18n$t("Side-by-side barplot"),
+      note = i18n$t("Create side-by-side barplot to show the distribution of categorical levels"),
+      primary.type = c("dichotomous", "categorical"),
+      secondary.type = c("dichotomous", "categorical"),
+      secondary.multi = FALSE,
+      tertiary.type = c("dichotomous", "categorical"),
+      secondary.extra = "none"
+    ),
     plot_hbars = list(
       fun = "plot_hbars",
       descr = i18n$t("Stacked horizontal bars"),
@@ -2367,7 +2396,7 @@ supported_plots <- function() {
       fun = "plot_violin",
       descr = i18n$t("Violin plot"),
       note = i18n$t("A modern alternative to the classic boxplot to visualise data distribution"),
-      primary.type = c("datatime", "continuous", "dichotomous", "categorical"),
+      primary.type = c("datatime", "continuous"),
       secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
       secondary.extra = "none",
@@ -2405,7 +2434,7 @@ supported_plots <- function() {
       fun = "plot_box",
       descr = i18n$t("Box plot"),
       note = i18n$t("A classic way to plot data distribution by groups"),
-      primary.type = c("datatime", "continuous", "dichotomous", "categorical"),
+      primary.type = c("datatime", "continuous"),
       secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
       tertiary.type = c("dichotomous", "categorical"),
@@ -4245,7 +4274,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.10.4-251027'
+hosted_version <- function()'v25.10.5-251031'
 
 
 ########
@@ -5360,6 +5389,7 @@ data_missings_ui <- function(id) {
 data_missings_server <- function(id,
                                  data,
                                  variable,
+                                 max_level=20,
                                  ...) {
   shiny::moduleServer(
     id = id,
@@ -5380,7 +5410,7 @@ data_missings_server <- function(id,
 
         tryCatch(
           {
-            out <- compare_missings(df_tbl,by_var)
+            out <- compare_missings(df_tbl,by_var,max_level = max_level)
           },
           error = function(err) {
             showNotification(paste0("Error: ", err), type = "err")
@@ -5469,8 +5499,18 @@ missing_demo_app()
 #' @returns gtsummary list object
 #' @export
 #'
-compare_missings <- function(data,by_var){
+compare_missings <- function(data,by_var,max_level=20){
   if (!is.null(by_var) && by_var != "" && by_var %in% names(data)) {
+    data <- data |>
+      lapply(\(.x){
+        # browser()
+        if (is.factor(.x)){
+          cut_var(.x,breaks=20,type="top")
+        } else {
+          .x
+        }
+      }) |> dplyr::bind_cols()
+
     data[[by_var]] <- ifelse(is.na(data[[by_var]]), "Missing", "Non-missing")
 
     out <- gtsummary::tbl_summary(data, by = by_var) |>
@@ -5479,6 +5519,137 @@ compare_missings <- function(data,by_var){
     out <- gtsummary::tbl_summary(data)
   }
   out
+}
+
+
+########
+#### Current file: /Users/au301842/FreesearchR/R//plot_bar.R 
+########
+
+plot_bar <- function(data, pri, sec, ter = NULL, style = c("stack", "dodge", "fill"), max_level = 30, ...) {
+  style <- match.arg(style)
+
+  if (!is.null(ter)) {
+    ds <- split(data, data[ter])
+  } else {
+    ds <- list(data)
+  }
+
+  out <- lapply(ds, \(.ds){
+    plot_bar_single(
+      data = .ds,
+      pri = pri,
+      sec = sec,
+      style = style,
+      max_level = max_level
+    )
+  })
+
+  wrap_plot_list(out, title = glue::glue(i18n$t("Grouped by {get_label(data,ter)}")), ...)
+}
+
+
+#' Single vertical barplot
+#'
+#' @param style barplot style passed to geom_bar position argument.
+#' One of c("stack", "dodge", "fill")
+#'
+#' @name data-plots
+#'
+#' @returns ggplot object
+#' @export
+#'
+#' @examples
+#' mtcars |>
+#'   dplyr::mutate(cyl = factor(cyl), am = factor(am)) |>
+#'   plot_bar_single(pri = "cyl", sec = "am", style = "fill")
+#'
+#' mtcars |>
+#'   dplyr::mutate(cyl = factor(cyl), am = factor(am)) |>
+#'   plot_bar_single(pri = "cyl", style = "stack")
+plot_bar_single <- function(data, pri, sec = NULL, style = c("stack", "dodge", "fill"), max_level = 30) {
+  style <- match.arg(style)
+
+  if (identical(sec, "none")) {
+    sec <- NULL
+  }
+
+  p_data <- as.data.frame(table(data[c(pri, sec)])) |>
+    dplyr::mutate(dplyr::across(tidyselect::any_of(c(pri, sec)), forcats::as_factor),
+      p = Freq / NROW(data)
+    )
+
+
+  if (nrow(p_data) > max_level) {
+    # browser()
+    p_data <- sort_by(
+      p_data,
+      p_data[["Freq"]],
+      decreasing = TRUE
+    ) |>
+      head(max_level)
+    # if (is.null(sec)){
+    #   p_data <- sort_by(
+    #     p_data,
+    #     p_data[["Freq"]],
+    #     decreasing=TRUE) |>
+    #     head(max_level)
+    # } else {
+    #   split(p_data,p_data[[sec]]) |>
+    #     lapply(\(.x){
+    #       # browser()
+    #     sort_by(
+    #       .x,
+    #       .x[["Freq"]],
+    #       decreasing=TRUE) |>
+    #       head(max_level)
+    #   }) |> dplyr::bind_rows()
+    # }
+  }
+
+  ## Shortens long level names
+  p_data[[pri]] <- forcats::as_factor(unique_short(as.character(p_data[[pri]]), max = 20))
+
+  if (!is.null(sec)) {
+    fill <- sec
+  } else {
+    fill <- pri
+  }
+
+  p <- ggplot2::ggplot(
+    p_data,
+    ggplot2::aes(
+      x = .data[[pri]],
+      y = p,
+      fill = .data[[fill]]
+    )
+  ) +
+    ggplot2::geom_bar(position = style, stat = "identity") +
+    ggplot2::scale_y_continuous(labels = scales::percent) +
+    ggplot2::ylab("Percentage") +
+    ggplot2::xlab(get_label(data,pri))+
+    ggplot2::guides(fill = ggplot2::guide_legend(title = get_label(data,fill)))
+
+  ## To handle large number of levels and long level names
+
+  if (nrow(p_data) > 10 | any(nchar(as.character(p_data[[pri]])) > 6)) {
+    p <- p +
+      # ggplot2::guides(fill = "none") +
+      ggplot2::theme(
+        axis.text.x = ggplot2::element_text(
+          angle = 90,
+          vjust = 1, hjust = 1
+        ))+
+      ggplot2::theme(
+        axis.text.x = ggplot2::element_text(vjust = 0.5)
+      )
+
+    if (is.null(sec)){
+      p <- p +
+        ggplot2::guides(fill = "none")
+    }
+  }
+  p
 }
 
 
@@ -5525,8 +5696,6 @@ plot_box <- function(data, pri, sec, ter = NULL,...) {
 
   wrap_plot_list(out,title=glue::glue(i18n$t("Grouped by {get_label(data,ter)}")),...)
 }
-
-
 
 
 #' Create nice box-plots
@@ -8745,6 +8914,462 @@ modify_qmd <- function(file, format) {
 
 
 ########
+#### Current file: /Users/au301842/FreesearchR/R//separate_string.R 
+########
+
+#' String split module based on tidyr::separate_
+#'
+#' @param id id
+#'
+#' @returns A shiny ui module
+#' @export
+#'
+#' @name split-string
+#'
+string_split_ui <- function(id) {
+  ns <- NS(id)
+  tagList(
+    shiny::fluidRow(
+      # shiny::textOutput(outputId = ns("no_splits")),
+      column(
+        width = 4,
+        shiny::uiOutput(outputId = ns("variable"))
+      ),
+      column(
+        width = 4,
+        shiny::uiOutput(outputId = ns("delim"))
+      ),
+      column(
+        width = 4,
+        shiny::uiOutput(outputId = ns("direction"))
+      ) # ,
+      # column(
+      #   width = 3,
+      #   actionButton(
+      #     inputId = ns("split"),
+      #     label = tagList(phosphoricons::ph("scissors"), i18n$t("Split the variable")),
+      #     class = "btn-outline-primary float-end"
+      #   )
+      # )
+    ),
+    shiny::fluidRow(
+      column(
+        width = 4,
+        shiny::h4(i18n$t("Original data")),
+        toastui::datagridOutput2(outputId = ns("orig_data"))
+        # DT::DTOutput(outputId = ns("orig_data_3"))
+        # This doesn't render...
+        # toastui::datagridOutput2(outputId = ns("orig_data_2"))
+      ),
+      column(
+        width = 8,
+        shiny::h4(i18n$t("Preview of result")),
+        toastui::datagridOutput2(outputId = ns("new_data"))
+      )
+    ),
+    actionButton(
+      inputId = ns("create"),
+      label = tagList(phosphoricons::ph("pencil"), i18n$t("Apply split")),
+      class = "btn-outline-primary float-end"
+    ),
+    tags$div(class = "clearfix")
+  )
+}
+
+
+
+#' @param data_r reactive data
+#'
+#' @returns shiny module server
+#' @export
+#'
+#' @name split-string
+#'
+string_split_server <- function(id, data_r = reactive(NULL)) {
+  moduleServer(
+    id,
+    function(input, output, session) {
+      rv <- reactiveValues(data = NULL, target=NULL, temp = NULL, out=NULL)
+
+      ns <- session$ns
+
+      # output$no_splits <- shiny::renderText({
+      #   req({
+      #     data_r()
+      #   })
+      #
+      #   if (any(is_splittable(data_r()))) {
+      #     i18n$t("No character variables with accepted delimiters detected.")
+      #   }
+      # })
+
+      shiny::observe({
+        req(data_r())
+
+        # if (any(is_splittable(data_r()))) {
+        data <- data_r()
+        rv$data <- data
+
+        vars_num <- vapply(data, \(.x){
+          is_splittable(.x)
+        }, logical(1))
+        vars_num <- names(vars_num)[vars_num]
+
+        req(length(vars_num)>0)
+
+        output$variable <- shiny::renderUI(
+          columnSelectInput(
+            inputId = ns("variable"),
+            data = data,
+            label = i18n$t("Variable to split:"),
+            width = "100%",
+            col_subset = vars_num,
+            selected = if (isTruthy(input$variable)) input$variable else vars_num[1]
+          )
+        )
+        # }
+        # shinyWidgets::updateVirtualSelect(
+        #   inputId = "variable",
+        #   choices = vars_num,
+        #   selected = if (isTruthy(input$variable)) input$variable else vars_num[1]
+        # )
+      })
+
+      output$delim <- shiny::renderUI({
+        req(rv$data)
+        req(input$variable)
+        # browser()
+
+        req(input$variable %in% names(rv$data))
+        # req({
+        #   any(apply(data_r(),2,is_splittable))
+        # })
+        # if (any(is_splittable(data_r()))) {
+        data <- rv$data |>
+          dplyr::select(tidyselect::all_of(input$variable))
+
+        delimiters <- Reduce(c, unique(sapply(data[[1]], detect_delimiter)))
+
+        # shiny::textInput(inputId = ns("delim"), label = i18n$t("Text or character to split string by"))
+        shiny::selectInput(
+          inputId = ns("delim"), label = i18n$t("Select delimiter"),
+          choices = setNames(
+            delimiters,
+            glue::glue("'{delimiters}'")
+          ), selected = 1
+        )
+        # }
+      })
+
+
+      output$direction <- shiny::renderUI({
+        # req({
+        #   rv$data
+        # })
+
+        # if (any(is_splittable(data_r()))) {
+        vectorSelectInput(
+          inputId = ns("direction"),
+          label = i18n$t("Direction:"),
+          choices = setNames(
+            c(
+              "wide",
+              "long"
+            ),
+            c(
+              i18n$t("Split string to multiple columns. Keep number of rows."),
+              i18n$t("Split string to multiple observations (rows) in the same column. Also ads id and instance columns")
+            )
+          ),
+          selected = "wide",
+          width = "100%"
+        )
+        # }
+      })
+
+      observeEvent(
+        list(
+          input$variable,
+          input$delim,
+          input$direction
+        ),
+        {
+          req(rv$data)
+          req(input$variable)
+          req(input$delim)
+          req(input$direction)
+
+          data <- rv$data |>
+            dplyr::select(tidyselect::all_of(input$variable))
+          # browser()
+          rv$temp <- separate_string(
+            data = data,
+            col = input$variable,
+            delim = input$delim,
+            direction = input$direction
+          )
+        }
+      )
+
+      # shiny::observeEvent(input$split, {
+      #   show_data(rv$temp, title = i18n$t("Browse data preview"), type = "modal")
+      # })
+
+      ## Toastui would not render the original data, so the solution was to go
+      ## with native table rendering, which works, but doesn't please the eye
+
+      # output$orig_data <- shiny::renderTable({
+      #   req(data_r())
+      #   req(input$variable)
+      #   data <- data_r() |>
+      #     dplyr::select(tidyselect::all_of(input$variable))
+      #   # browser()
+      #   head(data, 10)
+      # })
+
+      output$orig_data <- toastui::renderDatagrid2({
+        req(data_r())
+        req(input$variable)
+
+        req(hasName(rv$data, input$variable))
+
+        data <- data_r() |>
+          dplyr::select(tidyselect::all_of(input$variable)) |>
+          head(30) |>
+          dplyr::mutate(row=dplyr::row_number()) |>
+          dplyr::select(row,tidyselect::everything())
+        # browser()
+        toastui::datagrid(
+          data = data,
+          rowHeight = 40,
+          colwidths = "guess",
+          theme = "default",
+          bodyHeight = "auto",
+          pagination = 10)
+      })
+
+      output$new_data <- toastui::renderDatagrid2({
+        shiny::req(rv$temp)
+        data <- rv$temp
+        toastui::datagrid(
+          data = head(data, 30),
+          rowHeight = 40,
+          colwidths = "guess",
+          theme = "default",
+          bodyHeight = "auto", pagination = 10
+        )
+      })
+
+      data_split_r <- reactive({
+        req(rv$temp)
+
+        data <- rv$data
+
+        parameters <- list(
+          col = input$variable,
+          delim = input$delim,
+          direction = input$direction
+        )
+
+        out <- tryCatch({
+          rlang::exec(separate_string, !!!modifyList(
+            parameters,
+            list(
+              data = data
+            )
+          ))
+        })
+        # browser()
+
+        # separate_string(
+        #   data = data,
+        #
+        # )
+
+        code <- rlang::call2(
+          "separate_string",
+          !!!parameters,
+          .ns = "FreesearchR"
+        )
+        attr(out, "code") <- code
+      out})
+
+      data_returned_r <- observeEvent(input$create, {
+        rv$out <- data_split_r()
+      })
+
+      return(reactive(rv$out))
+    }
+  )
+}
+
+
+#' @param title Modal title
+#' @param easyClose easyClose
+#' @param size size
+#' @param footer footer
+#'
+#' @returns shiny modal
+#' @export
+#'
+#' @name split-string
+modal_string_split <- function(id,
+                               title = i18n$t("Split character string"),
+                               easyClose = TRUE,
+                               size = "xl",
+                               footer = NULL) {
+  ns <- NS(id)
+  showModal(modalDialog(
+    title = tagList(title, datamods:::button_close_modal()),
+    string_split_ui(id),
+    tags$div(
+      style = "display: none;",
+      textInput(inputId = ns("hidden"), label = NULL, value = datamods:::genId())
+    ),
+    easyClose = easyClose,
+    size = size,
+    footer = footer
+  ))
+}
+
+
+### Helpers
+
+#' Separate string wide or long
+#'
+#' @param data data
+#' @param col column
+#' @param delim delimiter
+#' @param direction target direction
+#'
+#' @returns data.frame
+#' @export
+#'
+separate_string <- function(data, col, delim, direction = c("wide", "long")) {
+  direction <- match.arg(direction)
+
+  if (direction == "long") {
+    out <- data |>
+      dplyr::mutate(id_str_split = dplyr::row_number()) |>
+      dplyr::group_by_at("id_str_split") |>
+      tidyr::separate_longer_delim(cols = tidyselect::all_of(col), delim = delim) |>
+      dplyr::mutate(instance_str_split = dplyr::row_number()) |>
+      # add_instance(by="id")
+      dplyr::ungroup() |>
+      dplyr::mutate(dplyr::across(tidyselect::matches(col), trimws))
+  } else if (direction == "wide") {
+    ## Experiment of wide to long
+
+    out <- data |>
+      tidyr::separate_wider_delim(
+        cols = tidyselect::all_of(col),
+        delim = delim,
+        names_sep = "_",
+        too_few = "align_start"
+      ) |>
+      dplyr::mutate(dplyr::across(tidyselect::starts_with(col), trimws))
+  }
+
+  out
+}
+
+
+
+#' Detect delimiters in string based on allowed delimiters
+#'
+#' @description
+#' Accepts any repeat of delimiters and includes surrounding whitespace
+#'
+#'
+#' @param text character vector
+#' @param delimiters allowed delimiters
+#'
+#' @returns character vector
+#' @export
+#'
+#' @examples
+#' sapply(c("Walk - run", "Sel__Re", "what;now"), detect_delimiter)
+detect_delimiter <- function(data, delimiters = c("_", "-", ";", "\n", ",")) {
+  # Create patterns for each delimiter with potential surrounding whitespace
+  patterns <- paste0("\\s*\\", delimiters, "+\\s*")
+
+  # Check each pattern
+  out <- sapply(patterns, \(.x){
+    if (grepl(.x, data)) {
+      # Extract the actual matched delimiter with whitespace
+      regmatches(data, regexpr(.x, data))
+    }
+  })
+
+  Reduce(c, out)
+}
+
+
+#' Determine if any variable in data frame character and contains recognized delimiters
+#'
+#' @param data vector or data.frame
+#'
+#' @returns logical
+#' @export
+#'
+#' @examples
+#' any(apply(mtcars, 2, is_splittable))
+#' is_splittable(mtcars)
+is_splittable <- function(data) {
+  if (is.data.frame(data)) {
+    return(apply(data, 2, is_splittable))
+  }
+
+  if (is.character(data)) {
+    if (length(Reduce(c, unique(sapply(data, detect_delimiter)))) > 0) {
+      TRUE
+    } else {
+      FALSE
+    }
+  } else {
+    FALSE
+  }
+}
+
+# mtcars |> simple_dt()
+simple_dt <- function(data,...){
+  headerCallbackRemoveHeaderFooter <- c(
+    "function(thead, data, start, end, display){",
+    "  $('th', thead).css('display', 'none');",
+    "}"
+  )
+
+  DT::datatable(
+    data,
+    options = list(
+      dom = "t",
+      ordering = FALSE,
+      paging = FALSE,
+      searching = FALSE,
+      # headerCallback = DT::JS(headerCallbackRemoveHeaderFooter),
+      columnDefs = list(
+        list(
+          targets = 1,
+          render = DT::JS(
+            "function(data, type, row, meta) {",
+            "return type === 'display' && data.length > 10 ?",
+            "'<span title=\"' + data + '\">' + data.substr(0, 10) + '...</span>' : data;",
+            "}")))
+    ),
+    selection = 'none',
+    callback = DT::JS(
+      "$('table.dataTable.no-footer').css('border-bottom', 'none');"
+    ),
+    class = 'row-border',
+    escape = FALSE,
+    rownames = FALSE,
+    # width = 500,
+    filter = "none"
+  )
+}
+
+
+########
 #### Current file: /Users/au301842/FreesearchR/R//syntax_highlight.R 
 ########
 
@@ -9013,7 +9638,7 @@ ui_elements <- function(selection) {
             import_globalenv_ui(
               id = "env",
               title = NULL,
-              packages = c("NHANES", "stRoke", "datasets")
+              packages = c("NHANES", "stRoke", "datasets", "MASS")
             )
           ),
           # shiny::conditionalPanel(
@@ -9182,7 +9807,7 @@ ui_elements <- function(selection) {
         shiny::tags$br(),
         shiny::fluidRow(
           shiny::column(
-            width = 4,
+            width = 3,
             shiny::actionButton(
               inputId = "modal_update",
               label = i18n$t("Reorder factor levels"),
@@ -9194,7 +9819,7 @@ ui_elements <- function(selection) {
             shiny::tags$br()
           ),
           shiny::column(
-            width = 4,
+            width = 3,
             shiny::actionButton(
               inputId = "modal_cut",
               label = i18n$t("New factor"),
@@ -9206,7 +9831,19 @@ ui_elements <- function(selection) {
             shiny::tags$br()
           ),
           shiny::column(
-            width = 4,
+            width = 3,
+            shiny::actionButton(
+              inputId = "modal_string",
+              label = i18n$t("Split text"),
+              width = "100%"
+            ),
+            shiny::tags$br(),
+            shiny::helpText(i18n$t("Split a text column by a recognised delimiter.")),
+            shiny::tags$br(),
+            shiny::tags$br()
+          ),
+          shiny::column(
+            width = 3,
             shiny::actionButton(
               inputId = "modal_column",
               label = i18n$t("New variable"),
@@ -12031,7 +12668,7 @@ server <- function(input, output, session) {
   })
 
   ## Activating action buttons on data imported
-  shiny::observeEvent(rv$data_original, {
+  shiny::observeEvent(list(rv$data_original, rv$data), {
     if (is.null(rv$data_original) | NROW(rv$data_original) == 0) {
       shiny::updateActionButton(inputId = "act_start", disabled = TRUE)
       shiny::updateActionButton(inputId = "modal_browse", disabled = TRUE)
@@ -12050,6 +12687,16 @@ server <- function(input, output, session) {
       #                 target = "nav_visuals")
     }
   })
+
+  shiny::observeEvent(list(rv$data_original, rv$data), {
+    if (is.null(rv$data_original) | NROW(rv$data_original) == 0 | is.null(rv$data) | !any(is_splittable(rv$data))) {
+      shiny::updateActionButton(inputId = "modal_string", disabled = TRUE)
+    } else if (!is.null(rv$data) && any(is_splittable(rv$data))) {
+      shiny::updateActionButton(inputId = "modal_string", disabled = FALSE)
+    }
+  })
+
+
 
   ##############################################################################
   #########
@@ -12141,6 +12788,29 @@ server <- function(input, output, session) {
     rv$data <- data_modal_update()
     rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
   })
+
+  #########  Split string
+
+  shiny::observeEvent(
+    input$modal_string,
+    modal_string_split(
+      id = "modal_string",
+      title = i18n$t("Split a character string by a common delimiter")
+    )
+  )
+
+  data_modal_string <- string_split_server(
+    id = "modal_string",
+    data_r = reactive(rv$data)
+  )
+
+  shiny::observeEvent(
+    data_modal_string(),
+    {
+      rv$data <- data_modal_string()
+      rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
+    }
+  )
 
   #########  Create column
 
@@ -12579,6 +13249,16 @@ server <- function(input, output, session) {
         add.overall = TRUE
       )
 
+      ## Limits maximum number of levels included in baseline table to 20.
+      data <- rv$list$data |>
+        lapply(\(.x){
+          # browser()
+          if (is.factor(.x)){
+            cut_var(.x,breaks=20,type="top")
+          } else {
+            .x
+          }
+        }) |> dplyr::bind_cols()
 
       # Attempt to introduce error on analysing too large dataset
       # tryCatch(
@@ -12589,7 +13269,7 @@ server <- function(input, output, session) {
       #       print("Please limit to 100.")
       #     } else {
       shiny::withProgress(message = i18n$t("Creating the table. Hold on for a moment.."), {
-        rv$list$table1 <- rlang::exec(create_baseline, !!!append_list(rv$list$data, parameters, "data"))
+        rv$list$table1 <- rlang::exec(create_baseline, !!!append_list(data, parameters, "data"))
       })
       #     }
       #   },

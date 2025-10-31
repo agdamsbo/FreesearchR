@@ -498,6 +498,28 @@ subset_types <- function(data, types, type.fun = data_type) {
 #' supported_plots() |> str()
 supported_plots <- function() {
   list(
+    plot_bar_rel = list(
+      fun = "plot_bar",
+      fun.args =list(style="fill"),
+      descr = i18n$t("Stacked relative barplot"),
+      note = i18n$t("Create relative stacked barplots to show the distribution of categorical levels"),
+      primary.type = c("dichotomous", "categorical"),
+      secondary.type = c("dichotomous", "categorical"),
+      secondary.multi = FALSE,
+      tertiary.type = c("dichotomous", "categorical"),
+      secondary.extra = NULL
+    ),
+    plot_bar_abs = list(
+      fun = "plot_bar",
+      fun.args =list(style="dodge"),
+      descr = i18n$t("Side-by-side barplot"),
+      note = i18n$t("Create side-by-side barplot to show the distribution of categorical levels"),
+      primary.type = c("dichotomous", "categorical"),
+      secondary.type = c("dichotomous", "categorical"),
+      secondary.multi = FALSE,
+      tertiary.type = c("dichotomous", "categorical"),
+      secondary.extra = "none"
+    ),
     plot_hbars = list(
       fun = "plot_hbars",
       descr = i18n$t("Stacked horizontal bars"),
@@ -566,28 +588,6 @@ supported_plots <- function() {
       secondary.max = 4,
       tertiary.type = c("dichotomous"),
       secondary.extra = NULL
-    ),
-    plot_bar_rel = list(
-      fun = "plot_bar",
-      fun.args =list(style="fill"),
-      descr = i18n$t("Stacked relative barplot"),
-      note = i18n$t("Create relative stacked barplots to show the distribution of categorical levels"),
-      primary.type = c("dichotomous", "categorical"),
-      secondary.type = c("dichotomous", "categorical"),
-      secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "categorical"),
-      secondary.extra = NULL
-    ),
-    plot_bar_abs = list(
-      fun = "plot_bar",
-      fun.args =list(style="dodge"),
-      descr = i18n$t("Side-by-side barplot"),
-      note = i18n$t("Create side-by-side barplot to show the distribution of categorical levels"),
-      primary.type = c("dichotomous", "categorical"),
-      secondary.type = c("dichotomous", "categorical"),
-      secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "categorical"),
-      secondary.extra = "none"
     )
   )
 }

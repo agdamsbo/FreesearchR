@@ -99,12 +99,14 @@ plot_bar_single <- function(data, pri, sec = NULL, style = c("stack", "dodge", "
     ggplot2::geom_bar(position = style, stat = "identity") +
     ggplot2::scale_y_continuous(labels = scales::percent) +
     ggplot2::ylab("Percentage") +
-    ggplot2::xlab(get_label(data,pri))
+    ggplot2::xlab(get_label(data,pri))+
+    ggplot2::guides(fill = ggplot2::guide_legend(title = get_label(data,fill)))
 
   ## To handle large number of levels and long level names
+
   if (nrow(p_data) > 10 | any(nchar(as.character(p_data[[pri]])) > 6)) {
     p <- p +
-      ggplot2::guides(fill = "none") +
+      # ggplot2::guides(fill = "none") +
       ggplot2::theme(
         axis.text.x = ggplot2::element_text(
           angle = 90,
@@ -113,6 +115,11 @@ plot_bar_single <- function(data, pri, sec = NULL, style = c("stack", "dodge", "
       ggplot2::theme(
         axis.text.x = ggplot2::element_text(vjust = 0.5)
       )
+
+    if (is.null(sec)){
+      p <- p +
+        ggplot2::guides(fill = "none")
+    }
   }
   p
 }
