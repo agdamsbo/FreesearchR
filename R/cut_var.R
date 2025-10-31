@@ -184,9 +184,16 @@ cut_var.factor <- function(x, breaks = NULL, type = c("top", "bottom"), other = 
   tbl <- sort(table(x), decreasing = TRUE)
 
   if (type == "top") {
+    if (length(levels(x)) <= breaks){
+      return(x)
+    }
     lvls <- names(tbl[seq_len(breaks)])
   } else if (type == "bottom") {
-    lvls <- names(tbl)[!tbl / NROW(x) * 100 < breaks]
+    freqs_check <- tbl / NROW(x) * 100 < breaks
+    if (!any(freqs_check)){
+      return(x)
+    }
+    lvls <- names(tbl)[!freqs_check]
   }
 
   if (other %in% lvls) {

@@ -35,14 +35,7 @@ cut_variable_ui <- function(id) {
       ),
       column(
         width = 3,
-        numericInput(
-          inputId = ns("n_breaks"),
-          label = i18n$t("Number of breaks:"),
-          value = 3,
-          min = 2,
-          max = 12,
-          width = "100%"
-        )
+        shiny::uiOutput(ns("n_breaks"))
       ),
       column(
         width = 3,
@@ -123,8 +116,38 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         # )
       }), data_r(), input$hidden)
 
+      output$n_breaks <- shiny::renderUI({
+        req(input$method)
+          # req(!is.null(get_list_elements(name = input$cut_method,element = "breaks")))
+          # browser()
+
+          break_text <- get_list_elements(name = input$method, element = "breaks")
+
+          if (is.null(get_list_elements(name = input$method, element = "min"))) {
+            min <- 2
+          } else {
+            min <- get_list_elements(name = input$method, element = "min")
+          }
+
+          if (is.null(get_list_elements(name = input$method, element = "max"))) {
+            max <- 10
+          } else {
+            max <- get_list_elements(name = input$method, element = "max")
+          }
+
+          numericInput(
+            inputId = ns("n_breaks"),
+            label = break_text,
+            value = 3,
+            min = min,
+            max = max,
+            width = "100%"
+          )
+        })
+
       output$slider_fixed <- renderUI({
         data <- req(data_r())
+        req(input$n_breaks)
         variable <- req(input$variable)
         req(hasName(data, variable))
 
@@ -221,14 +244,6 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           selected = NULL,
           width = "100%"
         )
-
-        # shinyWidgets::virtualSelectInput(
-        #   inputId = session$ns("method"),
-        #   label = i18n$t("Method:"),
-        #   choices = choices,
-        #   selected = NULL,
-        #   width = "100%"
-        # )
       })
 
 
@@ -389,7 +404,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           ),
           responseName = "count"
         )
-        count_data$freq <- paste(signif(count_data$count/nrow(data)*100,3),"%")
+        count_data$freq <- paste(signif(count_data$count / nrow(data) * 100, 3), "%")
         # browser()
         gridTheme <- getOption("datagrid.theme")
         if (length(gridTheme) < 1) {
@@ -398,7 +413,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         on.exit(toastui::reset_grid_theme())
         grid <- toastui::datagrid(
           data = count_data,
-          colwidths = "guess",
+          colwidths = "fit",
           theme = "default",
           bodyHeight = "auto"
         )
@@ -486,55 +501,63 @@ cut_methods <- function() {
     "hour" = list(
       descr = i18n$t("Hour of the day"),
       # class = c("hms", "POSIXct"), # Not implemented yet, but will during rewrite at some point...
-      breaks = i18n$t("Breaks")
+      breaks = NULL
     ),
     "day" = list(
       descr = i18n$t("By day of the week"),
-      breaks = i18n$t("Breaks")
+      breaks = NULL
     ),
     "weekday" = list(
       descr = i18n$t("By weekday"),
-      breaks = i18n$t("Breaks")
+      breaks = NULL
     ),
     "week" = list(
       descr = i18n$t("By week number and year"),
-      breaks = i18n$t("Breaks")
+      breaks = NULL
     ),
     "week_only" = list(
       descr = i18n$t("By week number"),
-      breaks = i18n$t("Breaks")
+      breaks = NULL
     ),
     "month" = list(
       descr = i18n$t("By month and year"),
-      breaks = i18n$t("Breaks")
+      breaks = NULL
     ),
     "month_only" = list(
       descr = i18n$t("By month only"),
-      breaks = i18n$t("Breaks")
+      breaks = NULL
     ),
     "quarter" = list(
       descr = i18n$t("By quarter of the year"),
-      breaks = i18n$t("Breaks")
+      breaks = NULL
     ),
     "year" = list(
       descr = i18n$t("By year"),
-      breaks = i18n$t("Breaks")
+      breaks = NULL
     ),
     "top" = list(
       descr = i18n$t("Keep only most common"),
-      breaks = i18n$t("Number")
+      breaks = i18n$t("Number"),
+      min = 1,
+      max = 20
     ),
     "bottom" = list(
       descr = i18n$t("Combine below percentage"),
-      breaks = i18n$t("Percentage")
+      breaks = i18n$t("Percentage"),
+      min = 1,
+      max = 50
     ),
     "fixed" = list(
       descr = i18n$t("By specified numbers"),
-      breaks = i18n$t("Breaks")
+      breaks = i18n$t("Breaks"),
+      min = 2,
+      max = 12
     ),
     "quantile" = list(
       descr = i18n$t("By quantiles (groups of equal size)"),
-      breaks = i18n$t("Breaks")
+      breaks = i18n$t("Breaks"),
+      min = 2,
+      max = 10
     )
   )
 }
@@ -555,9 +578,13 @@ cut_methods <- function() {
 #' @examples
 #' get_list_elements(c("top", "bottom"), "descr")
 get_list_elements <- function(name, element, dict = cut_methods()) {
-  sapply(dict[name], \(.x){
-    .x[[element]]
-  })
+  if (is.null(name)) {
+    return(NULL)
+  } else {
+    sapply(dict[name], \(.x){
+      .x[[element]]
+    })
+  }
 }
 
 #' Set values as names and names as values
