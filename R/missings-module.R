@@ -24,6 +24,7 @@ data_missings_ui <- function(id) {
 data_missings_server <- function(id,
                                  data,
                                  variable,
+                                 max_level=20,
                                  ...) {
   shiny::moduleServer(
     id = id,
@@ -44,7 +45,7 @@ data_missings_server <- function(id,
 
         tryCatch(
           {
-            out <- compare_missings(df_tbl,by_var)
+            out <- compare_missings(df_tbl,by_var,max_level = max_level)
           },
           error = function(err) {
             showNotification(paste0("Error: ", err), type = "err")
@@ -133,8 +134,18 @@ missing_demo_app()
 #' @returns gtsummary list object
 #' @export
 #'
-compare_missings <- function(data,by_var){
+compare_missings <- function(data,by_var,max_level=20){
   if (!is.null(by_var) && by_var != "" && by_var %in% names(data)) {
+    data <- data |>
+      lapply(\(.x){
+        # browser()
+        if (is.factor(.x)){
+          cut_var(.x,breaks=20,type="top")
+        } else {
+          .x
+        }
+      }) |> dplyr::bind_cols()
+
     data[[by_var]] <- ifelse(is.na(data[[by_var]]), "Missing", "Non-missing")
 
     out <- gtsummary::tbl_summary(data, by = by_var) |>
