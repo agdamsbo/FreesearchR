@@ -1,3 +1,12 @@
+#' String split module based on tidyr::separate_
+#'
+#' @param id id
+#'
+#' @returns A shiny ui module
+#' @export
+#'
+#' @name split-string
+#'
 string_split_ui <- function(id) {
   ns <- NS(id)
   tagList(
@@ -26,17 +35,17 @@ string_split_ui <- function(id) {
     ),
     shiny::fluidRow(
       column(
-        width = 3,
+        width = 4,
         shiny::h4(i18n$t("Original data")),
-        shiny::tableOutput(outputId = ns("orig_data"))
+        toastui::datagridOutput2(outputId = ns("orig_data"))
+        # DT::DTOutput(outputId = ns("orig_data_3"))
         # This doesn't render...
         # toastui::datagridOutput2(outputId = ns("orig_data_2"))
       ),
-      column(width = 1),
       column(
         width = 8,
         shiny::h4(i18n$t("Preview of result")),
-        shiny::tableOutput(outputId = ns("new_data"))
+        toastui::datagridOutput2(outputId = ns("new_data"))
       )
     ),
     actionButton(
@@ -50,11 +59,18 @@ string_split_ui <- function(id) {
 
 
 
+#' @param data_r reactive data
+#'
+#' @returns shiny module server
+#' @export
+#'
+#' @name split-string
+#'
 string_split_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
     id,
     function(input, output, session) {
-      rv <- reactiveValues(data = NULL, temp = NULL, out=NULL)
+      rv <- reactiveValues(data = NULL, target=NULL, temp = NULL, out=NULL)
 
       ns <- session$ns
 
@@ -80,6 +96,8 @@ string_split_server <- function(id, data_r = reactive(NULL)) {
         }, logical(1))
         vars_num <- names(vars_num)[vars_num]
 
+        req(length(vars_num)>0)
+
         output$variable <- shiny::renderUI(
           columnSelectInput(
             inputId = ns("variable"),
@@ -103,6 +121,7 @@ string_split_server <- function(id, data_r = reactive(NULL)) {
         req(input$variable)
         # browser()
 
+        req(input$variable %in% names(rv$data))
         # req({
         #   any(apply(data_r(),2,is_splittable))
         # })
@@ -180,36 +199,46 @@ string_split_server <- function(id, data_r = reactive(NULL)) {
       ## Toastui would not render the original data, so the solution was to go
       ## with native table rendering, which works, but doesn't please the eye
 
-      output$orig_data <- shiny::renderTable({
-        req(data_r())
-        req(input$variable)
-        data <- data_r() |>
-          dplyr::select(tidyselect::all_of(input$variable))
-        # browser()
-        head(data, 10)
-      })
-
-      # output$orig_data_2 <- toastui::renderDatagrid2({
+      # output$orig_data <- shiny::renderTable({
       #   req(data_r())
       #   req(input$variable)
       #   data <- data_r() |>
       #     dplyr::select(tidyselect::all_of(input$variable))
       #   # browser()
-      #   toastui::datagrid(head(data, 10))
+      #   head(data, 10)
       # })
 
+      output$orig_data <- toastui::renderDatagrid2({
+        req(data_r())
+        req(input$variable)
 
+        req(hasName(rv$data, input$variable))
 
-      output$new_data <- shiny::renderTable({
+        data <- data_r() |>
+          dplyr::select(tidyselect::all_of(input$variable)) |>
+          head(30) |>
+          dplyr::mutate(row=dplyr::row_number()) |>
+          dplyr::select(row,tidyselect::everything())
+        # browser()
+        toastui::datagrid(
+          data = data,
+          rowHeight = 40,
+          colwidths = "guess",
+          theme = "default",
+          bodyHeight = "auto",
+          pagination = 10)
+      })
+
+      output$new_data <- toastui::renderDatagrid2({
         shiny::req(rv$temp)
         data <- rv$temp
-        head(data, 10)
-        # toastui::datagrid(
-        #   data = head(data, 100),
-        #   colwidths = "guess",
-        #   theme = "default",
-        #   bodyHeight = "auto", pagination = 10
-        # )
+        toastui::datagrid(
+          data = head(data, 30),
+          rowHeight = 40,
+          colwidths = "guess",
+          theme = "default",
+          bodyHeight = "auto", pagination = 10
+        )
       })
 
       data_split_r <- reactive({
@@ -256,6 +285,15 @@ string_split_server <- function(id, data_r = reactive(NULL)) {
 }
 
 
+#' @param title Modal title
+#' @param easyClose easyClose
+#' @param size size
+#' @param footer footer
+#'
+#' @returns shiny modal
+#' @export
+#'
+#' @name split-string
 modal_string_split <- function(id,
                                title = i18n$t("Split character string"),
                                easyClose = TRUE,
@@ -372,4 +410,41 @@ is_splittable <- function(data) {
   } else {
     FALSE
   }
+}
+
+# mtcars |> simple_dt()
+simple_dt <- function(data,...){
+  headerCallbackRemoveHeaderFooter <- c(
+    "function(thead, data, start, end, display){",
+    "  $('th', thead).css('display', 'none');",
+    "}"
+  )
+
+  DT::datatable(
+    data,
+    options = list(
+      dom = "t",
+      ordering = FALSE,
+      paging = FALSE,
+      searching = FALSE,
+      # headerCallback = DT::JS(headerCallbackRemoveHeaderFooter),
+      columnDefs = list(
+        list(
+          targets = 1,
+          render = DT::JS(
+            "function(data, type, row, meta) {",
+            "return type === 'display' && data.length > 10 ?",
+            "'<span title=\"' + data + '\">' + data.substr(0, 10) + '...</span>' : data;",
+            "}")))
+    ),
+    selection = 'none',
+    callback = DT::JS(
+      "$('table.dataTable.no-footer').css('border-bottom', 'none');"
+    ),
+    class = 'row-border',
+    escape = FALSE,
+    rownames = FALSE,
+    # width = 500,
+    filter = "none"
+  )
 }

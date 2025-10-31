@@ -1,6 +1,10 @@
 # FreesearchR 25.10.5
 
-*NEW* New character/text split function available. A selection of delimiters are recognised and selectable. Function only available if splittable variables are present. This was the last big function to implement after workshops at Jitimai in Zanzibar.
+*NEW* New character/text split function available. A selection of delimiters are recognised and selectable. Function only available if splittable variables are present. 
+
+*NEW* Distribution plotting for factors have been much improved including two new bar plot styles and removing options better suited for continuous data.
+
+These were the last major functions to be implemented after workshops at Jitimai in Zanzibar City, Zanzibar during October 2025.
 
 # FreesearchR 25.10.4
 

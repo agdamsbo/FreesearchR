@@ -112,6 +112,7 @@ Collate:
     'launch_FreesearchR.R'
     'missings-module.R'
     'plot-download-module.R'
+    'plot_bar.R'
     'plot_box.R'
     'plot_euler.R'
     'plot_hbar.R'
