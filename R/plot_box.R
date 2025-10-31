@@ -39,8 +39,6 @@ plot_box <- function(data, pri, sec, ter = NULL,...) {
 }
 
 
-
-
 #' Create nice box-plots
 #'
 #' @name data-plots

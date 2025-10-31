@@ -343,6 +343,12 @@ data_visuals_server <- function(id,
                   ter = input$tertiary
                 )
 
+                ## If the dictionary holds additional arguments to pass to the
+                ## plotting function, these are included
+                if (!is.null(rv$plot.params()[["fun.args"]])){
+                  parameters <- modifyList(parameters,rv$plot.params()[["fun.args"]])
+                }
+
                 shiny::withProgress(message = i18n$t("Drawing the plot. Hold tight for a moment.."), {
                   rv$plot <- rlang::exec(
                     create_plot,
@@ -506,7 +512,7 @@ supported_plots <- function() {
       fun = "plot_violin",
       descr = i18n$t("Violin plot"),
       note = i18n$t("A modern alternative to the classic boxplot to visualise data distribution"),
-      primary.type = c("datatime", "continuous", "dichotomous", "categorical"),
+      primary.type = c("datatime", "continuous"),
       secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
       secondary.extra = "none",
@@ -544,7 +550,7 @@ supported_plots <- function() {
       fun = "plot_box",
       descr = i18n$t("Box plot"),
       note = i18n$t("A classic way to plot data distribution by groups"),
-      primary.type = c("datatime", "continuous", "dichotomous", "categorical"),
+      primary.type = c("datatime", "continuous"),
       secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
       tertiary.type = c("dichotomous", "categorical"),
@@ -560,6 +566,28 @@ supported_plots <- function() {
       secondary.max = 4,
       tertiary.type = c("dichotomous"),
       secondary.extra = NULL
+    ),
+    plot_bar_rel = list(
+      fun = "plot_bar",
+      fun.args =list(style="fill"),
+      descr = i18n$t("Stacked relative barplot"),
+      note = i18n$t("Create relative stacked barplots to show the distribution of categorical levels"),
+      primary.type = c("dichotomous", "categorical"),
+      secondary.type = c("dichotomous", "categorical"),
+      secondary.multi = FALSE,
+      tertiary.type = c("dichotomous", "categorical"),
+      secondary.extra = NULL
+    ),
+    plot_bar_abs = list(
+      fun = "plot_bar",
+      fun.args =list(style="dodge"),
+      descr = i18n$t("Side-by-side barplot"),
+      note = i18n$t("Create side-by-side barplot to show the distribution of categorical levels"),
+      primary.type = c("dichotomous", "categorical"),
+      secondary.type = c("dichotomous", "categorical"),
+      secondary.multi = FALSE,
+      tertiary.type = c("dichotomous", "categorical"),
+      secondary.extra = "none"
     )
   )
 }
