@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpigVRui/file787d121e91b3.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpFr1XvR/file15f634a33505f.R 
 ########
 
 i18n_path <- here::here("translations")
@@ -62,7 +62,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.10.5'
+app_version <- function()'25.11.1'
 
 
 ########
@@ -83,7 +83,6 @@ app_version <- function()'25.10.5'
 #' mtcars |> baseline_table()
 #' mtcars |> baseline_table(fun.args = list(by = "gear"))
 baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, vars = NULL) {
-
   out <- do.call(fun, c(list(data = data), fun.args))
   return(out)
 }
@@ -94,18 +93,25 @@ baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, 
 #'
 #' @param data data
 #' @param ... passed as fun.arg to baseline_table()
-#' @param strat.var grouping/strat variable
 #' @param add.p add comparison/p-value
 #' @param add.overall add overall column
+#' @param by.var specify stratification variable
+#' @param theme set table theme
+#' @param detail_level specify detail level. Either "minimal" or "extended".
 #'
 #' @returns gtsummary table list object
 #' @export
 #'
 #' @examples
 #' mtcars |> create_baseline(by.var = "gear", add.p = "yes" == "yes")
+#' mtcars |> create_baseline(by.var = "gear", detail_level = "extended")
+#' mtcars |> create_baseline(by.var = "gear", detail_level = "extended",type = list(gtsummary::all_dichotomous() ~ "categorical"),theme="nejm")
+#'
 #' create_baseline(default_parsing(mtcars), by.var = "am", add.p = FALSE, add.overall = FALSE, theme = "lancet")
-create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALSE, theme = c("jama", "lancet", "nejm", "qjecon")) {
+create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALSE, theme = c("jama", "lancet", "nejm", "qjecon"), detail_level = c("minimal", "extended")) {
   theme <- match.arg(theme)
+
+  detail_level <- match.arg(detail_level)
 
   if (by.var == "none" | !by.var %in% names(data)) {
     by.var <- NULL
@@ -124,11 +130,32 @@ create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALS
 
   args <- list(...)
 
+  # browser()
+
+  if (!any(hasName(args, c("type", "statistic")))) {
+    if (detail_level == "extended") {
+      args <-
+        modifyList(
+          args,
+          list(
+            type = list(gtsummary::all_continuous() ~ "continuous2",
+                        gtsummary::all_dichotomous() ~ "categorical"),
+            statistic = list(gtsummary::all_continuous() ~ c(
+              "{median} ({p25}, {p75})",
+              "{mean} ({sd})",
+              "{min}, {max}"))
+          )
+        )
+    }
+  }
+
   parameters <- list(
     data = data,
-    fun.args = list(by = by.var, ...)
+    fun.args = purrr::list_flatten(list(by = by.var, args))
   )
 
+
+  # browser()
   out <- do.call(
     baseline_table,
     parameters
@@ -4274,7 +4301,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.10.5-251031'
+hosted_version <- function()'v25.11.1-251109'
 
 
 ########
@@ -9914,6 +9941,17 @@ ui_elements <- function(selection) {
                   value = "acc_pan_chars",
                   title = "Settings",
                   icon = bsicons::bs_icon("table"),
+                  # vectorSelectInput(
+                  #   inputId = "baseline_theme",
+                  #   selected = "none",
+                  #   label = i18n$t("Select table theme"),
+                  #   choices = c(
+                  #     "The Journal of the American Medical Association" = "jama",
+                  #     "The Lancet"="lancet",
+                  #     "The New England Journal of Medicine" = "nejm",
+                  #     "The Quarterly Journal of Economics" = "qjecon")
+                  # ),
+                  shiny::uiOutput("detail_level"),
                   shiny::uiOutput("strat_var"),
                   shiny::helpText(i18n$t("Only factor/categorical variables are available for stratification. Go back to the 'Prepare' tab to reclass a variable if it's not on the list.")),
                   shiny::conditionalPanel(
@@ -13201,7 +13239,7 @@ server <- function(input, output, session) {
     columnSelectInput(
       inputId = "strat_var",
       selected = "none",
-      label = "Select variable to stratify baseline",
+      label = i18n$t("Select variable to stratify baseline"),
       data = shiny::reactive(rv$data_filtered)(),
       col_subset = c(
         "none",
@@ -13209,6 +13247,37 @@ server <- function(input, output, session) {
       )
     )
   })
+
+  # output$baseline_theme <- shiny::renderUI({
+  #   choices <-
+  #
+  #   vectorSelectInput(
+  #     inputId = "baseline_theme",
+  #     selected = "none",
+  #     label = i18n$t("Select table theme"),
+  #     choices = c(
+  #       "The Journal of the American Medical Association" = "jama",
+  #       "The Lancet"="lancet",
+  #       "The New England Journal of Medicine" = "nejm",
+  #       "The Quarterly Journal of Economics" = "qjecon")
+  #   )
+  # })
+
+
+  output$detail_level <- shiny::renderUI({
+  shiny::radioButtons(
+    inputId = "detail_level",
+    label = i18n$t("Level of detail"),
+    selected = "minimal",
+    inline = TRUE,choiceValues = c("minimal",
+                                   "extended"),
+    choiceNames = c(
+      i18n$t("Minimal"),
+      i18n$t("Extensive")
+    )
+  )
+  })
+
 
   ##############################################################################
   #########
@@ -13235,30 +13304,39 @@ server <- function(input, output, session) {
   #   })
 
 
+
+
   shiny::observeEvent(
     list(
       input$act_eval
     ),
     {
       shiny::req(input$strat_var)
+      # shiny::req(input$baseline_theme)
+      shiny::req(input$detail_level)
       shiny::req(rv$list$data)
+
+
 
       parameters <- list(
         by.var = input$strat_var,
         add.p = input$add_p == "yes",
-        add.overall = TRUE
+        add.overall = TRUE,
+        # theme = input$baseline_theme,
+        detail_level = input$detail_level
       )
 
       ## Limits maximum number of levels included in baseline table to 20.
       data <- rv$list$data |>
         lapply(\(.x){
           # browser()
-          if (is.factor(.x)){
-            cut_var(.x,breaks=20,type="top")
+          if (is.factor(.x)) {
+            cut_var(.x, breaks = 20, type = "top")
           } else {
             .x
           }
-        }) |> dplyr::bind_cols()
+        }) |>
+        dplyr::bind_cols()
 
       # Attempt to introduce error on analysing too large dataset
       # tryCatch(

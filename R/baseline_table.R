@@ -12,7 +12,6 @@
 #' mtcars |> baseline_table()
 #' mtcars |> baseline_table(fun.args = list(by = "gear"))
 baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, vars = NULL) {
-
   out <- do.call(fun, c(list(data = data), fun.args))
   return(out)
 }
@@ -23,18 +22,25 @@ baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, 
 #'
 #' @param data data
 #' @param ... passed as fun.arg to baseline_table()
-#' @param strat.var grouping/strat variable
 #' @param add.p add comparison/p-value
 #' @param add.overall add overall column
+#' @param by.var specify stratification variable
+#' @param theme set table theme
+#' @param detail_level specify detail level. Either "minimal" or "extended".
 #'
 #' @returns gtsummary table list object
 #' @export
 #'
 #' @examples
 #' mtcars |> create_baseline(by.var = "gear", add.p = "yes" == "yes")
+#' mtcars |> create_baseline(by.var = "gear", detail_level = "extended")
+#' mtcars |> create_baseline(by.var = "gear", detail_level = "extended",type = list(gtsummary::all_dichotomous() ~ "categorical"),theme="nejm")
+#'
 #' create_baseline(default_parsing(mtcars), by.var = "am", add.p = FALSE, add.overall = FALSE, theme = "lancet")
-create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALSE, theme = c("jama", "lancet", "nejm", "qjecon")) {
+create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALSE, theme = c("jama", "lancet", "nejm", "qjecon"), detail_level = c("minimal", "extended")) {
   theme <- match.arg(theme)
+
+  detail_level <- match.arg(detail_level)
 
   if (by.var == "none" | !by.var %in% names(data)) {
     by.var <- NULL
@@ -53,11 +59,32 @@ create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALS
 
   args <- list(...)
 
+  # browser()
+
+  if (!any(hasName(args, c("type", "statistic")))) {
+    if (detail_level == "extended") {
+      args <-
+        modifyList(
+          args,
+          list(
+            type = list(gtsummary::all_continuous() ~ "continuous2",
+                        gtsummary::all_dichotomous() ~ "categorical"),
+            statistic = list(gtsummary::all_continuous() ~ c(
+              "{median} ({p25}, {p75})",
+              "{mean} ({sd})",
+              "{min}, {max}"))
+          )
+        )
+    }
+  }
+
   parameters <- list(
     data = data,
-    fun.args = list(by = by.var, ...)
+    fun.args = purrr::list_flatten(list(by = by.var, args))
   )
 
+
+  # browser()
   out <- do.call(
     baseline_table,
     parameters

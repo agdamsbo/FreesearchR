@@ -1,3 +1,7 @@
+# FreesearchR 25.11.1
+
+*NEW* Added option to select extensive baseline table selecting between "Minimal" (current) or "Extensive" which adds mean/sd and min/max as well as plots all levels also for dichotomous variables.
+
 # FreesearchR 25.10.5
 
 *NEW* New character/text split function available. A selection of delimiters are recognised and selectable. Function only available if splittable variables are present. 

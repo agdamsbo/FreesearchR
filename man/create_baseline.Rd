@@ -10,7 +10,8 @@ create_baseline(
   by.var,
   add.p = FALSE,
   add.overall = FALSE,
-  theme = c("jama", "lancet", "nejm", "qjecon")
+  theme = c("jama", "lancet", "nejm", "qjecon"),
+  detail_level = c("minimal", "extended")
 )
 }
 \arguments{
@@ -18,11 +19,15 @@ create_baseline(
 
 \item{...}{passed as fun.arg to baseline_table()}
 
+\item{by.var}{specify stratification variable}
+
 \item{add.p}{add comparison/p-value}
 
 \item{add.overall}{add overall column}
 
-\item{strat.var}{grouping/strat variable}
+\item{theme}{set table theme}
+
+\item{detail_level}{specify detail level. Either "minimal" or "extended".}
 }
 \value{
 gtsummary table list object
@@ -32,5 +37,8 @@ Create a baseline table
 }
 \examples{
 mtcars |> create_baseline(by.var = "gear", add.p = "yes" == "yes")
+mtcars |> create_baseline(by.var = "gear", detail_level = "extended")
+mtcars |> create_baseline(by.var = "gear", detail_level = "extended",type = list(gtsummary::all_dichotomous() ~ "categorical"),theme="nejm")
+
 create_baseline(default_parsing(mtcars), by.var = "am", add.p = FALSE, add.overall = FALSE, theme = "lancet")
 }

@@ -375,6 +375,17 @@ ui_elements <- function(selection) {
                   value = "acc_pan_chars",
                   title = "Settings",
                   icon = bsicons::bs_icon("table"),
+                  # vectorSelectInput(
+                  #   inputId = "baseline_theme",
+                  #   selected = "none",
+                  #   label = i18n$t("Select table theme"),
+                  #   choices = c(
+                  #     "The Journal of the American Medical Association" = "jama",
+                  #     "The Lancet"="lancet",
+                  #     "The New England Journal of Medicine" = "nejm",
+                  #     "The Quarterly Journal of Economics" = "qjecon")
+                  # ),
+                  shiny::uiOutput("detail_level"),
                   shiny::uiOutput("strat_var"),
                   shiny::helpText(i18n$t("Only factor/categorical variables are available for stratification. Go back to the 'Prepare' tab to reclass a variable if it's not on the list.")),
                   shiny::conditionalPanel(
