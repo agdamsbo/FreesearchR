@@ -76,7 +76,7 @@ Thank you very much to all translators having helped to translate and validate t
 
 Like any other project, this project was never possible without the great work of others. These are some of the sources and packages I have used:
 
--   The ***FreesearchR*** app is build with [Shiny](https://shiny.posit.co/) and based on [*R*](https://www.r-project.org/).
+-   The ***FreesearchR*** app is built with [Shiny](https://shiny.posit.co/) and based on [*R*](https://www.r-project.org/).
 
 -   [gtsummary](https://www.danieldsjoberg.com/gtsummary/): superb and flexible way to create publication-ready analytical and summary tables.
 
