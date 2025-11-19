@@ -6,7 +6,6 @@
 #' @returns Shiny ui module
 #' @export
 #'
-#' @example examples/visual_summary_demo.R
 visual_summary_ui <- function(id) {
   ns <- shiny::NS(id)
 
@@ -100,14 +99,6 @@ modal_visual_summary <- function(id,
 #' @returns An [apexchart()] `htmlwidget` object.
 #' @export
 #'
-#' @examples
-#' # data_demo <- mtcars
-#' # data_demo[2:4, "cyl"] <- NA
-#' # rbind(data_demo, data_demo, data_demo, data_demo) |> missings_apex_plot()
-#' # data_demo |> missings_apex_plot()
-#' # mtcars |> missings_apex_plot(animation = TRUE)
-#' # dplyr::storms |> missings_apex_plot()
-#' # visdat::vis_dat(dplyr::storms)
 missings_apex_plot <- function(data, animation = FALSE, ...) {
   l <- data_summary_gather(data, ...)
 
@@ -158,14 +149,6 @@ missings_apex_plot <- function(data, animation = FALSE, ...) {
 #' @returns ggplot2 object
 #' @export
 #'
-#' @examples
-#' # data_demo <- mtcars
-#' # data_demo[sample(1:32, 10), "cyl"] <- NA
-#' # data_demo[sample(1:32, 8), "vs"] <- NA
-#' # visual_summary(data_demo)
-#' # visual_summary(data_demo, palette.fun = scales::hue_pal())
-#' # visual_summary(dplyr::storms, summary.fun = data_type)
-#' # visual_summary(dplyr::storms, summary.fun = data_type, na.label = "Missings", legend.title = "Class")
 visual_summary <- function(data, legend.title = NULL, ylab = "Observations", ...) {
   l <- data_summary_gather(data, ...)
 
