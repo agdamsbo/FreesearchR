@@ -1,0 +1,121 @@
+# FreesearchR
+
+The [***FreesearchR***](https://app.freesearchr.org) is a simple,
+clinical health data exploration and analysis tool to democratise
+clinical research by assisting any researcher to easily evaluate and
+analyse data and export publication ready results.
+
+[***FreesearchR***](https://app.freesearchr.org) is free and
+open-source, and is [accessible in your web browser through this
+link](https://app.freesearchr.org). The app can also run locally, please
+[see below](#run-locally-on-your-own-machine-sec-run-locally).
+
+All feedback is welcome and can be shared as a GitHub issue. Any
+suggestions on collaboration is much welcomed. Please reach out!
+
+![FreesearchR demo](./reference/figures/demo.gif)
+
+FreesearchR demo
+
+## Motivation
+
+This app has the following simple goals:
+
+1.  help the health clinician getting an overview of data in quality
+    improvement projects and clinical research
+
+2.  help learners get a good start analysing data and coding in *R*
+
+3.  ease quick data overview and basic visualisations for any clinical
+    researcher
+
+## Run locally on your own machine
+
+The ***FreesearchR*** app can also run on your own machine with no data
+transmitted anywhere. Blow are the available options.
+
+### Run from R (or RStduio)
+
+Working with data in R, FreesearchR is a quick and easy tool to get
+overview and perform the first explorative analyses to get you going.
+
+Any data available in the your R session will be available to the
+FreesearchR app. Just follow the below steps to get going:
+
+1.  **Requirement:** You need to have [*R*
+    installed](https://www.r-project.org/) and possibly an editor like
+    [RStudio](https://posit.co/download/rstudio-desktop/).
+
+2.  Then open the *R* console and copy/paste the following code, that
+    will install the [devtools](https://devtools.r-lib.org/) package and
+    then the [FreesearchR](https://github.com/agdamsbo/FreesearchR)
+    *R*-package with its dependencies:
+
+        require("devtools")
+        devtools::install_github("agdamsbo/FreesearchR")
+        library(FreesearchR)
+        # By loading mtcars to the environment, it will be available
+        # in the interface like any other data.frame
+        data(mtcars)
+        launch_FreesearchR()
+
+### Running with docker compose
+
+For advanced users, wanting to deploy the FreesearchR app to run
+anywhere, a docker image is available.
+
+Below is the minimal `docker_compose.yml` file:
+
+    services:
+      freesearchr:
+        image: ghcr.io/agdamsbo/freesearchr:latest
+        ports:
+          - '3838:3838'
+        restart: on-failure
+
+## Code of Conduct
+
+Please note that the ***FreesearchR*** project is published with a
+[Contributor Code of
+Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html).
+By contributing to this project, you agree to abide by its terms.
+
+## Translators
+
+Thank you very much to all translators having helped to translate and
+validate translation drafts.
+
+## Acknowledgements
+
+Like any other project, this project was never possible without the
+great work of others. These are some of the sources and packages I have
+used:
+
+- The ***FreesearchR*** app is built with
+  [Shiny](https://shiny.posit.co/) and based on
+  [*R*](https://www.r-project.org/).
+
+- [gtsummary](https://www.danieldsjoberg.com/gtsummary/): superb and
+  flexible way to create publication-ready analytical and summary
+  tables.
+
+- [dreamRs](https://github.com/dreamRs): maintainers of a broad
+  selection of great extensions and tools for
+  [Shiny](https://shiny.posit.co/).
+
+- [easystats](https://easystats.github.io/easystats/): the
+  [`performance::check_model()`](https://easystats.github.io/performance/articles/check_model.html)
+  function was central in sparking the idea to create a data analysis
+  tool.
+
+- [IDEAfilter](https://biogen-inc.github.io/IDEAFilter/): a visually
+  appealing data filter function based on the
+  [{shinyDataFilter}](https://github.com/dgkf/shinyDataFilter).
+
+This project was all written by a human and not by any AI-based tools.
+
+The online ***FreesearchR*** app contains a tracking script,
+transmitting minimal data on usage. No uploaded data is transmitted
+anywhere. Have a look at the [tracking data
+here](https://analytics.gdamsbo.dk/share/2i4BNpMcDMB9lJvF/agdamsbo.shinyapps.io).
+No tracking data is sent running the app locally (see above).
