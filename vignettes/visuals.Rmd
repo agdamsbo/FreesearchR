@@ -16,44 +16,4 @@ knitr::opts_chunk$set(
 options(rmarkdown.html_vignette.check_title = FALSE)
 ```
 
-```{r setup}
-library(FreesearchR)
-i18n_path <- system.file("translations", package = "FreesearchR")
-i18n <- shiny.i18n::Translator$new(translation_csvs_path = i18n_path)
-i18n$set_translation_language("en")
-```
-
-## Basic visualisations
-
-The goal of ***FreesearchR*** is to keep things simple. Visuals can get very complicated. We provide a selection of plots, that helps visualise typical clinical and will be enough for most use cases, and for publishing to most journals.
-
-If you want to go further, have a look at these sites with suggestions and sample code for data plotting:
-
--   [*R* Charts](https://r-charts.com/): Extensive gallery with great plots
-
--   [*R* Graph gallery](https://r-graph-gallery.com/): Another gallery with great graphs
-
--   [graphics principles](https://graphicsprinciples.github.io/): Easy to follow recommendations for clear visuals. 
-
-
-### Available plots
-
-Below are the available plot types listed.
-
-```{r echo = FALSE}
-c("continuous", "dichotomous", "categorical") |> 
-  lapply(\(.x){
-    dplyr::bind_cols(
-      dplyr::tibble("Data type"=.x),
-      supported_plots() |> 
-      lapply(\(.y){
-        if (.x %in% .y$primary.type){
-          .y[c("descr","note")]|> dplyr::bind_cols()
-        }
-})|> 
-  dplyr::bind_rows() |> 
-  setNames(c("Plot type","Description")))
-  }) |> 
-  dplyr::bind_rows() |> 
-  knitr::kable()
-```
+Documentation on visuals used in FreesearchR can be found in the [FreesearchR project documentations (link)](https://freesearchr.github.io/FreesearchR-knowledge/app/visuals.html).

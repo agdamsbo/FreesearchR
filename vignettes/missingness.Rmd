@@ -15,12 +15,4 @@ knitr::opts_chunk$set(
 options(rmarkdown.html_vignette.check_title = FALSE)
 ```
 
-```{r setup}
-library(FreesearchR)
-```
-
-## Considering missing observations
-
-### Further reading
-
-The authors behind the [{finalfit}-package](https://finalfit.org/index.html) have shared a very comprehensive article on what to do and think about missing observations in your data. Please [have a look here](https://finalfit.org/articles/missing.html).
+Considerations of data missingness can be found in the [FreesearchR project documentations (link)](https://freesearchr.github.io/FreesearchR-knowledge/intro/missingness.html).

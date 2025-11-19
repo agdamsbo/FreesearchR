@@ -1,3 +1,7 @@
+# FreesearchR 25.11.2
+
+*NEW* Vignettes were moved to the [FreesearchR project knowledge base](https://freesearchr.github.io/FreesearchR-knowledge/). This was mainly to ease rendering and allow quick and easy updates as well as future translations.
+
 # FreesearchR 25.11.1
 
 *NEW* Added option to select extensive baseline table selecting between "Minimal" (current) or "Extensive" which adds mean/sd and min/max as well as plots all levels also for dichotomous variables.
