@@ -68,7 +68,8 @@ Imports:
     readxl,
     NHANES,
     shiny.i18n,
-    stRoke
+    stRoke,
+    data.table
 Suggests: 
     styler,
     devtools,
