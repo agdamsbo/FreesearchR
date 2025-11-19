@@ -101,13 +101,13 @@ modal_visual_summary <- function(id,
 #' @export
 #'
 #' @examples
-#' data_demo <- mtcars
-#' data_demo[2:4, "cyl"] <- NA
-#' rbind(data_demo, data_demo, data_demo, data_demo) |> missings_apex_plot()
-#' data_demo |> missings_apex_plot()
-#' mtcars |> missings_apex_plot(animation = TRUE)
+#' # data_demo <- mtcars
+#' # data_demo[2:4, "cyl"] <- NA
+#' # rbind(data_demo, data_demo, data_demo, data_demo) |> missings_apex_plot()
+#' # data_demo |> missings_apex_plot()
+#' # mtcars |> missings_apex_plot(animation = TRUE)
 #' # dplyr::storms |> missings_apex_plot()
-#' visdat::vis_dat(dplyr::storms)
+#' # visdat::vis_dat(dplyr::storms)
 missings_apex_plot <- function(data, animation = FALSE, ...) {
   l <- data_summary_gather(data, ...)
 
@@ -159,13 +159,13 @@ missings_apex_plot <- function(data, animation = FALSE, ...) {
 #' @export
 #'
 #' @examples
-#' data_demo <- mtcars
-#' data_demo[sample(1:32, 10), "cyl"] <- NA
-#' data_demo[sample(1:32, 8), "vs"] <- NA
-#' visual_summary(data_demo)
-#' visual_summary(data_demo, palette.fun = scales::hue_pal())
-#' visual_summary(dplyr::storms, summary.fun = data_type)
-#' visual_summary(dplyr::storms, summary.fun = data_type, na.label = "Missings", legend.title = "Class")
+#' # data_demo <- mtcars
+#' # data_demo[sample(1:32, 10), "cyl"] <- NA
+#' # data_demo[sample(1:32, 8), "vs"] <- NA
+#' # visual_summary(data_demo)
+#' # visual_summary(data_demo, palette.fun = scales::hue_pal())
+#' # visual_summary(dplyr::storms, summary.fun = data_type)
+#' # visual_summary(dplyr::storms, summary.fun = data_type, na.label = "Missings", legend.title = "Class")
 visual_summary <- function(data, legend.title = NULL, ylab = "Observations", ...) {
   l <- data_summary_gather(data, ...)
 
@@ -217,7 +217,7 @@ visual_summary <- function(data, legend.title = NULL, ylab = "Observations", ...
 #' @export
 #'
 #' @examples
-#' mtcars |> data_summary_gather()
+#' mtcars |> data_summary_gather() |> names()
 data_summary_gather <- function(data, summary.fun = class, palette.fun = viridisLite::viridis, na.label = "NA", ...) {
   df_plot <- setNames(data, unique_short(names(data))) |>
     purrr::map_df(\(x){

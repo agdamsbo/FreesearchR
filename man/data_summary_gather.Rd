@@ -31,5 +31,5 @@ data.frame
 Data summary for printing visual summary
 }
 \examples{
-mtcars |> data_summary_gather()
+mtcars |> data_summary_gather() |> names()
 }

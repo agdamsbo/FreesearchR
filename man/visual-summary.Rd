@@ -102,18 +102,18 @@ visual_summary_demo_app <- function() {
 }
 
 visual_summary_demo_app()
-data_demo <- mtcars
-data_demo[2:4, "cyl"] <- NA
-rbind(data_demo, data_demo, data_demo, data_demo) |> missings_apex_plot()
-data_demo |> missings_apex_plot()
-mtcars |> missings_apex_plot(animation = TRUE)
+# data_demo <- mtcars
+# data_demo[2:4, "cyl"] <- NA
+# rbind(data_demo, data_demo, data_demo, data_demo) |> missings_apex_plot()
+# data_demo |> missings_apex_plot()
+# mtcars |> missings_apex_plot(animation = TRUE)
 # dplyr::storms |> missings_apex_plot()
-visdat::vis_dat(dplyr::storms)
-data_demo <- mtcars
-data_demo[sample(1:32, 10), "cyl"] <- NA
-data_demo[sample(1:32, 8), "vs"] <- NA
-visual_summary(data_demo)
-visual_summary(data_demo, palette.fun = scales::hue_pal())
-visual_summary(dplyr::storms, summary.fun = data_type)
-visual_summary(dplyr::storms, summary.fun = data_type, na.label = "Missings", legend.title = "Class")
+# visdat::vis_dat(dplyr::storms)
+# data_demo <- mtcars
+# data_demo[sample(1:32, 10), "cyl"] <- NA
+# data_demo[sample(1:32, 8), "vs"] <- NA
+# visual_summary(data_demo)
+# visual_summary(data_demo, palette.fun = scales::hue_pal())
+# visual_summary(dplyr::storms, summary.fun = data_type)
+# visual_summary(dplyr::storms, summary.fun = data_type, na.label = "Missings", legend.title = "Class")
 }
