@@ -30,5 +30,5 @@ list(
   lapply(expression_string) |>
   pipe_string() |>
   expression_string("data<-")
-#> [1] "data<-mtcars|>\ndplyr::select(c('cyl','disp'))|>\nFreesearchR::default_parsing()"
+#> [1] "data<-mtcars|>\ndplyr::select(c('cyl', 'disp'))|>\nFreesearchR::default_parsing()"
 ```

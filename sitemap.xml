@@ -27,6 +27,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/clean_common_axis.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/clean_date.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/clean_sep.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/collapse_spaces.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/columnSelectInput.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/compare_missings.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/contrast_text.html</loc></url>
@@ -55,6 +56,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/dim_change_call.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/drop_empty_event.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/expression_string.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/factor_new_levels_labels.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/factorize.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/file_export.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/format_writer.html</loc></url>
@@ -130,6 +132,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/tbl_merge.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/type_icons.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/ui_elements.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/unique_names.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/unique_short.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/update-factor.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/update-variables.html</loc></url>

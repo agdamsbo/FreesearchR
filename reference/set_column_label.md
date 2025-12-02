@@ -47,5 +47,5 @@ mtcars |>
 #> 10  19.2     6  168.   123  3.92  3.44  18.3     1     0     4     4
 #> # ℹ 22 more rows
 rlang::expr(FreesearchR::set_column_label(label = !!ls3)) |> expression_string()
-#> [1] "FreesearchR::set_column_label(label=c(mpg='',cyl='',disp='',hp='Horses',drat='',wt='',qsec='',vs='',am='',gear='',carb=''))"
+#> [1] "FreesearchR::set_column_label(label = c(mpg = '', cyl = '', disp = '', hp = 'Horses', drat = '', wt = '', qsec = '', vs = '', am = '', gear = '', carb = ''))"
 ```

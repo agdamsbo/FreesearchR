@@ -29,6 +29,8 @@
 - [`clean_sep()`](https://agdamsbo.github.io/FreesearchR/reference/clean_sep.md)
   : gsub wrapper for piping with default values for separator
   substituting
+- [`collapse_spaces()`](https://agdamsbo.github.io/FreesearchR/reference/collapse_spaces.md)
+  : Substitue spaces/tabs with single space excluding text within quotes
 - [`columnSelectInput()`](https://agdamsbo.github.io/FreesearchR/reference/columnSelectInput.md)
   : A selectizeInput customized for data frames with column labels
 - [`compare_missings()`](https://agdamsbo.github.io/FreesearchR/reference/compare_missings.md)
@@ -106,6 +108,8 @@
 - [`expression_string()`](https://agdamsbo.github.io/FreesearchR/reference/expression_string.md)
   : Deparses expression as string, substitutes native pipe and adds
   assign
+- [`factor_new_levels_labels()`](https://agdamsbo.github.io/FreesearchR/reference/factor_new_levels_labels.md)
+  : Simple function to apply new levels and/or labels to factor
 - [`factorize()`](https://agdamsbo.github.io/FreesearchR/reference/factorize.md)
   : Factorize variables in data.frame
 - [`file_export()`](https://agdamsbo.github.io/FreesearchR/reference/file_export.md)
@@ -275,6 +279,8 @@
   : Get data type icons
 - [`ui_elements()`](https://agdamsbo.github.io/FreesearchR/reference/ui_elements.md)
   : FreesearchR UI elements list
+- [`unique_names()`](https://agdamsbo.github.io/FreesearchR/reference/unique_names.md)
+  : Make unique variable names
 - [`unique_short()`](https://agdamsbo.github.io/FreesearchR/reference/unique_short.md)
   : Create unique short names of character vector items based on index
 - [`update_factor_ui()`](https://agdamsbo.github.io/FreesearchR/reference/update-factor.md)

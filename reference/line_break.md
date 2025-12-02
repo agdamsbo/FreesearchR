@@ -33,5 +33,5 @@ character string
 "Lorem ipsum... you know the routine" |> line_break()
 #> [1] "Lorem ipsum... you\nknow the routine"
 paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(force = TRUE)
-#> [1] "ibgccehdajdebjihfdbc\nbacigaffbaadgbabdedh\ncjeaifgdbjhieacaagga\nagdfeediafjfibbfjihd\negiebfajgfhcgbi\n"
+#> [1] "gccehdajdebjihfdbcgb\ncigaffbaadgbabdedhfc\neaifgdbjhieacaaggaja\ndfeediafjfibbfjihdhe\niebfajgfhcgbidc\n"
 ```
