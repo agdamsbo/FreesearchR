@@ -515,18 +515,82 @@ pipe_string <- function(data, collapse = "|>\n") {
 #' @examples
 #' list(
 #'   as.symbol(paste0("mtcars$", "mpg")),
-#'   rlang::call2(.fn = "select", !!!list(c("cyl", "disp")), .ns = "dplyr"),
+#'   rlang::call2(.fn = "select", !!!list(c("cyl", "di  sp")), .ns = "dplyr"),
 #'   rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
 #' ) |>
 #'   merge_expression() |>
 #'   expression_string()
 expression_string <- function(data, assign.str = "") {
   exp.str <- if (is.call(data)) deparse(data) else data
-  # browser()
+
   out <- paste0(assign.str, gsub("%>%", "|>\n", paste(gsub('"', "'", paste(exp.str, collapse = "")), collapse = "")))
-  gsub(" |`", "", out)
+  out <- collapse_spaces(out,preserve_newlines = FALSE)
+  gsub("`", "", out)
 }
 
+#' Substitue spaces/tabs with single space excluding text within quotes
+#'
+#' @description
+#' Written assisted by Claude.ai. It is long and possibly too complicated,
+#' but it works
+#'
+#'
+#' @param x character string
+#' @param preserve_newlines flag to preserve new lines
+#'
+#' @returns character string
+#'
+#' @examples
+#' collapse_spaces(c("cyl", "di sp","s e   d","d  e'dl  e'"))
+collapse_spaces <- function(x, preserve_newlines = TRUE) {
+  # Function to process a single string
+  process_string <- function(text) {
+    # Pattern to match single-quoted strings
+    quote_pattern <- "'[^']*'"
+
+    # Find all quoted strings and their positions
+    quotes <- gregexpr(quote_pattern, text, perl = TRUE)[[1]]
+
+    if (quotes[1] == -1) {
+      # No quoted strings, process entire text
+      if (preserve_newlines) {
+        return(gsub("[ \\t]{1,}", " ", text))
+      } else {
+        return(gsub("\\s{1,}", " ", text))
+      }
+    }
+
+    # Extract quoted strings
+    quote_lengths <- attr(quotes, "match.length")
+    quoted_parts <- substring(text, quotes, quotes + quote_lengths - 1)
+
+    # Create placeholders
+    placeholders <- paste0("__QUOTE_", seq_along(quoted_parts), "__")
+
+    # Replace quoted strings with placeholders
+    result <- text
+    for (i in seq_along(quoted_parts)) {
+      result <- sub(quote_pattern, placeholders[i], result, perl = TRUE)
+    }
+
+    # Collapse spaces in non-quoted parts
+    if (preserve_newlines) {
+      result <- gsub("[ \\t]{2,}", "", result)
+    } else {
+      result <- gsub("\\s{2,}", "", result)
+    }
+
+    # Restore quoted strings
+    for (i in seq_along(quoted_parts)) {
+      result <- sub(placeholders[i], quoted_parts[i], result, fixed = TRUE)
+    }
+
+    return(result)
+  }
+
+  # Apply to each element of vector
+  sapply(x, process_string, USE.NAMES = FALSE)
+}
 
 #' Very simple function to remove nested lists, like when uploading .rds
 #'

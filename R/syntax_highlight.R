@@ -11,15 +11,25 @@ prismCodeBlock <- function(code) {
 
 prismDependencies <- tags$head(
   tags$script(src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.4/prism.min.js"),
-  tags$link(rel = "stylesheet", type = "text/css",
-            href = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.4/themes/prism.min.css")
+  tags$link(
+    rel = "stylesheet", type = "text/css",
+    href = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.4/themes/prism.min.css"
+  ),
+  tags$script(src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.4/components/prism-r.min.js"),
+  tags$link(
+    rel = "stylesheet",
+    href = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css"
+  ),
+  tags$script(
+    src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js"
+  ),
+  tags$script(
+    src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"
+  )
 )
 
-prismRDependency <- tags$head(
-  tags$script(src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.4/components/prism-r.min.js")
-)
 
-html_code_wrap <- function(string,lang="r"){
+html_code_wrap <- function(string, lang = "r") {
   glue::glue("<pre><code class='language-{lang}'>{string}
   </code></pre>")
 }
