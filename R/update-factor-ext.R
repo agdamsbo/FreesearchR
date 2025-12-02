@@ -1,4 +1,3 @@
-
 ## Works, but not implemented
 ##
 ## These edits mainly allows for
@@ -101,7 +100,6 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
     id,
     function(input, output, session) {
-
       rv <- reactiveValues(data = NULL, data_grid = NULL)
 
       bindEvent(observe({
@@ -207,19 +205,37 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
         data <- req(data_r())
         variable <- req(input$variable)
         grid <- req(input$grid_data)
-        name_var <- if (isTRUE(input$new_var)) {
-          paste0(variable, "_updated")
-        } else {
-          variable
-        }
-        data[[name_var]] <- factor(
-          as.character(data[[variable]]),
-          levels = grid[["Var1"]]
+
+        parameters <- list(
+          variable = variable,
+          new_variable = isTRUE(input$new_var) | any(grid[["Var1_toset"]] == "New label"),
+          new_levels = as.character(grid[["Var1"]]),
+          new_labels = as.character(grid[["Var1_toset"]]),
+          ignore = "New label"
         )
-        data[[name_var]] <- factor(
-          data[[variable]],
-          labels = ifelse(grid[["Var1_toset"]]=="New label",grid[["Var1"]],grid[["Var1_toset"]])
+
+        data <- tryCatch(
+          {
+            rlang::exec(
+              factor_new_levels_labels,
+              !!!modifyList(parameters,
+                val = list(data = data)
+              )
+            )
+          },
+          error = function(err) {
+            showNotification(paste("We encountered the following error creating the new factor:", err), type = "err")
+          }
         )
+
+        # browser()
+        code <- rlang::call2(
+          "factor_new_levels_labels",
+          !!!parameters,
+          .ns = "FreesearchR"
+        )
+        attr(data, "code") <- code
+
         data
       })
 
@@ -229,6 +245,62 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
       return(reactive(rv$data))
     }
   )
+}
+
+#' Simple function to apply new levels and/or labels to factor
+#'
+#' @param variable factor variable
+#' @param new_level new levels, same length as original
+#' @param new_label new labels, same length as original
+#' @param ignore character string to ignore in new labels
+#'
+#' @returns factor
+#' @export
+#'
+#' @examples
+#' data_n <- mtcars
+#' data_n$cyl <- factor(data_n$cyl)
+#' factor_new_levels_labels(data_n, "cyl", new_labels = c("four", "New label", "New label"))
+factor_new_levels_labels <- function(
+    data,
+    variable,
+    new_variable = TRUE,
+    new_levels = NULL,
+    new_labels = NULL,
+    ignore = "New label") {
+  if (!is.factor(data[[variable]])) {
+    return(data)
+  }
+
+  if (is.null(new_levels)) {
+    new_levels <- levels(data[[variable]])
+  }
+
+  if (is.null(new_labels)) {
+    new_labels <- labels(data[[variable]])
+  }
+
+  with_level <- factor(
+    as.character(data[[variable]]),
+    levels = new_levels
+  )
+  with_label <- factor(
+    with_level,
+    labels = ifelse(new_labels == "New label", new_levels, new_labels)
+  )
+
+  # browser()
+
+  if (isTRUE(new_variable)) {
+    append_column(
+      data = data,
+      column = with_label,
+      name = unique_names(new = paste0(variable, "_updated"), existing = names(data))
+    )
+  } else {
+    data[[variable]] <- new_variable
+    data
+  }
 }
 
 
@@ -289,3 +361,22 @@ winbox_update_factor <- function(id,
   )
 }
 
+
+#' Make unique variable names
+#'
+#' Helper function to create new variable names that are unique
+#' given a set of existing names (in a data set, for example).
+#' If a variable name already exists, a number will be appended.
+#'
+#' @param new a vector of proposed new variable names
+#' @param existing a vector of existing variable names
+#' @return a vector of unique new variable names
+#' @examples
+#' unique_names(c("var_x", "var_y", "var_x"), c("var_x", "var_z"))
+#'
+#' @export
+unique_names <- function(new, existing = character()) {
+  new_names <- make.unique(c(existing, new), sep = "_")
+
+  new_names[-seq_along(existing)]
+}

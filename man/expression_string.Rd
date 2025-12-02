@@ -18,7 +18,7 @@ Deparses expression as string, substitutes native pipe and adds assign
 \examples{
 list(
   as.symbol(paste0("mtcars$", "mpg")),
-  rlang::call2(.fn = "select", !!!list(c("cyl", "disp")), .ns = "dplyr"),
+  rlang::call2(.fn = "select", !!!list(c("cyl", "di  sp")), .ns = "dplyr"),
   rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
 ) |>
   merge_expression() |>
