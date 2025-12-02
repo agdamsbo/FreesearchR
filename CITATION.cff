@@ -8,7 +8,7 @@ message: 'To cite package "FreesearchR" in publications use:'
 type: software
 license: AGPL-3.0-or-later
 title: 'FreesearchR: Easy data analysis for clinicians'
-version: 25.11.1
+version: 25.12.1
 doi: 10.5281/zenodo.14527429
 identifiers:
 - type: url
@@ -1063,6 +1063,40 @@ references:
     orcid: https://orcid.org/0000-0002-7559-1154
   year: '2025'
   doi: 10.32614/CRAN.package.stRoke
+- type: software
+  title: data.table
+  abstract: 'data.table: Extension of `data.frame`'
+  notes: Imports
+  url: https://r-datatable.com
+  repository: https://CRAN.R-project.org/package=data.table
+  authors:
+  - family-names: Barrett
+    given-names: Tyson
+    email: t.barrett88@gmail.com
+    orcid: https://orcid.org/0000-0002-2137-1391
+  - family-names: Dowle
+    given-names: Matt
+    email: mattjdowle@gmail.com
+  - family-names: Srinivasan
+    given-names: Arun
+    email: asrini@pm.me
+  - family-names: Gorecki
+    given-names: Jan
+  - family-names: Chirico
+    given-names: Michael
+    orcid: https://orcid.org/0000-0003-0787-087X
+  - family-names: Hocking
+    given-names: Toby
+    orcid: https://orcid.org/0000-0002-3146-0865
+  - family-names: Schwendinger
+    given-names: Benjamin
+    orcid: https://orcid.org/0000-0003-3315-8114
+  - family-names: Krylov
+    given-names: Ivan
+    email: ikrylov@disroot.org
+    orcid: https://orcid.org/0000-0002-0172-3812
+  year: '2025'
+  doi: 10.32614/CRAN.package.data.table
 - type: software
   title: styler
   abstract: 'styler: Non-Invasive Pretty Printing of R Code'

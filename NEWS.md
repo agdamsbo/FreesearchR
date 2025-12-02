@@ -1,3 +1,11 @@
+# FreesearchR 25.12.1
+
+*NEW* Option to edit factor label names in the "New factor" pop-up. This allows for easier naming for tables, but also to combine levels. A new variable is appended to the dataset if label names are changed. Code is now also exported.
+
+*FIX* Fixes a bug, where white space in code exported was removed. Now a little too many spaces are included. Fine tuning continues.
+
+*NEW* Easily copy code by just clicking "copy" in code blocks.
+
 # FreesearchR 25.11.2
 
 *NEW* Vignettes were moved to the [FreesearchR project knowledge base](https://freesearchr.github.io/FreesearchR-knowledge/). This was mainly to ease rendering and allow quick and easy updates as well as future translations.

@@ -374,7 +374,11 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           }
         )
 
-        data <- append_column(data, column = new_variable, name = paste0(variable, "_cut"), index = "right")
+        data <- append_column(data,
+                              column = new_variable,
+                              name = unique_names(paste0(variable, "_cut"),
+                                                  existing = names(data)),
+                              index = "right")
 
         code <- rlang::call2(
           "append_column",
