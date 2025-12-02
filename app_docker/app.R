@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpFr1XvR/file15f634a33505f.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpyM6210/file126781ad7585e.R 
 ########
 
 i18n_path <- here::here("translations")
@@ -62,7 +62,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.11.1'
+app_version <- function()'25.12.1'
 
 
 ########
@@ -1656,7 +1656,11 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           }
         )
 
-        data <- append_column(data, column = new_variable, name = paste0(variable, "_cut"), index = "right")
+        data <- append_column(data,
+                              column = new_variable,
+                              name = unique_names(paste0(variable, "_cut"),
+                                                  existing = names(data)),
+                              index = "right")
 
         code <- rlang::call2(
           "append_column",
@@ -4060,18 +4064,82 @@ pipe_string <- function(data, collapse = "|>\n") {
 #' @examples
 #' list(
 #'   as.symbol(paste0("mtcars$", "mpg")),
-#'   rlang::call2(.fn = "select", !!!list(c("cyl", "disp")), .ns = "dplyr"),
+#'   rlang::call2(.fn = "select", !!!list(c("cyl", "di  sp")), .ns = "dplyr"),
 #'   rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
 #' ) |>
 #'   merge_expression() |>
 #'   expression_string()
 expression_string <- function(data, assign.str = "") {
   exp.str <- if (is.call(data)) deparse(data) else data
-  # browser()
+
   out <- paste0(assign.str, gsub("%>%", "|>\n", paste(gsub('"', "'", paste(exp.str, collapse = "")), collapse = "")))
-  gsub(" |`", "", out)
+  out <- collapse_spaces(out,preserve_newlines = FALSE)
+  gsub("`", "", out)
 }
 
+#' Substitue spaces/tabs with single space excluding text within quotes
+#'
+#' @description
+#' Written assisted by Claude.ai. It is long and possibly too complicated,
+#' but it works
+#'
+#'
+#' @param x character string
+#' @param preserve_newlines flag to preserve new lines
+#'
+#' @returns character string
+#'
+#' @examples
+#' collapse_spaces(c("cyl", "di sp","s e   d","d  e'dl  e'"))
+collapse_spaces <- function(x, preserve_newlines = TRUE) {
+  # Function to process a single string
+  process_string <- function(text) {
+    # Pattern to match single-quoted strings
+    quote_pattern <- "'[^']*'"
+
+    # Find all quoted strings and their positions
+    quotes <- gregexpr(quote_pattern, text, perl = TRUE)[[1]]
+
+    if (quotes[1] == -1) {
+      # No quoted strings, process entire text
+      if (preserve_newlines) {
+        return(gsub("[ \\t]{1,}", " ", text))
+      } else {
+        return(gsub("\\s{1,}", " ", text))
+      }
+    }
+
+    # Extract quoted strings
+    quote_lengths <- attr(quotes, "match.length")
+    quoted_parts <- substring(text, quotes, quotes + quote_lengths - 1)
+
+    # Create placeholders
+    placeholders <- paste0("__QUOTE_", seq_along(quoted_parts), "__")
+
+    # Replace quoted strings with placeholders
+    result <- text
+    for (i in seq_along(quoted_parts)) {
+      result <- sub(quote_pattern, placeholders[i], result, perl = TRUE)
+    }
+
+    # Collapse spaces in non-quoted parts
+    if (preserve_newlines) {
+      result <- gsub("[ \\t]{2,}", "", result)
+    } else {
+      result <- gsub("\\s{2,}", "", result)
+    }
+
+    # Restore quoted strings
+    for (i in seq_along(quoted_parts)) {
+      result <- sub(placeholders[i], quoted_parts[i], result, fixed = TRUE)
+    }
+
+    return(result)
+  }
+
+  # Apply to each element of vector
+  sapply(x, process_string, USE.NAMES = FALSE)
+}
 
 #' Very simple function to remove nested lists, like when uploading .rds
 #'
@@ -4301,7 +4369,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.11.1-251109'
+hosted_version <- function()'v25.12.1-251202'
 
 
 ########
@@ -9413,15 +9481,25 @@ prismCodeBlock <- function(code) {
 
 prismDependencies <- tags$head(
   tags$script(src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.4/prism.min.js"),
-  tags$link(rel = "stylesheet", type = "text/css",
-            href = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.4/themes/prism.min.css")
+  tags$link(
+    rel = "stylesheet", type = "text/css",
+    href = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.4/themes/prism.min.css"
+  ),
+  tags$script(src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.4/components/prism-r.min.js"),
+  tags$link(
+    rel = "stylesheet",
+    href = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css"
+  ),
+  tags$script(
+    src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js"
+  ),
+  tags$script(
+    src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"
+  )
 )
 
-prismRDependency <- tags$head(
-  tags$script(src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.8.4/components/prism-r.min.js")
-)
 
-html_code_wrap <- function(string,lang="r"){
+html_code_wrap <- function(string, lang = "r") {
   glue::glue("<pre><code class='language-{lang}'>{string}
   </code></pre>")
 }
@@ -10222,7 +10300,6 @@ ui_elements <- function(selection) {
 #### Current file: /Users/au301842/FreesearchR/R//update-factor-ext.R 
 ########
 
-
 ## Works, but not implemented
 ##
 ## These edits mainly allows for
@@ -10325,7 +10402,6 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
   moduleServer(
     id,
     function(input, output, session) {
-
       rv <- reactiveValues(data = NULL, data_grid = NULL)
 
       bindEvent(observe({
@@ -10431,19 +10507,37 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
         data <- req(data_r())
         variable <- req(input$variable)
         grid <- req(input$grid_data)
-        name_var <- if (isTRUE(input$new_var)) {
-          paste0(variable, "_updated")
-        } else {
-          variable
-        }
-        data[[name_var]] <- factor(
-          as.character(data[[variable]]),
-          levels = grid[["Var1"]]
+
+        parameters <- list(
+          variable = variable,
+          new_variable = isTRUE(input$new_var) | any(grid[["Var1_toset"]] == "New label"),
+          new_levels = as.character(grid[["Var1"]]),
+          new_labels = as.character(grid[["Var1_toset"]]),
+          ignore = "New label"
         )
-        data[[name_var]] <- factor(
-          data[[variable]],
-          labels = ifelse(grid[["Var1_toset"]]=="New label",grid[["Var1"]],grid[["Var1_toset"]])
+
+        data <- tryCatch(
+          {
+            rlang::exec(
+              factor_new_levels_labels,
+              !!!modifyList(parameters,
+                val = list(data = data)
+              )
+            )
+          },
+          error = function(err) {
+            showNotification(paste("We encountered the following error creating the new factor:", err), type = "err")
+          }
         )
+
+        # browser()
+        code <- rlang::call2(
+          "factor_new_levels_labels",
+          !!!parameters,
+          .ns = "FreesearchR"
+        )
+        attr(data, "code") <- code
+
         data
       })
 
@@ -10453,6 +10547,62 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
       return(reactive(rv$data))
     }
   )
+}
+
+#' Simple function to apply new levels and/or labels to factor
+#'
+#' @param variable factor variable
+#' @param new_level new levels, same length as original
+#' @param new_label new labels, same length as original
+#' @param ignore character string to ignore in new labels
+#'
+#' @returns factor
+#' @export
+#'
+#' @examples
+#' data_n <- mtcars
+#' data_n$cyl <- factor(data_n$cyl)
+#' factor_new_levels_labels(data_n, "cyl", new_labels = c("four", "New label", "New label"))
+factor_new_levels_labels <- function(
+    data,
+    variable,
+    new_variable = TRUE,
+    new_levels = NULL,
+    new_labels = NULL,
+    ignore = "New label") {
+  if (!is.factor(data[[variable]])) {
+    return(data)
+  }
+
+  if (is.null(new_levels)) {
+    new_levels <- levels(data[[variable]])
+  }
+
+  if (is.null(new_labels)) {
+    new_labels <- labels(data[[variable]])
+  }
+
+  with_level <- factor(
+    as.character(data[[variable]]),
+    levels = new_levels
+  )
+  with_label <- factor(
+    with_level,
+    labels = ifelse(new_labels == "New label", new_levels, new_labels)
+  )
+
+  # browser()
+
+  if (isTRUE(new_variable)) {
+    append_column(
+      data = data,
+      column = with_label,
+      name = unique_names(new = paste0(variable, "_updated"), existing = names(data))
+    )
+  } else {
+    data[[variable]] <- new_variable
+    data
+  }
 }
 
 
@@ -10513,6 +10663,25 @@ winbox_update_factor <- function(id,
   )
 }
 
+
+#' Make unique variable names
+#'
+#' Helper function to create new variable names that are unique
+#' given a set of existing names (in a data set, for example).
+#' If a variable name already exists, a number will be appended.
+#'
+#' @param new a vector of proposed new variable names
+#' @param existing a vector of existing variable names
+#' @return a vector of unique new variable names
+#' @examples
+#' unique_names(c("var_x", "var_y", "var_x"), c("var_x", "var_z"))
+#'
+#' @export
+unique_names <- function(new, existing = character()) {
+  new_names <- make.unique(c(existing, new), sep = "_")
+
+  new_names[-seq_along(existing)]
+}
 
 
 ########
@@ -11817,7 +11986,6 @@ make_validation_alerts <- function(data) {
 #' @returns Shiny ui module
 #' @export
 #'
-#' @example examples/visual_summary_demo.R
 visual_summary_ui <- function(id) {
   ns <- shiny::NS(id)
 
@@ -11911,14 +12079,6 @@ modal_visual_summary <- function(id,
 #' @returns An [apexchart()] `htmlwidget` object.
 #' @export
 #'
-#' @examples
-#' data_demo <- mtcars
-#' data_demo[2:4, "cyl"] <- NA
-#' rbind(data_demo, data_demo, data_demo, data_demo) |> missings_apex_plot()
-#' data_demo |> missings_apex_plot()
-#' mtcars |> missings_apex_plot(animation = TRUE)
-#' # dplyr::storms |> missings_apex_plot()
-#' visdat::vis_dat(dplyr::storms)
 missings_apex_plot <- function(data, animation = FALSE, ...) {
   l <- data_summary_gather(data, ...)
 
@@ -11969,14 +12129,6 @@ missings_apex_plot <- function(data, animation = FALSE, ...) {
 #' @returns ggplot2 object
 #' @export
 #'
-#' @examples
-#' data_demo <- mtcars
-#' data_demo[sample(1:32, 10), "cyl"] <- NA
-#' data_demo[sample(1:32, 8), "vs"] <- NA
-#' visual_summary(data_demo)
-#' visual_summary(data_demo, palette.fun = scales::hue_pal())
-#' visual_summary(dplyr::storms, summary.fun = data_type)
-#' visual_summary(dplyr::storms, summary.fun = data_type, na.label = "Missings", legend.title = "Class")
 visual_summary <- function(data, legend.title = NULL, ylab = "Observations", ...) {
   l <- data_summary_gather(data, ...)
 
@@ -12028,7 +12180,7 @@ visual_summary <- function(data, legend.title = NULL, ylab = "Observations", ...
 #' @export
 #'
 #' @examples
-#' mtcars |> data_summary_gather()
+#' mtcars |> data_summary_gather() |> names()
 data_summary_gather <- function(data, summary.fun = class, palette.fun = viridisLite::viridis, na.label = "NA", ...) {
   df_plot <- setNames(data, unique_short(names(data))) |>
     purrr::map_df(\(x){
@@ -12308,7 +12460,6 @@ ui <- bslib::page_fixed(
   usei18n(i18n),
   ## Code formatting dependencies
   prismDependencies,
-  prismRDependency,
   # html_dependency_FreesearchR(),
   ## Version dependent header
   header_include(),
@@ -12813,10 +12964,12 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$modal_update,
-    datamods::modal_update_factor(id = "modal_update", title = i18n$t("Reorder factor levels"))
+    # datamods::modal_update_factor(id = "modal_update", title = i18n$t("Reorder factor levels"))
+    modal_update_factor(id = "modal_update", title = i18n$t("Reorder factor levels"))
   )
 
-  data_modal_update <- datamods::update_factor_server(
+  # data_modal_update <- datamods::update_factor_server(
+  data_modal_update <- update_factor_server(
     id = "modal_update",
     data_r = reactive(rv$data)
   )
@@ -13265,17 +13418,19 @@ server <- function(input, output, session) {
 
 
   output$detail_level <- shiny::renderUI({
-  shiny::radioButtons(
-    inputId = "detail_level",
-    label = i18n$t("Level of detail"),
-    selected = "minimal",
-    inline = TRUE,choiceValues = c("minimal",
-                                   "extended"),
-    choiceNames = c(
-      i18n$t("Minimal"),
-      i18n$t("Extensive")
+    shiny::radioButtons(
+      inputId = "detail_level",
+      label = i18n$t("Level of detail"),
+      selected = "minimal",
+      inline = TRUE, choiceValues = c(
+        "minimal",
+        "extended"
+      ),
+      choiceNames = c(
+        i18n$t("Minimal"),
+        i18n$t("Extensive")
+      )
     )
-  )
   })
 
 
