@@ -40,7 +40,7 @@ cut_variable_ui <- function(id) {
       column(
         width = 3,
         shiny::conditionalPanel(
-          condition = "input.method != 'top' && input.method != 'bottom'",
+          condition = "input.method != 'top' && input.method != 'bottom' && input.method != 'words' && input.method != 'characters'",
           ns = ns,
           checkboxInput(
             inputId = ns("right"),
@@ -94,7 +94,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         data <- data_r()
         rv$data <- data
         vars_num <- vapply(data, \(.x){
-          is.numeric(.x) || is_datetime(.x) || (is.factor(.x) && length(levels(.x)) > 2)
+          is.numeric(.x) || is_datetime(.x) || (is.factor(.x) && length(levels(.x)) > 2) || is.character(.x)
         }, logical(1))
         vars_num <- names(vars_num)[vars_num]
 
@@ -216,6 +216,12 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
             "top",
             "bottom"
           )
+        } else if ("character" %in% class(data[[variable]])) {
+          choices <- c(
+            choices,
+            "characters",
+            "words"
+          )
         } else {
           choices <- c(
             choices,
@@ -294,7 +300,9 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           list(var = f, brks = levels(f))
         } else if (input$method %in% c(
           "top",
-          "bottom"
+          "bottom",
+          "characters",
+          "words"
         )) {
           # This allows factor simplification to get the top or bottom count
           f <- cut_var(data[[variable]], breaks = input$n_breaks)
@@ -409,7 +417,6 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           responseName = "count"
         )
         count_data$freq <- paste(signif(count_data$count / nrow(data) * 100, 3), "%")
-        # browser()
         gridTheme <- getOption("datagrid.theme")
         if (length(gridTheme) < 1) {
           datamods:::apply_grid_theme()
@@ -475,6 +482,9 @@ plot_histogram <- function(data, column = NULL, bins = 30, breaks = NULL, color 
     x <- data
   } else {
     x <- data[[column]]
+  }
+  if (is.character(x)){
+    x <- REDCapCAST::as_factor(x)
   }
   x <- as.numeric(x)
   op <- par(mar = rep(1.5, 4))
@@ -548,6 +558,18 @@ cut_methods <- function() {
     "bottom" = list(
       descr = i18n$t("Combine below percentage"),
       breaks = i18n$t("Percentage"),
+      min = 1,
+      max = 50
+    ),
+    "characters" = list(
+      descr = i18n$t("Shorten to first letters"),
+      breaks = i18n$t("Letters"),
+      min = 1,
+      max = 20
+    ),
+    "words" = list(
+      descr = i18n$t("Shorten to first words"),
+      breaks = i18n$t("Words"),
       min = 1,
       max = 50
     ),

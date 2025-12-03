@@ -184,21 +184,24 @@ cut_var.factor <- function(x, breaks = NULL, type = c("top", "bottom"), other = 
   tbl <- sort(table(x), decreasing = TRUE)
 
   if (type == "top") {
-    if (length(levels(x)) <= breaks){
+    if (length(levels(x)) <= breaks) {
       return(x)
     }
     lvls <- names(tbl[seq_len(breaks)])
   } else if (type == "bottom") {
     freqs_check <- tbl / NROW(x) * 100 < breaks
-    if (!any(freqs_check)){
+    if (!any(freqs_check)) {
       return(x)
     }
     lvls <- names(tbl)[!freqs_check]
   }
 
-  if (other %in% lvls) {
-    other <- paste(other, "_freesearchr")
-  }
+  # if (other %in% lvls) {
+  #   other <- paste(other, "_freesearchr")
+  # }
+
+  # Ensure unique new level name
+  other <- unique_names(other, lvls)
 
   ## Relabel and relevel
   out <- forcats::fct_relabel(
@@ -213,6 +216,41 @@ cut_var.factor <- function(x, breaks = NULL, type = c("top", "bottom"), other = 
   out
 }
 
+
+#' Subset first part of string to factor
+#'
+#' @name cut_var
+#'
+#' @returns factor
+#' @export
+#'
+#' @examples
+#' c("Sunday", "This week is short") |> cut_var(breaks = 3)
+cut_var.character <- function(x, breaks = NULL, type = c("characters", "words"), ...) {
+  args <- list(...)
+
+  if (is.null(breaks)) {
+    return(x)
+  }
+
+  type <- match.arg(type)
+
+  if (type == "characters") {
+    out <- substr(x, start = 1, stop = breaks)
+  } else if (type == "words") {
+    out <- strsplit(x, " ") |>
+      sapply(\(.x){
+        if (length(.x) > breaks) {
+          paste(.x[seq_len(breaks)], collapse = " ")
+        } else {
+          paste(.x, collapse = " ")
+        }
+      })
+  }
+
+  attr(out, which = "brks") <- breaks
+  REDCapCAST::as_factor(out)
+}
 
 #' Test class
 #'
