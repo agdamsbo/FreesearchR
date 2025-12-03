@@ -4,6 +4,8 @@ Extended cutting function with fall-back to the native base::cut
 
 Simplify a factor to only the top or bottom n levels
 
+Subset first part of string to factor
+
 ## Usage
 
 ``` r
@@ -40,6 +42,9 @@ cut_var(x, breaks = NULL, start.on.monday = TRUE, ...)
 
 # S3 method for class 'factor'
 cut_var(x, breaks = NULL, type = c("top", "bottom"), other = "Other", ...)
+
+# S3 method for class 'character'
+cut_var(x, breaks = NULL, type = c("characters", "words"), ...)
 ```
 
 ## Arguments
@@ -55,6 +60,8 @@ cut_var(x, breaks = NULL, type = c("top", "bottom"), other = "Other", ...)
 - type:
 
 ## Value
+
+factor
 
 factor
 
@@ -140,4 +147,9 @@ mtcars$carb |>
 #> 
 #>     2     4     1 Other 
 #>    10    10     7     5 
+c("Sunday", "This week is short") |> cut_var(breaks = 3)
+#> [1] Sun Thi
+#> attr(,"brks")
+#> [1] 3
+#> Levels: Sun Thi
 ```
