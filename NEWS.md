@@ -1,3 +1,9 @@
+# FreesearchR 25.12.2
+
+*FIX* Fixed hanging interface when splitting strings.
+
+*NEW* New option to shorten character variables to the first N words or characters. Shortening by characters could be useful working with eg. ICD-10 diagnostic codes.
+
 # FreesearchR 25.12.1
 
 *NEW* Option to edit factor label names in the "New factor" pop-up. This allows for easier naming for tables, but also to combine levels. A new variable is appended to the dataset if label names are changed. Code is now also exported.

@@ -8,6 +8,7 @@
 \alias{cut_var.POSIXct}
 \alias{cut_var.Date}
 \alias{cut_var.factor}
+\alias{cut_var.character}
 \title{Extended cutting function with fall-back to the native base::cut}
 \usage{
 cut_var(x, ...)
@@ -37,6 +38,8 @@ cut_var(x, ...)
 \method{cut_var}{Date}(x, breaks = NULL, start.on.monday = TRUE, ...)
 
 \method{cut_var}{factor}(x, breaks = NULL, type = c("top", "bottom"), other = "Other", ...)
+
+\method{cut_var}{character}(x, breaks = NULL, type = c("characters", "words"), ...)
 }
 \arguments{
 \item{x}{an object inheriting from class "POSIXct"}
@@ -49,11 +52,15 @@ cut_var(x, ...)
 factor
 
 factor
+
+factor
 }
 \description{
 Extended cutting function with fall-back to the native base::cut
 
 Simplify a factor to only the top or bottom n levels
+
+Subset first part of string to factor
 }
 \examples{
 readr::parse_time(c("01:00:20", "03:00:20", "01:20:20", "08:20:20", "21:20:20", "03:02:20")) |> cut_var(2)
@@ -80,4 +87,5 @@ mtcars$carb |>
   as.factor() |>
   cut_var(20, "bottom") |>
   table()
+c("Sunday", "This week is short") |> cut_var(breaks = 3)
 }

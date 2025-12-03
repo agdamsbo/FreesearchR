@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpyM6210/file1267841f7ff86.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpejDCIE/filec7541d50b50.R 
 ########
 
 i18n_path <- system.file("translations", package = "FreesearchR")
@@ -62,7 +62,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.12.1'
+app_version <- function()'25.12.2'
 
 
 ########
@@ -1214,21 +1214,24 @@ cut_var.factor <- function(x, breaks = NULL, type = c("top", "bottom"), other = 
   tbl <- sort(table(x), decreasing = TRUE)
 
   if (type == "top") {
-    if (length(levels(x)) <= breaks){
+    if (length(levels(x)) <= breaks) {
       return(x)
     }
     lvls <- names(tbl[seq_len(breaks)])
   } else if (type == "bottom") {
     freqs_check <- tbl / NROW(x) * 100 < breaks
-    if (!any(freqs_check)){
+    if (!any(freqs_check)) {
       return(x)
     }
     lvls <- names(tbl)[!freqs_check]
   }
 
-  if (other %in% lvls) {
-    other <- paste(other, "_freesearchr")
-  }
+  # if (other %in% lvls) {
+  #   other <- paste(other, "_freesearchr")
+  # }
+
+  # Ensure unique new level name
+  other <- unique_names(other, lvls)
 
   ## Relabel and relevel
   out <- forcats::fct_relabel(
@@ -1243,6 +1246,41 @@ cut_var.factor <- function(x, breaks = NULL, type = c("top", "bottom"), other = 
   out
 }
 
+
+#' Subset first part of string to factor
+#'
+#' @name cut_var
+#'
+#' @returns factor
+#' @export
+#'
+#' @examples
+#' c("Sunday", "This week is short") |> cut_var(breaks = 3)
+cut_var.character <- function(x, breaks = NULL, type = c("characters", "words"), ...) {
+  args <- list(...)
+
+  if (is.null(breaks)) {
+    return(x)
+  }
+
+  type <- match.arg(type)
+
+  if (type == "characters") {
+    out <- substr(x, start = 1, stop = breaks)
+  } else if (type == "words") {
+    out <- strsplit(x, " ") |>
+      sapply(\(.x){
+        if (length(.x) > breaks) {
+          paste(.x[seq_len(breaks)], collapse = " ")
+        } else {
+          paste(.x, collapse = " ")
+        }
+      })
+  }
+
+  attr(out, which = "brks") <- breaks
+  REDCapCAST::as_factor(out)
+}
 
 #' Test class
 #'
@@ -1322,7 +1360,7 @@ cut_variable_ui <- function(id) {
       column(
         width = 3,
         shiny::conditionalPanel(
-          condition = "input.method != 'top' && input.method != 'bottom'",
+          condition = "input.method != 'top' && input.method != 'bottom' && input.method != 'words' && input.method != 'characters'",
           ns = ns,
           checkboxInput(
             inputId = ns("right"),
@@ -1376,7 +1414,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
         data <- data_r()
         rv$data <- data
         vars_num <- vapply(data, \(.x){
-          is.numeric(.x) || is_datetime(.x) || (is.factor(.x) && length(levels(.x)) > 2)
+          is.numeric(.x) || is_datetime(.x) || (is.factor(.x) && length(levels(.x)) > 2) || is.character(.x)
         }, logical(1))
         vars_num <- names(vars_num)[vars_num]
 
@@ -1498,6 +1536,12 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
             "top",
             "bottom"
           )
+        } else if ("character" %in% class(data[[variable]])) {
+          choices <- c(
+            choices,
+            "characters",
+            "words"
+          )
         } else {
           choices <- c(
             choices,
@@ -1576,7 +1620,9 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           list(var = f, brks = levels(f))
         } else if (input$method %in% c(
           "top",
-          "bottom"
+          "bottom",
+          "characters",
+          "words"
         )) {
           # This allows factor simplification to get the top or bottom count
           f <- cut_var(data[[variable]], breaks = input$n_breaks)
@@ -1691,7 +1737,6 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
           responseName = "count"
         )
         count_data$freq <- paste(signif(count_data$count / nrow(data) * 100, 3), "%")
-        # browser()
         gridTheme <- getOption("datagrid.theme")
         if (length(gridTheme) < 1) {
           datamods:::apply_grid_theme()
@@ -1757,6 +1802,9 @@ plot_histogram <- function(data, column = NULL, bins = 30, breaks = NULL, color 
     x <- data
   } else {
     x <- data[[column]]
+  }
+  if (is.character(x)){
+    x <- REDCapCAST::as_factor(x)
   }
   x <- as.numeric(x)
   op <- par(mar = rep(1.5, 4))
@@ -1830,6 +1878,18 @@ cut_methods <- function() {
     "bottom" = list(
       descr = i18n$t("Combine below percentage"),
       breaks = i18n$t("Percentage"),
+      min = 1,
+      max = 50
+    ),
+    "characters" = list(
+      descr = i18n$t("Shorten to first letters"),
+      breaks = i18n$t("Letters"),
+      min = 1,
+      max = 20
+    ),
+    "words" = list(
+      descr = i18n$t("Shorten to first words"),
+      breaks = i18n$t("Words"),
       min = 1,
       max = 50
     ),
@@ -4369,7 +4429,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.12.1-251202'
+hosted_version <- function()'v25.12.2-251203'
 
 
 ########
@@ -12974,11 +13034,14 @@ server <- function(input, output, session) {
     data_r = reactive(rv$data)
   )
 
-  shiny::observeEvent(data_modal_update(), {
-    shiny::removeModal()
-    rv$data <- data_modal_update()
-    rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
-  })
+  shiny::observeEvent(
+    data_modal_update(),
+    {
+      shiny::removeModal()
+      rv$data <- data_modal_update()
+      rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
+    }
+  )
 
   #########  Split string
 
@@ -12998,6 +13061,7 @@ server <- function(input, output, session) {
   shiny::observeEvent(
     data_modal_string(),
     {
+      shiny::removeModal()
       rv$data <- data_modal_string()
       rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
     }
