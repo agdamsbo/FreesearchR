@@ -69,7 +69,8 @@ Imports:
     NHANES,
     shiny.i18n,
     stRoke,
-    data.table
+    data.table,
+    viridis
 Suggests: 
     styler,
     devtools,

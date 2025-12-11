@@ -91,3 +91,12 @@ $(document).on('focus', '.smart-dropdown .selectize-control input', function() {
       }
     });
 
+// window.addEventListener('beforeunload', function (e) {
+//         // Cancel the event
+//         e.preventDefault();
+//         // Chrome requires returnValue to be set
+//         e.returnValue = '';
+//         // Some browsers display this message, others show a generic one
+//         return 'Are you sure you want to leave? Any unsaved changes will be lost.';
+//       });
+

@@ -335,7 +335,7 @@ validation_lib <- function(name = NULL) {
     "mcar" = function(x, y) {
       ### Placeholder for missingness validation
       list(
-        string = i18n$t("There is a significant difference in data missingness in {n_nonmcar} {ifelse(n_nnonmcar==1,'variable','variables')} grouped by the selected outcome/grouping variable {outcome}."),
+        string = i18n$t("There is a significant difference in data missingness in {n_nonmcar} {ifelse(n_nonmcar==1,'variable','variables')} grouped by the selected outcome/grouping variable {outcome}."),
         summary.fun = mcar_validate,
         summary.fun.args = list(
           data = x,

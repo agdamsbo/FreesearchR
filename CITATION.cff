@@ -1117,6 +1117,18 @@ references:
   year: '2025'
   doi: 10.32614/CRAN.package.data.table
 - type: software
+  title: viridis
+  abstract: 'viridis: Colorblind-Friendly Color Maps for R'
+  notes: Imports
+  url: https://sjmgarnier.github.io/viridis/
+  repository: https://CRAN.R-project.org/package=viridis
+  authors:
+  - family-names: Garnier
+    given-names: Simon
+    email: garnier@njit.edu
+  year: '2025'
+  doi: 10.32614/CRAN.package.viridis
+- type: software
   title: styler
   abstract: 'styler: Non-Invasive Pretty Printing of R Code'
   notes: Suggests

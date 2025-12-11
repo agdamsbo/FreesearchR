@@ -75,15 +75,15 @@ data_missings_server <- function(id,
           shiny::req(data())
           vectorSelectInput(
             inputId = ns("missings_method"),
-            label = i18n$t("Select missings analysis to apply"),
+            label = i18n$t("Analysis method for missingness overview"),
             choices = setNames(
               c(
                 "predictors",
                 "outcome"
               ),
               c(
-                i18n$t("Variables"),
-                i18n$t("By outcome")
+                i18n$t("Overview of missings across variables"),
+                i18n$t("Overview of difference in variables by missing status in outcome")
               )
             )
           )
@@ -96,15 +96,19 @@ data_missings_server <- function(id,
           shiny::req(input$missings_method)
           # browser()
           if (input$missings_method == "predictors") {
+            label <- i18n$t("Select a variable for grouped overview")
             df <- data_type_filter(data(), type = c("categorical", "dichotomous"))
+            col_subset <- c("none", names(df))
           } else {
+            label <- i18n$t("Select outcome variable for overview")
             df <- datar()[apply(datar(), 2, anyNA)]
+            col_subset <- names(df)
           }
           columnSelectInput(
             inputId = ns("missings_var"),
-            label = i18n$t("Select variable to stratify analysis"),
+            label = label,
             data = df,
-            col_subset = c("none", names(df)),
+            col_subset = col_subset,
             none_label = i18n$t("No variable")
           )
         })
@@ -144,7 +148,11 @@ data_missings_server <- function(id,
             # if (is.null(variabler()) || variabler() == "" || !variabler() %in% names(data()) || variabler() == "none") {
             # tbl <- rv$data()
             if (anyNA(datar())) {
-              title <- i18n$t("No variable chosen for analysis")
+              if (input$missings_method == "predictors") {
+                title <- i18n$t("Overview of missing observations")
+              } else {
+                title <- i18n$t("No outcome measure chosen")
+              }
             } else {
               title <- i18n$t("No missing observations")
             }
