@@ -688,7 +688,7 @@ convert_to <- function(data,
 
 #' Get variable(s) to convert
 #'
-#' @param vars Output of [summary_vars()]
+#' @param vars variables, output from summary_vars() function
 #' @param classes_input List of inputs containing new classes
 #'
 #' @return a `data.table`.

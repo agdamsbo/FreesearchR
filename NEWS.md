@@ -1,3 +1,7 @@
+# FreesearchR 25.12.3
+
+*NEW* Extended missingness evaluation to include two different approaches. Docs will catch up and video tutorials are coming.
+
 # FreesearchR 25.12.2
 
 *FIX* Fixed hanging interface when splitting strings.

@@ -6,12 +6,14 @@
 \alias{data_missings_server}
 \title{Data correlations evaluation module}
 \usage{
-data_missings_ui(id)
+data_missings_ui(id, ...)
 
-data_missings_server(id, data, variable, max_level = 20, ...)
+data_missings_server(id, data, max_level = 20, ...)
 }
 \arguments{
 \item{id}{Module id}
+
+\item{...}{additional UI elements to show before the table overview}
 
 \item{data}{data}
 

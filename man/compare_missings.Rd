@@ -4,7 +4,12 @@
 \alias{compare_missings}
 \title{Pairwise comparison of missings across covariables}
 \usage{
-compare_missings(data, by_var, max_level = 20)
+compare_missings(
+  data,
+  by_var,
+  max_level = 20,
+  type = c("predictors", "outcome")
+)
 }
 \arguments{
 \item{data}{data frame}

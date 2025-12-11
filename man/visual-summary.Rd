@@ -54,7 +54,7 @@ shiny server
 
 shiny modal
 
-An \code{\link[=apexchart]{apexchart()}} \code{htmlwidget} object.
+An \code{\link[apexcharter:apexchart]{apexcharter::apexchart()}} \code{htmlwidget} object.
 
 ggplot2 object
 }

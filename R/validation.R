@@ -109,6 +109,9 @@ validation_server <- function(id,
               purrr::list_flatten()
           } else if (length(to_validate) > 0) {
             out <- make_validation_alerts(to_validate)
+          } else {
+            ## Defaulting to an emptu output vector
+            out <- character()
           }
           valid_ui$x <- tagList(out)
         }
@@ -332,7 +335,7 @@ validation_lib <- function(name = NULL) {
     "mcar" = function(x, y) {
       ### Placeholder for missingness validation
       list(
-        string = i18n$t("There is a significant correlation between {n_nonmcar} variables and missing observations in the outcome variable {outcome}."),
+        string = i18n$t("There is a significant difference in data missingness in {n_nonmcar} {ifelse(n_nnonmcar==1,'variable','variables')} grouped by the selected outcome/grouping variable {outcome}."),
         summary.fun = mcar_validate,
         summary.fun.args = list(
           data = x,

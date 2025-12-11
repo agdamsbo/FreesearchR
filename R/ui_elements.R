@@ -452,26 +452,15 @@ ui_elements <- function(selection) {
             data_correlations_ui(id = "correlations", height = 600)
           )
         ),
-        bslib::nav_panel(
-          title = i18n$t("Missings"),
-          icon = bsicons::bs_icon("x-circle"),
-          bslib::layout_sidebar(
-            sidebar = bslib::sidebar(
-              bslib::accordion(
-                id = "acc_mis",
-                open = "acc_chars",
-                multiple = FALSE,
-                bslib::accordion_panel(
-                  value = "acc_pan_mis",
-                  title = "Settings",
-                  icon = bsicons::bs_icon("x-circle"),
-                  shiny::uiOutput("missings_var"),
-                  shiny::helpText(i18n$t("To consider if data is missing by random, choose the outcome/dependent variable (only variables with any missings are available). If there is a significant difference across other variables depending on missing observations, it may not be missing at random."))
-                )
-              )
+        do.call(
+          bslib::nav_panel,
+          c(
+            list(
+              title = i18n$t("Missings"),
+              icon = bsicons::bs_icon("x-circle")
             ),
-            validation_ui("validation_mcar"),
-            data_missings_ui(id = "missingness")
+            data_missings_ui(id = "missingness",
+                             validation_ui("validation_mcar"))
           )
         )
       ),

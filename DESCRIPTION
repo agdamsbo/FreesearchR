@@ -1,6 +1,6 @@
 Package: FreesearchR
 Title: Easy data analysis for clinicians
-Version: 25.12.2
+Version: 25.12.3
 Authors@R: c(
     person("Andreas Gammelgaard", "Damsbo",email="agdamsbo@clin.au.dk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7559-1154")),
@@ -11,7 +11,7 @@ Description: Easily evaluate and analyse clinical health data in your browser, e
 License: AGPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Imports: 
     assertthat,
     bslib,

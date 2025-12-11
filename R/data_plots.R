@@ -709,7 +709,7 @@ create_plot <- function(data, type, pri, sec, ter = NULL, ...) {
   out
 }
 
-#' Print label, and if missing print variable name
+#' Print label, and if missing print variable name for plots
 #'
 #' @param data vector or data frame
 #' @param var variable name. Optional.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/data_plots.R
 \name{get_label}
 \alias{get_label}
-\title{Print label, and if missing print variable name}
+\title{Print label, and if missing print variable name for plots}
 \usage{
 get_label(data, var = NULL)
 }
@@ -15,7 +15,7 @@ get_label(data, var = NULL)
 character string
 }
 \description{
-Print label, and if missing print variable name
+Print label, and if missing print variable name for plots
 }
 \examples{
 mtcars |> get_label(var = "mpg")

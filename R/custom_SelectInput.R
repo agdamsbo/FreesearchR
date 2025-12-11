@@ -20,8 +20,18 @@
 #' @importFrom shiny selectizeInput
 #' @export
 #'
-columnSelectInput <- function(inputId, label, data, selected = "", ...,
-                              col_subset = NULL, placeholder = "", onInitialize, none_label="No variable selected",maxItems=NULL) {
+columnSelectInput <- function(
+  inputId,
+  label,
+  data,
+  selected = "",
+  ...,
+  col_subset = NULL,
+  placeholder = "",
+  onInitialize,
+  none_label = "No variable selected",
+  maxItems = NULL
+) {
   datar <- if (is.reactive(data)) data else reactive(data)
   col_subsetr <- if (is.reactive(col_subset)) col_subset else reactive(col_subset)
 
@@ -41,8 +51,8 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
     )
   }, col = names(datar()))
 
-  if (!"none" %in% names(datar())){
-    labels <- c("none"=list(sprintf('\n    {\n      \"name\": \"none\",\n      \"label\": \"%s\",\n      \"dataclass\": \"\",\n      \"datatype\": \"\"\n    }',none_label)),labels)
+  if (!"none" %in% names(datar())) {
+    labels <- c("none" = list(sprintf('\n    {\n      \"name\": \"none\",\n      \"label\": \"%s\",\n      \"dataclass\": \"\",\n      \"datatype\": \"\"\n    }', none_label)), labels)
     choices <- setNames(names(labels), labels)
     choices <- choices[match(if (length(col_subsetr()) == 0 || isTRUE(col_subsetr() == "")) names(datar()) else col_subsetr(), choices)]
   } else {
@@ -86,7 +96,7 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
                '</div>';
         }
       }")),
-      if (!is.null(maxItems)) list(maxItems=maxItems)
+      if (!is.null(maxItems)) list(maxItems = maxItems)
     )
   )
 }
@@ -107,31 +117,31 @@ columnSelectInput <- function(inputId, label, data, selected = "", ...,
 #'
 #' @examples
 #' if (shiny::interactive()) {
-#' shinyApp(
-#'   ui = fluidPage(
-#'     shiny::uiOutput("select"),
-#'     tableOutput("data")
-#'   ),
-#'   server = function(input, output) {
-#'     output$select <- shiny::renderUI({
-#'       vectorSelectInput(
-#'         inputId = "variable", label = "Variable:",
-#'         data = c(
-#'           "Cylinders" = "cyl",
-#'           "Transmission" = "am",
-#'           "Gears" = "gear"
+#'   shinyApp(
+#'     ui = fluidPage(
+#'       shiny::uiOutput("select"),
+#'       tableOutput("data")
+#'     ),
+#'     server = function(input, output) {
+#'       output$select <- shiny::renderUI({
+#'         vectorSelectInput(
+#'           inputId = "variable", label = "Variable:",
+#'           data = c(
+#'             "Cylinders" = "cyl",
+#'             "Transmission" = "am",
+#'             "Gears" = "gear"
+#'           )
 #'         )
-#'       )
-#'     })
+#'       })
 #'
-#'     output$data <- renderTable(
-#'       {
-#'         mtcars[, c("mpg", input$variable), drop = FALSE]
-#'       },
-#'       rownames = TRUE
-#'     )
-#'   }
-#' )
+#'       output$data <- renderTable(
+#'         {
+#'           mtcars[, c("mpg", input$variable), drop = FALSE]
+#'         },
+#'         rownames = TRUE
+#'       )
+#'     }
+#'   )
 #' }
 vectorSelectInput <- function(inputId,
                               label,
@@ -184,5 +194,3 @@ vectorSelectInput <- function(inputId,
     )
   )
 }
-
-

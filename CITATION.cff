@@ -8,7 +8,7 @@ message: 'To cite package "FreesearchR" in publications use:'
 type: software
 license: AGPL-3.0-or-later
 title: 'FreesearchR: Easy data analysis for clinicians'
-version: 25.12.2
+version: 25.12.3
 doi: 10.5281/zenodo.14527429
 identifiers:
 - type: url
@@ -143,7 +143,7 @@ references:
   authors:
   - family-names: Müller
     given-names: Kirill
-    email: krlmlr+r@mailbox.org
+    email: kirill@cynkra.com
     orcid: https://orcid.org/0000-0002-1416-3412
   year: '2025'
   doi: 10.32614/CRAN.package.here
@@ -250,6 +250,10 @@ references:
     given-names: Barret
     email: barret@posit.co
     orcid: https://orcid.org/0000-0001-9986-114X
+  - family-names: Aden-Buie
+    given-names: Garrick
+    email: garrick@adenbuie.com
+    orcid: https://orcid.org/0000-0002-7111-0077
   - family-names: Xie
     given-names: Yihui
     email: yihui@posit.co
@@ -312,6 +316,10 @@ references:
     given-names: Simon
     email: simon.couch@posit.co
     orcid: https://orcid.org/0000-0001-5676-5107
+  - family-names: Hvitfeldt
+    given-names: Emil
+    email: emil.hvitfeldt@posit.co
+    orcid: https://orcid.org/0000-0002-0679-1945
   year: '2025'
   doi: 10.32614/CRAN.package.broom
 - type: software
@@ -397,6 +405,10 @@ references:
     email: joe@posit.co
   - family-names: Tan
     given-names: Xianying
+  - family-names: Aden-Buie
+    given-names: Garrick
+    email: garrick@posit.co
+    orcid: https://orcid.org/0000-0002-7111-0077
   year: '2025'
   doi: 10.32614/CRAN.package.DT
 - type: software
@@ -480,6 +492,10 @@ references:
     given-names: Brenton M.
     email: brenton@wiernik.org
     orcid: https://orcid.org/0000-0001-9560-6336
+  - family-names: Thériault
+    given-names: Rémi
+    email: remi.theriault@mail.mcgill.ca
+    orcid: https://orcid.org/0000-0003-4315-6788
   - family-names: Waggoner
     given-names: Philip
     email: philip.waggoner@gmail.com
@@ -659,7 +675,7 @@ references:
   authors:
   - family-names: Wickham
     given-names: Hadley
-    email: h.wickham@gmail.com
+    email: hadley@posit.co
   year: '2025'
   doi: 10.32614/CRAN.package.reshape2
 - type: software
@@ -999,6 +1015,9 @@ references:
   - family-names: Lenth
     given-names: Russell V.
     email: russell-lenth@uiowa.edu
+  - family-names: Piaskowski
+    given-names: Julia
+    email: julia.piask@gmail.com
   year: '2025'
   doi: 10.32614/CRAN.package.emmeans
 - type: software
@@ -1111,6 +1130,10 @@ references:
   - family-names: Walthert
     given-names: Lorenz
     email: lorenz.walthert@icloud.com
+  - family-names: Patil
+    given-names: Indrajeet
+    email: patilindrajeet.science@gmail.com
+    orcid: https://orcid.org/0000-0003-1995-6531
   year: '2025'
   doi: 10.32614/CRAN.package.styler
 - type: software
@@ -1128,7 +1151,7 @@ references:
     given-names: Winston
   - family-names: Bryan
     given-names: Jennifer
-    email: jenny@rstudio.com
+    email: jenny@posit.co
     orcid: https://orcid.org/0000-0002-6983-2759
   year: '2025'
   doi: 10.32614/CRAN.package.devtools
