@@ -32,7 +32,7 @@ FreesearchR:::session_data$platform |> knitr::kable()
 | rstudio     | 2025.09.2+418 Cucumberleaf Sunflower (desktop) |
 | pandoc      | 3.6.4 @ /opt/homebrew/bin/ (via rmarkdown)     |
 | quarto      | 1.7.30 @ /usr/local/bin/quarto                 |
-| FreesearchR | 25.12.3.251211                                 |
+| FreesearchR | 25.12.5.251211                                 |
 
 ## Libraries
 
@@ -63,7 +63,6 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | cardx             | 0.3.1         | 2025-12-04 | CRAN (R 4.4.3) |
 | caTools           | 1.18.3        | 2024-09-04 | CRAN (R 4.4.1) |
 | cellranger        | 1.1.0         | 2016-07-27 | CRAN (R 4.4.0) |
-| cffr              | 1.2.0         | 2025-01-25 | CRAN (R 4.4.1) |
 | checkmate         | 2.3.3         | 2025-08-18 | CRAN (R 4.4.1) |
 | class             | 7.3-23        | 2025-01-01 | CRAN (R 4.4.1) |
 | classInt          | 0.4-11        | 2025-01-08 | CRAN (R 4.4.1) |
@@ -73,7 +72,6 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | colorspace        | 2.1-2         | 2025-09-22 | CRAN (R 4.4.1) |
 | commonmark        | 2.0.0         | 2025-07-07 | CRAN (R 4.4.1) |
 | crayon            | 1.5.3         | 2024-06-20 | CRAN (R 4.4.1) |
-| curl              | 7.0.0         | 2025-08-19 | CRAN (R 4.4.1) |
 | data.table        | 1.17.8        | 2025-07-10 | CRAN (R 4.4.1) |
 | datamods          | 1.5.3         | 2024-10-02 | CRAN (R 4.4.1) |
 | datawizard        | 1.3.0         | 2025-10-11 | CRAN (R 4.4.1) |
@@ -104,7 +102,7 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | foreach           | 1.5.2         | 2022-02-02 | CRAN (R 4.4.0) |
 | foreign           | 0.8-90        | 2025-03-31 | CRAN (R 4.4.1) |
 | Formula           | 1.2-5         | 2023-02-24 | CRAN (R 4.4.1) |
-| FreesearchR       | 25.12.3       | NA         | NA             |
+| FreesearchR       | 25.12.5       | NA         | NA             |
 | fs                | 1.6.6         | 2025-04-12 | CRAN (R 4.4.1) |
 | gdtools           | 0.4.4         | 2025-10-06 | CRAN (R 4.4.1) |
 | generics          | 0.1.4         | 2025-05-09 | CRAN (R 4.4.1) |
@@ -132,11 +130,9 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | iterators         | 1.0.14        | 2022-02-05 | CRAN (R 4.4.1) |
 | jquerylib         | 0.1.4         | 2021-04-26 | CRAN (R 4.4.0) |
 | jsonlite          | 2.0.0         | 2025-03-27 | CRAN (R 4.4.1) |
-| jsonvalidate      | 1.5.0         | 2025-02-07 | CRAN (R 4.4.1) |
 | KernSmooth        | 2.23-26       | 2025-01-01 | CRAN (R 4.4.1) |
 | keyring           | 1.4.1         | 2025-06-15 | CRAN (R 4.4.1) |
 | knitr             | 1.50          | 2025-03-16 | CRAN (R 4.4.1) |
-| labeling          | 0.4.3         | 2023-08-29 | CRAN (R 4.4.1) |
 | later             | 1.4.4         | 2025-08-27 | CRAN (R 4.4.1) |
 | lattice           | 0.22-7        | 2025-04-02 | CRAN (R 4.4.1) |
 | lifecycle         | 1.0.4         | 2023-11-07 | CRAN (R 4.4.1) |
@@ -160,7 +156,6 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | openssl           | 2.3.4         | 2025-09-30 | CRAN (R 4.4.1) |
 | openxlsx2         | 1.22          | 2025-12-07 | CRAN (R 4.4.3) |
 | otel              | 0.2.0         | 2025-08-29 | CRAN (R 4.4.1) |
-| pak               | 0.9.1         | 2025-12-01 | CRAN (R 4.4.3) |
 | parameters        | 0.28.3        | 2025-11-25 | CRAN (R 4.4.3) |
 | patchwork         | 1.3.2         | 2025-08-25 | CRAN (R 4.4.1) |
 | pbmcapply         | 1.5.1         | 2022-04-28 | CRAN (R 4.4.1) |
@@ -181,14 +176,9 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | qqconf            | 1.3.2         | 2023-04-14 | CRAN (R 4.4.0) |
 | qqplotr           | 0.0.7         | 2025-09-05 | CRAN (R 4.4.1) |
 | quarto            | 1.5.1         | 2025-09-04 | CRAN (R 4.4.1) |
-| R.cache           | 0.17.0        | 2025-05-02 | CRAN (R 4.4.1) |
-| R.methodsS3       | 1.8.2         | 2022-06-13 | CRAN (R 4.4.1) |
-| R.oo              | 1.27.1        | 2025-05-02 | CRAN (R 4.4.1) |
-| R.utils           | 2.13.0        | 2025-02-24 | CRAN (R 4.4.1) |
 | R6                | 2.6.1         | 2025-02-15 | CRAN (R 4.4.1) |
 | ragg              | 1.5.0         | 2025-09-02 | CRAN (R 4.4.1) |
 | rankinPlot        | 1.1.0         | 2023-01-30 | CRAN (R 4.4.0) |
-| rappdirs          | 0.3.3         | 2021-01-31 | CRAN (R 4.4.1) |
 | rbibutils         | 2.4           | 2025-11-07 | CRAN (R 4.4.1) |
 | RColorBrewer      | 1.1-3         | 2022-04-03 | CRAN (R 4.4.1) |
 | Rcpp              | 1.1.0         | 2025-07-02 | CRAN (R 4.4.1) |
@@ -225,11 +215,10 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | shinyjs           | 2.1.0         | 2021-12-23 | CRAN (R 4.4.0) |
 | shinyTime         | 1.0.3         | 2022-08-19 | CRAN (R 4.4.0) |
 | shinyWidgets      | 0.9.0         | 2025-02-21 | CRAN (R 4.4.1) |
-| sourcetools       | 0.1.7-1       | 2023-02-01 | CRAN (R 4.4.1) |
+| smd               | 0.8.0         | 2025-02-12 | CRAN (R 4.4.1) |
 | stringi           | 1.8.7         | 2025-03-27 | CRAN (R 4.4.1) |
 | stringr           | 1.6.0         | 2025-11-04 | CRAN (R 4.4.1) |
 | stRoke            | 25.9.2        | 2025-09-30 | CRAN (R 4.4.1) |
-| styler            | 1.11.0        | 2025-10-13 | CRAN (R 4.4.1) |
 | systemfonts       | 1.3.1         | 2025-10-01 | CRAN (R 4.4.1) |
 | testthat          | 3.3.1         | 2025-11-25 | CRAN (R 4.4.3) |
 | textshaping       | 1.0.4         | 2025-10-10 | CRAN (R 4.4.1) |
@@ -243,9 +232,7 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | twosamples        | 2.0.1         | 2023-06-23 | CRAN (R 4.4.1) |
 | tzdb              | 0.5.0         | 2025-03-15 | CRAN (R 4.4.1) |
 | usethis           | 3.2.1         | 2025-09-06 | CRAN (R 4.4.1) |
-| utf8              | 1.2.6         | 2025-06-08 | CRAN (R 4.4.1) |
 | uuid              | 1.2-1         | 2024-07-29 | CRAN (R 4.4.1) |
-| V8                | 8.0.1         | 2025-10-10 | CRAN (R 4.4.1) |
 | vctrs             | 0.6.5         | 2023-12-01 | CRAN (R 4.4.0) |
 | viridis           | 0.6.5         | 2024-01-29 | CRAN (R 4.4.0) |
 | viridisLite       | 0.4.2         | 2023-05-02 | CRAN (R 4.4.1) |
