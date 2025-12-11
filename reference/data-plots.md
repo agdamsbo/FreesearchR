@@ -688,7 +688,7 @@ create_plot(mtcars, "plot_violin", "mpg", "cyl") |> attributes()
 #> list()
 #> 
 #> $plot_env
-#> <environment: 0x564c97f3d148>
+#> <environment: 0x56373c9ef8c8>
 #> 
 #> $code
 #> FreesearchR::plot_violin(pri = "mpg", sec = "cyl", ter = NULL)
@@ -703,23 +703,27 @@ mtcars |>
   plot_bar_single(pri = "cyl", style = "stack")
 
 mtcars |> plot_box(pri = "mpg", sec = "gear")
-#> Error in loadNamespace(x): there is no package called ‘viridis’
+
 mtcars |> plot_box(pri = "mpg", sec="cyl")
-#> Error in loadNamespace(x): there is no package called ‘viridis’
+
 mtcars |>
   default_parsing() |>
   plot_box(pri = "mpg", sec = "cyl", ter = "gear")
-#> Error in loadNamespace(x): there is no package called ‘viridis’
+#> Error in plot_box(default_parsing(mtcars), pri = "mpg", sec = "cyl", ter = "gear"): object 'i18n' not found
 mtcars |>
   default_parsing() |>
   plot_box(pri = "mpg", sec = "cyl", ter = "gear",axis.font.family="mono")
-#> Error in loadNamespace(x): there is no package called ‘viridis’
+#> Error in plot_box(default_parsing(mtcars), pri = "mpg", sec = "cyl", ter = "gear",     axis.font.family = "mono"): object 'i18n' not found
 mtcars |> plot_box_single("mpg")
-#> Error in loadNamespace(x): there is no package called ‘viridis’
+
 mtcars |> plot_box_single("mpg","cyl")
-#> Error in loadNamespace(x): there is no package called ‘viridis’
+
 gtsummary::trial |> plot_box_single("age","trt")
-#> Error in loadNamespace(x): there is no package called ‘viridis’
+#> Warning: Removed 11 rows containing non-finite outside the scale range
+#> (`stat_boxplot()`).
+#> Warning: Removed 11 rows containing missing values or values outside the scale range
+#> (`geom_point()`).
+
 mtcars |> plot_hbars(pri = "carb", sec = "cyl")
 #> Scale for fill is already present.
 #> Adding another scale for fill, which will replace the existing scale.
@@ -754,48 +758,48 @@ ds |> sankey_ready("first", "last")
 #> # A tibble: 19 × 7
 #>    first last      n gx.sum gy.sum lx          ly         
 #>    <fct> <fct> <int>  <int>  <int> <fct>       <fct>      
-#>  1 a     c         7     24     23 "a\n(n=24)" "c\n(n=23)"
-#>  2 a     b         6     24     25 "a\n(n=24)" "b\n(n=25)"
-#>  3 a     d         2     24     18 "a\n(n=24)" "d\n(n=18)"
-#>  4 a     a         8     24     29 "a\n(n=24)" "a\n(n=29)"
-#>  5 a     NA        1     24      5 "a\n(n=24)"  NA        
-#>  6 c     c         1     24     23 "c\n(n=24)" "c\n(n=23)"
+#>  1 d     d        11     36     18 "d\n(n=36)" "d\n(n=18)"
+#>  2 d     a        11     36     30 "d\n(n=36)" "a\n(n=30)"
+#>  3 d     b         6     36     25 "d\n(n=36)" "b\n(n=25)"
+#>  4 d     c         8     36     22 "d\n(n=36)" "c\n(n=22)"
+#>  5 c     d         3     24     18 "c\n(n=24)" "d\n(n=18)"
+#>  6 c     a         7     24     30 "c\n(n=24)" "a\n(n=30)"
 #>  7 c     b        10     24     25 "c\n(n=24)" "b\n(n=25)"
-#>  8 c     d         3     24     18 "c\n(n=24)" "d\n(n=18)"
-#>  9 c     a         7     24     29 "c\n(n=24)" "a\n(n=29)"
-#> 10 c     NA        3     24      5 "c\n(n=24)"  NA        
-#> 11 d     c         8     35     23 "d\n(n=35)" "c\n(n=23)"
-#> 12 d     b         6     35     25 "d\n(n=35)" "b\n(n=25)"
-#> 13 d     d        11     35     18 "d\n(n=35)" "d\n(n=18)"
-#> 14 d     a        10     35     29 "d\n(n=35)" "a\n(n=29)"
-#> 15 b     c         7     17     23 "b\n(n=17)" "c\n(n=23)"
-#> 16 b     b         3     17     25 "b\n(n=17)" "b\n(n=25)"
-#> 17 b     d         2     17     18 "b\n(n=17)" "d\n(n=18)"
-#> 18 b     a         4     17     29 "b\n(n=17)" "a\n(n=29)"
-#> 19 b     NA        1     17      5 "b\n(n=17)"  NA        
+#>  8 c     c         1     24     22 "c\n(n=24)" "c\n(n=22)"
+#>  9 c     NA        3     24      5 "c\n(n=24)"  NA        
+#> 10 b     d         2     17     18 "b\n(n=17)" "d\n(n=18)"
+#> 11 b     a         4     17     30 "b\n(n=17)" "a\n(n=30)"
+#> 12 b     b         3     17     25 "b\n(n=17)" "b\n(n=25)"
+#> 13 b     c         7     17     22 "b\n(n=17)" "c\n(n=22)"
+#> 14 b     NA        1     17      5 "b\n(n=17)"  NA        
+#> 15 a     d         2     23     18 "a\n(n=23)" "d\n(n=18)"
+#> 16 a     a         8     23     30 "a\n(n=23)" "a\n(n=30)"
+#> 17 a     b         6     23     25 "a\n(n=23)" "b\n(n=25)"
+#> 18 a     c         6     23     22 "a\n(n=23)" "c\n(n=22)"
+#> 19 a     NA        1     23      5 "a\n(n=23)"  NA        
 ds |> sankey_ready("first", "last", numbers = "percentage")
 #> # A tibble: 19 × 7
 #>    first last      n gx.sum gy.sum lx         ly        
 #>    <fct> <fct> <int>  <int>  <int> <fct>      <fct>     
-#>  1 a     c         7     24     23 "a\n(24%)" "c\n(23%)"
-#>  2 a     b         6     24     25 "a\n(24%)" "b\n(25%)"
-#>  3 a     d         2     24     18 "a\n(24%)" "d\n(18%)"
-#>  4 a     a         8     24     29 "a\n(24%)" "a\n(29%)"
-#>  5 a     NA        1     24      5 "a\n(24%)"  NA       
-#>  6 c     c         1     24     23 "c\n(24%)" "c\n(23%)"
+#>  1 d     d        11     36     18 "d\n(36%)" "d\n(18%)"
+#>  2 d     a        11     36     30 "d\n(36%)" "a\n(30%)"
+#>  3 d     b         6     36     25 "d\n(36%)" "b\n(25%)"
+#>  4 d     c         8     36     22 "d\n(36%)" "c\n(22%)"
+#>  5 c     d         3     24     18 "c\n(24%)" "d\n(18%)"
+#>  6 c     a         7     24     30 "c\n(24%)" "a\n(30%)"
 #>  7 c     b        10     24     25 "c\n(24%)" "b\n(25%)"
-#>  8 c     d         3     24     18 "c\n(24%)" "d\n(18%)"
-#>  9 c     a         7     24     29 "c\n(24%)" "a\n(29%)"
-#> 10 c     NA        3     24      5 "c\n(24%)"  NA       
-#> 11 d     c         8     35     23 "d\n(35%)" "c\n(23%)"
-#> 12 d     b         6     35     25 "d\n(35%)" "b\n(25%)"
-#> 13 d     d        11     35     18 "d\n(35%)" "d\n(18%)"
-#> 14 d     a        10     35     29 "d\n(35%)" "a\n(29%)"
-#> 15 b     c         7     17     23 "b\n(17%)" "c\n(23%)"
-#> 16 b     b         3     17     25 "b\n(17%)" "b\n(25%)"
-#> 17 b     d         2     17     18 "b\n(17%)" "d\n(18%)"
-#> 18 b     a         4     17     29 "b\n(17%)" "a\n(29%)"
-#> 19 b     NA        1     17      5 "b\n(17%)"  NA       
+#>  8 c     c         1     24     22 "c\n(24%)" "c\n(22%)"
+#>  9 c     NA        3     24      5 "c\n(24%)"  NA       
+#> 10 b     d         2     17     18 "b\n(17%)" "d\n(18%)"
+#> 11 b     a         4     17     30 "b\n(17%)" "a\n(30%)"
+#> 12 b     b         3     17     25 "b\n(17%)" "b\n(25%)"
+#> 13 b     c         7     17     22 "b\n(17%)" "c\n(22%)"
+#> 14 b     NA        1     17      5 "b\n(17%)"  NA       
+#> 15 a     d         2     23     18 "a\n(23%)" "d\n(18%)"
+#> 16 a     a         8     23     30 "a\n(23%)" "a\n(30%)"
+#> 17 a     b         6     23     25 "a\n(23%)" "b\n(25%)"
+#> 18 a     c         6     23     22 "a\n(23%)" "c\n(22%)"
+#> 19 a     NA        1     23      5 "a\n(23%)"  NA       
 data.frame(
   g = sample(LETTERS[1:2], 100, TRUE),
   first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)),
@@ -805,14 +809,14 @@ data.frame(
 #> # A tibble: 8 × 7
 #>   first last      n gx.sum gy.sum lx          ly             
 #>   <fct> <fct> <int>  <int>  <int> <fct>       <fct>          
-#> 1 d     FALSE    13     21     66 "d\n(n=21)" "FALSE\n(n=66)"
-#> 2 d     TRUE      8     21     34 "d\n(n=21)" "TRUE\n(n=34)" 
-#> 3 b     FALSE    18     28     66 "b\n(n=28)" "FALSE\n(n=66)"
-#> 4 b     TRUE     10     28     34 "b\n(n=28)" "TRUE\n(n=34)" 
-#> 5 a     FALSE    19     25     66 "a\n(n=25)" "FALSE\n(n=66)"
-#> 6 a     TRUE      6     25     34 "a\n(n=25)" "TRUE\n(n=34)" 
-#> 7 c     FALSE    16     26     66 "c\n(n=26)" "FALSE\n(n=66)"
-#> 8 c     TRUE     10     26     34 "c\n(n=26)" "TRUE\n(n=34)" 
+#> 1 b     FALSE    16     29     66 "b\n(n=29)" "FALSE\n(n=66)"
+#> 2 b     TRUE     13     29     34 "b\n(n=29)" "TRUE\n(n=34)" 
+#> 3 a     FALSE    18     25     66 "a\n(n=25)" "FALSE\n(n=66)"
+#> 4 a     TRUE      7     25     34 "a\n(n=25)" "TRUE\n(n=34)" 
+#> 5 d     FALSE    13     20     66 "d\n(n=20)" "FALSE\n(n=66)"
+#> 6 d     TRUE      7     20     34 "d\n(n=20)" "TRUE\n(n=34)" 
+#> 7 c     FALSE    19     26     66 "c\n(n=26)" "FALSE\n(n=66)"
+#> 8 c     TRUE      7     26     34 "c\n(n=26)" "TRUE\n(n=34)" 
 ds <- data.frame(g = sample(LETTERS[1:2], 100, TRUE), first = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)), last = REDCapCAST::as_factor(sample(letters[1:4], 100, TRUE)))
 ds |> plot_sankey("first", "last")
 #> Loading required package: ggplot2

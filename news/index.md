@@ -1,5 +1,9 @@
 # Changelog
 
+## FreesearchR 25.12.4
+
+Republish 25.12.3
+
 ## FreesearchR 25.12.3
 
 *NEW* Extended missingness evaluation to include two different
