@@ -62,31 +62,31 @@ dropdown element
 
 ``` r
 if (shiny::interactive()) {
-shinyApp(
-  ui = fluidPage(
-    shiny::uiOutput("select"),
-    tableOutput("data")
-  ),
-  server = function(input, output) {
-    output$select <- shiny::renderUI({
-      vectorSelectInput(
-        inputId = "variable", label = "Variable:",
-        data = c(
-          "Cylinders" = "cyl",
-          "Transmission" = "am",
-          "Gears" = "gear"
+  shinyApp(
+    ui = fluidPage(
+      shiny::uiOutput("select"),
+      tableOutput("data")
+    ),
+    server = function(input, output) {
+      output$select <- shiny::renderUI({
+        vectorSelectInput(
+          inputId = "variable", label = "Variable:",
+          data = c(
+            "Cylinders" = "cyl",
+            "Transmission" = "am",
+            "Gears" = "gear"
+          )
         )
-      )
-    })
+      })
 
-    output$data <- renderTable(
-      {
-        mtcars[, c("mpg", input$variable), drop = FALSE]
-      },
-      rownames = TRUE
-    )
-  }
-)
+      output$data <- renderTable(
+        {
+          mtcars[, c("mpg", input$variable), drop = FALSE]
+        },
+        rownames = TRUE
+      )
+    }
+  )
 }
 #> Error: 'interactive' is not an exported object from 'namespace:shiny'
 ```

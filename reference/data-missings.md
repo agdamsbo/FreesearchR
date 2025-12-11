@@ -5,9 +5,9 @@ Data correlations evaluation module
 ## Usage
 
 ``` r
-data_missings_ui(id)
+data_missings_ui(id, ...)
 
-data_missings_server(id, data, variable, max_level = 20, ...)
+data_missings_server(id, data, max_level = 20, ...)
 ```
 
 ## Arguments
@@ -15,6 +15,10 @@ data_missings_server(id, data, variable, max_level = 20, ...)
 - id:
 
   Module id
+
+- ...:
+
+  additional UI elements to show before the table overview
 
 - data:
 

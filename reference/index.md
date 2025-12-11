@@ -121,7 +121,7 @@
 - [`get_fun_options()`](https://agdamsbo.github.io/FreesearchR/reference/get_fun_options.md)
   : Get the function options based on the selected function description
 - [`get_label()`](https://agdamsbo.github.io/FreesearchR/reference/get_label.md)
-  : Print label, and if missing print variable name
+  : Print label, and if missing print variable name for plots
 - [`get_list_elements()`](https://agdamsbo.github.io/FreesearchR/reference/get_list_elements.md)
   : Subset elements from list of lists
 - [`get_plot_options()`](https://agdamsbo.github.io/FreesearchR/reference/get_plot_options.md)
@@ -195,6 +195,8 @@
   : Wrapper to pivot gtsummary table data to long for plotting
 - [`missing_fraction()`](https://agdamsbo.github.io/FreesearchR/reference/missing_fraction.md)
   : Get missingsness fraction
+- [`missings_logic_across()`](https://agdamsbo.github.io/FreesearchR/reference/missings_logic_across.md)
+  : Converting all variables to logicals by missing status
 - [`missings_validate()`](https://agdamsbo.github.io/FreesearchR/reference/missings_validate.md)
   : Validate function of missingness in data
 - [`modify_qmd()`](https://agdamsbo.github.io/FreesearchR/reference/modify_qmd.md)

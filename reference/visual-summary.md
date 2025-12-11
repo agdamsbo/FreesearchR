@@ -81,6 +81,8 @@ shiny server
 
 shiny modal
 
-An `apexchart()` `htmlwidget` object.
+An
+[`apexcharter::apexchart()`](https://dreamrs.github.io/apexcharter/reference/apexchart.html)
+`htmlwidget` object.
 
 ggplot2 object

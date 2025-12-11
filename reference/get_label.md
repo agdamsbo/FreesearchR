@@ -1,6 +1,6 @@
-# Print label, and if missing print variable name
+# Print label, and if missing print variable name for plots
 
-Print label, and if missing print variable name
+Print label, and if missing print variable name for plots
 
 ## Usage
 

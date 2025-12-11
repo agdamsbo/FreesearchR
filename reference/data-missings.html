@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FreesearchR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.12.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.12.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Data correlations evaluation module</h1>
-      <small class="dont-index">Source: <a href="https://github.com/agdamsbo/FreesearchR/blob/v25.12.2/R/missings-module.R" class="external-link"><code>R/missings-module.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/agdamsbo/FreesearchR/blob/main/R/missings-module.R" class="external-link"><code>R/missings-module.R</code></a></small>
       <div class="d-none name"><code>data-missings.Rd</code></div>
     </div>
 
@@ -48,9 +48,9 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">data_missings_ui</span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">data_missings_ui</span><span class="op">(</span><span class="va">id</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">data_missings_server</span><span class="op">(</span><span class="va">id</span>, <span class="va">data</span>, <span class="va">variable</span>, max_level <span class="op">=</span> <span class="fl">20</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">data_missings_server</span><span class="op">(</span><span class="va">id</span>, <span class="va">data</span>, max_level <span class="op">=</span> <span class="fl">20</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -59,6 +59,10 @@
 
 <dl><dt id="arg-id">id<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>
 <dd><p>Module id</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>additional UI elements to show before the table overview</p></dd>
 
 
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
