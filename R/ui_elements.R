@@ -400,9 +400,19 @@ ui_elements <- function(selection) {
                         "Yes" = "yes"
                       )
                     ),
-                    shiny::helpText(i18n$t("Option to perform statistical comparisons between strata in baseline table."))
+                    # shiny::helpText(i18n$t("Option to perform statistical comparisons between strata in baseline table.")),
+                    shiny::br(),
+                    shiny::radioButtons(
+                      inputId = "add_diff",
+                      label = i18n$t("Include group differences"),
+                      selected = "no",
+                      inline = TRUE,
+                      choices = list(
+                        "No" = "no",
+                        "Yes" = "yes"
+                      )
+                    )
                   ),
-                  shiny::br(),
                   shiny::br(),
                   shiny::actionButton(
                     inputId = "act_eval",

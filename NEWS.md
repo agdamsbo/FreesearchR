@@ -1,3 +1,7 @@
+# FreesearchR 25.12.5
+
+*NEW* Added option to add pairwise differences in discriptive table.
+
 # FreesearchR 25.12.4
 
 Republish 25.12.3

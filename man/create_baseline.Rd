@@ -9,6 +9,7 @@ create_baseline(
   ...,
   by.var,
   add.p = FALSE,
+  add.diff = FALSE,
   add.overall = FALSE,
   theme = c("jama", "lancet", "nejm", "qjecon"),
   detail_level = c("minimal", "extended")

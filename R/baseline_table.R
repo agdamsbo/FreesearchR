@@ -37,7 +37,7 @@ baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, 
 #' mtcars |> create_baseline(by.var = "gear", detail_level = "extended",type = list(gtsummary::all_dichotomous() ~ "categorical"),theme="nejm")
 #'
 #' create_baseline(default_parsing(mtcars), by.var = "am", add.p = FALSE, add.overall = FALSE, theme = "lancet")
-create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALSE, theme = c("jama", "lancet", "nejm", "qjecon"), detail_level = c("minimal", "extended")) {
+create_baseline <- function(data, ..., by.var, add.p = FALSE, add.diff=FALSE, add.overall = FALSE, theme = c("jama", "lancet", "nejm", "qjecon"), detail_level = c("minimal", "extended")) {
   theme <- match.arg(theme)
 
   detail_level <- match.arg(detail_level)
@@ -99,6 +99,10 @@ create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALS
       out <- out |>
         gtsummary::add_p() |>
         gtsummary::bold_p()
+    }
+    if (isTRUE(add.diff)) {
+      out <- out |>
+        gtsummary::add_difference()
     }
   }
 

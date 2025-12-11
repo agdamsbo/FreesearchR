@@ -306,3 +306,4 @@
 "Select outcome variable for overview","Select outcome variable for overview"
 "No outcome measure chosen","No outcome measure chosen"
 "There is a significant difference in data missingness in {n_nonmcar} {ifelse(n_nonmcar==1,'variable','variables')} grouped by the selected outcome/grouping variable {outcome}.","There is a significant difference in data missingness in {n_nonmcar} {ifelse(n_nonmcar==1,'variable','variables')} grouped by the selected outcome/grouping variable {outcome}."
+"Include group differences","Include group differences"

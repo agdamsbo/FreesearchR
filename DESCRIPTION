@@ -1,6 +1,6 @@
 Package: FreesearchR
 Title: Easy data analysis for clinicians
-Version: 25.12.4
+Version: 25.12.5
 Authors@R: c(
     person("Andreas Gammelgaard", "Damsbo",email="agdamsbo@clin.au.dk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7559-1154")),
@@ -70,7 +70,8 @@ Imports:
     shiny.i18n,
     stRoke,
     data.table,
-    viridis
+    viridis,
+    smd
 Suggests: 
     styler,
     devtools,

@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpT9sPX5/file6c8068b55910.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpftDBtp/file7bf313edd9e8.R 
 ########
 
 i18n_path <- system.file("translations", package = "FreesearchR")
@@ -63,7 +63,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.12.3'
+app_version <- function()'25.12.5'
 
 
 ########
@@ -109,7 +109,7 @@ baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, 
 #' mtcars |> create_baseline(by.var = "gear", detail_level = "extended",type = list(gtsummary::all_dichotomous() ~ "categorical"),theme="nejm")
 #'
 #' create_baseline(default_parsing(mtcars), by.var = "am", add.p = FALSE, add.overall = FALSE, theme = "lancet")
-create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALSE, theme = c("jama", "lancet", "nejm", "qjecon"), detail_level = c("minimal", "extended")) {
+create_baseline <- function(data, ..., by.var, add.p = FALSE, add.diff=FALSE, add.overall = FALSE, theme = c("jama", "lancet", "nejm", "qjecon"), detail_level = c("minimal", "extended")) {
   theme <- match.arg(theme)
 
   detail_level <- match.arg(detail_level)
@@ -171,6 +171,10 @@ create_baseline <- function(data, ..., by.var, add.p = FALSE, add.overall = FALS
       out <- out |>
         gtsummary::add_p() |>
         gtsummary::bold_p()
+    }
+    if (isTRUE(add.diff)) {
+      out <- out |>
+        gtsummary::add_difference()
     }
   }
 
@@ -4438,7 +4442,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.12.3-251211'
+hosted_version <- function()'v25.12.5-251211'
 
 
 ########
@@ -10285,9 +10289,19 @@ ui_elements <- function(selection) {
                         "Yes" = "yes"
                       )
                     ),
-                    shiny::helpText(i18n$t("Option to perform statistical comparisons between strata in baseline table."))
+                    # shiny::helpText(i18n$t("Option to perform statistical comparisons between strata in baseline table.")),
+                    shiny::br(),
+                    shiny::radioButtons(
+                      inputId = "add_diff",
+                      label = i18n$t("Include group differences"),
+                      selected = "no",
+                      inline = TRUE,
+                      choices = list(
+                        "No" = "no",
+                        "Yes" = "yes"
+                      )
+                    )
                   ),
-                  shiny::br(),
                   shiny::br(),
                   shiny::actionButton(
                     inputId = "act_eval",
@@ -13713,6 +13727,7 @@ server <- function(input, output, session) {
         by.var = input$strat_var,
         add.p = input$add_p == "yes",
         add.overall = TRUE,
+        add.diff = input$add_diff == "yes",
         # theme = input$baseline_theme,
         detail_level = input$detail_level
       )
