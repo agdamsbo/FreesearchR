@@ -4,7 +4,7 @@
 
 *NEW* Updated and slightly extended list of allowed operators for new variable creation.
 
-*FIX* The exported MS Word documents prompted a warning. I believe that has been fixed, but required several new dependencies.
+*FIX* The exported MS Word documents prompts a warning. The codebase now includes a fix, but it only works running locally, but was disabled.
 
 # FreesearchR 25.12.5
 

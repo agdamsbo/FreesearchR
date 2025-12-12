@@ -11,7 +11,7 @@ table_download_ui <- function(id, title = "Table", ...) {
       selected = NULL,
       choices = list(
         "MS Word" = "docx",
-        "Open document format" = "rtf"
+        "Compatible (rtf)" = "rtf"
       )
     ),
     shiny::br(),
@@ -66,11 +66,14 @@ table_download_server <- function(id, data, file_name = "table", ...) {
                   data = table,
                   filename = file # Save to the file path provided by downloadHandler
                 )
-                if (type == "docx") {
-                  out |> doconv::docx_update()
-                } else {
-                  out
-                }
+                # This only works locally and was disabled
+                # if (type == "docx") {
+                #   out |> doconv::docx_update()
+                # } else {
+                #   out
+                # }
+
+                out
               },
               error = function(err) {
                 shiny::showNotification(paste0(i18n$t("Error: "), err), type = "error")

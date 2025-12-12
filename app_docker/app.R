@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpaYL5kU/file9c7175d0a25d.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpaYL5kU/file9c7113e28000.R 
 ########
 
 i18n_path <- here::here("translations")
@@ -9855,7 +9855,7 @@ table_download_ui <- function(id, title = "Table", ...) {
       selected = NULL,
       choices = list(
         "MS Word" = "docx",
-        "Open document format" = "rtf"
+        "Compatible (rtf)" = "rtf"
       )
     ),
     shiny::br(),
@@ -9910,11 +9910,14 @@ table_download_server <- function(id, data, file_name = "table", ...) {
                   data = table,
                   filename = file # Save to the file path provided by downloadHandler
                 )
-                if (type == "docx") {
-                  out |> doconv::docx_update()
-                } else {
-                  out
-                }
+                # This only works locally and was disabled
+                # if (type == "docx") {
+                #   out |> doconv::docx_update()
+                # } else {
+                #   out
+                # }
+
+                out
               },
               error = function(err) {
                 shiny::showNotification(paste0(i18n$t("Error: "), err), type = "error")
@@ -14114,14 +14117,16 @@ server <- function(input, output, session) {
                 output_format = format,
                 input = file.path(getwd(), "www/report.rmd")
               )
+            # This only works locally and was disabled
+            # if (type == "docx") {
+            #   ## This handles the the following MS Word warning:
+            #   ##   >> "This document contains fields that may refer to other files."
+            #   out |> doconv::docx_update()
+            # } else {
+            #   out
+            # }
 
-            if (type == "docx") {
-              ## This handles the the following MS Word warning:
-              ##   >> "This document contains fields that may refer to other files."
-              out |> doconv::docx_update()
-            } else {
-              out
-            }
+            out
           },
           error = function(err) {
             showNotification(paste0(i18n$t("We encountered the following error creating your report: "), err), type = "err")

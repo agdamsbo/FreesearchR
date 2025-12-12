@@ -71,12 +71,7 @@ Imports:
     stRoke,
     data.table,
     viridis,
-    smd,
-    doconv,
-    locatexec,
-    magick,
-    pdftools,
-    qpdf
+    smd
 Suggests: 
     styler,
     devtools,
