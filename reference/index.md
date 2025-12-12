@@ -43,7 +43,7 @@
   : Determine significant correlations in the data set
 - [`create_column_ui()`](https://agdamsbo.github.io/FreesearchR/reference/create-column.md)
   [`create_column_server()`](https://agdamsbo.github.io/FreesearchR/reference/create-column.md)
-  [`list_allowed_operations()`](https://agdamsbo.github.io/FreesearchR/reference/create-column.md)
+  [`allowed_operations()`](https://agdamsbo.github.io/FreesearchR/reference/create-column.md)
   [`modal_create_column()`](https://agdamsbo.github.io/FreesearchR/reference/create-column.md)
   [`winbox_create_column()`](https://agdamsbo.github.io/FreesearchR/reference/create-column.md)
   : Create new column
