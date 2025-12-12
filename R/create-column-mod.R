@@ -26,9 +26,9 @@ create_column_ui <- function(id) {
   htmltools::tagList(
     # datamods:::html_dependency_datamods(),
     # html_dependency_FreesearchR(),
-   shiny::tags$head(
-    shiny::tags$link(rel = "stylesheet", type = "text/css", href = "FreesearchR/inst/assets/css/FreesearchR.css")
-  ),
+    shiny::tags$head(
+      shiny::tags$link(rel = "stylesheet", type = "text/css", href = "FreesearchR/inst/assets/css/FreesearchR.css")
+    ),
     fluidRow(
       column(
         width = 6,
@@ -184,35 +184,44 @@ create_column_server <- function(id,
 #'
 #' @rdname create-column
 # @importFrom methods getGroupMembers
-list_allowed_operations <- function() {
-  c(
-    "(", "c",
+allowed_operations <- function() {
+  list(
+    "Misc" = c("(", "c",":","~"),
     # getGroupMembers("Arith"),
-    c("+", "-", "*", "^", "%%", "%/%", "/"),
+    "Arithmetics" = c("+", "-", "*", "^", "%%", "%/%", "/"),
     # getGroupMembers("Compare"),
-    c("==", ">", "<", "!=", "<=", ">="),
+    "Compare" = c("==", ">", "<", "!=", "<=", ">="),
     # getGroupMembers("Logic"),
-    c("&", "|"),
+    "Logic" = c("&", "|", "is.na", "ifelse", "any", "all"),
     # getGroupMembers("Math"),
-    c(
+    "Math" = c(
       "abs", "sign", "sqrt", "ceiling", "floor", "trunc", "cummax",
       "cummin", "cumprod", "cumsum", "exp", "expm1", "log", "log10",
       "log2", "log1p", "cos", "cosh", "sin", "sinh", "tan", "tanh",
       "acos", "acosh", "asin", "asinh", "atan", "atanh", "cospi", "sinpi",
-      "tanpi", "gamma", "lgamma", "digamma", "trigamma"
+      "tanpi", "gamma", "lgamma", "digamma", "trigamma", "round", "signif"
     ),
     # getGroupMembers("Math2"),
-    c("round", "signif"),
+    # c("round", "signif"),
     # getGroupMembers("Summary"),
-    c("max", "min", "range", "prod", "sum", "any", "all"),
-    "pmin", "pmax", "mean",
-    "paste", "paste0", "substr", "nchar", "trimws",
-    "gsub", "sub", "grepl", "ifelse", "length",
-    "as.numeric", "as.character", "as.integer", "as.Date", "as.POSIXct",
-    "as.factor", "factor"
+    "Summary" = c(
+      "max", "min", "range", "prod", "sum", "length",
+      "pmin", "pmax", "mean"
+    ),
+    "Text" = c(
+      "paste", "paste0", "substr", "nchar", "trimws",
+      "gsub", "sub", "grepl"
+    ),
+    "Class" = c(
+      "as.numeric", "as.character", "as.integer", "as.Date", "as.POSIXct",
+      "as.factor", "factor"
+    )
   )
 }
 
+list_allowed_operations <- function(data=allowed_operations()) {
+  Reduce(c,data)
+}
 
 
 #' @inheritParams shiny::modalDialog
