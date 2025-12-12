@@ -19,7 +19,7 @@ data_missings_ui <- function(id, ...) {
           bslib::accordion_panel(
             value = "acc_pan_mis",
             title = "Settings",
-            icon = bsicons::bs_icon("x-circle"),
+            icon = bsicons::bs_icon("gear"),
             shiny::uiOutput(ns("missings_method")),
             shiny::uiOutput(ns("missings_var")),
             shiny::helpText(i18n$t("Evaluate missingness by either comparing missing values across variables (optionally grouped by af categorical or dichotomous variable) or compare variables grouped by the missing status (missing or not) of an outcome variable. If there is a significant difference i the missingness, this may cause a bias in you data and should be considered carefully interpreting the data and analyses as data may not be missing at random.")),
@@ -30,6 +30,16 @@ data_missings_ui <- function(id, ...) {
               width = "100%",
               icon = shiny::icon("calculator"),
               disabled = FALSE
+            )
+          ),
+          do.call(
+            bslib::accordion_panel,
+            c(
+              list(
+                title = "Download",
+                icon = bsicons::bs_icon("file-earmark-arrow-down")
+              ),
+              table_download_ui(id = ns("tbl_dwn"), title = NULL)
             )
           )
         )
@@ -133,10 +143,10 @@ data_missings_server <- function(id,
           tryCatch(
             {
               shiny::withProgress(message = i18n$t("Calculating. Hold tight for a moment.."), {
-              out <- do.call(
-                compare_missings,
-                modifyList(parameters, list(data = df_tbl))
-              )
+                out <- do.call(
+                  compare_missings,
+                  modifyList(parameters, list(data = df_tbl))
+                )
               })
             },
             error = function(err) {
@@ -204,6 +214,13 @@ data_missings_server <- function(id,
         }
       )
 
+
+      table_download_server(
+        id = "tbl_dwn",
+        data = shiny::reactive(rv$table),
+        file_name = "missings_table"
+      )
+
       return(shiny::reactive(rv$table))
     }
   )
@@ -218,7 +235,8 @@ missing_demo_app <- function() {
         title = i18n$t("Missings"),
         icon = bsicons::bs_icon("x-circle")
       ),
-      data_missings_ui(id = "data")
+      data_missings_ui(id = "data"),
+      gt::gt_output("table_p")
     )
   )
   server <- function(input, output, session) {
@@ -226,7 +244,15 @@ missing_demo_app <- function() {
     data_demo[sample(1:32, 10), "cyl"] <- NA
     data_demo[sample(1:32, 8), "vs"] <- NA
 
-    data_missings_server(id = "data", data = data_demo)
+    rv <- shiny::reactiveValues(
+      table = NULL
+    )
+
+    rv$table <- data_missings_server(id = "data", data = data_demo)
+
+    output$table_p <- gt::render_gt({
+      rv$table
+    })
 
     # visual_summary_server(id = "visual", data = data_demo)
 
