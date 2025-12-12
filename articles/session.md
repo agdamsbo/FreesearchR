@@ -45,6 +45,8 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | apexcharter       | 0.4.4         | 2024-09-06 | CRAN (R 4.4.1) |
 | askpass           | 1.2.1         | 2024-10-04 | CRAN (R 4.4.1) |
 | assertthat        | 0.2.1         | 2019-03-21 | CRAN (R 4.4.1) |
+| attachment        | 0.4.5         | 2025-03-14 | CRAN (R 4.4.1) |
+| attempt           | 0.3.1         | 2020-05-03 | CRAN (R 4.4.1) |
 | backports         | 1.5.0         | 2024-05-23 | CRAN (R 4.4.1) |
 | base64enc         | 0.1-3         | 2015-07-28 | CRAN (R 4.4.1) |
 | bayestestR        | 0.17.0        | 2025-08-29 | CRAN (R 4.4.1) |
@@ -82,6 +84,7 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | devtools          | 2.4.6         | 2025-10-03 | CRAN (R 4.4.1) |
 | DHARMa            | 0.4.7         | 2024-10-18 | CRAN (R 4.4.1) |
 | digest            | 0.6.39        | 2025-11-19 | CRAN (R 4.4.3) |
+| dockerfiler       | 0.2.5         | 2025-05-07 | CRAN (R 4.4.1) |
 | doconv            | 0.3.3         | 2025-08-18 | CRAN (R 4.4.1) |
 | doParallel        | 1.0.17        | 2022-02-07 | CRAN (R 4.4.0) |
 | dplyr             | 1.1.4         | 2023-11-17 | CRAN (R 4.4.0) |
@@ -227,6 +230,7 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | sessioninfo       | 1.2.3         | 2025-02-05 | CRAN (R 4.4.1) |
 | shiny             | 1.12.1        | 2025-12-09 | CRAN (R 4.4.1) |
 | shiny.i18n        | 0.3.0         | 2023-01-16 | CRAN (R 4.4.0) |
+| shiny2docker      | 0.0.3         | 2025-06-28 | CRAN (R 4.4.1) |
 | shinybusy         | 0.3.3         | 2024-03-09 | CRAN (R 4.4.0) |
 | shinyjs           | 2.1.0         | 2021-12-23 | CRAN (R 4.4.0) |
 | shinyTime         | 1.0.3         | 2022-08-19 | CRAN (R 4.4.0) |
@@ -261,4 +265,5 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | xml2              | 1.5.1         | 2025-12-01 | CRAN (R 4.4.3) |
 | xtable            | 1.8-4         | 2019-04-21 | CRAN (R 4.4.1) |
 | yaml              | 2.3.11        | 2025-11-28 | CRAN (R 4.4.3) |
+| yesno             | 0.1.3         | 2024-07-26 | CRAN (R 4.4.1) |
 | zip               | 2.3.3         | 2025-05-13 | CRAN (R 4.4.1) |
