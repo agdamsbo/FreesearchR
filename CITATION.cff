@@ -8,7 +8,7 @@ message: 'To cite package "FreesearchR" in publications use:'
 type: software
 license: AGPL-3.0-or-later
 title: 'FreesearchR: Easy data analysis for clinicians'
-version: 25.12.5
+version: 25.12.6
 doi: 10.5281/zenodo.14527429
 identifiers:
 - type: url
@@ -1140,6 +1140,69 @@ references:
     email: bradleysaul@fastmail.com
   year: '2025'
   doi: 10.32614/CRAN.package.smd
+- type: software
+  title: doconv
+  abstract: 'doconv: Document Conversion to ''PDF'' or ''PNG'''
+  notes: Imports
+  url: https://github.com/ardata-fr/doconv
+  repository: https://CRAN.R-project.org/package=doconv
+  authors:
+  - family-names: Gohel
+    given-names: David
+    email: david.gohel@ardata.fr
+  year: '2025'
+  doi: 10.32614/CRAN.package.doconv
+- type: software
+  title: locatexec
+  abstract: 'locatexec: Detection and Localization of Executable Files'
+  notes: Imports
+  url: https://github.com/ardata-fr/locatexec
+  repository: https://CRAN.R-project.org/package=locatexec
+  authors:
+  - family-names: Gohel
+    given-names: David
+    email: david.gohel@ardata.fr
+  year: '2025'
+  doi: 10.32614/CRAN.package.locatexec
+- type: software
+  title: magick
+  abstract: 'magick: Advanced Graphics and Image-Processing in R'
+  notes: Imports
+  url: https://docs.ropensci.org/magick/
+  repository: https://CRAN.R-project.org/package=magick
+  authors:
+  - family-names: Ooms
+    given-names: Jeroen
+    email: jeroenooms@gmail.com
+    orcid: https://orcid.org/0000-0002-4035-0289
+  year: '2025'
+  doi: 10.32614/CRAN.package.magick
+- type: software
+  title: pdftools
+  abstract: 'pdftools: Text Extraction, Rendering and Converting of PDF Documents'
+  notes: Imports
+  url: https://ropensci.r-universe.dev/pdftools
+  repository: https://CRAN.R-project.org/package=pdftools
+  authors:
+  - family-names: Ooms
+    given-names: Jeroen
+    email: jeroenooms@gmail.com
+    orcid: https://orcid.org/0000-0002-4035-0289
+  year: '2025'
+  doi: 10.32614/CRAN.package.pdftools
+- type: software
+  title: qpdf
+  abstract: 'qpdf: Split, Combine and Compress PDF Files'
+  notes: Imports
+  url: https://docs.ropensci.org/qpdf/
+  repository: https://CRAN.R-project.org/package=qpdf
+  authors:
+  - family-names: Ooms
+    given-names: Jeroen
+    email: jeroenooms@gmail.com
+    orcid: https://orcid.org/0000-0002-4035-0289
+  year: '2025'
+  doi: 10.32614/CRAN.package.qpdf
 - type: software
   title: styler
   abstract: 'styler: Non-Invasive Pretty Printing of R Code'

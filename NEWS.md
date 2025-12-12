@@ -1,3 +1,11 @@
+# FreesearchR 25.12.6
+
+*NEW* Export missingness table directly.
+
+*NEW* Updated and slightly extended list of allowed operators for new variable creation.
+
+*FIX* The exported MS Word documents prompted a warning. I believe that has been fixed, but required several new dependencies.
+
 # FreesearchR 25.12.5
 
 *NEW* Added option to add pairwise differences in discriptive table.

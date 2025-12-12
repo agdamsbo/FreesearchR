@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpftDBtp/file7bf3239dee0a.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpaYL5kU/file9c7175d0a25d.R 
 ########
 
 i18n_path <- here::here("translations")
@@ -63,7 +63,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.12.5'
+app_version <- function()'25.12.6'
 
 
 ########
@@ -453,9 +453,9 @@ create_column_ui <- function(id) {
   htmltools::tagList(
     # datamods:::html_dependency_datamods(),
     # html_dependency_FreesearchR(),
-   shiny::tags$head(
-    shiny::tags$link(rel = "stylesheet", type = "text/css", href = "FreesearchR/inst/assets/css/FreesearchR.css")
-  ),
+    shiny::tags$head(
+      shiny::tags$link(rel = "stylesheet", type = "text/css", href = "FreesearchR/inst/assets/css/FreesearchR.css")
+    ),
     fluidRow(
       column(
         width = 6,
@@ -611,35 +611,44 @@ create_column_server <- function(id,
 #'
 #' @rdname create-column
 # @importFrom methods getGroupMembers
-list_allowed_operations <- function() {
-  c(
-    "(", "c",
+allowed_operations <- function() {
+  list(
+    "Misc" = c("(", "c",":","~"),
     # getGroupMembers("Arith"),
-    c("+", "-", "*", "^", "%%", "%/%", "/"),
+    "Arithmetics" = c("+", "-", "*", "^", "%%", "%/%", "/"),
     # getGroupMembers("Compare"),
-    c("==", ">", "<", "!=", "<=", ">="),
+    "Compare" = c("==", ">", "<", "!=", "<=", ">="),
     # getGroupMembers("Logic"),
-    c("&", "|"),
+    "Logic" = c("&", "|", "is.na", "ifelse", "any", "all"),
     # getGroupMembers("Math"),
-    c(
+    "Math" = c(
       "abs", "sign", "sqrt", "ceiling", "floor", "trunc", "cummax",
       "cummin", "cumprod", "cumsum", "exp", "expm1", "log", "log10",
       "log2", "log1p", "cos", "cosh", "sin", "sinh", "tan", "tanh",
       "acos", "acosh", "asin", "asinh", "atan", "atanh", "cospi", "sinpi",
-      "tanpi", "gamma", "lgamma", "digamma", "trigamma"
+      "tanpi", "gamma", "lgamma", "digamma", "trigamma", "round", "signif"
     ),
     # getGroupMembers("Math2"),
-    c("round", "signif"),
+    # c("round", "signif"),
     # getGroupMembers("Summary"),
-    c("max", "min", "range", "prod", "sum", "any", "all"),
-    "pmin", "pmax", "mean",
-    "paste", "paste0", "substr", "nchar", "trimws",
-    "gsub", "sub", "grepl", "ifelse", "length",
-    "as.numeric", "as.character", "as.integer", "as.Date", "as.POSIXct",
-    "as.factor", "factor"
+    "Summary" = c(
+      "max", "min", "range", "prod", "sum", "length",
+      "pmin", "pmax", "mean"
+    ),
+    "Text" = c(
+      "paste", "paste0", "substr", "nchar", "trimws",
+      "gsub", "sub", "grepl"
+    ),
+    "Class" = c(
+      "as.numeric", "as.character", "as.integer", "as.Date", "as.POSIXct",
+      "as.factor", "factor"
+    )
   )
 }
 
+list_allowed_operations <- function(data=allowed_operations()) {
+  Reduce(c,data)
+}
 
 
 #' @inheritParams shiny::modalDialog
@@ -4442,7 +4451,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.12.5-251211'
+hosted_version <- function()'v25.12.6-251212'
 
 
 ########
@@ -5552,7 +5561,7 @@ data_missings_ui <- function(id, ...) {
           bslib::accordion_panel(
             value = "acc_pan_mis",
             title = "Settings",
-            icon = bsicons::bs_icon("x-circle"),
+            icon = bsicons::bs_icon("gear"),
             shiny::uiOutput(ns("missings_method")),
             shiny::uiOutput(ns("missings_var")),
             shiny::helpText(i18n$t("Evaluate missingness by either comparing missing values across variables (optionally grouped by af categorical or dichotomous variable) or compare variables grouped by the missing status (missing or not) of an outcome variable. If there is a significant difference i the missingness, this may cause a bias in you data and should be considered carefully interpreting the data and analyses as data may not be missing at random.")),
@@ -5563,6 +5572,16 @@ data_missings_ui <- function(id, ...) {
               width = "100%",
               icon = shiny::icon("calculator"),
               disabled = FALSE
+            )
+          ),
+          do.call(
+            bslib::accordion_panel,
+            c(
+              list(
+                title = "Download",
+                icon = bsicons::bs_icon("file-earmark-arrow-down")
+              ),
+              table_download_ui(id = ns("tbl_dwn"), title = NULL)
             )
           )
         )
@@ -5666,10 +5685,10 @@ data_missings_server <- function(id,
           tryCatch(
             {
               shiny::withProgress(message = i18n$t("Calculating. Hold tight for a moment.."), {
-              out <- do.call(
-                compare_missings,
-                modifyList(parameters, list(data = df_tbl))
-              )
+                out <- do.call(
+                  compare_missings,
+                  modifyList(parameters, list(data = df_tbl))
+                )
               })
             },
             error = function(err) {
@@ -5737,6 +5756,13 @@ data_missings_server <- function(id,
         }
       )
 
+
+      table_download_server(
+        id = "tbl_dwn",
+        data = shiny::reactive(rv$table),
+        file_name = "missings_table"
+      )
+
       return(shiny::reactive(rv$table))
     }
   )
@@ -5751,7 +5777,8 @@ missing_demo_app <- function() {
         title = i18n$t("Missings"),
         icon = bsicons::bs_icon("x-circle")
       ),
-      data_missings_ui(id = "data")
+      data_missings_ui(id = "data"),
+      gt::gt_output("table_p")
     )
   )
   server <- function(input, output, session) {
@@ -5759,7 +5786,15 @@ missing_demo_app <- function() {
     data_demo[sample(1:32, 10), "cyl"] <- NA
     data_demo[sample(1:32, 8), "vs"] <- NA
 
-    data_missings_server(id = "data", data = data_demo)
+    rv <- shiny::reactiveValues(
+      table = NULL
+    )
+
+    rv$table <- data_missings_server(id = "data", data = data_demo)
+
+    output$table_p <- gt::render_gt({
+      rv$table
+    })
 
     # visual_summary_server(id = "visual", data = data_demo)
 
@@ -6760,12 +6795,10 @@ plot_download_server <- function(id,
   shiny::moduleServer(
     id = id,
     module = function(input, output, session) {
-      # ns <- session$ns
-
-
-
       output$download_plot <- shiny::downloadHandler(
-        filename = paste0(file_name, ".", input$plot_type),
+        filename = function() {
+          paste0(file_name, ".", input$plot_type)
+        },
         content = function(file) {
           shiny::withProgress(message = "Saving the plot. Hold on for a moment..", {
             ggplot2::ggsave(
@@ -6774,7 +6807,8 @@ plot_download_server <- function(id,
               width = input$plot_width,
               height = input$plot_height,
               dpi = 300,
-              units = "mm", scale = 2
+              units = "mm",
+              scale = 2
             )
           })
         }
@@ -6782,6 +6816,60 @@ plot_download_server <- function(id,
     }
   )
 }
+
+
+plot_download_demo_app <- function() {
+
+  ui <- bslib::page_fillable(
+    title = "Plot Download Demo",
+    bslib::layout_sidebar(
+      sidebar = bslib::sidebar(
+        title = "Download Settings",
+        plot_download_ui(id = "plot_dwn")
+      ),
+      bslib::card(
+        bslib::card_header("Sample Plot"),
+        shiny::plotOutput("demo_plot", height = "500px")
+      )
+    )
+  )
+
+  server <- function(input, output, session) {
+
+    # Create a sample ggplot
+    sample_plot <- ggplot2::ggplot(mtcars, ggplot2::aes(x = wt, y = mpg, color = factor(cyl))) +
+      ggplot2::geom_point(size = 3) +
+      ggplot2::geom_smooth(method = "lm", se = TRUE) +
+      ggplot2::labs(
+        title = "Car Weight vs MPG",
+        x = "Weight (1000 lbs)",
+        y = "Miles per Gallon",
+        color = "Cylinders"
+      ) +
+      ggplot2::theme_minimal() +
+      ggplot2::theme(
+        plot.title = ggplot2::element_text(size = 16, face = "bold"),
+        legend.position = "bottom"
+      )
+
+    # Display the plot
+    output$demo_plot <- shiny::renderPlot({
+      sample_plot
+    })
+
+    # Connect to download module
+    plot_download_server(
+      id = "plot_dwn",
+      data = sample_plot,
+      file_name = "mtcars_plot"
+    )
+  }
+
+  shiny::shinyApp(ui, server)
+}
+
+# Run the demo
+# plot_download_demo_app()
 
 
 ########
@@ -9748,6 +9836,124 @@ html_code_wrap <- function(string, lang = "r") {
   glue::glue("<pre><code class='language-{lang}'>{string}
   </code></pre>")
 }
+
+
+########
+#### Current file: /Users/au301842/FreesearchR/R//table-download-module.R 
+########
+
+table_download_ui <- function(id, title = "Table", ...) {
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    shiny::h4(title),
+    shiny::helpText(i18n$t("Choose your favourite output file format for further work, and download, when the analyses are done.")),
+    shiny::br(),
+    shiny::br(),
+    shiny::selectInput(
+      inputId = ns("output_format"),
+      label = "Output format",
+      selected = NULL,
+      choices = list(
+        "MS Word" = "docx",
+        "Open document format" = "rtf"
+      )
+    ),
+    shiny::br(),
+    shiny::uiOutput(ns("download_button_container")),
+    # shiny::downloadButton(
+    #   outputId = ns("act_table"),
+    #   label = "Download table",
+    #   icon = shiny::icon("download")
+    # ),
+    shiny::br()
+  )
+}
+
+table_download_server <- function(id, data, file_name = "table", ...) {
+  shiny::moduleServer(
+    id = id,
+    module = function(input, output, session) {
+      ns <- session$ns
+
+      output$download_button_container <- shiny::renderUI({
+        # Check if data exists and is valid
+        if (!is.null(data()) && (inherits(data(), "gt_tbl") || inherits(data(), "gtsummary"))) {
+          shiny::downloadButton(
+            outputId = ns("act_table"),
+            label = i18n$t("Download table"),
+            icon = shiny::icon("download")
+          )
+        } else {
+          # Return NULL to show nothing
+          NULL
+        }
+      })
+
+
+      output$act_table <- shiny::downloadHandler(
+        filename = function() {
+          paste0("report.", input$output_format)
+        },
+        content = function(file) {
+          shiny::req(data())
+          type <- input$output_format
+          table <- data()
+
+          shiny::withProgress(message = i18n$t("Generating the report. Hold on for a moment.."), {
+            tryCatch(
+              {
+                # browser()
+                if (inherits(table, "gtsummary")) {
+                  table <- gtsummary::as_gt(table)
+                }
+                out <- gt::gtsave(
+                  data = table,
+                  filename = file # Save to the file path provided by downloadHandler
+                )
+                if (type == "docx") {
+                  out |> doconv::docx_update()
+                } else {
+                  out
+                }
+              },
+              error = function(err) {
+                shiny::showNotification(paste0(i18n$t("Error: "), err), type = "error")
+              }
+            )
+          })
+        }
+      )
+    }
+  )
+}
+
+
+# In your UI
+table_download_demo <- function() {
+  ui <- fluidPage(
+    table_download_ui(id = "my_table", title = "Download Results")
+  )
+
+  # In your server
+  server <- function(input, output, session) {
+    # Your data as a reactive
+    my_table_data <- reactive({
+      # This should return a gt or gtsummary table
+      mtcars |>
+        gt::gt() |>
+        gt::tab_header("My Table")
+    })
+
+    # Call the module server - THIS IS CRITICAL
+    table_download_server(
+      id = "my_table", # Must match the UI id
+      data = my_table_data # Pass the reactive (without parentheses)
+    )
+  }
+  shiny::shinyApp(ui, server)
+}
+
+# table_download_demo()
 
 
 ########
@@ -13900,7 +14106,7 @@ server <- function(input, output, session) {
       shiny::withProgress(message = i18n$t("Generating the report. Hold on for a moment.."), {
         tryCatch(
           {
-            rv$list |>
+            out <- rv$list |>
               write_rmd(
                 params.args = list(
                   regression.p = rv$list$regression$input$add_regression_p
@@ -13908,6 +14114,14 @@ server <- function(input, output, session) {
                 output_format = format,
                 input = file.path(getwd(), "www/report.rmd")
               )
+
+            if (type == "docx") {
+              ## This handles the the following MS Word warning:
+              ##   >> "This document contains fields that may refer to other files."
+              out |> doconv::docx_update()
+            } else {
+              out
+            }
           },
           error = function(err) {
             showNotification(paste0(i18n$t("We encountered the following error creating your report: "), err), type = "err")

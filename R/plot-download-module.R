@@ -51,12 +51,10 @@ plot_download_server <- function(id,
   shiny::moduleServer(
     id = id,
     module = function(input, output, session) {
-      # ns <- session$ns
-
-
-
       output$download_plot <- shiny::downloadHandler(
-        filename = paste0(file_name, ".", input$plot_type),
+        filename = function() {
+          paste0(file_name, ".", input$plot_type)
+        },
         content = function(file) {
           shiny::withProgress(message = "Saving the plot. Hold on for a moment..", {
             ggplot2::ggsave(
@@ -65,7 +63,8 @@ plot_download_server <- function(id,
               width = input$plot_width,
               height = input$plot_height,
               dpi = 300,
-              units = "mm", scale = 2
+              units = "mm",
+              scale = 2
             )
           })
         }
@@ -73,3 +72,57 @@ plot_download_server <- function(id,
     }
   )
 }
+
+
+plot_download_demo_app <- function() {
+
+  ui <- bslib::page_fillable(
+    title = "Plot Download Demo",
+    bslib::layout_sidebar(
+      sidebar = bslib::sidebar(
+        title = "Download Settings",
+        plot_download_ui(id = "plot_dwn")
+      ),
+      bslib::card(
+        bslib::card_header("Sample Plot"),
+        shiny::plotOutput("demo_plot", height = "500px")
+      )
+    )
+  )
+
+  server <- function(input, output, session) {
+
+    # Create a sample ggplot
+    sample_plot <- ggplot2::ggplot(mtcars, ggplot2::aes(x = wt, y = mpg, color = factor(cyl))) +
+      ggplot2::geom_point(size = 3) +
+      ggplot2::geom_smooth(method = "lm", se = TRUE) +
+      ggplot2::labs(
+        title = "Car Weight vs MPG",
+        x = "Weight (1000 lbs)",
+        y = "Miles per Gallon",
+        color = "Cylinders"
+      ) +
+      ggplot2::theme_minimal() +
+      ggplot2::theme(
+        plot.title = ggplot2::element_text(size = 16, face = "bold"),
+        legend.position = "bottom"
+      )
+
+    # Display the plot
+    output$demo_plot <- shiny::renderPlot({
+      sample_plot
+    })
+
+    # Connect to download module
+    plot_download_server(
+      id = "plot_dwn",
+      data = sample_plot,
+      file_name = "mtcars_plot"
+    )
+  }
+
+  shiny::shinyApp(ui, server)
+}
+
+# Run the demo
+# plot_download_demo_app()

@@ -1,6 +1,6 @@
 Package: FreesearchR
 Title: Easy data analysis for clinicians
-Version: 25.12.5
+Version: 25.12.6
 Authors@R: c(
     person("Andreas Gammelgaard", "Damsbo",email="agdamsbo@clin.au.dk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7559-1154")),
@@ -71,7 +71,12 @@ Imports:
     stRoke,
     data.table,
     viridis,
-    smd
+    smd,
+    doconv,
+    locatexec,
+    magick,
+    pdftools,
+    qpdf
 Suggests: 
     styler,
     devtools,
@@ -131,6 +136,7 @@ Collate:
     'report.R'
     'separate_string.R'
     'syntax_highlight.R'
+    'table-download-module.R'
     'theme.R'
     'translate.R'
     'ui_elements.R'
