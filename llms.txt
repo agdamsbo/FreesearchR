@@ -294,6 +294,8 @@ No tracking data is sent running the app locally (see above).
   : Test if url is valid format for REDCap API
 - [`is_valid_token()`](https://agdamsbo.github.io/FreesearchR/reference/is_valid_token.md)
   : Validate REDCap token
+- [`landing_page_ui()`](https://agdamsbo.github.io/FreesearchR/reference/landing_page_ui.md)
+  : Tag list of elements for the FreesearchR landing page
 - [`launch_FreesearchR()`](https://agdamsbo.github.io/FreesearchR/reference/launch_FreesearchR.md)
   : Easily launch the FreesearchR app
 - [`limit_data_size()`](https://agdamsbo.github.io/FreesearchR/reference/limit_data_size.md)
