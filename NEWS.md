@@ -1,3 +1,7 @@
+# FreesearchR 25.12.7
+
+*NEW* The landing page was overhauled for a nicer intro and better overview with focus on the basic functions.
+
 # FreesearchR 25.12.6
 
 *NEW* Export missingness table directly.
