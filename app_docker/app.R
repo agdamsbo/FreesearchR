@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpaYL5kU/file9c7113e28000.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpfypcRk/file94c84b9cb1cb.R 
 ########
 
 i18n_path <- here::here("translations")
@@ -41,10 +41,9 @@ library(shinyWidgets)
 library(gtsummary)
 library(bsicons)
 library(rlang)
-# library(datamods)
-# library(toastui)
 # library(phosphoricons)
 library(shiny.i18n)
+library(fontawesome)
 
 ## Translation init
 i18n <- shiny.i18n::Translator$new(translation_csvs_path = i18n_path)
@@ -63,7 +62,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.12.6'
+app_version <- function()'25.12.7'
 
 
 ########
@@ -3626,6 +3625,42 @@ construct_col_summary <- function(data) {
 
 
 ########
+#### Current file: /Users/au301842/FreesearchR/R//footer_ui.R 
+########
+
+footer_ui <- function(i18n) {
+  tagList(
+    shiny::tags$footer(
+      style = "background-color: #14131326; padding: 4px; text-align: center; bottom: 0; width: 100%;",
+      shiny::p(
+        style = "margin: 1",
+        i18n$t("Data is only stored for analyses and deleted when the app is closed.")
+      ),
+      shiny::p(
+        style = "margin: 1",
+        i18n$t("Run the FreesearchR app locally when working with sensitive data."), shiny::tags$a(i18n$t("(Read more)"), href = "https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine", target = "_blank", rel = "noopener noreferrer")
+      ),
+      # shiny::p(
+      #   style = "margin: 1; color: #888;",
+      div(
+        style = "display: inline-flex; align-items: center; gap: 1px;",
+        shiny::tags$a(i18n$t("Documentation"), href = "https://agdamsbo.github.io/FreesearchR/", target = "_blank", rel = "noopener noreferrer"), " | ", div(
+          style = "display: inline-block;",
+          class = c("smart-dropdown", "text-select"),
+          shiny::uiOutput(outputId = "language_select")
+        ), " | ", shiny::tags$a(i18n$t("Feedback"), href = "https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8", target = "_blank", rel = "noopener noreferrer")
+      ),
+      br(),
+      p(
+        style = "display: inline-flex; align-items: center; gap: 1px;",
+        hosted_version(), " | ", shiny::tags$a(i18n$t("License: AGPLv3"), href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a(i18n$t("Source"), href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer"),
+      )
+    )
+  )
+}
+
+
+########
 #### Current file: /Users/au301842/FreesearchR/R//helpers.R 
 ########
 
@@ -4451,7 +4486,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.12.6-251212'
+hosted_version <- function()'v25.12.7-251218'
 
 
 ########
@@ -5503,6 +5538,271 @@ limit_data_size <- function(data, limit = NULL) {
     data
   }
 }
+
+
+########
+#### Current file: /Users/au301842/FreesearchR/R//landing_page_ui.R 
+########
+
+#' Tag list of elements for the FreesearchR landing page
+#'
+#' @param i18n i18n function loaded in the UI
+#'
+#' @returns tag list
+#'
+landing_page_ui <- function(i18n) {
+  tagList(
+    # Header section
+    div(
+      class = "container-fluid py-4",
+      # style = "background: linear-gradient(135deg, #1E4A8F 0%, #8A4FFF 100%); color: white;",
+      div(
+        class = "row align-items-center",
+        div(
+          class = "col-md-8",
+          h1(i18n$t("Welcome to FreesearchR"), style = "font-weight: 700; margin-bottom: 10px;"),
+          h4(i18n$t("A free data analysis tool for clinicians, students, and learners"),
+             style = "font-weight: 300; opacity: 0.95;"),
+          p(
+            class = "lead",
+            i18n$t("Start with FreesearchR for basic data evaluation and analysis."),
+            i18n$t("When you need more advanced tools, you'll be prepared to use R directly."),
+            style = "font-size: 1.2rem; color: #555;"
+          )
+        ),
+        div(
+          class = "col-md-4 text-end",
+          img(src = "FreesearchR-logo.png", style = "max-width: 200px; height: auto;")
+        )
+      )
+    ),
+
+    # # Main content
+    div(
+      class = "container my-5",
+
+      # Introduction text
+      # div(
+      #   class = "row mb-5",
+      #   div(
+      #     class = "col-12 text-center",
+      #     p(
+      #       class = "lead",
+      #       i18n$t("Start with FreesearchR for basic data evaluation and analysis."),
+      #       i18n$t("When you need more advanced tools, you'll be better prepared to use R directly."),
+      #       style = "font-size: 1.2rem; color: #555;"
+      #     )
+      #   )
+      # ),
+
+      # Core Features Section
+      h2(i18n$t("Core Features"), class = "text-center mb-4",
+         style = "color: #1E4A8F; font-weight: 600;"),
+
+      div(
+        class = "row g-4 mb-5",
+
+        # Import Data
+        div(
+          class = "col-md-4",
+          div(
+            class = "card h-100 shadow-sm hover-card",
+            style = "border: none; transition: transform 0.2s;",
+            div(
+              class = "card-body text-center p-4",
+              div(
+                style = "font-size: 3rem; color: #1E4A8F; margin-bottom: 15px;",
+                fa("file-import")
+              ),
+              h4(i18n$t("Import Data"), class = "card-title", style = "color: #2D2D42; font-weight: 600;"),
+              p(
+                class = "card-text",
+                i18n$t("Load data from spreadsheets, REDCap servers, or try with sample data. Multiple sources supported for maximum flexibility.")
+              )
+            )
+          )
+        ),
+
+        # Data Management
+        div(
+          class = "col-md-4",
+          div(
+            class = "card h-100 shadow-sm hover-card",
+            style = "border: none;",
+            div(
+              class = "card-body text-center p-4",
+              div(
+                style = "font-size: 3rem; color: #1E4A8F; margin-bottom: 15px;",
+                fa("pen-to-square")
+              ),
+              h4(i18n$t("Data Management"), class = "card-title", style = "color: #2D2D42; font-weight: 600;"),
+              p(
+                class = "card-text",
+                i18n$t("Filter, modify, and create new variables. Prepare your data efficiently for analysis.")
+              )
+            )
+          )
+        ),
+
+        # Descriptive Statistics
+        div(
+          class = "col-md-4",
+          div(
+            class = "card h-100 shadow-sm hover-card",
+            style = "border: none;",
+            div(
+              class = "card-body text-center p-4",
+              div(
+                style = "font-size: 3rem; color: #1E4A8F; margin-bottom: 15px;",
+                fa("magnifying-glass-chart")
+              ),
+              h4(i18n$t("Descriptive Statistics"), class = "card-title", style = "color: #2D2D42; font-weight: 600;"),
+              p(
+                class = "card-text",
+                i18n$t("Evaluate data with descriptive analyses, inspect correlations, and review missing observations effectively.")
+              )
+            )
+          )
+        )
+      ),
+
+      # Advanced Features Section
+      h3(i18n$t("Additional Capabilities"), class = "text-center mb-4 mt-5",
+         style = "color: #2D2D42; font-weight: 500; font-size: 1.5rem;"),
+
+      div(
+        class = "row g-3 mb-5",
+        div(
+          class = "col-md-6",
+          div(
+            class = "card shadow-sm",
+            style = "border-left: 4px solid #8A4FFF;",
+            div(
+              class = "card-body",
+              h5(fa("chart-line"), " ", i18n$t("Data Visualization"), class = "card-title", style = "color: #2D2D42;"),
+              p(class = "card-text small", i18n$t("Create simple, clean plots for quick insights and overview"))
+            )
+          )
+        ),
+        div(
+          class = "col-md-6",
+          div(
+            class = "card shadow-sm",
+            style = "border-left: 4px solid #8A4FFF;",
+            div(
+              class = "card-body",
+              h5(fa("calculator"), " ", i18n$t("Regression Models"), class = "card-title", style = "color: #2D2D42;"),
+              p(class = "card-text small", i18n$t("Build simple regression models for advanced analysis"))
+            )
+          )
+        )
+      ),
+
+      # Export & Learning Section
+      div(
+        class = "row mb-5",
+        div(
+          class = "col-12",
+          div(
+            class = "card shadow",
+            style = "background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border: none;",
+            div(
+              class = "card-body p-4",
+              h4(fa("download"), " ", i18n$t("Export & Learn"), class = "text-center mb-3", style = "color: #1E4A8F;"),
+              div(
+                class = "row text-center",
+                div(
+                  class = "col-md-4",
+                  p(strong(i18n$t("Download Results")), br(), i18n$t("Export results directly to your text editor"))
+                ),
+                div(
+                  class = "col-md-4",
+                  p(strong(i18n$t("Get Modified Data")), br(), i18n$t("Save your processed datasets for later"))
+                ),
+                div(
+                  class = "col-md-4",
+                  p(strong(i18n$t("Reproducible Code")), br(), i18n$t("Learn and reproduce results in R"))
+                )
+              )
+            )
+          )
+        )
+      )#,
+
+      # Footer links
+    #   div(
+    #     class = "row mt-5 pt-4 border-top",
+    #     div(
+    #       class = "col-md-4 text-center mb-3",
+    #       a(
+    #         href = "https://agdamsbo.github.io/FreesearchR/",
+    #         target = "_blank",
+    #         class = "btn btn-outline-primary",
+    #         fa("book"), " ", i18n$t("Full Documentation")
+    #       )
+    #     ),
+    #     div(
+    #       class = "col-md-4 text-center mb-3",
+    #       a(
+    #         href = "https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8",
+    #         target = "_blank",
+    #         class = "btn btn-outline-success",
+    #         fa("comments"), " ", i18n$t("Share Feedback")
+    #       )
+    #     ),
+    #     div(
+    #       class = "col-md-4 text-center mb-3",
+    #       a(
+    #         href = "mailto:info@freesearchr.org",
+    #         class = "btn btn-outline-info",
+    #         fa("envelope"), " ", i18n$t("Contact Us")
+    #       )
+    #     )
+    #   ),
+    #
+    #   # Translation notice
+    #   div(
+    #     class = "row mt-4",
+    #     div(
+    #       class = "col-12 text-center",
+    #       p(
+    #         class = "text-muted small",
+    #         em(i18n$t("FreesearchR is available in multiple languages. To help with translations, please contact us at info@freesearchr.org"))
+    #       )
+    #     )
+    #   )
+    ),
+
+    # Custom CSS for hover effects
+    tags$style(HTML("
+      .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+      }
+    "))
+  )
+}
+
+# Example usage in a Shiny app with nav_panel:
+#
+# ui <- page_navbar(
+#   title = "FreesearchR",
+#   theme = bs_theme(
+#     version = 5,
+#     bootswatch = "flatly",
+#     primary = "#2C3E50",
+#     base_font = font_google("Roboto")
+#   ),
+#   nav_panel(
+#     title = i18n$t("Home"),
+#     landing_page_ui(i18n)
+#   ),
+#   nav_panel(
+#     title = i18n$t("Import Data"),
+#     # Import data UI
+#   ),
+#   # ... other nav_panels
+# )
 
 
 ########
@@ -10005,6 +10305,7 @@ custom_theme <- function(...,
   )
 }
 
+
 FreesearchR_colors <- function(choose = NULL) {
   out <- c(
     primary = "#1E4A8F",
@@ -10078,6 +10379,7 @@ gg_theme_export <- function() {
 }
 
 
+
 ########
 #### Current file: /Users/au301842/FreesearchR/R//translate.R 
 ########
@@ -10123,14 +10425,15 @@ ui_elements <- function(selection) {
         ## Default just output "NULL"
         ## This could probably be achieved more legantly, but this works.
         dev_banner(),
-        shiny::column(width = 2),
-        shiny::column(
-          width = 8,
-          # shiny::uiOutput(outputId = "language_select"),
-          htmlOutput("intro_text")
-          # shiny::includeHTML(i18n$t("www/intro.html"))
-          # shiny::markdown(readLines(i18n$t("www/intro.md")))
-        ),
+        landing_page_ui(i18n=i18n),
+        # shiny::column(width = 2),
+        # shiny::column(
+        #   width = 8,
+        #   # shiny::uiOutput(outputId = "language_select"),
+        #   htmlOutput("intro_text")
+        #   # shiny::includeHTML(i18n$t("www/intro.html"))
+        #   # shiny::markdown(readLines(i18n$t("www/intro.md")))
+        # ),
         shiny::column(width = 2)
       )
     ),
@@ -12948,7 +13251,7 @@ ui <- bslib::page_fixed(
         # ui_elements$feedback,
         # ui_elements$docs,
         fillable = FALSE,
-        footer = shiny::uiOutput("footer_text_div")
+        footer = footer_ui(i18n)
       )
     )
   )
@@ -13116,36 +13419,9 @@ server <- function(input, output, session) {
       )
     )
 
-    output$intro_text <- renderUI(includeHTML(i18n$t("www/intro.html")))
+    # output$intro_text <- renderUI(includeHTML(i18n$t("www/intro.html")))
   })
 
-  ## This is not working but kept to try to solve if deemed necessary
-  shiny::observe(
-    output$footer_text_div <- renderUI({
-      shiny::tags$footer(
-        style = "background-color: #14131326; padding: 4px; text-align: center; bottom: 0; width: 100%;",
-        shiny::p(
-          style = "margin: 1",
-          i18n$t("Data is only stored for analyses and deleted when the app is closed."), shiny::markdown(i18n$t("Consider [running ***FreesearchR*** locally](https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine) if working with sensitive data."))
-        ),
-        # shiny::p(
-        #   style = "margin: 1; color: #888;",
-        div(
-          style = "display: inline-flex; align-items: center; gap: 1px;",
-          shiny::tags$a(i18n$t("Documentation"), href = "https://agdamsbo.github.io/FreesearchR/", target = "_blank", rel = "noopener noreferrer"), " | ", div(
-            style = "display: inline-block;",
-            class = c("smart-dropdown", "text-select"),
-            shiny::uiOutput(outputId = "language_select")
-          ), " | ", shiny::tags$a(i18n$t("Feedback"), href = "https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8", target = "_blank", rel = "noopener noreferrer")
-        ),
-        br(),
-        p(
-          style = "display: inline-flex; align-items: center; gap: 1px;",
-          hosted_version(), " | ", shiny::tags$a(i18n$t("License: AGPLv3"), href = "https://github.com/agdamsbo/FreesearchR/blob/main/LICENSE.md", target = "_blank", rel = "noopener noreferrer"), " | ", shiny::tags$a(i18n$t("Source"), href = "https://github.com/agdamsbo/FreesearchR/", target = "_blank", rel = "noopener noreferrer"),
-        )
-      )
-    })
-  )
 
   shiny::observeEvent(input$language_select, {
     bslib::accordion_panel_update(id = "acc_chars", title = i18n$t("Settings"), target = "acc_pan_chars")
