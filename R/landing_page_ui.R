@@ -16,7 +16,13 @@ landing_page_ui <- function(i18n) {
           class = "col-md-8",
           h1(i18n$t("Welcome to FreesearchR"), style = "font-weight: 700; margin-bottom: 10px;"),
           h4(i18n$t("A free data analysis tool for clinicians, students, and learners"),
-             style = "font-weight: 300; opacity: 0.95;")
+             style = "font-weight: 300; opacity: 0.95;"),
+          p(
+            class = "lead",
+            i18n$t("Start with FreesearchR for basic data evaluation and analysis."),
+            i18n$t("When you need more advanced tools, you'll be prepared to use R directly."),
+            style = "font-size: 1.2rem; color: #555;"
+          )
         ),
         div(
           class = "col-md-4 text-end",
@@ -25,23 +31,23 @@ landing_page_ui <- function(i18n) {
       )
     ),
 
-    # Main content
+    # # Main content
     div(
       class = "container my-5",
 
       # Introduction text
-      div(
-        class = "row mb-5",
-        div(
-          class = "col-12 text-center",
-          p(
-            class = "lead",
-            i18n$t("Start with FreesearchR for basic data evaluation and analysis."),
-            i18n$t("When you need more advanced tools, you'll be better prepared to use R directly."),
-            style = "font-size: 1.2rem; color: #555;"
-          )
-        )
-      ),
+      # div(
+      #   class = "row mb-5",
+      #   div(
+      #     class = "col-12 text-center",
+      #     p(
+      #       class = "lead",
+      #       i18n$t("Start with FreesearchR for basic data evaluation and analysis."),
+      #       i18n$t("When you need more advanced tools, you'll be better prepared to use R directly."),
+      #       style = "font-size: 1.2rem; color: #555;"
+      #     )
+      #   )
+      # ),
 
       # Core Features Section
       h2(i18n$t("Core Features"), class = "text-center mb-4",
