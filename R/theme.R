@@ -40,6 +40,7 @@ custom_theme <- function(...,
   )
 }
 
+
 FreesearchR_colors <- function(choose = NULL) {
   out <- c(
     primary = "#1E4A8F",
@@ -111,3 +112,4 @@ gg_theme_export <- function() {
     plot.title = ggplot2::element_text(size = 24)
   )
 }
+

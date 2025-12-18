@@ -25,14 +25,15 @@ ui_elements <- function(selection) {
         ## Default just output "NULL"
         ## This could probably be achieved more legantly, but this works.
         dev_banner(),
-        shiny::column(width = 2),
-        shiny::column(
-          width = 8,
-          # shiny::uiOutput(outputId = "language_select"),
-          htmlOutput("intro_text")
-          # shiny::includeHTML(i18n$t("www/intro.html"))
-          # shiny::markdown(readLines(i18n$t("www/intro.md")))
-        ),
+        landing_page_ui(i18n=i18n),
+        # shiny::column(width = 2),
+        # shiny::column(
+        #   width = 8,
+        #   # shiny::uiOutput(outputId = "language_select"),
+        #   htmlOutput("intro_text")
+        #   # shiny::includeHTML(i18n$t("www/intro.html"))
+        #   # shiny::markdown(readLines(i18n$t("www/intro.md")))
+        # ),
         shiny::column(width = 2)
       )
     ),
