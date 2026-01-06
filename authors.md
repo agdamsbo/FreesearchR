@@ -12,15 +12,15 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/agdamsbo/FreesearchR/blob/v25.12.7/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/agdamsbo/FreesearchR/blob/v26.1.1/DESCRIPTION)
 
-Damsbo A (2025). *FreesearchR: Easy data analysis for clinicians*. R
+Damsbo A (2026). *FreesearchR: Easy data analysis for clinicians*. R
 package version 25.12.7, <https://github.com/agdamsbo/FreesearchR>.
 
     @Manual{,
       title = {FreesearchR: Easy data analysis for clinicians},
       author = {Andreas Gammelgaard Damsbo},
-      year = {2025},
+      year = {2026},
       note = {R package version 25.12.7},
       url = {https://github.com/agdamsbo/FreesearchR},
     }
