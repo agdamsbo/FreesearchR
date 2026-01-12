@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpfypcRk/file94c829f4964f.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpBwniSk/file141b66174230e.R 
 ########
 
 i18n_path <- system.file("translations", package = "FreesearchR")
@@ -62,7 +62,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'25.12.7'
+app_version <- function()'26.1.2'
 
 
 ########
@@ -4486,7 +4486,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v25.12.7-251218'
+hosted_version <- function()'v26.1.2-260112'
 
 
 ########
@@ -5566,6 +5566,7 @@ landing_page_ui <- function(i18n) {
           p(
             class = "lead",
             i18n$t("Start with FreesearchR for basic data evaluation and analysis."),
+            i18n$t("The app contains a selelct number of features and will guide you through key analyses."),
             i18n$t("When you need more advanced tools, you'll be prepared to use R directly."),
             style = "font-size: 1.2rem; color: #555;"
           )
@@ -10386,9 +10387,11 @@ gg_theme_export <- function() {
 
 language_choices <- function() {
   c(
+    "🇩🇰 Dansk" = "da",
+    # "🇩🇪 Deutsch" = "de",
     "🇬🇧 English" = "en",
-    "🇹🇿 Kiswahili" = "sw",
-    "🇩🇰 Dansk" = "da"
+    "🇹🇿 Kiswahili" = "sw"#,
+    # "🇸🇪 Svenska" = "sv"
   )
 }
 
@@ -10672,11 +10675,11 @@ ui_elements <- function(selection) {
             width = 3,
             shiny::actionButton(
               inputId = "modal_update",
-              label = i18n$t("Reorder factor levels"),
+              label = i18n$t("Modify factor levels"),
               width = "100%"
             ),
             shiny::tags$br(),
-            shiny::helpText(i18n$t("Reorder the levels of factor/categorical variables.")),
+            shiny::helpText(i18n$t("Reorder or rename the levels of factor/categorical variables.")),
             shiny::tags$br(),
             shiny::tags$br()
           ),
@@ -11184,16 +11187,16 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
           decreasing <- FALSE
           label <- tagList(
             phosphoricons::ph("sort-descending"),
-            "Sort Levels"
+            i18n$t("Sort by Levels")
           )
         } else {
           decreasing <- TRUE
           label <- tagList(
             phosphoricons::ph("sort-ascending"),
-            "Sort Levels"
+            i18n$t("Sort by Levels")
           )
         }
-        updateActionButton(inputId = "sort_levels", label = as.character(label))
+        updateActionButton(inputId = "sort_levels", label = label)
         rv$data_grid <- rv$data_grid[order(rv$data_grid[[1]], decreasing = decreasing), ]
       })
 
@@ -11202,16 +11205,16 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
           decreasing <- FALSE
           label <- tagList(
             phosphoricons::ph("sort-descending"),
-            i18n$t("Sort count")
+            i18n$t("Sort by count")
           )
         } else {
           decreasing <- TRUE
           label <- tagList(
             phosphoricons::ph("sort-ascending"),
-            i18n$t("Sort count")
+            i18n$t("Sort by count")
           )
         }
-        updateActionButton(inputId = "sort_occurrences", label = as.character(label))
+        updateActionButton(inputId = "sort_occurrences", label = label)
         rv$data_grid <- rv$data_grid[order(rv$data_grid[[2]], decreasing = decreasing), ]
       })
 
@@ -11347,7 +11350,6 @@ factor_new_levels_labels <- function(
     labels = ifelse(new_labels == "New label", new_levels, new_labels)
   )
 
-  # browser()
 
   if (isTRUE(new_variable)) {
     append_column(
@@ -11356,7 +11358,7 @@ factor_new_levels_labels <- function(
       name = unique_names(new = paste0(variable, "_updated"), existing = names(data))
     )
   } else {
-    data[[variable]] <- new_variable
+    data[[variable]] <- with_label
     data
   }
 }

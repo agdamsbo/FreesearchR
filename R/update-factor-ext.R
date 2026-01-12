@@ -126,16 +126,16 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
           decreasing <- FALSE
           label <- tagList(
             phosphoricons::ph("sort-descending"),
-            "Sort Levels"
+            i18n$t("Sort by Levels")
           )
         } else {
           decreasing <- TRUE
           label <- tagList(
             phosphoricons::ph("sort-ascending"),
-            "Sort Levels"
+            i18n$t("Sort by Levels")
           )
         }
-        updateActionButton(inputId = "sort_levels", label = as.character(label))
+        updateActionButton(inputId = "sort_levels", label = label)
         rv$data_grid <- rv$data_grid[order(rv$data_grid[[1]], decreasing = decreasing), ]
       })
 
@@ -144,16 +144,16 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
           decreasing <- FALSE
           label <- tagList(
             phosphoricons::ph("sort-descending"),
-            i18n$t("Sort count")
+            i18n$t("Sort by count")
           )
         } else {
           decreasing <- TRUE
           label <- tagList(
             phosphoricons::ph("sort-ascending"),
-            i18n$t("Sort count")
+            i18n$t("Sort by count")
           )
         }
-        updateActionButton(inputId = "sort_occurrences", label = as.character(label))
+        updateActionButton(inputId = "sort_occurrences", label = label)
         rv$data_grid <- rv$data_grid[order(rv$data_grid[[2]], decreasing = decreasing), ]
       })
 
@@ -289,7 +289,6 @@ factor_new_levels_labels <- function(
     labels = ifelse(new_labels == "New label", new_levels, new_labels)
   )
 
-  # browser()
 
   if (isTRUE(new_variable)) {
     append_column(
@@ -298,7 +297,7 @@ factor_new_levels_labels <- function(
       name = unique_names(new = paste0(variable, "_updated"), existing = names(data))
     )
   } else {
-    data[[variable]] <- new_variable
+    data[[variable]] <- with_label
     data
   }
 }

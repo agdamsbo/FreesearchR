@@ -272,11 +272,11 @@ ui_elements <- function(selection) {
             width = 3,
             shiny::actionButton(
               inputId = "modal_update",
-              label = i18n$t("Reorder factor levels"),
+              label = i18n$t("Modify factor levels"),
               width = "100%"
             ),
             shiny::tags$br(),
-            shiny::helpText(i18n$t("Reorder the levels of factor/categorical variables.")),
+            shiny::helpText(i18n$t("Reorder or rename the levels of factor/categorical variables.")),
             shiny::tags$br(),
             shiny::tags$br()
           ),

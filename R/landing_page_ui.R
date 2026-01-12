@@ -20,6 +20,7 @@ landing_page_ui <- function(i18n) {
           p(
             class = "lead",
             i18n$t("Start with FreesearchR for basic data evaluation and analysis."),
+            i18n$t("The app contains a selelct number of features and will guide you through key analyses."),
             i18n$t("When you need more advanced tools, you'll be prepared to use R directly."),
             style = "font-size: 1.2rem; color: #555;"
           )

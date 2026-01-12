@@ -1,3 +1,13 @@
+# FreesearchR 26.1.2
+
+Rebuild 26.1.1
+
+# FreesearchR 26.1.1
+
+*FIX* Two bugs in the "modify factor levels" module was fixed, which would print wrong button labels and save wrong data if not selecting to save as new factor.
+
+*TRANLATIONS* DA and SW translations are updated. This was mostly done using machine translations and will be reviewed in the coming months.
+
 # FreesearchR 25.12.7
 
 *NEW* The landing page was overhauled for a nicer intro and better overview with focus on the basic functions.
