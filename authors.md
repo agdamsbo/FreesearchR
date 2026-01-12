@@ -12,7 +12,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/agdamsbo/FreesearchR/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/agdamsbo/FreesearchR/blob/v26.1.2/DESCRIPTION)
 
 Damsbo A (2026). *FreesearchR: Easy data analysis for clinicians*. R
 package version 26.1.2, <https://github.com/agdamsbo/FreesearchR>.
