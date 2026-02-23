@@ -9,45 +9,49 @@
 data_missings_ui <- function(id, ...) {
   ns <- shiny::NS(id)
 
-  list(
-    bslib::layout_sidebar(
-      sidebar = bslib::sidebar(
-        bslib::accordion(
-          id = ns("acc_mis"),
-          open = "acc_chars",
-          multiple = FALSE,
-          bslib::accordion_panel(
-            value = "acc_pan_mis",
-            title = "Settings",
-            icon = bsicons::bs_icon("gear"),
+  list(bslib::layout_sidebar(
+    uiOutput(outputId = ns("feedback")),
+    sidebar = bslib::sidebar(
+      bslib::accordion(
+        id = ns("acc_mis"),
+        open = "acc_chars",
+        multiple = FALSE,
+        bslib::accordion_panel(
+          value = "acc_pan_mis",
+          title = "Settings",
+          icon = bsicons::bs_icon("gear"),
+          shiny::conditionalPanel(
+            condition = "output.missings == true",
             shiny::uiOutput(ns("missings_method")),
             shiny::uiOutput(ns("missings_var")),
-            shiny::helpText(i18n$t("Evaluate missingness by either comparing missing values across variables (optionally grouped by af categorical or dichotomous variable) or compare variables grouped by the missing status (missing or not) of an outcome variable. If there is a significant difference i the missingness, this may cause a bias in you data and should be considered carefully interpreting the data and analyses as data may not be missing at random.")),
-            shiny::br(),
-            shiny::actionButton(
-              inputId = ns("act_miss"),
-              label = i18n$t("Evaluate"),
-              width = "100%",
-              icon = shiny::icon("calculator"),
-              disabled = FALSE
+            ns = ns
+          ),
+          shiny::helpText(
+            i18n$t(
+              "Evaluate missingness by either comparing missing values across variables (optionally grouped by af categorical or dichotomous variable) or compare variables grouped by the missing status (missing or not) of an outcome variable. If there is a significant difference i the missingness, this may cause a bias in you data and should be considered carefully interpreting the data and analyses as data may not be missing at random."
             )
           ),
-          do.call(
-            bslib::accordion_panel,
-            c(
-              list(
-                title = "Download",
-                icon = bsicons::bs_icon("file-earmark-arrow-down")
-              ),
-              table_download_ui(id = ns("tbl_dwn"), title = NULL)
-            )
+          shiny::br(),
+          shiny::actionButton(
+            inputId = ns("act_miss"),
+            label = i18n$t("Evaluate"),
+            width = "100%",
+            icon = shiny::icon("calculator"),
+            disabled = FALSE
           )
-        )
-      ),
-      ...,
-      gt::gt_output(outputId = ns("missings_table"))
-    )
-  )
+        ),
+        do.call(bslib::accordion_panel, c(
+          list(
+            title = "Download",
+            icon = bsicons::bs_icon("file-earmark-arrow-down")
+          ),
+          table_download_ui(id = ns("tbl_dwn"), title = NULL)
+        ))
+      )
+    ),
+    ...,
+    gt::gt_output(outputId = ns("missings_table"))
+  ))
 }
 
 ## This should really just be rebuild to only contain a function
@@ -59,46 +63,65 @@ data_missings_ui <- function(id, ...) {
 #' @name data-missings
 #' @returns shiny server module
 #' @export
-data_missings_server <- function(id,
-                                 data,
-                                 max_level = 20,
-                                 ...) {
+data_missings_server <- function(id, data, max_level = 20, ...) {
   shiny::moduleServer(
     id = id,
     module = function(input, output, session) {
       ns <- session$ns
 
-      datar <- if (is.reactive(data)) data else reactive(data)
+      datar <- if (is.reactive(data))
+        data
+      else
+        reactive(data)
 
-      rv <- shiny::reactiveValues(
-        data = NULL,
-        table = NULL
+      rv <- shiny::reactiveValues(data = NULL,
+                                  table = NULL,
+                                  feedback = NULL)
+
+      ## Case with no missings
+
+      info_alert <- shinyWidgets::alert(
+        status = "info",
+        phosphoricons::ph("question"),
+        i18n$t("You have provided a complete dataset with no missing values.")
       )
+
+      output$missings <- shiny::reactive({
+        shiny::req(data())
+        any(is.na(data()))
+      })
+      shiny::outputOptions(output, "missings", suspendWhenHidden = FALSE)
+
+      observe({
+        shiny::req(data())
+        if (!any(is.na(data()))) {
+          rv$feedback <- info_alert
+        } else {
+          rv$feedback <- NULL
+        }
+      })
+
+
+      output$feedback <- renderUI(rv$feedback)
 
       ## Notes
       ##
       ## Code export is still missing
       ## Direct table export would be nice
 
-      shiny::observe(
-        output$missings_method <- shiny::renderUI({
-          shiny::req(data())
-          vectorSelectInput(
-            inputId = ns("missings_method"),
-            label = i18n$t("Analysis method for missingness overview"),
-            choices = setNames(
-              c(
-                "predictors",
-                "outcome"
-              ),
-              c(
-                i18n$t("Overview of missings across variables"),
-                i18n$t("Overview of difference in variables by missing status in outcome")
-              )
+      shiny::observe(output$missings_method <- shiny::renderUI({
+        shiny::req(data())
+        vectorSelectInput(
+          inputId = ns("missings_method"),
+          label = i18n$t("Analysis method for missingness overview"),
+          choices = setNames(c("predictors", "outcome"), c(
+            i18n$t("Overview of missings across variables"),
+            i18n$t(
+              "Overview of difference in variables by missing status in outcome"
             )
-          )
-        })
-      )
+          ))
+        )
+      }))
 
       shiny::observe({
         output$missings_var <- shiny::renderUI({
@@ -125,94 +148,93 @@ data_missings_server <- function(id,
       })
 
 
-      shiny::observeEvent(
-        list(input$act_miss),
-        {
-          shiny::req(datar())
-          shiny::req(input$missings_var)
-          # browser()
-          df_tbl <- datar()
-          by_var <- input$missings_var
+      shiny::observeEvent(list(input$act_miss), {
+        shiny::req(datar())
+        shiny::req(input$missings_var)
+        # browser()
+        df_tbl <- datar()
+        by_var <- input$missings_var
 
-          parameters <- list(
-            by_var = by_var,
-            max_level = max_level,
-            type = input$missings_method
-          )
+        parameters <- list(
+          by_var = by_var,
+          max_level = max_level,
+          type = input$missings_method
+        )
 
-          tryCatch(
-            {
-              shiny::withProgress(message = i18n$t("Calculating. Hold tight for a moment.."), {
-                out <- do.call(
-                  compare_missings,
-                  modifyList(parameters, list(data = df_tbl))
-                )
-              })
-            },
-            error = function(err) {
-              showNotification(paste0("Error: ", err), type = "err")
-            }
-          )
+        tryCatch({
+          shiny::withProgress(message = i18n$t("Calculating. Hold tight for a moment.."), {
+            out <- do.call(compare_missings, modifyList(parameters, list(data = df_tbl)))
+          })
+        }, error = function(err) {
+          showNotification(paste0("Error: ", err), type = "err")
+        })
 
-          if (is.null(input$missings_var) || input$missings_var == "" || !input$missings_var %in% names(datar()) || input$missings_var == "none") {
-            # if (is.null(variabler()) || variabler() == "" || !variabler() %in% names(data()) || variabler() == "none") {
-            # tbl <- rv$data()
-            if (anyNA(datar())) {
-              if (input$missings_method == "predictors") {
-                title <- i18n$t("Overview of missing observations")
-              } else {
-                title <- i18n$t("No outcome measure chosen")
-              }
+        if (is.null(input$missings_var) ||
+            input$missings_var == "" ||
+            !input$missings_var %in% names(datar()) ||
+            input$missings_var == "none") {
+          # if (is.null(variabler()) || variabler() == "" || !variabler() %in% names(data()) || variabler() == "none") {
+          # tbl <- rv$data()
+          if (anyNA(datar())) {
+            if (input$missings_method == "predictors") {
+              title <- i18n$t("Overview of missing observations")
             } else {
-              title <- i18n$t("No missing observations")
+              title <- i18n$t("No outcome measure chosen")
             }
           } else {
-            ## Due to reactivity, the table updates too quickly. this mitigates that issue..
+            title <- i18n$t("No missing observations")
+          }
+        } else {
+          ## Due to reactivity, the table updates too quickly. this mitigates that issue..
 
 
-            if (input$missings_var == "predictors") {
-              title <- glue::glue(i18n$t("Missings across variables by the variable **'{input$missings_var}'**"))
-            } else {
-              title <- glue::glue(i18n$t("Missing vs non-missing observations in the variable **'{input$missings_var}'**"))
-            }
+          if (input$missings_var == "predictors") {
+            title <- glue::glue(
+              i18n$t(
+                "Missings across variables by the variable **'{input$missings_var}'**"
+              )
+            )
+          } else {
+            title <- glue::glue(
+              i18n$t(
+                "Missing vs non-missing observations in the variable **'{input$missings_var}'**"
+              )
+            )
+          }
+        }
+
+        attr(out, "tbl_title") <- title
+
+        rv$data <- shiny::reactive(out)
+      })
+
+      shiny::observeEvent(list(
+        # input$act_miss
+        rv$data
+      ), {
+        output$missings_table <- gt::render_gt({
+          shiny::req(rv$data)
+          # shiny::req(input$missings_var)
+          # browser()
+          if ("p.value" %in% names(rv$data()[["table_body"]])) {
+            tbl <- rv$data() |>
+              gtsummary::bold_p()
+          } else {
+            tbl <- rv$data()
           }
 
-          attr(out, "tbl_title") <- title
 
-          rv$data <- shiny::reactive(out)
-        }
-      )
+          out <- tbl |>
+            gtsummary::as_gt() |>
+            gt::tab_header(title = gt::md(attr(tbl, "tbl_title")))
 
-      shiny::observeEvent(
-        list(
-          # input$act_miss
-          rv$data
-        ),
-        {
-          output$missings_table <- gt::render_gt({
-            shiny::req(rv$data)
-            # shiny::req(input$missings_var)
-            # browser()
-            if ("p.value" %in% names(rv$data()[["table_body"]])) {
-              tbl <- rv$data() |>
-                gtsummary::bold_p()
-            } else {
-              tbl <- rv$data()
-            }
+          attr(out, "strat_var") <- input$missings_var
 
+          rv$table <- out
 
-            out <- tbl |>
-              gtsummary::as_gt() |>
-              gt::tab_header(title = gt::md(attr(tbl, "tbl_title")))
-
-            attr(out, "strat_var") <- input$missings_var
-
-            rv$table <- out
-
-            out
-          })
-        }
-      )
+          out
+        })
+      })
 
 
       table_download_server(
@@ -228,25 +250,20 @@ data_missings_server <- function(id,
 
 
 missing_demo_app <- function() {
-  ui <- do.call(
-    bslib::page,
-    c(
-      list(
-        title = i18n$t("Missings"),
-        icon = bsicons::bs_icon("x-circle")
-      ),
-      data_missings_ui(id = "data"),
-      gt::gt_output("table_p")
-    )
-  )
+  ui <- do.call(bslib::page, c(
+    list(
+      title = i18n$t("Missings"),
+      icon = bsicons::bs_icon("x-circle")
+    ),
+    data_missings_ui(id = "data"),
+    gt::gt_output("table_p")
+  ))
   server <- function(input, output, session) {
     data_demo <- mtcars
     data_demo[sample(1:32, 10), "cyl"] <- NA
     data_demo[sample(1:32, 8), "vs"] <- NA
 
-    rv <- shiny::reactiveValues(
-      table = NULL
-    )
+    rv <- shiny::reactiveValues(table = NULL)
 
     rv$table <- data_missings_server(id = "data", data = data_demo)
 
@@ -280,17 +297,15 @@ missing_demo_app <- function() {
 #' @returns gtsummary list object
 #' @export
 #'
-compare_missings <- function(
-  data,
-  by_var,
-  max_level = 20,
-  type = c("predictors", "outcome")
-) {
+compare_missings <- function(data,
+                             by_var,
+                             max_level = 20,
+                             type = c("predictors", "outcome")) {
   type <- match.arg(type)
 
   if (!is.null(by_var) && by_var != "" && by_var %in% names(data)) {
     data <- data |>
-      lapply(\(.x){
+      lapply(\(.x) {
         if (is.factor(.x)) {
           cut_var(.x, breaks = 20, type = "top")
         } else {
@@ -334,7 +349,7 @@ compare_missings <- function(
 missings_logic_across <- function(data, exclude = NULL) {
   # This function includes a approach way to preserve variable labels
   names(data) |>
-    lapply(\(.x){
+    lapply(\(.x) {
       # browser()
       # Saving original labels
       lab <- REDCapCAST::get_attr(data[[.x]], attr = "label")
@@ -345,7 +360,12 @@ missings_logic_across <- function(data, exclude = NULL) {
       }
       if (!is.na(lab)) {
         # Restoring original labels, if not NA
-        REDCapCAST::set_attr(data = out, label = lab, attr = "label", overwrite = TRUE)
+        REDCapCAST::set_attr(
+          data = out,
+          label = lab,
+          attr = "label",
+          overwrite = TRUE
+        )
       } else {
         out
       }
