@@ -166,7 +166,7 @@ visual_summary <- function(data, legend.title = NULL, ylab = "Observations", ...
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(
       angle = 45,
-      vjust = 1, hjust = 1
+      vjust = 0, hjust = 1
     )) +
     ggplot2::scale_fill_manual(values = l$colors) +
     ggplot2::labs(x = "", y = ylab) +
