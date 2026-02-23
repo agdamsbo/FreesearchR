@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//Rtmpp0JgLn/file73e1e257b26.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//Rtmpp0JgLn/file73e17f71b1a4.R 
 ########
 
 i18n_path <- system.file("translations", package = "FreesearchR")
@@ -72,7 +72,7 @@ if (!"global_freesearchR" %in% ls(name = globalenv())) {
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'26.2.1'
+app_version <- function()'26.2.2'
 
 
 ########
@@ -4524,7 +4524,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v26.2.1-260223'
+hosted_version <- function()'v26.2.2-260223'
 
 
 ########
@@ -6205,18 +6205,16 @@ data_missings_server <- function(id, data, max_level = 20, ...) {
           }
         } else {
           ## Due to reactivity, the table updates too quickly. this mitigates that issue..
-
-
-          if (input$missings_var == "predictors") {
+          if (input$missings_method == "predictors") {
             title <- glue::glue(
               i18n$t(
-                "Missings across variables by the variable **'{input$missings_var}'**"
+                "Missing observations across variables grouped by **'{input$missings_var}'**"
               )
             )
           } else {
             title <- glue::glue(
               i18n$t(
-                "Missing vs non-missing observations in the variable **'{input$missings_var}'**"
+                "Differences by missing vs non-missing observations in **'{input$missings_var}'**"
               )
             )
           }
