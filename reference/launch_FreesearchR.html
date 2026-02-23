@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FreesearchR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Easily launch the FreesearchR app</h1>
-      <small class="dont-index">Source: <a href="https://github.com/agdamsbo/FreesearchR/blob/v26.1.2/R/launch_FreesearchR.R" class="external-link"><code>R/launch_FreesearchR.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/agdamsbo/FreesearchR/blob/main/R/launch_FreesearchR.R" class="external-link"><code>R/launch_FreesearchR.R</code></a></small>
       <div class="d-none name"><code>launch_FreesearchR.Rd</code></div>
     </div>
 
@@ -48,15 +48,38 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">launch_FreesearchR</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">launch_FreesearchR</span><span class="op">(</span></span>
+<span>  inlcude_globalenv <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  data_limit_default <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  data_limit_upper <span class="op">=</span> <span class="fl">1e+05</span>,</span>
+<span>  data_limit_lower <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dl><dt id="arg-data-limit-default">data_limit_default<a class="anchor" aria-label="anchor" href="#arg-data-limit-default"></a></dt>
+<dd><p>default data set observations limit</p></dd>
+
+
+<dt id="arg-data-limit-upper">data_limit_upper<a class="anchor" aria-label="anchor" href="#arg-data-limit-upper"></a></dt>
+<dd><p>data set observations upper limit</p></dd>
+
+
+<dt id="arg-data-limit-lower">data_limit_lower<a class="anchor" aria-label="anchor" href="#arg-data-limit-lower"></a></dt>
+<dd><p>data set observations lower limit</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>passed on to <code><a href="https://rdrr.io/pkg/shiny/man/runApp.html" class="external-link">shiny::runApp()</a></code></p></dd>
+
+
+<dt id="arg-include-globalenv">include_globalenv<a class="anchor" aria-label="anchor" href="#arg-include-globalenv"></a></dt>
+<dd><p>flag to include global env (local data) as option
+when loading data</p></dd>
 
 </dl></div>
     <div class="section level2">

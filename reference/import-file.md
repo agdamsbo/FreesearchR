@@ -11,7 +11,10 @@ import_file_ui(
   preview_data = TRUE,
   file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat",
     ".sav"),
-  layout_params = c("dropdown", "inline")
+  layout_params = c("dropdown", "inline"),
+  limit_default = 10000,
+  limit_upper = 10000,
+  limit_lower = 0
 )
 
 import_file_server(
@@ -20,8 +23,7 @@ import_file_server(
   show_data_in = c("popup", "modal"),
   trigger_return = c("button", "change"),
   return_class = c("data.frame", "data.table", "tbl_df", "raw"),
-  reset = reactive(NULL),
-  limit = 1e+05
+  reset = reactive(NULL)
 )
 ```
 

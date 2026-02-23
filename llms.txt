@@ -240,6 +240,8 @@ No tracking data is sent running the app locally (see above).
   : Merges list of named arguments for qmd header generation
 - [`get_data_packages()`](https://agdamsbo.github.io/FreesearchR/reference/get_data_packages.md)
   : Get packages containing datasets
+- [`get_dimensions()`](https://agdamsbo.github.io/FreesearchR/reference/get_dimensions.md)
+  : Extension of the helper function from datamods
 - [`get_fun_options()`](https://agdamsbo.github.io/FreesearchR/reference/get_fun_options.md)
   : Get the function options based on the selected function description
 - [`get_label()`](https://agdamsbo.github.io/FreesearchR/reference/get_label.md)

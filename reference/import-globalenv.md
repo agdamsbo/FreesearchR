@@ -19,7 +19,8 @@ import_globalenv_server(
   show_data_in = c("popup", "modal"),
   trigger_return = c("button", "change"),
   return_class = c("data.frame", "data.table", "tbl_df", "raw"),
-  reset = reactive(NULL)
+  reset = reactive(NULL),
+  limit_data = NULL
 )
 ```
 
@@ -64,3 +65,7 @@ import_globalenv_server(
 - reset:
 
   A `reactive` function that when triggered resets the data.
+
+- limit_data:
+
+  upper limit to imported data
