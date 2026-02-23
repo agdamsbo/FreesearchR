@@ -37,7 +37,7 @@ data_missings_ui <- function(id, ...) {
             label = i18n$t("Evaluate"),
             width = "100%",
             icon = shiny::icon("calculator"),
-            disabled = FALSE
+            disabled = TRUE
           )
         ),
         do.call(bslib::accordion_panel, c(
@@ -87,19 +87,25 @@ data_missings_server <- function(id, data, max_level = 20, ...) {
       )
 
       output$missings <- shiny::reactive({
-        shiny::req(data())
-        any(is.na(data()))
+        # shiny::req(data())
+        any(is.na(datar()))
       })
       shiny::outputOptions(output, "missings", suspendWhenHidden = FALSE)
 
-      observe({
-        shiny::req(data())
-        if (!any(is.na(data()))) {
-          rv$feedback <- info_alert
-        } else {
-          rv$feedback <- NULL
-        }
-      })
+      shiny::observeEvent(list(datar(), input$missings_method, input$missings_var),
+                   {
+                     # shiny::req(data())
+                     # browser()
+                     if (!any(is.na(datar()))) {
+                       rv$feedback <- info_alert
+                       shiny::updateActionButton(inputId = "act_miss", disabled = TRUE)
+                       rv$table <- NULL
+                       output$missings_table <- gt::render_gt({ NULL })
+                     } else {
+                       rv$feedback <- NULL
+                       shiny::updateActionButton(inputId = "act_miss", disabled = FALSE)
+                     }
+                   },ignoreInit = TRUE)
 
 
       output$feedback <- renderUI(rv$feedback)
@@ -110,7 +116,7 @@ data_missings_server <- function(id, data, max_level = 20, ...) {
       ## Direct table export would be nice
 
       shiny::observe(output$missings_method <- shiny::renderUI({
-        shiny::req(data())
+        shiny::req(datar())
         vectorSelectInput(
           inputId = ns("missings_method"),
           label = i18n$t("Analysis method for missingness overview"),
@@ -130,7 +136,7 @@ data_missings_server <- function(id, data, max_level = 20, ...) {
           # browser()
           if (input$missings_method == "predictors") {
             label <- i18n$t("Select a variable for grouped overview")
-            df <- data_type_filter(data(), type = c("categorical", "dichotomous"))
+            df <- data_type_filter(datar(), type = c("categorical", "dichotomous"))
             col_subset <- c("none", names(df))
           } else {
             label <- i18n$t("Select outcome variable for overview")
