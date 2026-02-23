@@ -78,7 +78,10 @@ update_factor_ui <- function(id) {
       ),
       actionButton(
         inputId = ns("create"),
-        label = tagList(phosphoricons::ph("arrow-clockwise"), i18n$t("Update factor variable")),
+        label = tagList(
+          phosphoricons::ph("arrow-clockwise"),
+          i18n$t("Update factor variable")
+        ),
         class = "btn-outline-primary"
       )
     ),
@@ -97,154 +100,136 @@ update_factor_ui <- function(id) {
 #'
 #' @rdname update-factor
 update_factor_server <- function(id, data_r = reactive(NULL)) {
-  moduleServer(
-    id,
-    function(input, output, session) {
-      rv <- reactiveValues(data = NULL, data_grid = NULL)
+  moduleServer(id, function(input, output, session) {
+    rv <- reactiveValues(data = NULL, data_grid = NULL)
 
-      bindEvent(observe({
-        data <- data_r()
-        rv$data <- data
-        vars_factor <- vapply(data, is.factor, logical(1))
-        vars_factor <- names(vars_factor)[vars_factor]
-        updateVirtualSelect(
-          inputId = "variable",
-          choices = vars_factor,
-          selected = if (isTruthy(input$variable)) input$variable else vars_factor[1]
-        )
-      }), data_r(), input$hidden)
+    bindEvent(observe({
+      data <- data_r()
+      rv$data <- data
+      vars_factor <- vapply(data, is.factor, logical(1))
+      vars_factor <- names(vars_factor)[vars_factor]
+      updateVirtualSelect(
+        inputId = "variable",
+        choices = vars_factor,
+        selected = if (isTruthy(input$variable))
+          input$variable
+        else
+          vars_factor[1]
+      )
+    }), data_r(), input$hidden)
 
-      observeEvent(input$variable, {
-        data <- req(data_r())
-        variable <- req(input$variable)
-        grid <- as.data.frame(table(data[[variable]]))
-        rv$data_grid <- grid
+    observeEvent(input$variable, {
+      data <- req(data_r())
+      variable <- req(input$variable)
+      grid <- as.data.frame(table(data[[variable]]))
+      rv$data_grid <- grid
+    })
+
+    observeEvent(input$sort_levels, {
+      if (input$sort_levels %% 2 == 1) {
+        decreasing <- FALSE
+        label <- tagList(phosphoricons::ph("sort-descending"),
+                         i18n$t("Sort by Levels"))
+      } else {
+        decreasing <- TRUE
+        label <- tagList(phosphoricons::ph("sort-ascending"),
+                         i18n$t("Sort by Levels"))
+      }
+      updateActionButton(inputId = "sort_levels", label = label)
+      rv$data_grid <- rv$data_grid[order(rv$data_grid[[1]], decreasing = decreasing), ]
+    })
+
+    observeEvent(input$sort_occurrences, {
+      if (input$sort_occurrences %% 2 == 1) {
+        decreasing <- FALSE
+        label <- tagList(phosphoricons::ph("sort-descending"),
+                         i18n$t("Sort by count"))
+      } else {
+        decreasing <- TRUE
+        label <- tagList(phosphoricons::ph("sort-ascending"),
+                         i18n$t("Sort by count"))
+      }
+      updateActionButton(inputId = "sort_occurrences", label = label)
+      rv$data_grid <- rv$data_grid[order(rv$data_grid[[2]], decreasing = decreasing), ]
+    })
+
+
+    output$grid <- renderDatagrid({
+      req(rv$data_grid)
+      gridTheme <- getOption("datagrid.theme")
+      if (length(gridTheme) < 1) {
+        datamods:::apply_grid_theme()
+      }
+      on.exit(toastui::reset_grid_theme())
+      data <- rv$data_grid
+      data <- add_var_toset(data, "Var1", "New label")
+
+      grid <- datagrid(
+        data = data,
+        draggable = TRUE,
+        sortable = FALSE,
+        data_as_input = TRUE
+      )
+      grid <- grid_columns(
+        grid,
+        columns = c("Var1", "Var1_toset", "Freq"),
+        header = c(i18n$t("Levels"), "New label", i18n$t("Count"))
+      )
+      grid <- grid_colorbar(
+        grid,
+        column = "Freq",
+        label_outside = TRUE,
+        label_width = "30px",
+        background = "#D8DEE9",
+        bar_bg = datamods:::get_primary_color(),
+        from = c(0, max(rv$data_grid$Freq) + 1)
+      )
+      grid <- toastui::grid_style_column(grid = grid,
+                                         column = "Var1_toset",
+                                         fontStyle = "italic")
+      grid <- toastui::grid_editor(grid = grid,
+                                   column = "Var1_toset",
+                                   type = "text")
+      grid
+    })
+
+    data_updated_r <- reactive({
+      data <- req(data_r())
+      variable <- req(input$variable)
+      grid <- req(input$grid_data)
+
+      parameters <- list(
+        variable = variable,
+        new_variable = isTRUE(input$new_var) |
+          any(grid[["Var1_toset"]] == "New label"),
+        new_levels = as.character(grid[["Var1"]]),
+        new_labels = as.character(grid[["Var1_toset"]]),
+        ignore = "New label"
+      )
+
+      data <- tryCatch({
+        rlang::exec(factor_new_levels_labels,
+                    !!!modifyList(parameters, val = list(data = data)))
+      }, error = function(err) {
+        showNotification(paste(
+          "We encountered the following error creating the new factor:",
+          err
+        ),
+        type = "err")
       })
 
-      observeEvent(input$sort_levels, {
-        if (input$sort_levels %% 2 == 1) {
-          decreasing <- FALSE
-          label <- tagList(
-            phosphoricons::ph("sort-descending"),
-            i18n$t("Sort by Levels")
-          )
-        } else {
-          decreasing <- TRUE
-          label <- tagList(
-            phosphoricons::ph("sort-ascending"),
-            i18n$t("Sort by Levels")
-          )
-        }
-        updateActionButton(inputId = "sort_levels", label = label)
-        rv$data_grid <- rv$data_grid[order(rv$data_grid[[1]], decreasing = decreasing), ]
-      })
+      # browser()
+      code <- rlang::call2("factor_new_levels_labels", !!!parameters, .ns = "FreesearchR")
+      attr(data, "code") <- code
 
-      observeEvent(input$sort_occurrences, {
-        if (input$sort_occurrences %% 2 == 1) {
-          decreasing <- FALSE
-          label <- tagList(
-            phosphoricons::ph("sort-descending"),
-            i18n$t("Sort by count")
-          )
-        } else {
-          decreasing <- TRUE
-          label <- tagList(
-            phosphoricons::ph("sort-ascending"),
-            i18n$t("Sort by count")
-          )
-        }
-        updateActionButton(inputId = "sort_occurrences", label = label)
-        rv$data_grid <- rv$data_grid[order(rv$data_grid[[2]], decreasing = decreasing), ]
-      })
+      data
+    })
 
-
-      output$grid <- renderDatagrid({
-        req(rv$data_grid)
-        gridTheme <- getOption("datagrid.theme")
-        if (length(gridTheme) < 1) {
-          datamods:::apply_grid_theme()
-        }
-        on.exit(toastui::reset_grid_theme())
-        data <- rv$data_grid
-        data <- add_var_toset(data, "Var1", "New label")
-
-        grid <- datagrid(
-          data = data,
-          draggable = TRUE,
-          sortable = FALSE,
-          data_as_input = TRUE
-        )
-        grid <- grid_columns(
-          grid,
-          columns = c("Var1", "Var1_toset", "Freq"),
-          header = c(i18n$t("Levels"), "New label", i18n$t("Count"))
-        )
-        grid <- grid_colorbar(
-          grid,
-          column = "Freq",
-          label_outside = TRUE,
-          label_width = "30px",
-          background = "#D8DEE9",
-          bar_bg = datamods:::get_primary_color(),
-          from = c(0, max(rv$data_grid$Freq) + 1)
-        )
-        grid <- toastui::grid_style_column(
-          grid = grid,
-          column = "Var1_toset",
-          fontStyle = "italic"
-        )
-        grid <- toastui::grid_editor(
-          grid = grid,
-          column = "Var1_toset",
-          type = "text"
-        )
-        grid
-      })
-
-      data_updated_r <- reactive({
-        data <- req(data_r())
-        variable <- req(input$variable)
-        grid <- req(input$grid_data)
-
-        parameters <- list(
-          variable = variable,
-          new_variable = isTRUE(input$new_var) | any(grid[["Var1_toset"]] == "New label"),
-          new_levels = as.character(grid[["Var1"]]),
-          new_labels = as.character(grid[["Var1_toset"]]),
-          ignore = "New label"
-        )
-
-        data <- tryCatch(
-          {
-            rlang::exec(
-              factor_new_levels_labels,
-              !!!modifyList(parameters,
-                val = list(data = data)
-              )
-            )
-          },
-          error = function(err) {
-            showNotification(paste("We encountered the following error creating the new factor:", err), type = "err")
-          }
-        )
-
-        # browser()
-        code <- rlang::call2(
-          "factor_new_levels_labels",
-          !!!parameters,
-          .ns = "FreesearchR"
-        )
-        attr(data, "code") <- code
-
-        data
-      })
-
-      data_returned_r <- observeEvent(input$create, {
-        rv$data <- data_updated_r()
-      })
-      return(reactive(rv$data))
-    }
-  )
+    data_returned_r <- observeEvent(input$create, {
+      rv$data <- data_updated_r()
+    })
+    return(reactive(rv$data))
+  })
 }
 
 #' Simple function to apply new levels and/or labels to factor
@@ -261,13 +246,12 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
 #' data_n <- mtcars
 #' data_n$cyl <- factor(data_n$cyl)
 #' factor_new_levels_labels(data_n, "cyl", new_labels = c("four", "New label", "New label"))
-factor_new_levels_labels <- function(
-    data,
-    variable,
-    new_variable = TRUE,
-    new_levels = NULL,
-    new_labels = NULL,
-    ignore = "New label") {
+factor_new_levels_labels <- function(data,
+                                     variable,
+                                     new_variable = TRUE,
+                                     new_levels = NULL,
+                                     new_labels = NULL,
+                                     ignore = "New label") {
   if (!is.factor(data[[variable]])) {
     return(data)
   }
@@ -280,28 +264,25 @@ factor_new_levels_labels <- function(
     new_labels <- labels(data[[variable]])
   }
 
-  with_level <- factor(
-    as.character(data[[variable]]),
-    levels = new_levels
-  )
-  with_label <- factor(
-    with_level,
-    labels = ifelse(new_labels == "New label", new_levels, new_labels)
-  )
+  with_level <- factor(as.character(data[[variable]]), levels = new_levels)
+  with_label <- factor(with_level,
+                       labels = ifelse(new_labels == "New label", new_levels, new_labels))
 
 
   if (isTRUE(new_variable)) {
     append_column(
       data = data,
       column = with_label,
-      name = unique_names(new = paste0(variable, "_updated"), existing = names(data))
+      name = unique_names(
+        new = paste0(variable, "_updated"),
+        existing = names(data)
+      )
     )
   } else {
     data[[variable]] <- with_label
     data
   }
 }
-
 
 
 #' @inheritParams shiny::modalDialog
@@ -317,17 +298,23 @@ modal_update_factor <- function(id,
                                 size = "l",
                                 footer = NULL) {
   ns <- NS(id)
-  showModal(modalDialog(
-    title = tagList(title, datamods:::button_close_modal()),
-    update_factor_ui(id),
-    tags$div(
-      style = "display: none;",
-      textInput(inputId = ns("hidden"), label = NULL, value = datamods:::genId())
-    ),
-    easyClose = easyClose,
-    size = size,
-    footer = footer
-  ))
+  showModal(
+    modalDialog(
+      title = tagList(title, datamods:::button_close_modal()),
+      update_factor_ui(id),
+      tags$div(
+        style = "display: none;",
+        textInput(
+          inputId = ns("hidden"),
+          label = NULL,
+          value = datamods:::genId()
+        )
+      ),
+      easyClose = easyClose,
+      size = size,
+      footer = footer
+    )
+  )
 }
 
 
@@ -346,10 +333,11 @@ winbox_update_factor <- function(id,
     title = title,
     ui = tagList(
       update_factor_ui(id),
-      tags$div(
-        style = "display: none;",
-        textInput(inputId = ns("hidden"), label = NULL, value = genId())
-      )
+      tags$div(style = "display: none;", textInput(
+        inputId = ns("hidden"),
+        label = NULL,
+        value = genId()
+      ))
     ),
     options = modifyList(
       shinyWidgets::wbOptions(height = "615px", modal = TRUE),

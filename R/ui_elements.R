@@ -25,7 +25,7 @@ ui_elements <- function(selection) {
         ## Default just output "NULL"
         ## This could probably be achieved more legantly, but this works.
         dev_banner(),
-        landing_page_ui(i18n=i18n),
+        landing_page_ui(i18n = i18n),
         # shiny::column(width = 2),
         # shiny::column(
         #   width = 8,
@@ -68,7 +68,11 @@ ui_elements <- function(selection) {
           ),
           # shiny::tags$script('document.querySelector("#source div").style.width = "100%"'),
           ## Update this to change depending on run locally or hosted
-          shiny::helpText(i18n$t("Upload a file, get data directly from REDCap or use local or sample data.")),
+          shiny::helpText(
+            i18n$t(
+              "Upload a file, get data directly from REDCap or use local or sample data."
+            )
+          ),
           shiny::br(),
           shiny::br(),
           shiny::conditionalPanel(
@@ -77,7 +81,11 @@ ui_elements <- function(selection) {
               id = "file_import",
               layout_params = "dropdown",
               # title = "Choose a datafile to upload",
-              file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".ods", ".dta")
+              file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".ods", ".dta"),
+              limit_default = global_freesearchR$data_limit_default,
+              limit_lower = global_freesearchR$data_limit_lower,
+              limit_upper = global_freesearchR$data_limit_upper
+
             )
           ),
           shiny::conditionalPanel(
@@ -90,17 +98,15 @@ ui_elements <- function(selection) {
             #   shiny::HTML(i18n$t("<p>The <em><strong>FreesearchR</strong></em> app only stores data for analyses, but please only use with sensitive data when running locally. <a href='https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine'>Read more here</a></p>")),
             #   dismissible = TRUE
             # ),
-            m_redcap_readUI(
-              id = "redcap_import",
-              title = ""
-            )
+            m_redcap_readUI(id = "redcap_import", title = "")
           ),
           shiny::conditionalPanel(
             condition = "input.source=='env'",
             import_globalenv_ui(
               id = "env",
               title = NULL,
-              packages = c("NHANES", "stRoke", "datasets", "MASS")
+              packages = c("NHANES", "stRoke", "datasets", "MASS"),
+              globalenv = global_freesearchR$include_globalenv
             )
           ),
           # shiny::conditionalPanel(
@@ -136,7 +142,11 @@ ui_elements <- function(selection) {
                   format = shinyWidgets::wNumbFormat(decimals = 0),
                   color = datamods:::get_primary_color()
                 ),
-                shiny::helpText(i18n$t("At 0, only complete variables are included; at 100, all variables are included.")),
+                shiny::helpText(
+                  i18n$t(
+                    "At 0, only complete variables are included; at 100, all variables are included."
+                  )
+                ),
                 shiny::br()
               ),
               shiny::column(
@@ -185,7 +195,9 @@ ui_elements <- function(selection) {
             width = 9,
             shiny::uiOutput(outputId = "data_info", inline = TRUE),
             shiny::tags$p(
-              i18n$t("Below you find a summary table for quick insigths, and on the right you can visualise data classes, browse observations and apply different data filters.")
+              i18n$t(
+                "Below you find a summary table for quick insigths, and on the right you can visualise data classes, browse observations and apply different data filters."
+              )
             )
           ),
           shiny::column(
@@ -221,16 +233,18 @@ ui_elements <- function(selection) {
           shiny::column(
             width = 3,
             shiny::tags$h6(i18n$t("Filter data types")),
-            shiny::uiOutput(
-              outputId = "column_filter"
-            ),
+            shiny::uiOutput(outputId = "column_filter"),
             ## This needs to run in server for translation
-            shiny::helpText("Read more on how ", tags$a(
-              "data types",
-              href = "https://agdamsbo.github.io/FreesearchR/articles/data-types.html",
-              target = "_blank",
-              rel = "noopener noreferrer"
-            ), " are defined."),
+            shiny::helpText(
+              "Read more on how ",
+              tags$a(
+                "data types",
+                href = "https://agdamsbo.github.io/FreesearchR/articles/data-types.html",
+                target = "_blank",
+                rel = "noopener noreferrer"
+              ),
+              " are defined."
+            ),
             validation_ui("validation_var"),
             shiny::br(),
             shiny::br(),
@@ -250,21 +264,26 @@ ui_elements <- function(selection) {
         title = i18n$t("Edit and create data"),
         icon = shiny::icon("file-pen"),
         tags$h3(i18n$t("Subset, rename and convert variables")),
-        fluidRow(
-          shiny::column(
-            width = 9,
-            shiny::tags$p(
-              i18n$t("Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."),
-              i18n$t("There are more advanced options to modify factor/categorical variables as well as create new factor from an existing variable or new variables with R code. At the bottom you can restore the original data."),
-              i18n$t("Please note that data modifications are applied before any filtering.")
+        fluidRow(shiny::column(
+          width = 9, shiny::tags$p(
+            i18n$t(
+              "Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."
+            ),
+            i18n$t(
+              "There are more advanced options to modify factor/categorical variables as well as create new factor from an existing variable or new variables with R code. At the bottom you can restore the original data."
+            ),
+            i18n$t(
+              "Please note that data modifications are applied before any filtering."
             )
           )
-        ),
+        )),
         update_variables_ui("modal_variables"),
         shiny::tags$br(),
         shiny::tags$br(),
         shiny::tags$h4(i18n$t("Advanced data manipulation")),
-        shiny::tags$p(i18n$t("Below options allow more advanced varaible manipulations.")),
+        shiny::tags$p(
+          i18n$t("Below options allow more advanced varaible manipulations.")
+        ),
         shiny::tags$br(),
         shiny::tags$br(),
         shiny::fluidRow(
@@ -276,7 +295,9 @@ ui_elements <- function(selection) {
               width = "100%"
             ),
             shiny::tags$br(),
-            shiny::helpText(i18n$t("Reorder or rename the levels of factor/categorical variables.")),
+            shiny::helpText(
+              i18n$t("Reorder or rename the levels of factor/categorical variables.")
+            ),
             shiny::tags$br(),
             shiny::tags$br()
           ),
@@ -288,7 +309,11 @@ ui_elements <- function(selection) {
               width = "100%"
             ),
             shiny::tags$br(),
-            shiny::helpText(i18n$t("Create factor/categorical variable from a continous variable (number/date/time).")),
+            shiny::helpText(
+              i18n$t(
+                "Create factor/categorical variable from a continous variable (number/date/time)."
+              )
+            ),
             shiny::tags$br(),
             shiny::tags$br()
           ),
@@ -300,7 +325,9 @@ ui_elements <- function(selection) {
               width = "100%"
             ),
             shiny::tags$br(),
-            shiny::helpText(i18n$t("Split a text column by a recognised delimiter.")),
+            shiny::helpText(i18n$t(
+              "Split a text column by a recognised delimiter."
+            )),
             shiny::tags$br(),
             shiny::tags$br()
           ),
@@ -312,16 +339,18 @@ ui_elements <- function(selection) {
               width = "100%"
             ),
             shiny::tags$br(),
-            shiny::helpText(i18n$t("Create a new variable based on an R-expression.")),
+            shiny::helpText(i18n$t(
+              "Create a new variable based on an R-expression."
+            )),
             shiny::tags$br(),
             shiny::tags$br()
           )
         ),
         tags$h4(i18n$t("Compare modified data to original")),
         shiny::tags$br(),
-        shiny::tags$p(
-          i18n$t("Raw print of the original vs the modified data.")
-        ),
+        shiny::tags$p(i18n$t(
+          "Raw print of the original vs the modified data."
+        )),
         shiny::tags$br(),
         shiny::fluidRow(
           shiny::column(
@@ -342,7 +371,11 @@ ui_elements <- function(selection) {
           width = "100%"
         ),
         shiny::tags$br(),
-        shiny::helpText(i18n$t("Reset to original imported dataset. Careful! There is no un-doing.")),
+        shiny::helpText(
+          i18n$t(
+            "Reset to original imported dataset. Careful! There is no un-doing."
+          )
+        ),
         shiny::tags$br(),
         shiny::tags$br()
       )
@@ -388,7 +421,11 @@ ui_elements <- function(selection) {
                   # ),
                   shiny::uiOutput("detail_level"),
                   shiny::uiOutput("strat_var"),
-                  shiny::helpText(i18n$t("Only factor/categorical variables are available for stratification. Go back to the 'Prepare' tab to reclass a variable if it's not on the list.")),
+                  shiny::helpText(
+                    i18n$t(
+                      "Only factor/categorical variables are available for stratification. Go back to the 'Prepare' tab to reclass a variable if it's not on the list."
+                    )
+                  ),
                   shiny::conditionalPanel(
                     condition = "input.strat_var!='none'",
                     shiny::radioButtons(
@@ -396,10 +433,7 @@ ui_elements <- function(selection) {
                       label = i18n$t("Compare strata?"),
                       selected = "no",
                       inline = TRUE,
-                      choices = list(
-                        "No" = "no",
-                        "Yes" = "yes"
-                      )
+                      choices = list("No" = "no", "Yes" = "yes")
                     ),
                     # shiny::helpText(i18n$t("Option to perform statistical comparisons between strata in baseline table.")),
                     shiny::br(),
@@ -408,10 +442,7 @@ ui_elements <- function(selection) {
                       label = i18n$t("Include group differences"),
                       selected = "no",
                       inline = TRUE,
-                      choices = list(
-                        "No" = "no",
-                        "Yes" = "yes"
-                      )
+                      choices = list("No" = "no", "Yes" = "yes")
                     )
                   ),
                   shiny::br(),
@@ -422,7 +453,9 @@ ui_elements <- function(selection) {
                     icon = shiny::icon("calculator"),
                     disabled = TRUE
                   ),
-                  shiny::helpText(i18n$t("Press 'Evaluate' to create the comparison table."))
+                  shiny::helpText(i18n$t(
+                    "Press 'Evaluate' to create the comparison table."
+                  ))
                 )
               )
             ),
@@ -444,7 +477,11 @@ ui_elements <- function(selection) {
                   title = "Settings",
                   icon = bsicons::bs_icon("bounding-box"),
                   shiny::uiOutput("outcome_var_cor"),
-                  shiny::helpText(i18n$t("To avoid evaluating the correlation of the outcome variable, this can be excluded from the plot or select 'none'.")),
+                  shiny::helpText(
+                    i18n$t(
+                      "To avoid evaluating the correlation of the outcome variable, this can be excluded from the plot or select 'none'."
+                    )
+                  ),
                   shiny::br(),
                   shinyWidgets::noUiSliderInput(
                     inputId = "cor_cutoff",
@@ -456,24 +493,22 @@ ui_elements <- function(selection) {
                     format = shinyWidgets::wNumbFormat(decimals = 2),
                     color = datamods:::get_primary_color()
                   ),
-                  shiny::helpText(i18n$t("Set the cut-off for considered 'highly correlated'."))
+                  shiny::helpText(i18n$t(
+                    "Set the cut-off for considered 'highly correlated'."
+                  ))
                 )
               )
             ),
             data_correlations_ui(id = "correlations", height = 600)
           )
         ),
-        do.call(
-          bslib::nav_panel,
-          c(
-            list(
-              title = i18n$t("Missings"),
-              icon = bsicons::bs_icon("x-circle")
-            ),
-            data_missings_ui(id = "missingness",
-                             validation_ui("validation_mcar"))
-          )
-        )
+        do.call(bslib::nav_panel, c(
+          list(
+            title = i18n$t("Missings"),
+            icon = bsicons::bs_icon("x-circle")
+          ),
+          data_missings_ui(id = "missingness", validation_ui("validation_mcar"))
+        ))
       ),
     ##############################################################################
     #########
@@ -508,10 +543,7 @@ ui_elements <- function(selection) {
         title = i18n$t("Regression"),
         icon = shiny::icon("calculator"),
         value = "nav_analyses",
-        do.call(
-          bslib::navset_card_tab,
-          regression_ui("regression")
-        )
+        do.call(bslib::navset_card_tab, regression_ui("regression"))
       ),
     ##############################################################################
     #########
@@ -533,7 +565,11 @@ ui_elements <- function(selection) {
               shiny::column(
                 width = 6,
                 shiny::h4(i18n$t("Report")),
-                shiny::helpText(i18n$t("Choose your favourite output file format for further work, and download, when the analyses are done.")),
+                shiny::helpText(
+                  i18n$t(
+                    "Choose your favourite output file format for further work, and download, when the analyses are done."
+                  )
+                ),
                 shiny::br(),
                 shiny::br(),
                 shiny::selectInput(
@@ -561,7 +597,9 @@ ui_elements <- function(selection) {
               shiny::column(
                 width = 6,
                 shiny::h4("Data"),
-                shiny::helpText("Choose your favourite output data format to download the modified data."),
+                shiny::helpText(
+                  "Choose your favourite output data format to download the modified data."
+                ),
                 shiny::br(),
                 shiny::br(),
                 shiny::selectInput(
@@ -588,16 +626,27 @@ ui_elements <- function(selection) {
             shiny::br(),
             shiny::br(),
             shiny::h4("Code snippets"),
-            shiny::tags$p("Below are the code bits used to create the final data set and the main analyses."),
-            shiny::tags$p("This can be used as a starting point for learning to code and for reproducibility."),
-            shiny::tagList(
-              lapply(
-                paste0("code_", c(
-                  "import", "format", "data", "variables", "filter", "table1", "univariable", "multivariable"
-                )),
-                \(.x)shiny::htmlOutput(outputId = .x)
-              )
+            shiny::tags$p(
+              "Below are the code bits used to create the final data set and the main analyses."
             ),
+            shiny::tags$p(
+              "This can be used as a starting point for learning to code and for reproducibility."
+            ),
+            shiny::tagList(lapply(
+              paste0(
+                "code_",
+                c(
+                  "import",
+                  "format",
+                  "data",
+                  "variables",
+                  "filter",
+                  "table1",
+                  "univariable",
+                  "multivariable"
+                )
+              ), \(.x)shiny::htmlOutput(outputId = .x)
+            )),
             shiny::tags$br(),
             shiny::br()
           ),
@@ -613,7 +662,8 @@ ui_elements <- function(selection) {
       # shiny::img(shiny::icon("book")),
       shiny::tags$a(
         href = "https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8",
-        "Feedback", shiny::icon("arrow-up-right-from-square"),
+        "Feedback",
+        shiny::icon("arrow-up-right-from-square"),
         target = "_blank",
         rel = "noopener noreferrer"
       )
@@ -627,7 +677,8 @@ ui_elements <- function(selection) {
       # shiny::img(shiny::icon("book")),
       shiny::tags$a(
         href = "https://agdamsbo.github.io/FreesearchR/",
-        "Docs", shiny::icon("arrow-up-right-from-square"),
+        "Docs",
+        shiny::icon("arrow-up-right-from-square"),
         target = "_blank",
         rel = "noopener noreferrer"
       )

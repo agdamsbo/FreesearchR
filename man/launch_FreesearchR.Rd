@@ -4,10 +4,25 @@
 \alias{launch_FreesearchR}
 \title{Easily launch the FreesearchR app}
 \usage{
-launch_FreesearchR(...)
+launch_FreesearchR(
+  inlcude_globalenv = TRUE,
+  data_limit_default = 1000,
+  data_limit_upper = 1e+05,
+  data_limit_lower = 1,
+  ...
+)
 }
 \arguments{
+\item{data_limit_default}{default data set observations limit}
+
+\item{data_limit_upper}{data set observations upper limit}
+
+\item{data_limit_lower}{data set observations lower limit}
+
 \item{...}{passed on to \code{shiny::runApp()}}
+
+\item{include_globalenv}{flag to include global env (local data) as option
+when loading data}
 }
 \value{
 shiny app

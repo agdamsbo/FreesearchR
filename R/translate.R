@@ -7,4 +7,3 @@ language_choices <- function() {
     # "🇸🇪 Svenska" = "sv"
   )
 }
-

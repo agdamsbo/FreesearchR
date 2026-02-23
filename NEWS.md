@@ -1,3 +1,16 @@
+# FreesearchR 26.2.1
+
+This update is mainly focused on polishing, fixes and small additions to make the app more intuitive.
+
+*NEW* Link on landing page to quickly go to data loading.
+
+*NEW* Allow custom data set limit loading large data files, while tightening default limits. This secures the server, but also allows for unlimited use when run locally or from a custom server in a future implementation. The groundwork is place now. 
+
+*NEW* Hidden options and info alert when trying to analyse missing in complete dataset. The sub panel may be hidden in future iterations for this case.
+
+Updated dependencies. Updated to latest R for building and testing. Using the new Air package for code formatting.
+
+
 # FreesearchR 26.1.2
 
 Rebuild 26.1.1

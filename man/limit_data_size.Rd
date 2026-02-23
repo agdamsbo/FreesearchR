@@ -18,9 +18,10 @@ data.frame
 This function may act to guard a hosted app against very large data sets in
 addition to the file size limitations.
 The function will limit the data set by dropping rows.
+If limit is set to 0 or NULL, the original data set is returned.
 }
 \examples{
 prod(dim(mtcars))
-limit_data_size(mtcars)
+limit_data_size(mtcars,2)
 limit_data_size(mtcars,100)
 }

@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpBwniSk/file141b664b382fa.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpvRkTPP/file5ce31553c48a.R 
 ########
 
 i18n_path <- here::here("translations")
@@ -51,6 +51,16 @@ i18n <- shiny.i18n::Translator$new(translation_csvs_path = i18n_path)
 # i18n <- shiny.i18n::Translator$new(translation_csvs_path = here::here("inst/translations/"))
 i18n$set_translation_language("en")
 
+## Global freesearchR vars
+if (!"global_freesearchR" %in% ls(name = globalenv())) {
+  global_freesearchR <- list(
+    include_globalenv = FALSE,
+    data_limit_default = 1000,
+    data_limit_upper = 10000,
+    data_limit_lower = 1
+  )
+}
+
 
 ########
 #### Current file: /Users/au301842/FreesearchR/app/functions.R 
@@ -62,7 +72,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'26.1.2'
+app_version <- function()'26.2.1'
 
 
 ########
@@ -3716,7 +3726,7 @@ write_quarto <- function(data, ...) {
   )
 }
 
-write_rmd <- function(data, ..., params.args=NULL) {
+write_rmd <- function(data, ..., params.args = NULL) {
   # Exports data to temporary location
   #
   # I assume this is more secure than putting it in the www folder and deleting
@@ -3731,7 +3741,10 @@ write_rmd <- function(data, ..., params.args=NULL) {
   ## Ref: https://github.com/quarto-dev/quarto-cli/discussions/4041
   ## Outputs to the same as the .qmd file
   rmarkdown::render(
-    params = modifyList(list(data.file = "web_data.rds",version=app_version()),params.args),
+    params = modifyList(
+      list(data.file = "web_data.rds", version = app_version()),
+      params.args
+    ),
     # execute_params = list(data.file = temp),
     ...
   )
@@ -3799,12 +3812,7 @@ argsstring2list <- function(string) {
 factorize <- function(data, vars) {
   if (!is.null(vars)) {
     data |>
-      dplyr::mutate(
-        dplyr::across(
-          dplyr::all_of(vars),
-          REDCapCAST::as_factor
-        )
-      )
+      dplyr::mutate(dplyr::across(dplyr::all_of(vars), REDCapCAST::as_factor))
   } else {
     data
   }
@@ -3837,32 +3845,30 @@ dummy_Imports <- function() {
 #' @returns data
 #' @export
 #'
-file_export <- function(data, output.format = c("df", "teal", "list"), filename, ...) {
+file_export <- function(data,
+                        output.format = c("df", "teal", "list"),
+                        filename,
+                        ...) {
   output.format <- match.arg(output.format)
 
   filename <- gsub("-", "_", filename)
 
   if (output.format == "teal") {
-    out <- within(
-      teal_data(),
-      {
-        assign(name, value |>
+    out <- within(teal_data(), {
+      assign(
+        name,
+        value |>
           dplyr::bind_cols(.name_repair = "unique_quiet") |>
-          default_parsing())
-      },
-      value = data,
-      name = filename
-    )
+          default_parsing()
+      )
+    }, value = data, name = filename)
 
     datanames(out) <- filename
   } else if (output.format == "df") {
     out <- data |>
       default_parsing()
   } else if (output.format == "list") {
-    out <- list(
-      data = data,
-      name = filename
-    )
+    out <- list(data = data, name = filename)
 
     out <- c(out, ...)
   }
@@ -3897,7 +3903,8 @@ default_parsing <- function(data) {
     remove_nested_list() |>
     REDCapCAST::parse_data() |>
     REDCapCAST::as_factor() |>
-    REDCapCAST::numchar2fct(numeric.threshold = 8, character.throshold = 10) |>
+    REDCapCAST::numchar2fct(numeric.threshold = 8,
+                            character.throshold = 10) |>
     REDCapCAST::as_logical() |>
     REDCapCAST::fct_drop()
 
@@ -3961,9 +3968,11 @@ remove_empty_attr <- function(data) {
 #' @examples
 #' data.frame(a = 1:10, b = NA, c = c(2, NA)) |> remove_empty_cols(cutoff = .5)
 remove_empty_cols <- function(data, cutoff = .7) {
-  filter <- apply(X = data, MARGIN = 2, FUN = \(.x){
-    sum(as.numeric(!is.na(.x))) / length(.x)
-  }) >= cutoff
+  filter <- apply(X = data,
+                  MARGIN = 2,
+                  FUN = \(.x) {
+                    sum(as.numeric(!is.na(.x))) / length(.x)
+                  }) >= cutoff
   data[filter]
 }
 
@@ -4023,14 +4032,25 @@ missing_fraction <- function(data) {
 #'   sample(c(1:8, NA), 20, TRUE)
 #' ) |> data_description()
 data_description <- function(data, data_text = "Data") {
-  data <- if (shiny::is.reactive(data)) data() else data
+  data <- if (shiny::is.reactive(data))
+    data()
+  else
+    data
 
   n <- nrow(data)
   n_var <- ncol(data)
   n_complete <- sum(complete.cases(data))
   p_complete <- signif(100 * n_complete / n, 3)
 
-  glue::glue(i18n$t("{data_text} has {n} observations and {n_var} variables, with {n_complete} ({p_complete} %) complete cases."))
+  if (is.null(data)) {
+    i18n$t("No data present.")
+  } else {
+    glue::glue(
+      i18n$t(
+        "{data_text} has {n} observations and {n_var} variables, with {n_complete} ({p_complete} %) complete cases."
+      )
+    )
+  }
   # sprintf(
   #   "%s has %s observations and %s variables, with %s (%s%%) complete cases.",
   #   data_text,
@@ -4139,7 +4159,8 @@ if_not_missing <- function(data, default = NULL) {
 #' ) |> merge_expression()
 merge_expression <- function(data) {
   Reduce(
-    f = function(x, y) rlang::expr(!!x %>% !!y),
+    f = function(x, y)
+      rlang::expr(!!x %>% !!y),
     x = data
   )
 }
@@ -4163,7 +4184,8 @@ merge_expression <- function(data) {
 pipe_string <- function(data, collapse = "|>\n") {
   if (is.list(data)) {
     Reduce(
-      f = function(x, y) glue::glue("{x}{collapse}{y}"),
+      f = function(x, y)
+        glue::glue("{x}{collapse}{y}"),
       x = data
     )
   } else {
@@ -4187,10 +4209,15 @@ pipe_string <- function(data, collapse = "|>\n") {
 #'   merge_expression() |>
 #'   expression_string()
 expression_string <- function(data, assign.str = "") {
-  exp.str <- if (is.call(data)) deparse(data) else data
+  exp.str <- if (is.call(data))
+    deparse(data)
+  else
+    data
 
-  out <- paste0(assign.str, gsub("%>%", "|>\n", paste(gsub('"', "'", paste(exp.str, collapse = "")), collapse = "")))
-  out <- collapse_spaces(out,preserve_newlines = FALSE)
+  out <- paste0(assign.str, gsub("%>%", "|>\n", paste(gsub(
+    '"', "'", paste(exp.str, collapse = "")
+  ), collapse = "")))
+  out <- collapse_spaces(out, preserve_newlines = FALSE)
   gsub("`", "", out)
 }
 
@@ -4294,10 +4321,16 @@ remove_nested_list <- function(data) {
 #' rlang::expr(FreesearchR::set_column_label(label = !!ls3)) |> expression_string()
 set_column_label <- function(data, label, overwrite = TRUE) {
   purrr::imap(data, function(.data, .name) {
-    ls <- if (is.list(label)) unlist(label) else label
+    ls <- if (is.list(label))
+      unlist(label)
+    else
+      label
     ls[ls == ""] <- NA
     if (.name %in% names(ls)) {
-      out <- REDCapCAST::set_attr(.data, unname(ls[.name]), attr = "label", overwrite = overwrite)
+      out <- REDCapCAST::set_attr(.data,
+                                  unname(ls[.name]),
+                                  attr = "label",
+                                  overwrite = overwrite)
       remove_empty_attr(out)
     } else {
       .data
@@ -4348,11 +4381,8 @@ append_column <- function(data, column, name, index = "right") {
   }
   new_df <- setNames(data.frame(column), name)
 
-  list(
-    data[seq_len(index - 1)],
-    new_df,
-    if (!index > ncol(data)) data[index:ncol(data)]
-  ) |>
+  list(data[seq_len(index - 1)], new_df, if (!index > ncol(data))
+    data[index:ncol(data)]) |>
     dplyr::bind_cols()
 }
 
@@ -4377,7 +4407,7 @@ is_identical_to_previous <- function(data, no.name = TRUE) {
     lagged <- c(FALSE, data[seq_len(length(data) - 1)])
   }
 
-  vapply(seq_len(length(data)), \(.x){
+  vapply(seq_len(length(data)), \(.x) {
     if (isTRUE(no.name)) {
       identical(unname(lagged[.x]), unname(data[.x]))
     } else {
@@ -4396,8 +4426,11 @@ is_identical_to_previous <- function(data, no.name = TRUE) {
 #'
 #' @examples
 #' c("foo bar", "fooBar21", "!!Foo'B'a-r", "foo_bar", "F  OO bar") |> simple_snake()
-simple_snake <- function(data){
-  gsub("[\\s+]","_",gsub("[^\\w\\s:-]", "", tolower(data), perl=TRUE), perl=TRUE)
+simple_snake <- function(data) {
+  gsub("[\\s+]",
+       "_",
+       gsub("[^\\w\\s:-]", "", tolower(data), perl = TRUE),
+       perl = TRUE)
 }
 
 #' Data type assessment.
@@ -4434,7 +4467,8 @@ data_type <- function(data) {
       out <- "empty"
     } else if (l_unique < 2) {
       out <- "monotone"
-    } else if (any(c("factor", "logical") %in% cl_d) | l_unique == 2) {
+    } else if (any(c("factor", "logical") %in% cl_d) |
+               l_unique == 2) {
       if (identical("logical", cl_d) | l_unique == 2) {
         out <- "dichotomous"
       } else {
@@ -4470,14 +4504,18 @@ data_type <- function(data) {
 #' data_types()
 data_types <- function() {
   list(
-    "empty" = list(descr="Variable of all NAs",classes="Any class"),
-    "monotone" = list(descr="Variable with only one unique value",classes="Any class"),
-    "dichotomous" = list(descr="Variable with only two unique values",classes="Any class"),
-    "categorical"= list(descr="Factor variable",classes="factor (ordered or unordered)"),
-    "text"= list(descr="Character variable",classes="character"),
-    "datetime"= list(descr="Variable of time, date or datetime values",classes="hms, Date, POSIXct and POSIXt"),
-    "continuous"= list(descr="Numeric variable",classes="numeric, integer or double"),
-    "unknown"= list(descr="Anything not falling within the previous",classes="Any other class")
+    "empty" = list(descr = "Variable of all NAs", classes = "Any class"),
+    "monotone" = list(descr = "Variable with only one unique value", classes =
+                        "Any class"),
+    "dichotomous" = list(descr = "Variable with only two unique values", classes =
+                           "Any class"),
+    "categorical" = list(descr = "Factor variable", classes = "factor (ordered or unordered)"),
+    "text" = list(descr = "Character variable", classes = "character"),
+    "datetime" = list(descr = "Variable of time, date or datetime values", classes =
+                        "hms, Date, POSIXct and POSIXt"),
+    "continuous" = list(descr = "Numeric variable", classes = "numeric, integer or double"),
+    "unknown" = list(descr = "Anything not falling within the previous", classes =
+                       "Any other class")
   )
 }
 
@@ -4486,7 +4524,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v26.1.2-260112'
+hosted_version <- function()'v26.2.1-260223'
 
 
 ########
@@ -4510,6 +4548,8 @@ html_dependency_FreesearchR <- function() {
 ########
 
 
+
+
 #' @title Import data from an Environment
 #'
 #' @description Let the user select a dataset from its own environment or from a package's environment.
@@ -4529,7 +4569,6 @@ import_globalenv_ui <- function(id,
                                 globalenv = TRUE,
                                 packages = datamods::get_data_packages(),
                                 title = TRUE) {
-
   ns <- NS(id)
 
   choices <- list()
@@ -4542,15 +4581,14 @@ import_globalenv_ui <- function(id,
 
   if (isTRUE(globalenv)) {
     selected <- "Global Environment"
+    select_label <- i18n$t("Select a dataset from your environment or sample dataset from a package.")
   } else {
     selected <- packages[1]
+    select_label <- i18n$t("Select a sample dataset from a package.")
   }
 
   if (isTRUE(title)) {
-    title <- tags$h4(
-      i18n$t("Import a dataset from an environment"),
-      class = "datamods-title"
-    )
+    title <- tags$h4(i18n$t("Import a dataset from an environment"), class = "datamods-title")
   }
 
   tags$div(
@@ -4577,14 +4615,13 @@ import_globalenv_ui <- function(id,
       # options = list(title = i18n$t("List of datasets...")),
       width = "100%"
     ),
-
     tags$div(
       id = ns("import-placeholder"),
       shinyWidgets::alert(
         id = ns("import-result"),
         status = "info",
         tags$b(i18n$t("No data selected!")),
-        i18n$t("Use a dataset from your environment or from the environment of a package."),
+        select_label,
         dismissible = TRUE
       )
     ),
@@ -4598,12 +4635,14 @@ import_globalenv_ui <- function(id,
 
 
 #' @param btn_show_data Display or not a button to display data in a modal window if import is successful.
+#'
 #' @param show_data_in Where to display data: in a `"popup"` or in a `"modal"` window.
 #' @param trigger_return When to update selected data:
 #'  `"button"` (when user click on button) or
 #'  `"change"` (each time user select a dataset in the list).
 #' @param return_class Class of returned data: `data.frame`, `data.table`, `tbl_df` (tibble) or `raw`.
 #' @param reset A `reactive` function that when triggered resets the data.
+#' @param limit_data upper limit to imported data
 #'
 #' @export
 #'
@@ -4617,16 +4656,17 @@ import_globalenv_server <- function(id,
                                     show_data_in = c("popup", "modal"),
                                     trigger_return = c("button", "change"),
                                     return_class = c("data.frame", "data.table", "tbl_df", "raw"),
-                                    reset = reactive(NULL)) {
-
+                                    reset = reactive(NULL),
+                                    limit_data = NULL) {
   trigger_return <- match.arg(trigger_return)
   return_class <- match.arg(return_class)
 
   module <- function(input, output, session) {
-
     ns <- session$ns
     imported_rv <- reactiveValues(data = NULL, name = NULL)
-    temporary_rv <- reactiveValues(data = NULL, name = NULL, status = NULL)
+    temporary_rv <- reactiveValues(data = NULL,
+                                   name = NULL,
+                                   status = NULL)
 
     observeEvent(reset(), {
       temporary_rv$data <- NULL
@@ -4641,6 +4681,7 @@ import_globalenv_server <- function(id,
     })
 
     observeEvent(input$env, {
+      # browser()
       if (identical(input$env, "Global Environment")) {
         choices <- datamods:::search_obj("data.frame")
       } else {
@@ -4650,9 +4691,14 @@ import_globalenv_server <- function(id,
         choices <- i18n$t("No dataset here...")
         choicesOpt <- list(disabled = TRUE)
       } else {
-        choicesOpt <- list(
-          subtext = datamods:::get_dimensions(choices)
-        )
+        choicesOpt <- list(subtext = get_dimensions(choices,filter_df=TRUE))
+        # browser()
+        ## choices are corrected if GlobalEnv is not chosen
+        if (!identical(input$env, "Global Environment")) {
+          choices <- structure(names(choicesOpt$subtext),
+                               package = attr(choices, "package"))
+        }
+
       }
       temporary_rv$package <- attr(choices, "package")
       shinyWidgets::updatePickerInput(
@@ -4663,7 +4709,8 @@ import_globalenv_server <- function(id,
         choicesOpt = choicesOpt,
         options = list(
           title = i18n$t("List of datasets..."),
-                       "live-search" = TRUE)
+          "live-search" = TRUE
+        )
       )
     })
 
@@ -4672,7 +4719,9 @@ import_globalenv_server <- function(id,
         id = "import-result",
         status = "info",
         tags$b(i18n$t("No data selected!")),
-        i18n$t("Use a dataset from your environment or from the environment of a package."),
+        i18n$t(
+          "Use a dataset from your environment or from the environment of a package."
+        ),
         dismissible = TRUE
       )
     )
@@ -4686,58 +4735,68 @@ import_globalenv_server <- function(id,
 
 
 
-    observeEvent(input$data, {
-      if (!isTruthy(input$data)) {
-        datamods:::toggle_widget(inputId = "confirm", enable = FALSE)
-        datamods:::insert_alert(
-          selector = ns("import"),
-          status = "info",
-          tags$b(i18n$t("No data selected!")),
-          i18n$t("Use a dataset from your environment or from the environment of a package.")
-        )
-      } else {
-        name_df <- input$data
+    observeEvent(input$data,
+                 {
+                   if (!isTruthy(input$data)) {
+                     datamods:::toggle_widget(inputId = "confirm", enable = FALSE)
+                     datamods:::insert_alert(
+                       selector = ns("import"),
+                       status = "info",
+                       tags$b(i18n$t("No data selected!")),
+                       i18n$t(
+                         "Use a dataset from your environment or from the environment of a package."
+                       )
+                     )
+                   } else {
+                     # browser()
+                     name_df <- input$data
 
-        if (!is.null(temporary_rv$package)) {
-          attr(name_df, "package") <- temporary_rv$package
-        }
+                     if (!is.null(temporary_rv$package)) {
+                       attr(name_df, "package") <- temporary_rv$package
+                     }
 
-        imported <- try(get_env_data(name_df), silent = TRUE)
+                     imported <- try(get_env_data(name_df), silent = TRUE)
 
-        if (inherits(imported, "try-error") || NROW(imported) < 1) {
-          datamods:::toggle_widget(inputId = "confirm", enable = FALSE)
-          datamods:::insert_error(mssg = i18n$t(attr(imported, "condition")$message))
-          temporary_rv$status <- "error"
-          temporary_rv$data <- NULL
-          temporary_rv$name <- NULL
-        } else {
-          datamods:::toggle_widget(inputId = "confirm", enable = TRUE)
-          datamods:::insert_alert(
-            selector = ns("import"),
-            status = "success",
-            datamods:::make_success_alert(
-              imported,
-              trigger_return = trigger_return,
-              btn_show_data = btn_show_data
-            )
-          )
-          pkg <- attr(name_df, "package")
-          if (!is.null(pkg)) {
-            name <- paste(pkg, input$data, sep = "::")
-          } else {
-            name <- input$data
-          }
-          name <- trimws(sub("\\(([^\\)]+)\\)", "", name))
-          temporary_rv$status <- "success"
-          temporary_rv$data <- imported
-          temporary_rv$name <- name
-        }
-      }
-    }, ignoreInit = TRUE, ignoreNULL = FALSE)
+                     if (inherits(imported, "try-error") ||
+                         NROW(imported) < 1) {
+                       datamods:::toggle_widget(inputId = "confirm", enable = FALSE)
+                       datamods:::insert_error(mssg = i18n$t(attr(imported, "condition")$message))
+                       temporary_rv$status <- "error"
+                       temporary_rv$data <- NULL
+                       temporary_rv$name <- NULL
+                     } else {
+                       datamods:::toggle_widget(inputId = "confirm", enable = TRUE)
+                       datamods:::insert_alert(
+                         selector = ns("import"),
+                         status = "success",
+                         make_success_alert(
+                           data = imported,
+                           trigger_return = trigger_return,
+                           btn_show_data = btn_show_data
+                         )
+                       )
+                       pkg <- attr(name_df, "package")
+                       if (!is.null(pkg)) {
+                         name <- paste(pkg, input$data, sep = "::")
+                       } else {
+                         name <- input$data
+                       }
+                       name <- trimws(sub("\\(([^\\)]+)\\)", "", name))
+                       temporary_rv$status <- "success"
+
+                       temporary_rv$data <- limit_data_size(imported,limit = limit_data)
+                       temporary_rv$name <- name
+                     }
+                   }
+                 },
+                 ignoreInit = TRUE,
+                 ignoreNULL = FALSE)
 
 
     observeEvent(input$see_data, {
-      show_data(temporary_rv$data, title = i18n$t("Imported data"), type = show_data_in)
+      show_data(temporary_rv$data,
+                title = i18n$t("Imported data"),
+                type = show_data_in)
     })
 
     observeEvent(input$confirm, {
@@ -4761,10 +4820,7 @@ import_globalenv_server <- function(id,
     }
   }
 
-  moduleServer(
-    id = id,
-    module = module
-  )
+  moduleServer(id = id, module = module)
 }
 
 
@@ -4811,6 +4867,7 @@ get_data_packages <- function() {
 #' list_pkg_data("ggplot2")
 list_pkg_data <- function(pkg) {
   if (isTRUE(requireNamespace(pkg, quietly = TRUE))) {
+    # browser()
     list_data <- data(package = pkg, envir = environment())$results[, "Item"]
     list_data <- sort(list_data)
     attr(list_data, "package") <- pkg
@@ -4828,17 +4885,27 @@ list_pkg_data <- function(pkg) {
 get_env_data <- function(obj, env = globalenv()) {
   pkg <- attr(obj, "package")
   re <- regexpr(pattern = "\\(([^\\)]+)\\)", text = obj)
-  obj_ <- substr(x = obj, start = re + 1, stop = re + attr(re, "match.length") - 2)
-  obj <- gsub(pattern = "\\s.*", replacement = "", x = obj)
+  obj_ <- substr(
+    x = obj,
+    start = re + 1,
+    stop = re + attr(re, "match.length") - 2
+  )
+  obj <- gsub(pattern = "\\s.*",
+              replacement = "",
+              x = obj)
   if (obj %in% ls(name = env)) {
     get(x = obj, envir = env)
   } else if (!is.null(pkg) && !identical(pkg, "")) {
-    res <- suppressWarnings(try(
-      get(utils::data(list = obj, package = pkg, envir = environment())), silent = TRUE
-    ))
+    res <- suppressWarnings(try(get(utils::data(
+      list = obj,
+      package = pkg,
+      envir = environment()
+    )), silent = TRUE))
     if (!inherits(res, "try-error"))
       return(res)
-    data(list = obj_, package = pkg, envir = environment())
+    data(list = obj_,
+         package = pkg,
+         envir = environment())
     get(obj, envir = environment())
   } else {
     NULL
@@ -4846,16 +4913,23 @@ get_env_data <- function(obj, env = globalenv()) {
 }
 
 
-get_dimensions <- function(objs) {
-  if (is.null(objs))
+#' Extension of the helper function from datamods
+#'
+#' @param objs objs
+#' @param filter_df flag to only include data frames
+#'
+#' @returns vector of data frames with the package names as attr
+get_dimensions <- function(objs,filter_df=TRUE) {
+  if (is.null(objs)){
     return(NULL)
+    }
   dataframes_dims <- Map(
     f = function(name, pkg) {
       attr(name, "package") <- pkg
       tmp <- suppressWarnings(get_env_data(name))
       if (is.data.frame(tmp)) {
         sprintf("%d obs. of  %d variables", nrow(tmp), ncol(tmp))
-      } else {
+      } else if (isFALSE(filter_df)) {
         i18n$t("Not a data.frame")
       }
     },
@@ -4890,8 +4964,18 @@ get_dimensions <- function(objs) {
 import_file_ui <- function(id,
                            title = "",
                            preview_data = TRUE,
-                           file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat", ".sav"),
-                           layout_params = c("dropdown", "inline")) {
+                           file_extensions = c(".csv",
+                                               ".txt",
+                                               ".xls",
+                                               ".xlsx",
+                                               ".rds",
+                                               ".fst",
+                                               ".sas7bdat",
+                                               ".sav"),
+                           layout_params = c("dropdown", "inline"),
+                           limit_default = 10000,
+                           limit_upper = 10000,
+                           limit_lower = 0) {
   ns <- shiny::NS(id)
 
   if (!is.null(layout_params)) {
@@ -4899,10 +4983,7 @@ import_file_ui <- function(id,
   }
 
   if (isTRUE(title)) {
-    title <- shiny::tags$h4(
-      "Import a file",
-      class = "datamods-title"
-    )
+    title <- shiny::tags$h4("Import a file", class = "datamods-title")
   }
 
 
@@ -4927,7 +5008,26 @@ import_file_ui <- function(id,
           size = "sm",
           width = "100%"
         ),
-        shiny::helpText(phosphoricons::ph("info"), i18n$t("if several use a comma (',') to separate them"))
+        shiny::helpText(
+          phosphoricons::ph("info"),
+          i18n$t("if several use a comma (',') to separate them")
+        )
+      ),
+      shiny::tagAppendChild(
+        shinyWidgets::numericInputIcon(
+          inputId = ns("size_limit"),
+          label = i18n$t("Maximum number of observations:"),
+          value = limit_default,
+          min = limit_lower,
+          max = limit_upper,
+          icon = list("n ="),
+          size = "sm",
+          width = "100%"
+        ),
+        shiny::helpText(
+          phosphoricons::ph("info"),
+          i18n$t("setting to 0 includes all")
+        )
       )
     ),
     shiny::column(
@@ -4943,10 +5043,7 @@ import_file_ui <- function(id,
       selectInputIcon(
         inputId = ns("encoding"),
         label = i18n$t("Encoding:"),
-        choices = c(
-          "UTF-8" = "UTF-8",
-          "Latin1" = "latin1"
-        ),
+        choices = c("UTF-8" = "UTF-8", "Latin1" = "latin1"),
         icon = phosphoricons::ph("text-aa"),
         size = "sm",
         width = "100%"
@@ -5000,7 +5097,8 @@ import_file_ui <- function(id,
     datamods:::html_dependency_datamods(),
     title,
     file_ui,
-    if (identical(layout_params, "inline")) params_ui,
+    if (identical(layout_params, "inline"))
+      params_ui,
     shiny::tags$div(
       class = "hidden",
       id = ns("sheet-container"),
@@ -5020,7 +5118,8 @@ import_file_ui <- function(id,
         shiny::tags$b(i18n$t("No file selected.")),
         # shiny::textOutput(ns("trans_format_text")),
         # This is the easiest solution, though not gramatically perfect
-        i18n$t("You can choose between these file types:"), paste(file_extensions, collapse = ", "),
+        i18n$t("You can choose between these file types:"),
+        paste(file_extensions, collapse = ", "),
         # sprintf("You can import %s files", paste(file_extensions, collapse = ", ")),
         dismissible = TRUE
       )
@@ -5053,8 +5152,7 @@ import_file_server <- function(id,
                                show_data_in = c("popup", "modal"),
                                trigger_return = c("button", "change"),
                                return_class = c("data.frame", "data.table", "tbl_df", "raw"),
-                               reset = reactive(NULL),
-                               limit=100000) {
+                               reset = reactive(NULL)) {
   read_fns <- list(
     ods = "import_ods",
     dta = "import_dta",
@@ -5072,7 +5170,12 @@ import_file_server <- function(id,
   module <- function(input, output, session) {
     ns <- session$ns
     imported_rv <- shiny::reactiveValues(data = NULL, name = NULL)
-    temporary_rv <- shiny::reactiveValues(data = NULL, name = NULL, status = NULL, sheets = 1)
+    temporary_rv <- shiny::reactiveValues(
+      data = NULL,
+      name = NULL,
+      status = NULL,
+      sheets = 1
+    )
 
     shiny::observeEvent(reset(), {
       temporary_rv$data <- NULL
@@ -5121,10 +5224,12 @@ import_file_server <- function(id,
         input$skip_rows,
         input$dec,
         input$encoding,
-        input$na_label
+        input$na_label,
+        input$size_limit
       ),
       {
         req(input$file)
+        req(input$size_limit)
 
         if (!all(input$sheet %in% temporary_rv$sheets)) {
           sheets <- 1
@@ -5166,16 +5271,17 @@ import_file_server <- function(id,
           datamods:::insert_alert(
             selector = ns("import"),
             status = "success",
-            datamods:::make_success_alert(
-              imported,
+            make_success_alert(
+              data = imported,
               trigger_return = trigger_return,
               btn_show_data = btn_show_data,
-              extra = if (isTRUE(input$preview_data)) i18n$t("First five rows are shown below:")
+              extra = if (isTRUE(input$preview_data))
+                i18n$t("First five rows are shown below:")
             )
           )
 
           ## As a protective measure, the dataset size is capped at cell limit
-          imported <- limit_data_size(imported,limit = limit)
+          imported <- limit_data_size(imported, limit = input$size_limit)
 
           temporary_rv$status <- "success"
           temporary_rv$data <- imported
@@ -5187,34 +5293,35 @@ import_file_server <- function(id,
     )
 
     observeEvent(input$see_data, {
-      tryCatch(
-        {
-          datamods:::show_data(default_parsing(temporary_rv$data), title = i18n$t("Imported data"), type = show_data_in)
-        },
-        # warning = function(warn) {
-        #     showNotification(warn, type = "warning")
-        # },
-        error = function(err) {
-          showNotification(err, type = "err")
-        }
-      )
+      tryCatch({
+        datamods:::show_data(
+          default_parsing(temporary_rv$data),
+          title = i18n$t("Imported data"),
+          type = show_data_in
+        )
+      }, # warning = function(warn) {
+      #     showNotification(warn, type = "warning")
+      # },
+      error = function(err) {
+        showNotification(err, type = "err")
+      })
     })
 
     output$table <- toastui::renderDatagrid2({
       req(temporary_rv$data)
-      tryCatch(
-        {
-          toastui::datagrid(
-            data = setNames(head(temporary_rv$data, 5), make.names(names(temporary_rv$data), unique = TRUE)),
-            theme = "striped",
-            colwidths = "guess",
-            minBodyHeight = 250
-          )
-        },
-        error = function(err) {
-          showNotification(err, type = "err")
-        }
-      )
+      tryCatch({
+        toastui::datagrid(
+          data = setNames(
+            head(temporary_rv$data, 5),
+            make.names(names(temporary_rv$data), unique = TRUE)
+          ),
+          theme = "striped",
+          colwidths = "guess",
+          minBodyHeight = 250
+        )
+      }, error = function(err) {
+        showNotification(err, type = "err")
+      })
     })
 
     observeEvent(input$confirm, {
@@ -5240,10 +5347,7 @@ import_file_server <- function(id,
     }
   }
 
-  moduleServer(
-    id = id,
-    module = module
-  )
+  moduleServer(id = id, module = module)
 }
 
 # utils -------------------------------------------------------------------
@@ -5302,39 +5406,37 @@ import_delim <- function(file, skip, encoding, na.strings) {
 #' @export
 #'
 import_xls <- function(file, sheet, skip, na.strings) {
-  tryCatch(
-    {
-      ## If sheet is null, this allows purrr::map to run
-      if (is.null(sheet)) sheet <- 1
+  tryCatch({
+    ## If sheet is null, this allows purrr::map to run
+    if (is.null(sheet))
+      sheet <- 1
 
-      sheet |>
-        purrr::map(\(.x){
-          readxl::read_excel(
-            path = file,
-            sheet = .x,
-            na = na.strings,
-            skip = skip,
-            .name_repair = "unique_quiet",
-            trim_ws = TRUE
-          )
+    sheet |>
+      purrr::map(\(.x) {
+        readxl::read_excel(
+          path = file,
+          sheet = .x,
+          na = na.strings,
+          skip = skip,
+          .name_repair = "unique_quiet",
+          trim_ws = TRUE
+        )
 
-          # openxlsx2::read_xlsx(
-          #   file = file,
-          #   sheet = .x,
-          #   skip_empty_rows = TRUE,
-          #   start_row = skip - 1,
-          #   na.strings = na.strings
-          # )
-        }) |>
-        purrr::reduce(dplyr::full_join)
-    },
-    # warning = function(warn) {
-    #   showNotification(paste0(warn), type = "warning")
-    # },
-    error = function(err) {
-      showNotification(paste0(err), type = "err")
-    }
-  )
+        # openxlsx2::read_xlsx(
+        #   file = file,
+        #   sheet = .x,
+        #   skip_empty_rows = TRUE,
+        #   start_row = skip - 1,
+        #   na.strings = na.strings
+        # )
+      }) |>
+      purrr::reduce(dplyr::full_join)
+  }, # warning = function(warn) {
+  #   showNotification(paste0(warn), type = "warning")
+  # },
+  error = function(err) {
+    showNotification(paste0(err), type = "err")
+  })
 }
 
 
@@ -5344,27 +5446,25 @@ import_xls <- function(file, sheet, skip, na.strings) {
 #' @export
 #'
 import_ods <- function(file, sheet, skip, na.strings) {
-  tryCatch(
-    {
-      if (is.null(sheet)) sheet <- 1
-      sheet |>
-        purrr::map(\(.x){
-          readODS::read_ods(
-            path = file,
-            sheet = .x,
-            skip = skip,
-            na = na.strings
-          )
-        }) |>
-        purrr::reduce(dplyr::full_join)
-    },
-    # warning = function(warn) {
-    #   showNotification(paste0(warn), type = "warning")
-    # },
-    error = function(err) {
-      showNotification(paste0(err), type = "err")
-    }
-  )
+  tryCatch({
+    if (is.null(sheet))
+      sheet <- 1
+    sheet |>
+      purrr::map(\(.x) {
+        readODS::read_ods(
+          path = file,
+          sheet = .x,
+          skip = skip,
+          na = na.strings
+        )
+      }) |>
+      purrr::reduce(dplyr::full_join)
+  }, # warning = function(warn) {
+  #   showNotification(paste0(warn), type = "warning")
+  # },
+  error = function(err) {
+    showNotification(paste0(err), type = "err")
+  })
 }
 
 #' @name import-file-type
@@ -5373,10 +5473,7 @@ import_ods <- function(file, sheet, skip, na.strings) {
 #' @export
 #'
 import_dta <- function(file) {
-  haven::read_dta(
-    file = file,
-    .name_repair = "unique_quiet"
-  )
+  haven::read_dta(file = file, .name_repair = "unique_quiet")
 }
 
 #' @name import-file-type
@@ -5385,9 +5482,7 @@ import_dta <- function(file) {
 #' @export
 #'
 import_rds <- function(file) {
-  out <- readr::read_rds(
-    file = file
-  )
+  out <- readr::read_rds(file = file)
 
   if (is.data.frame(out)) {
     out
@@ -5462,7 +5557,17 @@ import_file_demo_app <- function() {
         width = 4,
         import_file_ui(
           id = "myid",
-          file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".sas7bdat", ".ods", ".dta"),
+          file_extensions = c(
+            ".csv",
+            ".tsv",
+            ".txt",
+            ".xls",
+            ".xlsx",
+            ".rds",
+            ".sas7bdat",
+            ".ods",
+            ".dta"
+          ),
           layout_params = "dropdown" # "inline" # or "dropdown"
         )
       ),
@@ -5510,6 +5615,7 @@ import_file_demo_app <- function() {
 #' This function may act to guard a hosted app against very large data sets in
 #' addition to the file size limitations.
 #' The function will limit the data set by dropping rows.
+#' If limit is set to 0 or NULL, the original data set is returned.
 #'
 #'
 #' @param data data.frame
@@ -5520,23 +5626,70 @@ import_file_demo_app <- function() {
 #'
 #' @examples
 #' prod(dim(mtcars))
-#' limit_data_size(mtcars)
+#' limit_data_size(mtcars,2)
 #' limit_data_size(mtcars,100)
 limit_data_size <- function(data, limit = NULL) {
-  ## Add security to only allow dataset of 100.000 cells
+  ## Add security to reduce large datasets to n observations below limit.
   ## Ideally this should only go for the hosted version
 
-  if (is.null(limit)){
+  if (is.null(limit) || limit == 0) {
     return(data)
   }
 
   data_dim <- dim(data)
 
-  if (prod(data_dim) > limit) {
+  ## If the limit is below nrow, the first observations from the first row
+  ## is included for a very pessimistic selection.
+  ## A more optimistic selection would just use ceiling instead of floor.
+  if (limit < data_dim[2]) {
+    head(data, 1)[seq_len(limit)]
+  } else if (prod(data_dim) > limit) {
     head(data, floor(limit / data_dim[2]))
   } else {
     data
   }
+}
+
+
+#' @importFrom htmltools tagList tags
+#' @importFrom shiny icon getDefaultReactiveDomain
+make_success_alert <- function(data,
+                               trigger_return,
+                               btn_show_data,
+                               extra = NULL,
+                               session = shiny::getDefaultReactiveDomain()) {
+  if (identical(trigger_return, "button")) {
+    success_message <- tagList(tags$b(
+      phosphoricons::ph("check", weight = "bold"),
+      i18n$t("Data ready to be imported!")
+    ),
+    sprintf(
+      i18n$t("Data has %s obs. of %s variables."),
+      nrow(data),
+      ncol(data)
+    ),
+    extra)
+  } else {
+    success_message <- tagList(tags$b(
+      phosphoricons::ph("check", weight = "bold"),
+      i18n$t("Data successfully imported!")
+    ),
+    sprintf(
+      i18n$t("Data has %s obs. of %s variables."),
+      nrow(data),
+      ncol(data)
+    ),
+    extra)
+  }
+  if (isTRUE(btn_show_data)) {
+    success_message <- tagList(success_message,
+                               tags$br(),
+                               actionLink(
+                                 inputId = session$ns("see_data"),
+                                 label = tagList(phosphoricons::ph("table"), i18n$t("Click to see data"))
+                               ))
+  }
+  return(success_message)
 }
 
 
@@ -5568,6 +5721,7 @@ landing_page_ui <- function(i18n) {
             i18n$t("Start with FreesearchR for basic data evaluation and analysis."),
             i18n$t("The app contains a selelct number of features and will guide you through key analyses."),
             i18n$t("When you need more advanced tools, you'll be prepared to use R directly."),
+            shiny::actionLink(inputId = "act_data",label = i18n$t("Start by loading data.")),
             style = "font-size: 1.2rem; color: #555;"
           )
         ),
@@ -5815,6 +5969,11 @@ landing_page_ui <- function(i18n) {
 #' @description
 #' All data.frames in the global environment will be accessible through the app.
 #'
+#' @param include_globalenv flag to include global env (local data) as option
+#' when loading data
+#' @param data_limit_default default data set observations limit
+#' @param data_limit_upper data set observations upper limit
+#' @param data_limit_lower data set observations lower limit
 #' @param ... passed on to `shiny::runApp()`
 #'
 #' @returns shiny app
@@ -5825,16 +5984,27 @@ landing_page_ui <- function(i18n) {
 #' data(mtcars)
 #' launch_FreesearchR(launch.browser = TRUE)
 #' }
-launch_FreesearchR <- function(...){
+launch_FreesearchR <- function(inlcude_globalenv = TRUE,
+                               data_limit_default = 1000,
+                               data_limit_upper = 100000,
+                               data_limit_lower = 1,
+                               ...) {
+  global_freesearchR <- list(
+    include_globalenv = include_globalenv,
+    data_limit_default = data_limit_default,
+    data_limit_upper = data_limit_upper,
+    data_limit_lower = data_limit_lower
+  )
+
   appDir <- system.file("apps", "FreesearchR", package = "FreesearchR")
   if (appDir == "") {
-    stop("Could not find the app directory. Try re-installing `FreesearchR`.", call. = FALSE)
+    stop("Could not find the app directory. Try re-installing `FreesearchR`.",
+         call. = FALSE)
   }
 
-  a <- shiny::runApp(appDir = paste0(appDir,"/app.R"), ...)
+  a <- shiny::runApp(appDir = paste0(appDir, "/app.R"), ...)
   return(invisible(a))
 }
-
 
 
 ########
@@ -5852,45 +6022,49 @@ launch_FreesearchR <- function(...){
 data_missings_ui <- function(id, ...) {
   ns <- shiny::NS(id)
 
-  list(
-    bslib::layout_sidebar(
-      sidebar = bslib::sidebar(
-        bslib::accordion(
-          id = ns("acc_mis"),
-          open = "acc_chars",
-          multiple = FALSE,
-          bslib::accordion_panel(
-            value = "acc_pan_mis",
-            title = "Settings",
-            icon = bsicons::bs_icon("gear"),
+  list(bslib::layout_sidebar(
+    uiOutput(outputId = ns("feedback")),
+    sidebar = bslib::sidebar(
+      bslib::accordion(
+        id = ns("acc_mis"),
+        open = "acc_chars",
+        multiple = FALSE,
+        bslib::accordion_panel(
+          value = "acc_pan_mis",
+          title = "Settings",
+          icon = bsicons::bs_icon("gear"),
+          shiny::conditionalPanel(
+            condition = "output.missings == true",
             shiny::uiOutput(ns("missings_method")),
             shiny::uiOutput(ns("missings_var")),
-            shiny::helpText(i18n$t("Evaluate missingness by either comparing missing values across variables (optionally grouped by af categorical or dichotomous variable) or compare variables grouped by the missing status (missing or not) of an outcome variable. If there is a significant difference i the missingness, this may cause a bias in you data and should be considered carefully interpreting the data and analyses as data may not be missing at random.")),
-            shiny::br(),
-            shiny::actionButton(
-              inputId = ns("act_miss"),
-              label = i18n$t("Evaluate"),
-              width = "100%",
-              icon = shiny::icon("calculator"),
-              disabled = FALSE
+            ns = ns
+          ),
+          shiny::helpText(
+            i18n$t(
+              "Evaluate missingness by either comparing missing values across variables (optionally grouped by af categorical or dichotomous variable) or compare variables grouped by the missing status (missing or not) of an outcome variable. If there is a significant difference i the missingness, this may cause a bias in you data and should be considered carefully interpreting the data and analyses as data may not be missing at random."
             )
           ),
-          do.call(
-            bslib::accordion_panel,
-            c(
-              list(
-                title = "Download",
-                icon = bsicons::bs_icon("file-earmark-arrow-down")
-              ),
-              table_download_ui(id = ns("tbl_dwn"), title = NULL)
-            )
+          shiny::br(),
+          shiny::actionButton(
+            inputId = ns("act_miss"),
+            label = i18n$t("Evaluate"),
+            width = "100%",
+            icon = shiny::icon("calculator"),
+            disabled = FALSE
           )
-        )
-      ),
-      ...,
-      gt::gt_output(outputId = ns("missings_table"))
-    )
-  )
+        ),
+        do.call(bslib::accordion_panel, c(
+          list(
+            title = "Download",
+            icon = bsicons::bs_icon("file-earmark-arrow-down")
+          ),
+          table_download_ui(id = ns("tbl_dwn"), title = NULL)
+        ))
+      )
+    ),
+    ...,
+    gt::gt_output(outputId = ns("missings_table"))
+  ))
 }
 
 ## This should really just be rebuild to only contain a function
@@ -5902,46 +6076,65 @@ data_missings_ui <- function(id, ...) {
 #' @name data-missings
 #' @returns shiny server module
 #' @export
-data_missings_server <- function(id,
-                                 data,
-                                 max_level = 20,
-                                 ...) {
+data_missings_server <- function(id, data, max_level = 20, ...) {
   shiny::moduleServer(
     id = id,
     module = function(input, output, session) {
       ns <- session$ns
 
-      datar <- if (is.reactive(data)) data else reactive(data)
+      datar <- if (is.reactive(data))
+        data
+      else
+        reactive(data)
 
-      rv <- shiny::reactiveValues(
-        data = NULL,
-        table = NULL
+      rv <- shiny::reactiveValues(data = NULL,
+                                  table = NULL,
+                                  feedback = NULL)
+
+      ## Case with no missings
+
+      info_alert <- shinyWidgets::alert(
+        status = "info",
+        phosphoricons::ph("question"),
+        i18n$t("You have provided a complete dataset with no missing values.")
       )
+
+      output$missings <- shiny::reactive({
+        shiny::req(data())
+        any(is.na(data()))
+      })
+      shiny::outputOptions(output, "missings", suspendWhenHidden = FALSE)
+
+      observe({
+        shiny::req(data())
+        if (!any(is.na(data()))) {
+          rv$feedback <- info_alert
+        } else {
+          rv$feedback <- NULL
+        }
+      })
+
+
+      output$feedback <- renderUI(rv$feedback)
 
       ## Notes
       ##
       ## Code export is still missing
       ## Direct table export would be nice
 
-      shiny::observe(
-        output$missings_method <- shiny::renderUI({
-          shiny::req(data())
-          vectorSelectInput(
-            inputId = ns("missings_method"),
-            label = i18n$t("Analysis method for missingness overview"),
-            choices = setNames(
-              c(
-                "predictors",
-                "outcome"
-              ),
-              c(
-                i18n$t("Overview of missings across variables"),
-                i18n$t("Overview of difference in variables by missing status in outcome")
-              )
+      shiny::observe(output$missings_method <- shiny::renderUI({
+        shiny::req(data())
+        vectorSelectInput(
+          inputId = ns("missings_method"),
+          label = i18n$t("Analysis method for missingness overview"),
+          choices = setNames(c("predictors", "outcome"), c(
+            i18n$t("Overview of missings across variables"),
+            i18n$t(
+              "Overview of difference in variables by missing status in outcome"
             )
-          )
-        })
-      )
+          ))
+        )
+      }))
 
       shiny::observe({
         output$missings_var <- shiny::renderUI({
@@ -5968,94 +6161,93 @@ data_missings_server <- function(id,
       })
 
 
-      shiny::observeEvent(
-        list(input$act_miss),
-        {
-          shiny::req(datar())
-          shiny::req(input$missings_var)
-          # browser()
-          df_tbl <- datar()
-          by_var <- input$missings_var
+      shiny::observeEvent(list(input$act_miss), {
+        shiny::req(datar())
+        shiny::req(input$missings_var)
+        # browser()
+        df_tbl <- datar()
+        by_var <- input$missings_var
 
-          parameters <- list(
-            by_var = by_var,
-            max_level = max_level,
-            type = input$missings_method
-          )
+        parameters <- list(
+          by_var = by_var,
+          max_level = max_level,
+          type = input$missings_method
+        )
 
-          tryCatch(
-            {
-              shiny::withProgress(message = i18n$t("Calculating. Hold tight for a moment.."), {
-                out <- do.call(
-                  compare_missings,
-                  modifyList(parameters, list(data = df_tbl))
-                )
-              })
-            },
-            error = function(err) {
-              showNotification(paste0("Error: ", err), type = "err")
-            }
-          )
+        tryCatch({
+          shiny::withProgress(message = i18n$t("Calculating. Hold tight for a moment.."), {
+            out <- do.call(compare_missings, modifyList(parameters, list(data = df_tbl)))
+          })
+        }, error = function(err) {
+          showNotification(paste0("Error: ", err), type = "err")
+        })
 
-          if (is.null(input$missings_var) || input$missings_var == "" || !input$missings_var %in% names(datar()) || input$missings_var == "none") {
-            # if (is.null(variabler()) || variabler() == "" || !variabler() %in% names(data()) || variabler() == "none") {
-            # tbl <- rv$data()
-            if (anyNA(datar())) {
-              if (input$missings_method == "predictors") {
-                title <- i18n$t("Overview of missing observations")
-              } else {
-                title <- i18n$t("No outcome measure chosen")
-              }
+        if (is.null(input$missings_var) ||
+            input$missings_var == "" ||
+            !input$missings_var %in% names(datar()) ||
+            input$missings_var == "none") {
+          # if (is.null(variabler()) || variabler() == "" || !variabler() %in% names(data()) || variabler() == "none") {
+          # tbl <- rv$data()
+          if (anyNA(datar())) {
+            if (input$missings_method == "predictors") {
+              title <- i18n$t("Overview of missing observations")
             } else {
-              title <- i18n$t("No missing observations")
+              title <- i18n$t("No outcome measure chosen")
             }
           } else {
-            ## Due to reactivity, the table updates too quickly. this mitigates that issue..
+            title <- i18n$t("No missing observations")
+          }
+        } else {
+          ## Due to reactivity, the table updates too quickly. this mitigates that issue..
 
 
-            if (input$missings_var == "predictors") {
-              title <- glue::glue(i18n$t("Missings across variables by the variable **'{input$missings_var}'**"))
-            } else {
-              title <- glue::glue(i18n$t("Missing vs non-missing observations in the variable **'{input$missings_var}'**"))
-            }
+          if (input$missings_var == "predictors") {
+            title <- glue::glue(
+              i18n$t(
+                "Missings across variables by the variable **'{input$missings_var}'**"
+              )
+            )
+          } else {
+            title <- glue::glue(
+              i18n$t(
+                "Missing vs non-missing observations in the variable **'{input$missings_var}'**"
+              )
+            )
+          }
+        }
+
+        attr(out, "tbl_title") <- title
+
+        rv$data <- shiny::reactive(out)
+      })
+
+      shiny::observeEvent(list(
+        # input$act_miss
+        rv$data
+      ), {
+        output$missings_table <- gt::render_gt({
+          shiny::req(rv$data)
+          # shiny::req(input$missings_var)
+          # browser()
+          if ("p.value" %in% names(rv$data()[["table_body"]])) {
+            tbl <- rv$data() |>
+              gtsummary::bold_p()
+          } else {
+            tbl <- rv$data()
           }
 
-          attr(out, "tbl_title") <- title
 
-          rv$data <- shiny::reactive(out)
-        }
-      )
+          out <- tbl |>
+            gtsummary::as_gt() |>
+            gt::tab_header(title = gt::md(attr(tbl, "tbl_title")))
 
-      shiny::observeEvent(
-        list(
-          # input$act_miss
-          rv$data
-        ),
-        {
-          output$missings_table <- gt::render_gt({
-            shiny::req(rv$data)
-            # shiny::req(input$missings_var)
-            # browser()
-            if ("p.value" %in% names(rv$data()[["table_body"]])) {
-              tbl <- rv$data() |>
-                gtsummary::bold_p()
-            } else {
-              tbl <- rv$data()
-            }
+          attr(out, "strat_var") <- input$missings_var
 
+          rv$table <- out
 
-            out <- tbl |>
-              gtsummary::as_gt() |>
-              gt::tab_header(title = gt::md(attr(tbl, "tbl_title")))
-
-            attr(out, "strat_var") <- input$missings_var
-
-            rv$table <- out
-
-            out
-          })
-        }
-      )
+          out
+        })
+      })
 
 
       table_download_server(
@@ -6071,25 +6263,20 @@ data_missings_server <- function(id,
 
 
 missing_demo_app <- function() {
-  ui <- do.call(
-    bslib::page,
-    c(
-      list(
-        title = i18n$t("Missings"),
-        icon = bsicons::bs_icon("x-circle")
-      ),
-      data_missings_ui(id = "data"),
-      gt::gt_output("table_p")
-    )
-  )
+  ui <- do.call(bslib::page, c(
+    list(
+      title = i18n$t("Missings"),
+      icon = bsicons::bs_icon("x-circle")
+    ),
+    data_missings_ui(id = "data"),
+    gt::gt_output("table_p")
+  ))
   server <- function(input, output, session) {
     data_demo <- mtcars
     data_demo[sample(1:32, 10), "cyl"] <- NA
     data_demo[sample(1:32, 8), "vs"] <- NA
 
-    rv <- shiny::reactiveValues(
-      table = NULL
-    )
+    rv <- shiny::reactiveValues(table = NULL)
 
     rv$table <- data_missings_server(id = "data", data = data_demo)
 
@@ -6123,17 +6310,15 @@ missing_demo_app <- function() {
 #' @returns gtsummary list object
 #' @export
 #'
-compare_missings <- function(
-  data,
-  by_var,
-  max_level = 20,
-  type = c("predictors", "outcome")
-) {
+compare_missings <- function(data,
+                             by_var,
+                             max_level = 20,
+                             type = c("predictors", "outcome")) {
   type <- match.arg(type)
 
   if (!is.null(by_var) && by_var != "" && by_var %in% names(data)) {
     data <- data |>
-      lapply(\(.x){
+      lapply(\(.x) {
         if (is.factor(.x)) {
           cut_var(.x, breaks = 20, type = "top")
         } else {
@@ -6177,7 +6362,7 @@ compare_missings <- function(
 missings_logic_across <- function(data, exclude = NULL) {
   # This function includes a approach way to preserve variable labels
   names(data) |>
-    lapply(\(.x){
+    lapply(\(.x) {
       # browser()
       # Saving original labels
       lab <- REDCapCAST::get_attr(data[[.x]], attr = "label")
@@ -6188,7 +6373,12 @@ missings_logic_across <- function(data, exclude = NULL) {
       }
       if (!is.na(lab)) {
         # Restoring original labels, if not NA
-        REDCapCAST::set_attr(data = out, label = lab, attr = "label", overwrite = TRUE)
+        REDCapCAST::set_attr(
+          data = out,
+          label = lab,
+          attr = "label",
+          overwrite = TRUE
+        )
       } else {
         out
       }
@@ -10396,7 +10586,6 @@ language_choices <- function() {
 }
 
 
-
 ########
 #### Current file: /Users/au301842/FreesearchR/R//ui_elements.R 
 ########
@@ -10428,7 +10617,7 @@ ui_elements <- function(selection) {
         ## Default just output "NULL"
         ## This could probably be achieved more legantly, but this works.
         dev_banner(),
-        landing_page_ui(i18n=i18n),
+        landing_page_ui(i18n = i18n),
         # shiny::column(width = 2),
         # shiny::column(
         #   width = 8,
@@ -10471,7 +10660,11 @@ ui_elements <- function(selection) {
           ),
           # shiny::tags$script('document.querySelector("#source div").style.width = "100%"'),
           ## Update this to change depending on run locally or hosted
-          shiny::helpText(i18n$t("Upload a file, get data directly from REDCap or use local or sample data.")),
+          shiny::helpText(
+            i18n$t(
+              "Upload a file, get data directly from REDCap or use local or sample data."
+            )
+          ),
           shiny::br(),
           shiny::br(),
           shiny::conditionalPanel(
@@ -10480,7 +10673,11 @@ ui_elements <- function(selection) {
               id = "file_import",
               layout_params = "dropdown",
               # title = "Choose a datafile to upload",
-              file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".ods", ".dta")
+              file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".ods", ".dta"),
+              limit_default = global_freesearchR$data_limit_default,
+              limit_lower = global_freesearchR$data_limit_lower,
+              limit_upper = global_freesearchR$data_limit_upper
+
             )
           ),
           shiny::conditionalPanel(
@@ -10493,17 +10690,15 @@ ui_elements <- function(selection) {
             #   shiny::HTML(i18n$t("<p>The <em><strong>FreesearchR</strong></em> app only stores data for analyses, but please only use with sensitive data when running locally. <a href='https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine'>Read more here</a></p>")),
             #   dismissible = TRUE
             # ),
-            m_redcap_readUI(
-              id = "redcap_import",
-              title = ""
-            )
+            m_redcap_readUI(id = "redcap_import", title = "")
           ),
           shiny::conditionalPanel(
             condition = "input.source=='env'",
             import_globalenv_ui(
               id = "env",
               title = NULL,
-              packages = c("NHANES", "stRoke", "datasets", "MASS")
+              packages = c("NHANES", "stRoke", "datasets", "MASS"),
+              globalenv = global_freesearchR$include_globalenv
             )
           ),
           # shiny::conditionalPanel(
@@ -10539,7 +10734,11 @@ ui_elements <- function(selection) {
                   format = shinyWidgets::wNumbFormat(decimals = 0),
                   color = datamods:::get_primary_color()
                 ),
-                shiny::helpText(i18n$t("At 0, only complete variables are included; at 100, all variables are included.")),
+                shiny::helpText(
+                  i18n$t(
+                    "At 0, only complete variables are included; at 100, all variables are included."
+                  )
+                ),
                 shiny::br()
               ),
               shiny::column(
@@ -10588,7 +10787,9 @@ ui_elements <- function(selection) {
             width = 9,
             shiny::uiOutput(outputId = "data_info", inline = TRUE),
             shiny::tags$p(
-              i18n$t("Below you find a summary table for quick insigths, and on the right you can visualise data classes, browse observations and apply different data filters.")
+              i18n$t(
+                "Below you find a summary table for quick insigths, and on the right you can visualise data classes, browse observations and apply different data filters."
+              )
             )
           ),
           shiny::column(
@@ -10624,16 +10825,18 @@ ui_elements <- function(selection) {
           shiny::column(
             width = 3,
             shiny::tags$h6(i18n$t("Filter data types")),
-            shiny::uiOutput(
-              outputId = "column_filter"
-            ),
+            shiny::uiOutput(outputId = "column_filter"),
             ## This needs to run in server for translation
-            shiny::helpText("Read more on how ", tags$a(
-              "data types",
-              href = "https://agdamsbo.github.io/FreesearchR/articles/data-types.html",
-              target = "_blank",
-              rel = "noopener noreferrer"
-            ), " are defined."),
+            shiny::helpText(
+              "Read more on how ",
+              tags$a(
+                "data types",
+                href = "https://agdamsbo.github.io/FreesearchR/articles/data-types.html",
+                target = "_blank",
+                rel = "noopener noreferrer"
+              ),
+              " are defined."
+            ),
             validation_ui("validation_var"),
             shiny::br(),
             shiny::br(),
@@ -10653,21 +10856,26 @@ ui_elements <- function(selection) {
         title = i18n$t("Edit and create data"),
         icon = shiny::icon("file-pen"),
         tags$h3(i18n$t("Subset, rename and convert variables")),
-        fluidRow(
-          shiny::column(
-            width = 9,
-            shiny::tags$p(
-              i18n$t("Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."),
-              i18n$t("There are more advanced options to modify factor/categorical variables as well as create new factor from an existing variable or new variables with R code. At the bottom you can restore the original data."),
-              i18n$t("Please note that data modifications are applied before any filtering.")
+        fluidRow(shiny::column(
+          width = 9, shiny::tags$p(
+            i18n$t(
+              "Below, are several options for simple data manipulation like update variables by renaming, creating new labels (for nicer tables in the report) and changing variable classes (numeric, factor/categorical etc.)."
+            ),
+            i18n$t(
+              "There are more advanced options to modify factor/categorical variables as well as create new factor from an existing variable or new variables with R code. At the bottom you can restore the original data."
+            ),
+            i18n$t(
+              "Please note that data modifications are applied before any filtering."
             )
           )
-        ),
+        )),
         update_variables_ui("modal_variables"),
         shiny::tags$br(),
         shiny::tags$br(),
         shiny::tags$h4(i18n$t("Advanced data manipulation")),
-        shiny::tags$p(i18n$t("Below options allow more advanced varaible manipulations.")),
+        shiny::tags$p(
+          i18n$t("Below options allow more advanced varaible manipulations.")
+        ),
         shiny::tags$br(),
         shiny::tags$br(),
         shiny::fluidRow(
@@ -10679,7 +10887,9 @@ ui_elements <- function(selection) {
               width = "100%"
             ),
             shiny::tags$br(),
-            shiny::helpText(i18n$t("Reorder or rename the levels of factor/categorical variables.")),
+            shiny::helpText(
+              i18n$t("Reorder or rename the levels of factor/categorical variables.")
+            ),
             shiny::tags$br(),
             shiny::tags$br()
           ),
@@ -10691,7 +10901,11 @@ ui_elements <- function(selection) {
               width = "100%"
             ),
             shiny::tags$br(),
-            shiny::helpText(i18n$t("Create factor/categorical variable from a continous variable (number/date/time).")),
+            shiny::helpText(
+              i18n$t(
+                "Create factor/categorical variable from a continous variable (number/date/time)."
+              )
+            ),
             shiny::tags$br(),
             shiny::tags$br()
           ),
@@ -10703,7 +10917,9 @@ ui_elements <- function(selection) {
               width = "100%"
             ),
             shiny::tags$br(),
-            shiny::helpText(i18n$t("Split a text column by a recognised delimiter.")),
+            shiny::helpText(i18n$t(
+              "Split a text column by a recognised delimiter."
+            )),
             shiny::tags$br(),
             shiny::tags$br()
           ),
@@ -10715,16 +10931,18 @@ ui_elements <- function(selection) {
               width = "100%"
             ),
             shiny::tags$br(),
-            shiny::helpText(i18n$t("Create a new variable based on an R-expression.")),
+            shiny::helpText(i18n$t(
+              "Create a new variable based on an R-expression."
+            )),
             shiny::tags$br(),
             shiny::tags$br()
           )
         ),
         tags$h4(i18n$t("Compare modified data to original")),
         shiny::tags$br(),
-        shiny::tags$p(
-          i18n$t("Raw print of the original vs the modified data.")
-        ),
+        shiny::tags$p(i18n$t(
+          "Raw print of the original vs the modified data."
+        )),
         shiny::tags$br(),
         shiny::fluidRow(
           shiny::column(
@@ -10745,7 +10963,11 @@ ui_elements <- function(selection) {
           width = "100%"
         ),
         shiny::tags$br(),
-        shiny::helpText(i18n$t("Reset to original imported dataset. Careful! There is no un-doing.")),
+        shiny::helpText(
+          i18n$t(
+            "Reset to original imported dataset. Careful! There is no un-doing."
+          )
+        ),
         shiny::tags$br(),
         shiny::tags$br()
       )
@@ -10791,7 +11013,11 @@ ui_elements <- function(selection) {
                   # ),
                   shiny::uiOutput("detail_level"),
                   shiny::uiOutput("strat_var"),
-                  shiny::helpText(i18n$t("Only factor/categorical variables are available for stratification. Go back to the 'Prepare' tab to reclass a variable if it's not on the list.")),
+                  shiny::helpText(
+                    i18n$t(
+                      "Only factor/categorical variables are available for stratification. Go back to the 'Prepare' tab to reclass a variable if it's not on the list."
+                    )
+                  ),
                   shiny::conditionalPanel(
                     condition = "input.strat_var!='none'",
                     shiny::radioButtons(
@@ -10799,10 +11025,7 @@ ui_elements <- function(selection) {
                       label = i18n$t("Compare strata?"),
                       selected = "no",
                       inline = TRUE,
-                      choices = list(
-                        "No" = "no",
-                        "Yes" = "yes"
-                      )
+                      choices = list("No" = "no", "Yes" = "yes")
                     ),
                     # shiny::helpText(i18n$t("Option to perform statistical comparisons between strata in baseline table.")),
                     shiny::br(),
@@ -10811,10 +11034,7 @@ ui_elements <- function(selection) {
                       label = i18n$t("Include group differences"),
                       selected = "no",
                       inline = TRUE,
-                      choices = list(
-                        "No" = "no",
-                        "Yes" = "yes"
-                      )
+                      choices = list("No" = "no", "Yes" = "yes")
                     )
                   ),
                   shiny::br(),
@@ -10825,7 +11045,9 @@ ui_elements <- function(selection) {
                     icon = shiny::icon("calculator"),
                     disabled = TRUE
                   ),
-                  shiny::helpText(i18n$t("Press 'Evaluate' to create the comparison table."))
+                  shiny::helpText(i18n$t(
+                    "Press 'Evaluate' to create the comparison table."
+                  ))
                 )
               )
             ),
@@ -10847,7 +11069,11 @@ ui_elements <- function(selection) {
                   title = "Settings",
                   icon = bsicons::bs_icon("bounding-box"),
                   shiny::uiOutput("outcome_var_cor"),
-                  shiny::helpText(i18n$t("To avoid evaluating the correlation of the outcome variable, this can be excluded from the plot or select 'none'.")),
+                  shiny::helpText(
+                    i18n$t(
+                      "To avoid evaluating the correlation of the outcome variable, this can be excluded from the plot or select 'none'."
+                    )
+                  ),
                   shiny::br(),
                   shinyWidgets::noUiSliderInput(
                     inputId = "cor_cutoff",
@@ -10859,24 +11085,22 @@ ui_elements <- function(selection) {
                     format = shinyWidgets::wNumbFormat(decimals = 2),
                     color = datamods:::get_primary_color()
                   ),
-                  shiny::helpText(i18n$t("Set the cut-off for considered 'highly correlated'."))
+                  shiny::helpText(i18n$t(
+                    "Set the cut-off for considered 'highly correlated'."
+                  ))
                 )
               )
             ),
             data_correlations_ui(id = "correlations", height = 600)
           )
         ),
-        do.call(
-          bslib::nav_panel,
-          c(
-            list(
-              title = i18n$t("Missings"),
-              icon = bsicons::bs_icon("x-circle")
-            ),
-            data_missings_ui(id = "missingness",
-                             validation_ui("validation_mcar"))
-          )
-        )
+        do.call(bslib::nav_panel, c(
+          list(
+            title = i18n$t("Missings"),
+            icon = bsicons::bs_icon("x-circle")
+          ),
+          data_missings_ui(id = "missingness", validation_ui("validation_mcar"))
+        ))
       ),
     ##############################################################################
     #########
@@ -10911,10 +11135,7 @@ ui_elements <- function(selection) {
         title = i18n$t("Regression"),
         icon = shiny::icon("calculator"),
         value = "nav_analyses",
-        do.call(
-          bslib::navset_card_tab,
-          regression_ui("regression")
-        )
+        do.call(bslib::navset_card_tab, regression_ui("regression"))
       ),
     ##############################################################################
     #########
@@ -10936,7 +11157,11 @@ ui_elements <- function(selection) {
               shiny::column(
                 width = 6,
                 shiny::h4(i18n$t("Report")),
-                shiny::helpText(i18n$t("Choose your favourite output file format for further work, and download, when the analyses are done.")),
+                shiny::helpText(
+                  i18n$t(
+                    "Choose your favourite output file format for further work, and download, when the analyses are done."
+                  )
+                ),
                 shiny::br(),
                 shiny::br(),
                 shiny::selectInput(
@@ -10964,7 +11189,9 @@ ui_elements <- function(selection) {
               shiny::column(
                 width = 6,
                 shiny::h4("Data"),
-                shiny::helpText("Choose your favourite output data format to download the modified data."),
+                shiny::helpText(
+                  "Choose your favourite output data format to download the modified data."
+                ),
                 shiny::br(),
                 shiny::br(),
                 shiny::selectInput(
@@ -10991,16 +11218,27 @@ ui_elements <- function(selection) {
             shiny::br(),
             shiny::br(),
             shiny::h4("Code snippets"),
-            shiny::tags$p("Below are the code bits used to create the final data set and the main analyses."),
-            shiny::tags$p("This can be used as a starting point for learning to code and for reproducibility."),
-            shiny::tagList(
-              lapply(
-                paste0("code_", c(
-                  "import", "format", "data", "variables", "filter", "table1", "univariable", "multivariable"
-                )),
-                \(.x)shiny::htmlOutput(outputId = .x)
-              )
+            shiny::tags$p(
+              "Below are the code bits used to create the final data set and the main analyses."
             ),
+            shiny::tags$p(
+              "This can be used as a starting point for learning to code and for reproducibility."
+            ),
+            shiny::tagList(lapply(
+              paste0(
+                "code_",
+                c(
+                  "import",
+                  "format",
+                  "data",
+                  "variables",
+                  "filter",
+                  "table1",
+                  "univariable",
+                  "multivariable"
+                )
+              ), \(.x)shiny::htmlOutput(outputId = .x)
+            )),
             shiny::tags$br(),
             shiny::br()
           ),
@@ -11016,7 +11254,8 @@ ui_elements <- function(selection) {
       # shiny::img(shiny::icon("book")),
       shiny::tags$a(
         href = "https://redcap.au.dk/surveys/?s=JPCLPTXYDKFA8DA8",
-        "Feedback", shiny::icon("arrow-up-right-from-square"),
+        "Feedback",
+        shiny::icon("arrow-up-right-from-square"),
         target = "_blank",
         rel = "noopener noreferrer"
       )
@@ -11030,7 +11269,8 @@ ui_elements <- function(selection) {
       # shiny::img(shiny::icon("book")),
       shiny::tags$a(
         href = "https://agdamsbo.github.io/FreesearchR/",
-        "Docs", shiny::icon("arrow-up-right-from-square"),
+        "Docs",
+        shiny::icon("arrow-up-right-from-square"),
         target = "_blank",
         rel = "noopener noreferrer"
       )
@@ -11139,7 +11379,10 @@ update_factor_ui <- function(id) {
       ),
       actionButton(
         inputId = ns("create"),
-        label = tagList(phosphoricons::ph("arrow-clockwise"), i18n$t("Update factor variable")),
+        label = tagList(
+          phosphoricons::ph("arrow-clockwise"),
+          i18n$t("Update factor variable")
+        ),
         class = "btn-outline-primary"
       )
     ),
@@ -11158,154 +11401,136 @@ update_factor_ui <- function(id) {
 #'
 #' @rdname update-factor
 update_factor_server <- function(id, data_r = reactive(NULL)) {
-  moduleServer(
-    id,
-    function(input, output, session) {
-      rv <- reactiveValues(data = NULL, data_grid = NULL)
+  moduleServer(id, function(input, output, session) {
+    rv <- reactiveValues(data = NULL, data_grid = NULL)
 
-      bindEvent(observe({
-        data <- data_r()
-        rv$data <- data
-        vars_factor <- vapply(data, is.factor, logical(1))
-        vars_factor <- names(vars_factor)[vars_factor]
-        updateVirtualSelect(
-          inputId = "variable",
-          choices = vars_factor,
-          selected = if (isTruthy(input$variable)) input$variable else vars_factor[1]
-        )
-      }), data_r(), input$hidden)
+    bindEvent(observe({
+      data <- data_r()
+      rv$data <- data
+      vars_factor <- vapply(data, is.factor, logical(1))
+      vars_factor <- names(vars_factor)[vars_factor]
+      updateVirtualSelect(
+        inputId = "variable",
+        choices = vars_factor,
+        selected = if (isTruthy(input$variable))
+          input$variable
+        else
+          vars_factor[1]
+      )
+    }), data_r(), input$hidden)
 
-      observeEvent(input$variable, {
-        data <- req(data_r())
-        variable <- req(input$variable)
-        grid <- as.data.frame(table(data[[variable]]))
-        rv$data_grid <- grid
+    observeEvent(input$variable, {
+      data <- req(data_r())
+      variable <- req(input$variable)
+      grid <- as.data.frame(table(data[[variable]]))
+      rv$data_grid <- grid
+    })
+
+    observeEvent(input$sort_levels, {
+      if (input$sort_levels %% 2 == 1) {
+        decreasing <- FALSE
+        label <- tagList(phosphoricons::ph("sort-descending"),
+                         i18n$t("Sort by Levels"))
+      } else {
+        decreasing <- TRUE
+        label <- tagList(phosphoricons::ph("sort-ascending"),
+                         i18n$t("Sort by Levels"))
+      }
+      updateActionButton(inputId = "sort_levels", label = label)
+      rv$data_grid <- rv$data_grid[order(rv$data_grid[[1]], decreasing = decreasing), ]
+    })
+
+    observeEvent(input$sort_occurrences, {
+      if (input$sort_occurrences %% 2 == 1) {
+        decreasing <- FALSE
+        label <- tagList(phosphoricons::ph("sort-descending"),
+                         i18n$t("Sort by count"))
+      } else {
+        decreasing <- TRUE
+        label <- tagList(phosphoricons::ph("sort-ascending"),
+                         i18n$t("Sort by count"))
+      }
+      updateActionButton(inputId = "sort_occurrences", label = label)
+      rv$data_grid <- rv$data_grid[order(rv$data_grid[[2]], decreasing = decreasing), ]
+    })
+
+
+    output$grid <- renderDatagrid({
+      req(rv$data_grid)
+      gridTheme <- getOption("datagrid.theme")
+      if (length(gridTheme) < 1) {
+        datamods:::apply_grid_theme()
+      }
+      on.exit(toastui::reset_grid_theme())
+      data <- rv$data_grid
+      data <- add_var_toset(data, "Var1", "New label")
+
+      grid <- datagrid(
+        data = data,
+        draggable = TRUE,
+        sortable = FALSE,
+        data_as_input = TRUE
+      )
+      grid <- grid_columns(
+        grid,
+        columns = c("Var1", "Var1_toset", "Freq"),
+        header = c(i18n$t("Levels"), "New label", i18n$t("Count"))
+      )
+      grid <- grid_colorbar(
+        grid,
+        column = "Freq",
+        label_outside = TRUE,
+        label_width = "30px",
+        background = "#D8DEE9",
+        bar_bg = datamods:::get_primary_color(),
+        from = c(0, max(rv$data_grid$Freq) + 1)
+      )
+      grid <- toastui::grid_style_column(grid = grid,
+                                         column = "Var1_toset",
+                                         fontStyle = "italic")
+      grid <- toastui::grid_editor(grid = grid,
+                                   column = "Var1_toset",
+                                   type = "text")
+      grid
+    })
+
+    data_updated_r <- reactive({
+      data <- req(data_r())
+      variable <- req(input$variable)
+      grid <- req(input$grid_data)
+
+      parameters <- list(
+        variable = variable,
+        new_variable = isTRUE(input$new_var) |
+          any(grid[["Var1_toset"]] == "New label"),
+        new_levels = as.character(grid[["Var1"]]),
+        new_labels = as.character(grid[["Var1_toset"]]),
+        ignore = "New label"
+      )
+
+      data <- tryCatch({
+        rlang::exec(factor_new_levels_labels,
+                    !!!modifyList(parameters, val = list(data = data)))
+      }, error = function(err) {
+        showNotification(paste(
+          "We encountered the following error creating the new factor:",
+          err
+        ),
+        type = "err")
       })
 
-      observeEvent(input$sort_levels, {
-        if (input$sort_levels %% 2 == 1) {
-          decreasing <- FALSE
-          label <- tagList(
-            phosphoricons::ph("sort-descending"),
-            i18n$t("Sort by Levels")
-          )
-        } else {
-          decreasing <- TRUE
-          label <- tagList(
-            phosphoricons::ph("sort-ascending"),
-            i18n$t("Sort by Levels")
-          )
-        }
-        updateActionButton(inputId = "sort_levels", label = label)
-        rv$data_grid <- rv$data_grid[order(rv$data_grid[[1]], decreasing = decreasing), ]
-      })
+      # browser()
+      code <- rlang::call2("factor_new_levels_labels", !!!parameters, .ns = "FreesearchR")
+      attr(data, "code") <- code
 
-      observeEvent(input$sort_occurrences, {
-        if (input$sort_occurrences %% 2 == 1) {
-          decreasing <- FALSE
-          label <- tagList(
-            phosphoricons::ph("sort-descending"),
-            i18n$t("Sort by count")
-          )
-        } else {
-          decreasing <- TRUE
-          label <- tagList(
-            phosphoricons::ph("sort-ascending"),
-            i18n$t("Sort by count")
-          )
-        }
-        updateActionButton(inputId = "sort_occurrences", label = label)
-        rv$data_grid <- rv$data_grid[order(rv$data_grid[[2]], decreasing = decreasing), ]
-      })
+      data
+    })
 
-
-      output$grid <- renderDatagrid({
-        req(rv$data_grid)
-        gridTheme <- getOption("datagrid.theme")
-        if (length(gridTheme) < 1) {
-          datamods:::apply_grid_theme()
-        }
-        on.exit(toastui::reset_grid_theme())
-        data <- rv$data_grid
-        data <- add_var_toset(data, "Var1", "New label")
-
-        grid <- datagrid(
-          data = data,
-          draggable = TRUE,
-          sortable = FALSE,
-          data_as_input = TRUE
-        )
-        grid <- grid_columns(
-          grid,
-          columns = c("Var1", "Var1_toset", "Freq"),
-          header = c(i18n$t("Levels"), "New label", i18n$t("Count"))
-        )
-        grid <- grid_colorbar(
-          grid,
-          column = "Freq",
-          label_outside = TRUE,
-          label_width = "30px",
-          background = "#D8DEE9",
-          bar_bg = datamods:::get_primary_color(),
-          from = c(0, max(rv$data_grid$Freq) + 1)
-        )
-        grid <- toastui::grid_style_column(
-          grid = grid,
-          column = "Var1_toset",
-          fontStyle = "italic"
-        )
-        grid <- toastui::grid_editor(
-          grid = grid,
-          column = "Var1_toset",
-          type = "text"
-        )
-        grid
-      })
-
-      data_updated_r <- reactive({
-        data <- req(data_r())
-        variable <- req(input$variable)
-        grid <- req(input$grid_data)
-
-        parameters <- list(
-          variable = variable,
-          new_variable = isTRUE(input$new_var) | any(grid[["Var1_toset"]] == "New label"),
-          new_levels = as.character(grid[["Var1"]]),
-          new_labels = as.character(grid[["Var1_toset"]]),
-          ignore = "New label"
-        )
-
-        data <- tryCatch(
-          {
-            rlang::exec(
-              factor_new_levels_labels,
-              !!!modifyList(parameters,
-                val = list(data = data)
-              )
-            )
-          },
-          error = function(err) {
-            showNotification(paste("We encountered the following error creating the new factor:", err), type = "err")
-          }
-        )
-
-        # browser()
-        code <- rlang::call2(
-          "factor_new_levels_labels",
-          !!!parameters,
-          .ns = "FreesearchR"
-        )
-        attr(data, "code") <- code
-
-        data
-      })
-
-      data_returned_r <- observeEvent(input$create, {
-        rv$data <- data_updated_r()
-      })
-      return(reactive(rv$data))
-    }
-  )
+    data_returned_r <- observeEvent(input$create, {
+      rv$data <- data_updated_r()
+    })
+    return(reactive(rv$data))
+  })
 }
 
 #' Simple function to apply new levels and/or labels to factor
@@ -11322,13 +11547,12 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
 #' data_n <- mtcars
 #' data_n$cyl <- factor(data_n$cyl)
 #' factor_new_levels_labels(data_n, "cyl", new_labels = c("four", "New label", "New label"))
-factor_new_levels_labels <- function(
-    data,
-    variable,
-    new_variable = TRUE,
-    new_levels = NULL,
-    new_labels = NULL,
-    ignore = "New label") {
+factor_new_levels_labels <- function(data,
+                                     variable,
+                                     new_variable = TRUE,
+                                     new_levels = NULL,
+                                     new_labels = NULL,
+                                     ignore = "New label") {
   if (!is.factor(data[[variable]])) {
     return(data)
   }
@@ -11341,28 +11565,25 @@ factor_new_levels_labels <- function(
     new_labels <- labels(data[[variable]])
   }
 
-  with_level <- factor(
-    as.character(data[[variable]]),
-    levels = new_levels
-  )
-  with_label <- factor(
-    with_level,
-    labels = ifelse(new_labels == "New label", new_levels, new_labels)
-  )
+  with_level <- factor(as.character(data[[variable]]), levels = new_levels)
+  with_label <- factor(with_level,
+                       labels = ifelse(new_labels == "New label", new_levels, new_labels))
 
 
   if (isTRUE(new_variable)) {
     append_column(
       data = data,
       column = with_label,
-      name = unique_names(new = paste0(variable, "_updated"), existing = names(data))
+      name = unique_names(
+        new = paste0(variable, "_updated"),
+        existing = names(data)
+      )
     )
   } else {
     data[[variable]] <- with_label
     data
   }
 }
-
 
 
 #' @inheritParams shiny::modalDialog
@@ -11378,17 +11599,23 @@ modal_update_factor <- function(id,
                                 size = "l",
                                 footer = NULL) {
   ns <- NS(id)
-  showModal(modalDialog(
-    title = tagList(title, datamods:::button_close_modal()),
-    update_factor_ui(id),
-    tags$div(
-      style = "display: none;",
-      textInput(inputId = ns("hidden"), label = NULL, value = datamods:::genId())
-    ),
-    easyClose = easyClose,
-    size = size,
-    footer = footer
-  ))
+  showModal(
+    modalDialog(
+      title = tagList(title, datamods:::button_close_modal()),
+      update_factor_ui(id),
+      tags$div(
+        style = "display: none;",
+        textInput(
+          inputId = ns("hidden"),
+          label = NULL,
+          value = datamods:::genId()
+        )
+      ),
+      easyClose = easyClose,
+      size = size,
+      footer = footer
+    )
+  )
 }
 
 
@@ -11407,10 +11634,11 @@ winbox_update_factor <- function(id,
     title = title,
     ui = tagList(
       update_factor_ui(id),
-      tags$div(
-        style = "display: none;",
-        textInput(inputId = ns("hidden"), label = NULL, value = genId())
-      )
+      tags$div(style = "display: none;", textInput(
+        inputId = ns("hidden"),
+        label = NULL,
+        value = genId()
+      ))
     ),
     options = modifyList(
       shinyWidgets::wbOptions(height = "615px", modal = TRUE),
@@ -12907,7 +13135,7 @@ visual_summary <- function(data, legend.title = NULL, ylab = "Observations", ...
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(
       angle = 45,
-      vjust = 1, hjust = 1
+      vjust = 0, hjust = 1
     )) +
     ggplot2::scale_fill_manual(values = l$colors) +
     ggplot2::labs(x = "", y = ylab) +
@@ -13358,9 +13586,7 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
-  rv_alerts <- shiny::reactiveValues(
-    redcap_alert = NULL
-  )
+  rv_alerts <- shiny::reactiveValues(redcap_alert = NULL)
 
   # output$your_lang <- renderPrint(input$browser_lang)
 
@@ -13407,28 +13633,26 @@ server <- function(input, output, session) {
     #   ),
     #   selected = "file"
     # )
-    shiny::updateSelectInput(
-      inputId = "source",
-      choices = setNames(
-        c(
-          "file", "redcap", "env"
-        ),
-        c(
-          i18n$t("File upload"),
-          i18n$t("REDCap server export"),
-          i18n$t("Local or sample data")
-        )
-      )
-    )
+    shiny::updateSelectInput(inputId = "source", choices = setNames(c("file", "redcap", "env"), c(
+      i18n$t("File upload"),
+      i18n$t("REDCap server export"),
+      i18n$t("Local or sample data")
+    )))
 
     # output$intro_text <- renderUI(includeHTML(i18n$t("www/intro.html")))
   })
 
 
   shiny::observeEvent(input$language_select, {
-    bslib::accordion_panel_update(id = "acc_chars", title = i18n$t("Settings"), target = "acc_pan_chars")
-    bslib::accordion_panel_update(id = "acc_cor", title = i18n$t("Settings"), target = "acc_pan_cor")
-    bslib::accordion_panel_update(id = "acc_mis", title = i18n$t("Settings"), target = "acc_pan_mis")
+    bslib::accordion_panel_update(id = "acc_chars",
+                                  title = i18n$t("Settings"),
+                                  target = "acc_pan_chars")
+    bslib::accordion_panel_update(id = "acc_cor",
+                                  title = i18n$t("Settings"),
+                                  target = "acc_pan_cor")
+    bslib::accordion_panel_update(id = "acc_mis",
+                                  title = i18n$t("Settings"),
+                                  target = "acc_pan_mis")
   })
 
 
@@ -13443,30 +13667,32 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
-  shiny::observeEvent(
-    input$source,
-    {
-      ## Alert rendered on server as links do not render if only on client
-      if (input$source == "redcap") {
-        rv_alerts$redcap_alert <- shinyWidgets::alert(
-          id = "redcap_warning",
-          status = "info",
-          shiny::tags$h2(i18n$t("Please be mindfull handling sensitive data")),
-          shiny::markdown(i18n$t("The ***FreesearchR*** app only stores data for analyses, but please only use with sensitive data when running locally. [Read more here](https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine).")),
-          # shiny::HTML(i18n$t("<p>The <em><strong>FreesearchR</strong></em> app only stores data for analyses, but please only use with sensitive data when running locally. <a href='https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine'>Read more here</a></p>")),
-          dismissible = FALSE
-        )
-      }
+  shiny::observeEvent(input$source, {
+    ## Alert rendered on server as links do not render if only on client
+    if (input$source == "redcap") {
+      rv_alerts$redcap_alert <- shinyWidgets::alert(
+        id = "redcap_warning",
+        status = "info",
+        shiny::tags$h2(i18n$t(
+          "Please be mindfull handling sensitive data"
+        )),
+        shiny::markdown(
+          i18n$t(
+            "The ***FreesearchR*** app only stores data for analyses, but please only use with sensitive data when running locally. [Read more here](https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine)."
+          )
+        ),
+        # shiny::HTML(i18n$t("<p>The <em><strong>FreesearchR</strong></em> app only stores data for analyses, but please only use with sensitive data when running locally. <a href='https://agdamsbo.github.io/FreesearchR/#run-locally-on-your-own-machine'>Read more here</a></p>")),
+        dismissible = FALSE
+      )
     }
-  )
+  })
 
   data_file <- import_file_server(
     id = "file_import",
     show_data_in = "popup",
     trigger_return = "change",
-    return_class = "data.frame",
+    return_class = "data.frame"
     ## Added data.frame size limit (number of cells), rows are dropped to fit
-    limit = 100000
   )
 
   shiny::observeEvent(data_file$data(), {
@@ -13475,9 +13701,7 @@ server <- function(input, output, session) {
     rv$code <- modifyList(x = rv$code, list(import = data_file$code()))
   })
 
-  from_redcap <- m_redcap_readServer(
-    id = "redcap_import"
-  )
+  from_redcap <- m_redcap_readServer(id = "redcap_import")
 
   shiny::observeEvent(from_redcap$data(), {
     rv$data_temp <- from_redcap$data()
@@ -13489,7 +13713,8 @@ server <- function(input, output, session) {
     id = "env",
     trigger_return = "change",
     btn_show_data = FALSE,
-    reset = reactive(input$hidden)
+    reset = reactive(input$hidden),
+    limit_data = global_freesearchR$data_limit_upper
   )
 
   shiny::observeEvent(from_env$data(), {
@@ -13509,18 +13734,19 @@ server <- function(input, output, session) {
   )
 
   observeEvent(input$modal_initial_view, {
-    tryCatch(
-      {
-        modal_visual_summary(
-          id = "initial_summary",
-          footer = NULL,
-          size = "xl", title = i18n$t("Data classes and missing observations")
-        )
-      },
-      error = function(err) {
-        showNotification(paste(i18n$t("We encountered the following error showing missingness:"), err), type = "err")
-      }
-    )
+    tryCatch({
+      modal_visual_summary(
+        id = "initial_summary",
+        footer = NULL,
+        size = "xl",
+        title = i18n$t("Data classes and missing observations")
+      )
+    }, error = function(err) {
+      showNotification(paste(
+        i18n$t("We encountered the following error showing missingness:"),
+        err
+      ), type = "err")
+    })
   })
 
   output$import_var <- shiny::renderUI({
@@ -13546,16 +13772,13 @@ server <- function(input, output, session) {
 
   shiny::observeEvent(input$source, {
     rv$data_temp <- NULL
+    rv$code <- modifyList(x = rv$code, list(import = NULL))
   })
 
   shiny::outputOptions(output, "data_loaded", suspendWhenHidden = FALSE)
 
   shiny::observeEvent(
-    eventExpr = list(
-      input$import_var,
-      input$complete_cutoff,
-      rv$data_temp
-    ),
+    eventExpr = list(input$import_var, input$complete_cutoff, rv$data_temp),
     handlerExpr = {
       shiny::req(rv$data_temp)
       shiny::req(input$import_var)
@@ -13563,17 +13786,34 @@ server <- function(input, output, session) {
       temp_data <- rv$data_temp
       if (all(input$import_var %in% names(temp_data))) {
         temp_data <- temp_data |> dplyr::select(input$import_var)
+      } else {
+        rv$data_original <- temp_data <- NULL
       }
 
-      rv$data_original <- temp_data |>
-        default_parsing()
+      if (!is.null(temp_data)) {
+        rv$data_original <- temp_data |>
+          default_parsing()
+      }
+
+    },
+    ignoreNULL = FALSE
+  )
+
+  shiny::observeEvent(
+    eventExpr = list(input$import_var, input$complete_cutoff, rv$data_temp),
+    handlerExpr = {
+      shiny::req(rv$data_temp)
+      shiny::req(input$import_var)
+      # browser()
 
       rv$code$import <- rv$code$import |>
         expression_string(assign.str = "df <-")
 
       rv$code$format <- list(
         "df",
-        rlang::expr(dplyr::select(dplyr::all_of(!!input$import_var))),
+        rlang::expr(dplyr::select(dplyr::all_of(
+          !!input$import_var
+        ))),
         rlang::call2(.fn = "default_parsing", .ns = "FreesearchR")
       ) |>
         lapply(expression_string) |>
@@ -13582,7 +13822,8 @@ server <- function(input, output, session) {
 
       rv$code$filter <- NULL
       rv$code$modify <- NULL
-    }, ignoreNULL = FALSE
+    },
+    ignoreNULL = FALSE
   )
 
   output$data_info_import <- shiny::renderUI({
@@ -13614,7 +13855,9 @@ server <- function(input, output, session) {
   })
 
   shiny::observeEvent(list(rv$data_original, rv$data), {
-    if (is.null(rv$data_original) | NROW(rv$data_original) == 0 | is.null(rv$data) | !any(is_splittable(rv$data))) {
+    if (is.null(rv$data_original) |
+        NROW(rv$data_original) == 0 |
+        is.null(rv$data) | !any(is_splittable(rv$data))) {
       shiny::updateActionButton(inputId = "modal_string", disabled = TRUE)
     } else if (!is.null(rv$data) && any(is_splittable(rv$data))) {
       shiny::updateActionButton(inputId = "modal_string", disabled = FALSE)
@@ -13628,30 +13871,23 @@ server <- function(input, output, session) {
   #########
   ##############################################################################
 
-  shiny::observeEvent(
-    eventExpr = list(
-      rv$data_original
-    ),
-    handlerExpr = {
-      shiny::req(rv$data_original)
+  shiny::observeEvent(eventExpr = list(rv$data_original),
+                      handlerExpr = {
+                        shiny::req(rv$data_original)
 
-      rv$data <- rv$data_original
-    }
-  )
+                        rv$data <- rv$data_original
+                      })
 
   ## For now this solution work, but I would prefer to solve this with the above
-  shiny::observeEvent(input$reset_confirm,
-    {
-      if (isTRUE(input$reset_confirm)) {
-        shiny::req(rv$data_original)
-        rv$data <- rv$data_original
-        rv$code$filter <- NULL
-        rv$code$variables <- NULL
-        rv$code$modify <- NULL
-      }
-    },
-    ignoreNULL = TRUE
-  )
+  shiny::observeEvent(input$reset_confirm, {
+    if (isTRUE(input$reset_confirm)) {
+      shiny::req(rv$data_original)
+      rv$data <- rv$data_original
+      rv$code$filter <- NULL
+      rv$code$variables <- NULL
+      rv$code$modify <- NULL
+    }
+  }, ignoreNULL = TRUE)
 
 
   shiny::observeEvent(input$data_reset, {
@@ -13680,15 +13916,10 @@ server <- function(input, output, session) {
 
   #########  Create factor
 
-  shiny::observeEvent(
-    input$modal_cut,
-    modal_cut_variable("modal_cut", title = i18n$t("Create new factor"))
-  )
+  shiny::observeEvent(input$modal_cut,
+                      modal_cut_variable("modal_cut", title = i18n$t("Create new factor")))
 
-  data_modal_cut <- cut_variable_server(
-    id = "modal_cut",
-    data_r = shiny::reactive(rv$data)
-  )
+  data_modal_cut <- cut_variable_server(id = "modal_cut", data_r = shiny::reactive(rv$data))
 
   shiny::observeEvent(data_modal_cut(), {
     rv$data <- data_modal_cut()
@@ -13704,43 +13935,29 @@ server <- function(input, output, session) {
   )
 
   # data_modal_update <- datamods::update_factor_server(
-  data_modal_update <- update_factor_server(
-    id = "modal_update",
-    data_r = reactive(rv$data)
-  )
+  data_modal_update <- update_factor_server(id = "modal_update", data_r = reactive(rv$data))
 
-  shiny::observeEvent(
-    data_modal_update(),
-    {
-      shiny::removeModal()
-      rv$data <- data_modal_update()
-      rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
-    }
-  )
+  shiny::observeEvent(data_modal_update(), {
+    shiny::removeModal()
+    rv$data <- data_modal_update()
+    rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
+  })
 
   #########  Split string
 
-  shiny::observeEvent(
-    input$modal_string,
-    modal_string_split(
-      id = "modal_string",
-      title = i18n$t("Split a character string by a common delimiter")
-    )
-  )
+  shiny::observeEvent(input$modal_string,
+                      modal_string_split(
+                        id = "modal_string",
+                        title = i18n$t("Split a character string by a common delimiter")
+                      ))
 
-  data_modal_string <- string_split_server(
-    id = "modal_string",
-    data_r = reactive(rv$data)
-  )
+  data_modal_string <- string_split_server(id = "modal_string", data_r = reactive(rv$data))
 
-  shiny::observeEvent(
-    data_modal_string(),
-    {
-      shiny::removeModal()
-      rv$data <- data_modal_string()
-      rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
-    }
-  )
+  shiny::observeEvent(data_modal_string(), {
+    shiny::removeModal()
+    rv$data <- data_modal_string()
+    rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
+  })
 
   #########  Create column
 
@@ -13748,21 +13965,19 @@ server <- function(input, output, session) {
     input$modal_column,
     modal_create_column(
       id = "modal_column",
-      footer = shiny::markdown(i18n$t("This window is aimed at advanced users and require some *R*-experience!")),
+      footer = shiny::markdown(
+        i18n$t(
+          "This window is aimed at advanced users and require some *R*-experience!"
+        )
+      ),
       title = i18n$t("Create new variables")
     )
   )
-  data_modal_r <- create_column_server(
-    id = "modal_column",
-    data_r = reactive(rv$data)
-  )
-  shiny::observeEvent(
-    data_modal_r(),
-    {
-      rv$data <- data_modal_r()
-      rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
-    }
-  )
+  data_modal_r <- create_column_server(id = "modal_column", data_r = reactive(rv$data))
+  shiny::observeEvent(data_modal_r(), {
+    rv$data <- data_modal_r()
+    rv$code$modify[[length(rv$code$modify) + 1]] <- attr(rv$data, "code")
+  })
 
   #########  Subset, rename, reclass
 
@@ -13819,42 +14034,21 @@ server <- function(input, output, session) {
     # ),
     {
       if (!is.null(rv$data_filtered)) {
-        rv_validations$obs_filter <- make_validation(
-          ls = validation_lib("obs_filter"),
-          list(
-            x = rv$data,
-            y = rv$data_filtered
-          )
-        )
+        rv_validations$obs_filter <- make_validation(ls = validation_lib("obs_filter"), list(x = rv$data, y = rv$data_filtered))
       }
 
       if (!is.null(rv$data_variables)) {
-        rv_validations$var_filter <- make_validation(
-          ls = validation_lib("var_filter"),
-          list(
-            x = rv$data,
-            y = rv$data_variables
-          )
-        )
+        rv_validations$var_filter <- make_validation(ls = validation_lib("var_filter"),
+                                                     list(x = rv$data, y = rv$data_variables))
       }
 
       if (!is.null(rv$data)) {
-        rv_validations$missings <- make_validation(
-          ls = validation_lib("missings"),
-          list(
-            x = rv$data
-          )
-        )
+        rv_validations$missings <- make_validation(ls = validation_lib("missings"), list(x = rv$data))
       }
 
       if (!is.null(rv$corr_pairs())) {
         req(rv$corr_pairs())
-        rv_validations$corr_pairs <- make_validation(
-          ls = validation_lib("corr_pairs"),
-          list(
-            x = rv$corr_pairs
-          )
-        )
+        rv_validations$corr_pairs <- make_validation(ls = validation_lib("corr_pairs"), list(x = rv$corr_pairs))
       }
 
       # mcar_validate(data=rv$missings()[["_data"]],outcome = input$missings_var)
@@ -13862,13 +14056,10 @@ server <- function(input, output, session) {
         req(rv$missings())
         # req(input$missings_var)
         # browser()
-        rv_validations$mcar <- make_validation(
-          ls = validation_lib("mcar"),
-          list(
-            x = rv$missings()[["_data"]],
-            y = attr(rv$missings(), "strat_var")
-          )
-        )
+        rv_validations$mcar <- make_validation(ls = validation_lib("mcar"), list(
+          x = rv$missings()[["_data"]],
+          y = attr(rv$missings(), "strat_var")
+        ))
       }
     }
   )
@@ -13877,35 +14068,17 @@ server <- function(input, output, session) {
   ## Individually to display at point of interest
   ## and as a whole to display on the final download panel
 
-  shiny::observeEvent(
-    rv_validations$obs_filter,
-    {
-      validation_server(
-        id = "validation_obs",
-        data = rv_validations$obs_filter
-      )
-    }
-  )
+  shiny::observeEvent(rv_validations$obs_filter, {
+    validation_server(id = "validation_obs", data = rv_validations$obs_filter)
+  })
 
-  shiny::observeEvent(
-    rv_validations$var_filter,
-    {
-      validation_server(
-        id = "validation_var",
-        data = rv_validations$var_filter
-      )
-    }
-  )
+  shiny::observeEvent(rv_validations$var_filter, {
+    validation_server(id = "validation_var", data = rv_validations$var_filter)
+  })
 
-  shiny::observeEvent(
-    rv_validations$mcar,
-    {
-      validation_server(
-        id = "validation_mcar",
-        data = rv_validations$mcar
-      )
-    }
-  )
+  shiny::observeEvent(rv_validations$mcar, {
+    validation_server(id = "validation_mcar", data = rv_validations$mcar)
+  })
 
   shiny::observeEvent(
     list(
@@ -13916,65 +14089,54 @@ server <- function(input, output, session) {
       rv_validations$corr_pairs
     ),
     {
-      validation_server(
-        id = "validation_all",
-        data = rv_validations
-      )
+      validation_server(id = "validation_all", data = rv_validations)
     }
   )
 
   #########  Data filter
   # IDEAFilter has the least cluttered UI, but might have a License issue
   # Consider using shinyDataFilter, though not on CRAN
-  data_filter <- IDEAFilter::IDEAFilter("data_filter",
+  data_filter <- IDEAFilter::IDEAFilter(
+    "data_filter",
     data = shiny::reactive(rv$data_variables),
     verbose = TRUE
   )
 
-  shiny::observeEvent(
-    list(
-      shiny::reactive(rv$data_variables),
-      shiny::reactive(rv$data_original),
-      data_filter(),
-      # regression_vars(),
-      input$complete_cutoff
-    ),
-    {
-      ###  Save filtered data
-      rv$data_filtered <- data_filter()
+  shiny::observeEvent(list(
+    shiny::reactive(rv$data_variables),
+    shiny::reactive(rv$data_original),
+    data_filter(),
+    # regression_vars(),
+    input$complete_cutoff
+  ),
+  {
+    ###  Save filtered data
+    rv$data_filtered <- data_filter()
 
-      ###  Save filtered data
-      ###  without empty factor levels
-      rv$list$data <- data_filter() |>
-        REDCapCAST::fct_drop() |>
-        (\(.x){
-          .x[!sapply(.x, is.character)]
-        })()
+    ###  Save filtered data
+    ###  without empty factor levels
+    rv$list$data <- data_filter() |>
+      REDCapCAST::fct_drop() |>
+      (\(.x) {
+        .x[!sapply(.x, is.character)]
+      })()
 
-      ## This looks messy!! But it works as intended for now
+    ## This looks messy!! But it works as intended for now
 
-      out <- gsub(
-        "filter", "dplyr::filter",
-        gsub(
-          "\\s{2,}", " ",
-          paste0(
-            capture.output(attr(rv$data_filtered, "code")),
-            collapse = " "
-          )
-        )
-      )
+    out <- gsub("filter", "dplyr::filter", gsub("\\s{2,}", " ", paste0(capture.output(
+      attr(rv$data_filtered, "code")
+    ), collapse = " ")))
 
-      out <- strsplit(out, "%>%") |>
-        unlist() |>
-        (\(.x){
-          paste(c("df <- df", .x[-1], "REDCapCAST::fct_drop()"),
-            collapse = "|> \n "
-          )
-        })()
+    out <- strsplit(out, "%>%") |>
+      unlist() |>
+      (\(.x) {
+        paste(c("df <- df", .x[-1], "REDCapCAST::fct_drop()"), collapse = "|> \n ")
+      })()
 
-      rv$code <- append_list(data = out, list = rv$code, index = "filter")
-    }
-  )
+    rv$code <- append_list(data = out,
+                           list = rv$code,
+                           index = "filter")
+  })
 
   #########  Data preview
 
@@ -13991,14 +14153,18 @@ server <- function(input, output, session) {
   )
 
   observeEvent(input$modal_browse, {
-    tryCatch(
-      {
-        show_data(REDCapCAST::fct_drop(rv$data_filtered), title = i18n$t("Uploaded data overview"), type = "modal")
-      },
-      error = function(err) {
-        showNotification(paste(i18n$t("We encountered the following error browsing your data:"), err), type = "err")
-      }
-    )
+    tryCatch({
+      show_data(
+        REDCapCAST::fct_drop(rv$data_filtered),
+        title = i18n$t("Uploaded data overview"),
+        type = "modal"
+      )
+    }, error = function(err) {
+      showNotification(paste(
+        i18n$t("We encountered the following error browsing your data:"),
+        err
+      ), type = "err")
+    })
   })
 
   visual_summary_server(
@@ -14011,18 +14177,20 @@ server <- function(input, output, session) {
   )
 
   observeEvent(input$modal_visual_overview, {
-    tryCatch(
-      {
-        modal_visual_summary(
-          id = "visual_overview",
-          footer = i18n$t("Here is an overview of how your data is interpreted, and where data is missing. Use this information to consider if data is missing at random or if some observations are missing systematically wich may be caused by an observation bias."),
-          size = "xl"
-        )
-      },
-      error = function(err) {
-        showNotification(paste(i18n$t("We encountered the following error showing missingness:"), err), type = "err")
-      }
-    )
+    tryCatch({
+      modal_visual_summary(
+        id = "visual_overview",
+        footer = i18n$t(
+          "Here is an overview of how your data is interpreted, and where data is missing. Use this information to consider if data is missing at random or if some observations are missing systematically wich may be caused by an observation bias."
+        ),
+        size = "xl"
+      )
+    }, error = function(err) {
+      showNotification(paste(
+        i18n$t("We encountered the following error showing missingness:"),
+        err
+      ), type = "err")
+    })
   })
 
   output$original_str <- renderPrint({
@@ -14030,25 +14198,19 @@ server <- function(input, output, session) {
   })
 
   output$modified_str <- renderPrint({
-    str(as.data.frame(rv$data_filtered) |>
-      REDCapCAST::set_attr(
-        label = NULL,
-        attr = "code"
-      ))
+    str(
+      as.data.frame(rv$data_filtered) |>
+        REDCapCAST::set_attr(label = NULL, attr = "code")
+    )
   })
 
   ## Evaluation table/plots reset on data change
   ## This does not work (!?)
-  shiny::observeEvent(
-    list(
-      rv$data_filtered
-    ),
-    {
-      shiny::req(rv$data_filtered)
+  shiny::observeEvent(list(rv$data_filtered), {
+    shiny::req(rv$data_filtered)
 
-      rv$list$table1 <- NULL
-    }
-  )
+    rv$list$table1 <- NULL
+  })
 
 
   ##############################################################################
@@ -14106,7 +14268,12 @@ server <- function(input, output, session) {
 
   output$code_table1 <- shiny::renderUI({
     shiny::req(rv$code$table1)
-    prismCodeBlock(paste0("#", i18n$t("Data characteristics table"), "\n", rv$code$table1))
+    prismCodeBlock(paste0(
+      "#",
+      i18n$t("Data characteristics table"),
+      "\n",
+      rv$code$table1
+    ))
   })
 
 
@@ -14114,7 +14281,7 @@ server <- function(input, output, session) {
   ## This is a very rewarding couple of lines marking new insights to dynamically rendering code
   shiny::observe({
     shiny::req(rv$regression)
-    rv$regression()$regression$models |> purrr::imap(\(.x, .i){
+    rv$regression()$regression$models |> purrr::imap(\(.x, .i) {
       output[[paste0("code_", tolower(.i))]] <- shiny::renderUI({
         prismCodeBlock(paste0(paste("#", .i, "regression model\n"), .x$code_table))
       })
@@ -14134,10 +14301,7 @@ server <- function(input, output, session) {
       selected = "none",
       label = i18n$t("Select variable to stratify baseline"),
       data = shiny::reactive(rv$data_filtered)(),
-      col_subset = c(
-        "none",
-        names(rv$data_filtered)[unlist(lapply(rv$data_filtered, data_type)) %in% c("dichotomous", "categorical", "ordinal")]
-      )
+      col_subset = c("none", names(rv$data_filtered)[unlist(lapply(rv$data_filtered, data_type)) %in% c("dichotomous", "categorical", "ordinal")])
     )
   })
 
@@ -14162,14 +14326,9 @@ server <- function(input, output, session) {
       inputId = "detail_level",
       label = i18n$t("Level of detail"),
       selected = "minimal",
-      inline = TRUE, choiceValues = c(
-        "minimal",
-        "extended"
-      ),
-      choiceNames = c(
-        i18n$t("Minimal"),
-        i18n$t("Extensive")
-      )
+      inline = TRUE,
+      choiceValues = c("minimal", "extended"),
+      choiceNames = c(i18n$t("Minimal"), i18n$t("Extensive"))
     )
   })
 
@@ -14183,7 +14342,8 @@ server <- function(input, output, session) {
 
   output$data_info_nochar <- shiny::renderUI({
     shiny::req(rv$list$data)
-    data_description(rv$list$data, data_text = i18n$t("The dataset without text variables"))
+    data_description(rv$list$data,
+                     data_text = i18n$t("The dataset without text variables"))
   })
 
   ## Only allow evaluation if the dataset has fewer then 50 variables
@@ -14199,60 +14359,56 @@ server <- function(input, output, session) {
   #   })
 
 
-  shiny::observeEvent(
-    list(
-      input$act_eval
-    ),
-    {
-      shiny::req(input$strat_var)
-      # shiny::req(input$baseline_theme)
-      shiny::req(input$detail_level)
-      shiny::req(rv$list$data)
+  shiny::observeEvent(list(input$act_eval), {
+    shiny::req(input$strat_var)
+    # shiny::req(input$baseline_theme)
+    shiny::req(input$detail_level)
+    shiny::req(rv$list$data)
 
 
-      parameters <- list(
-        by.var = input$strat_var,
-        add.p = input$add_p == "yes",
-        add.overall = TRUE,
-        add.diff = input$add_diff == "yes",
-        # theme = input$baseline_theme,
-        detail_level = input$detail_level
-      )
+    parameters <- list(
+      by.var = input$strat_var,
+      add.p = input$add_p == "yes",
+      add.overall = TRUE,
+      add.diff = input$add_diff == "yes",
+      # theme = input$baseline_theme,
+      detail_level = input$detail_level
+    )
 
-      ## Limits maximum number of levels included in baseline table to 20.
-      data <- rv$list$data |>
-        lapply(\(.x){
-          # browser()
-          if (is.factor(.x)) {
-            cut_var(.x, breaks = 20, type = "top")
-          } else {
-            .x
-          }
-        }) |>
-        dplyr::bind_cols()
+    ## Limits maximum number of levels included in baseline table to 20.
+    data <- rv$list$data |>
+      lapply(\(.x) {
+        # browser()
+        if (is.factor(.x)) {
+          cut_var(.x, breaks = 20, type = "top")
+        } else {
+          .x
+        }
+      }) |>
+      dplyr::bind_cols()
 
-      # Attempt to introduce error on analysing too large dataset
-      # tryCatch(
-      #   {
-      #     if (ncol(rv$list$data) > 10) {
-      #       n_col <- ncol(rv$list$data)
-      #       # stop(glue::glue(i18n$t("The data includes {n_col} variables. Please limit to 100.")))
-      #       print("Please limit to 100.")
-      #     } else {
-      shiny::withProgress(message = i18n$t("Creating the table. Hold on for a moment.."), {
-        rv$list$table1 <- rlang::exec(create_baseline, !!!append_list(data, parameters, "data"))
-      })
-      #     }
-      #   },
-      #   error = function(err) {
-      #     showNotification(err, type = "err")
-      #   }
-      # )
+    # Attempt to introduce error on analysing too large dataset
+    # tryCatch(
+    #   {
+    #     if (ncol(rv$list$data) > 10) {
+    #       n_col <- ncol(rv$list$data)
+    #       # stop(glue::glue(i18n$t("The data includes {n_col} variables. Please limit to 100.")))
+    #       print("Please limit to 100.")
+    #     } else {
+    shiny::withProgress(message = i18n$t("Creating the table. Hold on for a moment.."), {
+      rv$list$table1 <- rlang::exec(create_baseline,
+                                    !!!append_list(data, parameters, "data"))
+    })
+    #     }
+    #   },
+    #   error = function(err) {
+    #     showNotification(err, type = "err")
+    #   }
+    # )
 
 
-      rv$code$table1 <- glue::glue("FreesearchR::create_baseline(df,{list2str(parameters)})")
-    }
-  )
+    rv$code$table1 <- glue::glue("FreesearchR::create_baseline(df,{list2str(parameters)})")
+  })
 
   output$table1 <- gt::render_gt({
     if (!is.null(rv$list$table1)) {
@@ -14270,10 +14426,7 @@ server <- function(input, output, session) {
       selected = "none",
       data = rv$list$data,
       label = i18n$t("Select outcome variable"),
-      col_subset = c(
-        "none",
-        colnames(rv$list$data)
-      ),
+      col_subset = c("none", colnames(rv$list$data)),
       multiple = FALSE
     )
   })
@@ -14283,7 +14436,8 @@ server <- function(input, output, session) {
     data = shiny::reactive({
       shiny::req(rv$list$data)
       out <- rv$list$data
-      if (!is.null(input$outcome_var_cor) && input$outcome_var_cor != "none") {
+      if (!is.null(input$outcome_var_cor) &&
+          input$outcome_var_cor != "none") {
         out <- out[!names(out) %in% input$outcome_var_cor]
       }
       out
@@ -14294,10 +14448,8 @@ server <- function(input, output, session) {
   ## Missingness evaluation
 
 
-  rv$missings <- data_missings_server(
-    id = "missingness",
-    data = shiny::reactive(rv$data_filtered)
-  )
+  rv$missings <- data_missings_server(id = "missingness",
+                                      data = shiny::reactive(rv$data_filtered))
 
 
 
@@ -14331,6 +14483,10 @@ server <- function(input, output, session) {
   #########  Page navigation
   #########
   ##############################################################################
+
+  shiny::observeEvent(input$act_data, {
+    bslib::nav_select(id = "main_panel", selected = "nav_import")
+  })
 
   shiny::observeEvent(input$act_start, {
     bslib::nav_select(id = "main_panel", selected = "nav_prepare_overview")
@@ -14385,31 +14541,33 @@ server <- function(input, output, session) {
       rv$list$missings <- rv$missings()
 
       shiny::withProgress(message = i18n$t("Generating the report. Hold on for a moment.."), {
-        tryCatch(
-          {
-            out <- rv$list |>
-              write_rmd(
-                params.args = list(
-                  regression.p = rv$list$regression$input$add_regression_p
-                ),
-                output_format = format,
-                input = file.path(getwd(), "www/report.rmd")
-              )
-            # This only works locally and was disabled
-            # if (type == "docx") {
-            #   ## This handles the the following MS Word warning:
-            #   ##   >> "This document contains fields that may refer to other files."
-            #   out |> doconv::docx_update()
-            # } else {
-            #   out
-            # }
+        tryCatch({
+          out <- rv$list |>
+            write_rmd(
+              params.args = list(
+                regression.p = rv$list$regression$input$add_regression_p
+              ),
+              output_format = format,
+              input = file.path(getwd(), "www/report.rmd")
+            )
+          # This only works locally and was disabled
+          # if (type == "docx") {
+          #   ## This handles the the following MS Word warning:
+          #   ##   >> "This document contains fields that may refer to other files."
+          #   out |> doconv::docx_update()
+          # } else {
+          #   out
+          # }
 
-            out
-          },
-          error = function(err) {
-            showNotification(paste0(i18n$t("We encountered the following error creating your report: "), err), type = "err")
-          }
-        )
+          out
+        }, error = function(err) {
+          showNotification(paste0(
+            i18n$t(
+              "We encountered the following error creating your report: "
+            ),
+            err
+          ), type = "err")
+        })
       })
       file.rename(paste0("www/report.", type), file)
     }
@@ -14439,7 +14597,7 @@ server <- function(input, output, session) {
   session$onSessionEnded(function() {
     cat("Session Ended\n")
     files <- list.files("www/")
-    lapply(files[!files %in% files.to.keep], \(.x){
+    lapply(files[!files %in% files.to.keep], \(.x) {
       unlink(paste0("www/", .x), recursive = FALSE)
       print(paste(.x, "deleted"))
     })

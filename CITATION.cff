@@ -8,7 +8,7 @@ message: 'To cite package "FreesearchR" in publications use:'
 type: software
 license: AGPL-3.0-or-later
 title: 'FreesearchR: Easy data analysis for clinicians'
-version: 26.1.1
+version: 26.2.1
 doi: 10.5281/zenodo.14527429
 identifiers:
 - type: url
@@ -474,7 +474,7 @@ references:
   authors:
   - family-names: Lüdecke
     given-names: Daniel
-    email: d.luedecke@uke.de
+    email: officialeasystats@gmail.com
     orcid: https://orcid.org/0000-0002-8895-3206
   - family-names: Makowski
     given-names: Dominique
@@ -813,6 +813,9 @@ references:
     given-names: Barret
     email: barret@posit.co
     orcid: https://orcid.org/0000-0001-9986-114X
+  - family-names: Haughton
+    given-names: Shannon
+    email: shannon.l.haughton@gsk.com
   - family-names: Hughes
     given-names: Ellis
     email: ellis.h.hughes@gsk.com
@@ -821,6 +824,9 @@ references:
     given-names: Alexandra
     email: alexandralauer1@gmail.com
     orcid: https://orcid.org/0000-0002-4191-6301
+  - family-names: François
+    given-names: Romain
+    email: romain@tada.science
   - family-names: Seo
     given-names: JooYoung
     email: jseo1005@illinois.edu
@@ -921,7 +927,7 @@ references:
   authors:
   - family-names: Damsbo
     given-names: Andreas Gammelgaard
-    email: agdamsbo@clin.au.dk
+    email: andreas@gdamsbo.dk
     orcid: https://orcid.org/0000-0002-7559-1154
   - family-names: Egeler
     given-names: Paul
@@ -1101,11 +1107,14 @@ references:
     email: asrini@pm.me
   - family-names: Gorecki
     given-names: Jan
+    email: j.gorecki@wit.edu.pl
   - family-names: Chirico
     given-names: Michael
+    email: michaelchirico4@gmail.com
     orcid: https://orcid.org/0000-0003-0787-087X
   - family-names: Hocking
     given-names: Toby
+    email: toby.hocking@r-project.org
     orcid: https://orcid.org/0000-0002-3146-0865
   - family-names: Schwendinger
     given-names: Benjamin

@@ -50,7 +50,7 @@ write_quarto <- function(data, ...) {
   )
 }
 
-write_rmd <- function(data, ..., params.args=NULL) {
+write_rmd <- function(data, ..., params.args = NULL) {
   # Exports data to temporary location
   #
   # I assume this is more secure than putting it in the www folder and deleting
@@ -65,7 +65,10 @@ write_rmd <- function(data, ..., params.args=NULL) {
   ## Ref: https://github.com/quarto-dev/quarto-cli/discussions/4041
   ## Outputs to the same as the .qmd file
   rmarkdown::render(
-    params = modifyList(list(data.file = "web_data.rds",version=app_version()),params.args),
+    params = modifyList(
+      list(data.file = "web_data.rds", version = app_version()),
+      params.args
+    ),
     # execute_params = list(data.file = temp),
     ...
   )
@@ -133,12 +136,7 @@ argsstring2list <- function(string) {
 factorize <- function(data, vars) {
   if (!is.null(vars)) {
     data |>
-      dplyr::mutate(
-        dplyr::across(
-          dplyr::all_of(vars),
-          REDCapCAST::as_factor
-        )
-      )
+      dplyr::mutate(dplyr::across(dplyr::all_of(vars), REDCapCAST::as_factor))
   } else {
     data
   }
@@ -171,32 +169,30 @@ dummy_Imports <- function() {
 #' @returns data
 #' @export
 #'
-file_export <- function(data, output.format = c("df", "teal", "list"), filename, ...) {
+file_export <- function(data,
+                        output.format = c("df", "teal", "list"),
+                        filename,
+                        ...) {
   output.format <- match.arg(output.format)
 
   filename <- gsub("-", "_", filename)
 
   if (output.format == "teal") {
-    out <- within(
-      teal_data(),
-      {
-        assign(name, value |>
+    out <- within(teal_data(), {
+      assign(
+        name,
+        value |>
           dplyr::bind_cols(.name_repair = "unique_quiet") |>
-          default_parsing())
-      },
-      value = data,
-      name = filename
-    )
+          default_parsing()
+      )
+    }, value = data, name = filename)
 
     datanames(out) <- filename
   } else if (output.format == "df") {
     out <- data |>
       default_parsing()
   } else if (output.format == "list") {
-    out <- list(
-      data = data,
-      name = filename
-    )
+    out <- list(data = data, name = filename)
 
     out <- c(out, ...)
   }
@@ -231,7 +227,8 @@ default_parsing <- function(data) {
     remove_nested_list() |>
     REDCapCAST::parse_data() |>
     REDCapCAST::as_factor() |>
-    REDCapCAST::numchar2fct(numeric.threshold = 8, character.throshold = 10) |>
+    REDCapCAST::numchar2fct(numeric.threshold = 8,
+                            character.throshold = 10) |>
     REDCapCAST::as_logical() |>
     REDCapCAST::fct_drop()
 
@@ -295,9 +292,11 @@ remove_empty_attr <- function(data) {
 #' @examples
 #' data.frame(a = 1:10, b = NA, c = c(2, NA)) |> remove_empty_cols(cutoff = .5)
 remove_empty_cols <- function(data, cutoff = .7) {
-  filter <- apply(X = data, MARGIN = 2, FUN = \(.x){
-    sum(as.numeric(!is.na(.x))) / length(.x)
-  }) >= cutoff
+  filter <- apply(X = data,
+                  MARGIN = 2,
+                  FUN = \(.x) {
+                    sum(as.numeric(!is.na(.x))) / length(.x)
+                  }) >= cutoff
   data[filter]
 }
 
@@ -357,14 +356,25 @@ missing_fraction <- function(data) {
 #'   sample(c(1:8, NA), 20, TRUE)
 #' ) |> data_description()
 data_description <- function(data, data_text = "Data") {
-  data <- if (shiny::is.reactive(data)) data() else data
+  data <- if (shiny::is.reactive(data))
+    data()
+  else
+    data
 
   n <- nrow(data)
   n_var <- ncol(data)
   n_complete <- sum(complete.cases(data))
   p_complete <- signif(100 * n_complete / n, 3)
 
-  glue::glue(i18n$t("{data_text} has {n} observations and {n_var} variables, with {n_complete} ({p_complete} %) complete cases."))
+  if (is.null(data)) {
+    i18n$t("No data present.")
+  } else {
+    glue::glue(
+      i18n$t(
+        "{data_text} has {n} observations and {n_var} variables, with {n_complete} ({p_complete} %) complete cases."
+      )
+    )
+  }
   # sprintf(
   #   "%s has %s observations and %s variables, with %s (%s%%) complete cases.",
   #   data_text,
@@ -473,7 +483,8 @@ if_not_missing <- function(data, default = NULL) {
 #' ) |> merge_expression()
 merge_expression <- function(data) {
   Reduce(
-    f = function(x, y) rlang::expr(!!x %>% !!y),
+    f = function(x, y)
+      rlang::expr(!!x %>% !!y),
     x = data
   )
 }
@@ -497,7 +508,8 @@ merge_expression <- function(data) {
 pipe_string <- function(data, collapse = "|>\n") {
   if (is.list(data)) {
     Reduce(
-      f = function(x, y) glue::glue("{x}{collapse}{y}"),
+      f = function(x, y)
+        glue::glue("{x}{collapse}{y}"),
       x = data
     )
   } else {
@@ -521,10 +533,15 @@ pipe_string <- function(data, collapse = "|>\n") {
 #'   merge_expression() |>
 #'   expression_string()
 expression_string <- function(data, assign.str = "") {
-  exp.str <- if (is.call(data)) deparse(data) else data
+  exp.str <- if (is.call(data))
+    deparse(data)
+  else
+    data
 
-  out <- paste0(assign.str, gsub("%>%", "|>\n", paste(gsub('"', "'", paste(exp.str, collapse = "")), collapse = "")))
-  out <- collapse_spaces(out,preserve_newlines = FALSE)
+  out <- paste0(assign.str, gsub("%>%", "|>\n", paste(gsub(
+    '"', "'", paste(exp.str, collapse = "")
+  ), collapse = "")))
+  out <- collapse_spaces(out, preserve_newlines = FALSE)
   gsub("`", "", out)
 }
 
@@ -628,10 +645,16 @@ remove_nested_list <- function(data) {
 #' rlang::expr(FreesearchR::set_column_label(label = !!ls3)) |> expression_string()
 set_column_label <- function(data, label, overwrite = TRUE) {
   purrr::imap(data, function(.data, .name) {
-    ls <- if (is.list(label)) unlist(label) else label
+    ls <- if (is.list(label))
+      unlist(label)
+    else
+      label
     ls[ls == ""] <- NA
     if (.name %in% names(ls)) {
-      out <- REDCapCAST::set_attr(.data, unname(ls[.name]), attr = "label", overwrite = overwrite)
+      out <- REDCapCAST::set_attr(.data,
+                                  unname(ls[.name]),
+                                  attr = "label",
+                                  overwrite = overwrite)
       remove_empty_attr(out)
     } else {
       .data
@@ -682,11 +705,8 @@ append_column <- function(data, column, name, index = "right") {
   }
   new_df <- setNames(data.frame(column), name)
 
-  list(
-    data[seq_len(index - 1)],
-    new_df,
-    if (!index > ncol(data)) data[index:ncol(data)]
-  ) |>
+  list(data[seq_len(index - 1)], new_df, if (!index > ncol(data))
+    data[index:ncol(data)]) |>
     dplyr::bind_cols()
 }
 
@@ -711,7 +731,7 @@ is_identical_to_previous <- function(data, no.name = TRUE) {
     lagged <- c(FALSE, data[seq_len(length(data) - 1)])
   }
 
-  vapply(seq_len(length(data)), \(.x){
+  vapply(seq_len(length(data)), \(.x) {
     if (isTRUE(no.name)) {
       identical(unname(lagged[.x]), unname(data[.x]))
     } else {
@@ -730,8 +750,11 @@ is_identical_to_previous <- function(data, no.name = TRUE) {
 #'
 #' @examples
 #' c("foo bar", "fooBar21", "!!Foo'B'a-r", "foo_bar", "F  OO bar") |> simple_snake()
-simple_snake <- function(data){
-  gsub("[\\s+]","_",gsub("[^\\w\\s:-]", "", tolower(data), perl=TRUE), perl=TRUE)
+simple_snake <- function(data) {
+  gsub("[\\s+]",
+       "_",
+       gsub("[^\\w\\s:-]", "", tolower(data), perl = TRUE),
+       perl = TRUE)
 }
 
 #' Data type assessment.
@@ -768,7 +791,8 @@ data_type <- function(data) {
       out <- "empty"
     } else if (l_unique < 2) {
       out <- "monotone"
-    } else if (any(c("factor", "logical") %in% cl_d) | l_unique == 2) {
+    } else if (any(c("factor", "logical") %in% cl_d) |
+               l_unique == 2) {
       if (identical("logical", cl_d) | l_unique == 2) {
         out <- "dichotomous"
       } else {
@@ -804,13 +828,17 @@ data_type <- function(data) {
 #' data_types()
 data_types <- function() {
   list(
-    "empty" = list(descr="Variable of all NAs",classes="Any class"),
-    "monotone" = list(descr="Variable with only one unique value",classes="Any class"),
-    "dichotomous" = list(descr="Variable with only two unique values",classes="Any class"),
-    "categorical"= list(descr="Factor variable",classes="factor (ordered or unordered)"),
-    "text"= list(descr="Character variable",classes="character"),
-    "datetime"= list(descr="Variable of time, date or datetime values",classes="hms, Date, POSIXct and POSIXt"),
-    "continuous"= list(descr="Numeric variable",classes="numeric, integer or double"),
-    "unknown"= list(descr="Anything not falling within the previous",classes="Any other class")
+    "empty" = list(descr = "Variable of all NAs", classes = "Any class"),
+    "monotone" = list(descr = "Variable with only one unique value", classes =
+                        "Any class"),
+    "dichotomous" = list(descr = "Variable with only two unique values", classes =
+                           "Any class"),
+    "categorical" = list(descr = "Factor variable", classes = "factor (ordered or unordered)"),
+    "text" = list(descr = "Character variable", classes = "character"),
+    "datetime" = list(descr = "Variable of time, date or datetime values", classes =
+                        "hms, Date, POSIXct and POSIXt"),
+    "continuous" = list(descr = "Numeric variable", classes = "numeric, integer or double"),
+    "unknown" = list(descr = "Anything not falling within the previous", classes =
+                       "Any other class")
   )
 }

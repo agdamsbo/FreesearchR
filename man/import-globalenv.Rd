@@ -19,7 +19,8 @@ import_globalenv_server(
   show_data_in = c("popup", "modal"),
   trigger_return = c("button", "change"),
   return_class = c("data.frame", "data.table", "tbl_df", "raw"),
-  reset = reactive(NULL)
+  reset = reactive(NULL),
+  limit_data = NULL
 )
 }
 \arguments{
@@ -43,6 +44,8 @@ use \code{NULL} for no title or a \code{shiny.tag} for a custom one.}
 \item{return_class}{Class of returned data: \code{data.frame}, \code{data.table}, \code{tbl_df} (tibble) or \code{raw}.}
 
 \item{reset}{A \code{reactive} function that when triggered resets the data.}
+
+\item{limit_data}{upper limit to imported data}
 }
 \description{
 Let the user select a dataset from its own environment or from a package's environment.
