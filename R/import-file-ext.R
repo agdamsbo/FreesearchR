@@ -14,8 +14,18 @@
 import_file_ui <- function(id,
                            title = "",
                            preview_data = TRUE,
-                           file_extensions = c(".csv", ".txt", ".xls", ".xlsx", ".rds", ".fst", ".sas7bdat", ".sav"),
-                           layout_params = c("dropdown", "inline")) {
+                           file_extensions = c(".csv",
+                                               ".txt",
+                                               ".xls",
+                                               ".xlsx",
+                                               ".rds",
+                                               ".fst",
+                                               ".sas7bdat",
+                                               ".sav"),
+                           layout_params = c("dropdown", "inline"),
+                           limit_default = 10000,
+                           limit_upper = 10000,
+                           limit_lower = 0) {
   ns <- shiny::NS(id)
 
   if (!is.null(layout_params)) {
@@ -23,10 +33,7 @@ import_file_ui <- function(id,
   }
 
   if (isTRUE(title)) {
-    title <- shiny::tags$h4(
-      "Import a file",
-      class = "datamods-title"
-    )
+    title <- shiny::tags$h4("Import a file", class = "datamods-title")
   }
 
 
@@ -51,7 +58,26 @@ import_file_ui <- function(id,
           size = "sm",
           width = "100%"
         ),
-        shiny::helpText(phosphoricons::ph("info"), i18n$t("if several use a comma (',') to separate them"))
+        shiny::helpText(
+          phosphoricons::ph("info"),
+          i18n$t("if several use a comma (',') to separate them")
+        )
+      ),
+      shiny::tagAppendChild(
+        shinyWidgets::numericInputIcon(
+          inputId = ns("size_limit"),
+          label = i18n$t("Maximum number of observations:"),
+          value = limit_default,
+          min = limit_lower,
+          max = limit_upper,
+          icon = list("n ="),
+          size = "sm",
+          width = "100%"
+        ),
+        shiny::helpText(
+          phosphoricons::ph("info"),
+          i18n$t("setting to 0 includes all")
+        )
       )
     ),
     shiny::column(
@@ -67,10 +93,7 @@ import_file_ui <- function(id,
       selectInputIcon(
         inputId = ns("encoding"),
         label = i18n$t("Encoding:"),
-        choices = c(
-          "UTF-8" = "UTF-8",
-          "Latin1" = "latin1"
-        ),
+        choices = c("UTF-8" = "UTF-8", "Latin1" = "latin1"),
         icon = phosphoricons::ph("text-aa"),
         size = "sm",
         width = "100%"
@@ -124,7 +147,8 @@ import_file_ui <- function(id,
     datamods:::html_dependency_datamods(),
     title,
     file_ui,
-    if (identical(layout_params, "inline")) params_ui,
+    if (identical(layout_params, "inline"))
+      params_ui,
     shiny::tags$div(
       class = "hidden",
       id = ns("sheet-container"),
@@ -144,7 +168,8 @@ import_file_ui <- function(id,
         shiny::tags$b(i18n$t("No file selected.")),
         # shiny::textOutput(ns("trans_format_text")),
         # This is the easiest solution, though not gramatically perfect
-        i18n$t("You can choose between these file types:"), paste(file_extensions, collapse = ", "),
+        i18n$t("You can choose between these file types:"),
+        paste(file_extensions, collapse = ", "),
         # sprintf("You can import %s files", paste(file_extensions, collapse = ", ")),
         dismissible = TRUE
       )
@@ -177,8 +202,7 @@ import_file_server <- function(id,
                                show_data_in = c("popup", "modal"),
                                trigger_return = c("button", "change"),
                                return_class = c("data.frame", "data.table", "tbl_df", "raw"),
-                               reset = reactive(NULL),
-                               limit=100000) {
+                               reset = reactive(NULL)) {
   read_fns <- list(
     ods = "import_ods",
     dta = "import_dta",
@@ -196,7 +220,12 @@ import_file_server <- function(id,
   module <- function(input, output, session) {
     ns <- session$ns
     imported_rv <- shiny::reactiveValues(data = NULL, name = NULL)
-    temporary_rv <- shiny::reactiveValues(data = NULL, name = NULL, status = NULL, sheets = 1)
+    temporary_rv <- shiny::reactiveValues(
+      data = NULL,
+      name = NULL,
+      status = NULL,
+      sheets = 1
+    )
 
     shiny::observeEvent(reset(), {
       temporary_rv$data <- NULL
@@ -245,10 +274,12 @@ import_file_server <- function(id,
         input$skip_rows,
         input$dec,
         input$encoding,
-        input$na_label
+        input$na_label,
+        input$size_limit
       ),
       {
         req(input$file)
+        req(input$size_limit)
 
         if (!all(input$sheet %in% temporary_rv$sheets)) {
           sheets <- 1
@@ -290,16 +321,17 @@ import_file_server <- function(id,
           datamods:::insert_alert(
             selector = ns("import"),
             status = "success",
-            datamods:::make_success_alert(
-              imported,
+            make_success_alert(
+              data = imported,
               trigger_return = trigger_return,
               btn_show_data = btn_show_data,
-              extra = if (isTRUE(input$preview_data)) i18n$t("First five rows are shown below:")
+              extra = if (isTRUE(input$preview_data))
+                i18n$t("First five rows are shown below:")
             )
           )
 
           ## As a protective measure, the dataset size is capped at cell limit
-          imported <- limit_data_size(imported,limit = limit)
+          imported <- limit_data_size(imported, limit = input$size_limit)
 
           temporary_rv$status <- "success"
           temporary_rv$data <- imported
@@ -311,34 +343,35 @@ import_file_server <- function(id,
     )
 
     observeEvent(input$see_data, {
-      tryCatch(
-        {
-          datamods:::show_data(default_parsing(temporary_rv$data), title = i18n$t("Imported data"), type = show_data_in)
-        },
-        # warning = function(warn) {
-        #     showNotification(warn, type = "warning")
-        # },
-        error = function(err) {
-          showNotification(err, type = "err")
-        }
-      )
+      tryCatch({
+        datamods:::show_data(
+          default_parsing(temporary_rv$data),
+          title = i18n$t("Imported data"),
+          type = show_data_in
+        )
+      }, # warning = function(warn) {
+      #     showNotification(warn, type = "warning")
+      # },
+      error = function(err) {
+        showNotification(err, type = "err")
+      })
     })
 
     output$table <- toastui::renderDatagrid2({
       req(temporary_rv$data)
-      tryCatch(
-        {
-          toastui::datagrid(
-            data = setNames(head(temporary_rv$data, 5), make.names(names(temporary_rv$data), unique = TRUE)),
-            theme = "striped",
-            colwidths = "guess",
-            minBodyHeight = 250
-          )
-        },
-        error = function(err) {
-          showNotification(err, type = "err")
-        }
-      )
+      tryCatch({
+        toastui::datagrid(
+          data = setNames(
+            head(temporary_rv$data, 5),
+            make.names(names(temporary_rv$data), unique = TRUE)
+          ),
+          theme = "striped",
+          colwidths = "guess",
+          minBodyHeight = 250
+        )
+      }, error = function(err) {
+        showNotification(err, type = "err")
+      })
     })
 
     observeEvent(input$confirm, {
@@ -364,10 +397,7 @@ import_file_server <- function(id,
     }
   }
 
-  moduleServer(
-    id = id,
-    module = module
-  )
+  moduleServer(id = id, module = module)
 }
 
 # utils -------------------------------------------------------------------
@@ -426,39 +456,37 @@ import_delim <- function(file, skip, encoding, na.strings) {
 #' @export
 #'
 import_xls <- function(file, sheet, skip, na.strings) {
-  tryCatch(
-    {
-      ## If sheet is null, this allows purrr::map to run
-      if (is.null(sheet)) sheet <- 1
+  tryCatch({
+    ## If sheet is null, this allows purrr::map to run
+    if (is.null(sheet))
+      sheet <- 1
 
-      sheet |>
-        purrr::map(\(.x){
-          readxl::read_excel(
-            path = file,
-            sheet = .x,
-            na = na.strings,
-            skip = skip,
-            .name_repair = "unique_quiet",
-            trim_ws = TRUE
-          )
+    sheet |>
+      purrr::map(\(.x) {
+        readxl::read_excel(
+          path = file,
+          sheet = .x,
+          na = na.strings,
+          skip = skip,
+          .name_repair = "unique_quiet",
+          trim_ws = TRUE
+        )
 
-          # openxlsx2::read_xlsx(
-          #   file = file,
-          #   sheet = .x,
-          #   skip_empty_rows = TRUE,
-          #   start_row = skip - 1,
-          #   na.strings = na.strings
-          # )
-        }) |>
-        purrr::reduce(dplyr::full_join)
-    },
-    # warning = function(warn) {
-    #   showNotification(paste0(warn), type = "warning")
-    # },
-    error = function(err) {
-      showNotification(paste0(err), type = "err")
-    }
-  )
+        # openxlsx2::read_xlsx(
+        #   file = file,
+        #   sheet = .x,
+        #   skip_empty_rows = TRUE,
+        #   start_row = skip - 1,
+        #   na.strings = na.strings
+        # )
+      }) |>
+      purrr::reduce(dplyr::full_join)
+  }, # warning = function(warn) {
+  #   showNotification(paste0(warn), type = "warning")
+  # },
+  error = function(err) {
+    showNotification(paste0(err), type = "err")
+  })
 }
 
 
@@ -468,27 +496,25 @@ import_xls <- function(file, sheet, skip, na.strings) {
 #' @export
 #'
 import_ods <- function(file, sheet, skip, na.strings) {
-  tryCatch(
-    {
-      if (is.null(sheet)) sheet <- 1
-      sheet |>
-        purrr::map(\(.x){
-          readODS::read_ods(
-            path = file,
-            sheet = .x,
-            skip = skip,
-            na = na.strings
-          )
-        }) |>
-        purrr::reduce(dplyr::full_join)
-    },
-    # warning = function(warn) {
-    #   showNotification(paste0(warn), type = "warning")
-    # },
-    error = function(err) {
-      showNotification(paste0(err), type = "err")
-    }
-  )
+  tryCatch({
+    if (is.null(sheet))
+      sheet <- 1
+    sheet |>
+      purrr::map(\(.x) {
+        readODS::read_ods(
+          path = file,
+          sheet = .x,
+          skip = skip,
+          na = na.strings
+        )
+      }) |>
+      purrr::reduce(dplyr::full_join)
+  }, # warning = function(warn) {
+  #   showNotification(paste0(warn), type = "warning")
+  # },
+  error = function(err) {
+    showNotification(paste0(err), type = "err")
+  })
 }
 
 #' @name import-file-type
@@ -497,10 +523,7 @@ import_ods <- function(file, sheet, skip, na.strings) {
 #' @export
 #'
 import_dta <- function(file) {
-  haven::read_dta(
-    file = file,
-    .name_repair = "unique_quiet"
-  )
+  haven::read_dta(file = file, .name_repair = "unique_quiet")
 }
 
 #' @name import-file-type
@@ -509,9 +532,7 @@ import_dta <- function(file) {
 #' @export
 #'
 import_rds <- function(file) {
-  out <- readr::read_rds(
-    file = file
-  )
+  out <- readr::read_rds(file = file)
 
   if (is.data.frame(out)) {
     out
@@ -586,7 +607,17 @@ import_file_demo_app <- function() {
         width = 4,
         import_file_ui(
           id = "myid",
-          file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".sas7bdat", ".ods", ".dta"),
+          file_extensions = c(
+            ".csv",
+            ".tsv",
+            ".txt",
+            ".xls",
+            ".xlsx",
+            ".rds",
+            ".sas7bdat",
+            ".ods",
+            ".dta"
+          ),
           layout_params = "dropdown" # "inline" # or "dropdown"
         )
       ),
@@ -634,6 +665,7 @@ import_file_demo_app <- function() {
 #' This function may act to guard a hosted app against very large data sets in
 #' addition to the file size limitations.
 #' The function will limit the data set by dropping rows.
+#' If limit is set to 0 or NULL, the original data set is returned.
 #'
 #'
 #' @param data data.frame
@@ -644,21 +676,68 @@ import_file_demo_app <- function() {
 #'
 #' @examples
 #' prod(dim(mtcars))
-#' limit_data_size(mtcars)
+#' limit_data_size(mtcars,2)
 #' limit_data_size(mtcars,100)
 limit_data_size <- function(data, limit = NULL) {
-  ## Add security to only allow dataset of 100.000 cells
+  ## Add security to reduce large datasets to n observations below limit.
   ## Ideally this should only go for the hosted version
 
-  if (is.null(limit)){
+  if (is.null(limit) || limit == 0) {
     return(data)
   }
 
   data_dim <- dim(data)
 
-  if (prod(data_dim) > limit) {
+  ## If the limit is below nrow, the first observations from the first row
+  ## is included for a very pessimistic selection.
+  ## A more optimistic selection would just use ceiling instead of floor.
+  if (limit < data_dim[2]) {
+    head(data, 1)[seq_len(limit)]
+  } else if (prod(data_dim) > limit) {
     head(data, floor(limit / data_dim[2]))
   } else {
     data
   }
+}
+
+
+#' @importFrom htmltools tagList tags
+#' @importFrom shiny icon getDefaultReactiveDomain
+make_success_alert <- function(data,
+                               trigger_return,
+                               btn_show_data,
+                               extra = NULL,
+                               session = shiny::getDefaultReactiveDomain()) {
+  if (identical(trigger_return, "button")) {
+    success_message <- tagList(tags$b(
+      phosphoricons::ph("check", weight = "bold"),
+      i18n$t("Data ready to be imported!")
+    ),
+    sprintf(
+      i18n$t("Data has %s obs. of %s variables."),
+      nrow(data),
+      ncol(data)
+    ),
+    extra)
+  } else {
+    success_message <- tagList(tags$b(
+      phosphoricons::ph("check", weight = "bold"),
+      i18n$t("Data successfully imported!")
+    ),
+    sprintf(
+      i18n$t("Data has %s obs. of %s variables."),
+      nrow(data),
+      ncol(data)
+    ),
+    extra)
+  }
+  if (isTRUE(btn_show_data)) {
+    success_message <- tagList(success_message,
+                               tags$br(),
+                               actionLink(
+                                 inputId = session$ns("see_data"),
+                                 label = tagList(phosphoricons::ph("table"), i18n$t("Click to see data"))
+                               ))
+  }
+  return(success_message)
 }
