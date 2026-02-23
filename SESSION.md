@@ -2,7 +2,7 @@
 
 | ——————————– R environment ———————————                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| \|setting \|value \| \|:———–\|:——————————————\| \|version \|R version 4.5.2 (2025-10-31) \| \|os \|macOS Tahoe 26.3 \| \|system \|aarch64, darwin20 \| \|ui \|RStudio \| \|language \|(EN) \| \|collate \|en_US.UTF-8 \| \|ctype \|en_US.UTF-8 \| \|tz \|Europe/Copenhagen \| \|date \|2026-02-23 \| \|rstudio \|2026.01.1+403 Apple Blossom (desktop) \| \|pandoc \|3.6.4 @ /opt/homebrew/bin/ (via rmarkdown) \| \|quarto \|1.7.30 @ /usr/local/bin/quarto \| \|FreesearchR \|26.2.1.260223 \| |
+| \|setting \|value \| \|:———–\|:——————————————\| \|version \|R version 4.5.2 (2025-10-31) \| \|os \|macOS Tahoe 26.3 \| \|system \|aarch64, darwin20 \| \|ui \|RStudio \| \|language \|(EN) \| \|collate \|en_US.UTF-8 \| \|ctype \|en_US.UTF-8 \| \|tz \|Europe/Copenhagen \| \|date \|2026-02-23 \| \|rstudio \|2026.01.1+403 Apple Blossom (desktop) \| \|pandoc \|3.6.4 @ /opt/homebrew/bin/ (via rmarkdown) \| \|quarto \|1.7.30 @ /usr/local/bin/quarto \| \|FreesearchR \|26.2.2.260223 \| |
 
 ## ———————————– packages ———————————–
 
@@ -63,7 +63,6 @@
 | farver            | 2.1.2         | 2024-05-13 | CRAN (R 4.5.0) |
 | fastmap           | 1.2.0         | 2024-05-15 | CRAN (R 4.5.0) |
 | flextable         | 0.9.11        | 2026-02-13 | CRAN (R 4.5.2) |
-| fontawesome       | 0.5.3         | 2024-11-16 | CRAN (R 4.5.0) |
 | fontBitstreamVera | 0.1.1         | 2017-02-01 | CRAN (R 4.5.0) |
 | fontLiberation    | 0.1.0         | 2016-10-15 | CRAN (R 4.5.0) |
 | fontquiver        | 0.2.1         | 2017-02-01 | CRAN (R 4.5.0) |
@@ -71,7 +70,7 @@
 | foreach           | 1.5.2         | 2022-02-02 | CRAN (R 4.5.0) |
 | foreign           | 0.8-90        | 2025-03-31 | CRAN (R 4.5.2) |
 | Formula           | 1.2-5         | 2023-02-24 | CRAN (R 4.5.0) |
-| FreesearchR       | 26.2.1        | NA         | NA             |
+| FreesearchR       | 26.2.2        | NA         | NA             |
 | fs                | 1.6.6         | 2025-04-12 | CRAN (R 4.5.0) |
 | gdtools           | 0.5.0         | 2026-02-09 | CRAN (R 4.5.2) |
 | generics          | 0.1.4         | 2025-05-09 | CRAN (R 4.5.0) |
@@ -102,15 +101,12 @@
 | KernSmooth        | 2.23-26       | 2025-01-01 | CRAN (R 4.5.2) |
 | keyring           | 1.4.1         | 2025-06-15 | CRAN (R 4.5.0) |
 | knitr             | 1.51          | 2025-12-20 | CRAN (R 4.5.2) |
-| labeling          | 0.4.3         | 2023-08-29 | CRAN (R 4.5.0) |
 | later             | 1.4.6         | 2026-02-13 | CRAN (R 4.5.2) |
 | lattice           | 0.22-7        | 2025-04-02 | CRAN (R 4.5.2) |
 | lifecycle         | 1.0.5         | 2026-01-08 | CRAN (R 4.5.2) |
-| litedown          | 0.9           | 2025-12-18 | CRAN (R 4.5.2) |
 | lme4              | 1.1-38        | 2025-12-02 | CRAN (R 4.5.2) |
 | lubridate         | 1.9.5         | 2026-02-04 | CRAN (R 4.5.2) |
 | magrittr          | 2.0.4         | 2025-09-12 | CRAN (R 4.5.0) |
-| markdown          | 2.0           | 2025-03-23 | CRAN (R 4.5.0) |
 | MASS              | 7.3-65        | 2025-02-28 | CRAN (R 4.5.0) |
 | Matrix            | 1.7-4         | 2025-08-28 | CRAN (R 4.5.2) |
 | memoise           | 2.0.1         | 2021-11-26 | CRAN (R 4.5.0) |
@@ -204,7 +200,6 @@
 | twosamples        | 2.0.1         | 2023-06-23 | CRAN (R 4.5.0) |
 | tzdb              | 0.5.0         | 2025-03-15 | CRAN (R 4.5.0) |
 | usethis           | 3.2.1         | 2025-09-06 | CRAN (R 4.5.0) |
-| utf8              | 1.2.6         | 2025-06-08 | CRAN (R 4.5.0) |
 | uuid              | 1.2-2         | 2026-01-23 | CRAN (R 4.5.2) |
 | vctrs             | 0.7.1         | 2026-01-23 | CRAN (R 4.5.2) |
 | viridis           | 0.6.5         | 2024-01-29 | CRAN (R 4.5.0) |

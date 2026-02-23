@@ -1,5 +1,10 @@
 # Changelog
 
+## FreesearchR 26.2.2
+
+Minor addition to the previous update with correct activation of the
+missingness evaluation button.
+
 ## FreesearchR 26.2.1
 
 This update is mainly focused on polishing, fixes and small additions to
