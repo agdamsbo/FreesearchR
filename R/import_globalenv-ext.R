@@ -1,4 +1,6 @@
 
+
+
 #' @title Import data from an Environment
 #'
 #' @description Let the user select a dataset from its own environment or from a package's environment.
@@ -18,7 +20,6 @@ import_globalenv_ui <- function(id,
                                 globalenv = TRUE,
                                 packages = datamods::get_data_packages(),
                                 title = TRUE) {
-
   ns <- NS(id)
 
   choices <- list()
@@ -31,15 +32,14 @@ import_globalenv_ui <- function(id,
 
   if (isTRUE(globalenv)) {
     selected <- "Global Environment"
+    select_label <- i18n$t("Select a dataset from your environment or sample dataset from a package.")
   } else {
     selected <- packages[1]
+    select_label <- i18n$t("Select a sample dataset from a package.")
   }
 
   if (isTRUE(title)) {
-    title <- tags$h4(
-      i18n$t("Import a dataset from an environment"),
-      class = "datamods-title"
-    )
+    title <- tags$h4(i18n$t("Import a dataset from an environment"), class = "datamods-title")
   }
 
   tags$div(
@@ -66,14 +66,13 @@ import_globalenv_ui <- function(id,
       # options = list(title = i18n$t("List of datasets...")),
       width = "100%"
     ),
-
     tags$div(
       id = ns("import-placeholder"),
       shinyWidgets::alert(
         id = ns("import-result"),
         status = "info",
         tags$b(i18n$t("No data selected!")),
-        i18n$t("Use a dataset from your environment or from the environment of a package."),
+        select_label,
         dismissible = TRUE
       )
     ),
@@ -87,12 +86,14 @@ import_globalenv_ui <- function(id,
 
 
 #' @param btn_show_data Display or not a button to display data in a modal window if import is successful.
+#'
 #' @param show_data_in Where to display data: in a `"popup"` or in a `"modal"` window.
 #' @param trigger_return When to update selected data:
 #'  `"button"` (when user click on button) or
 #'  `"change"` (each time user select a dataset in the list).
 #' @param return_class Class of returned data: `data.frame`, `data.table`, `tbl_df` (tibble) or `raw`.
 #' @param reset A `reactive` function that when triggered resets the data.
+#' @param limit_data upper limit to imported data
 #'
 #' @export
 #'
@@ -106,16 +107,17 @@ import_globalenv_server <- function(id,
                                     show_data_in = c("popup", "modal"),
                                     trigger_return = c("button", "change"),
                                     return_class = c("data.frame", "data.table", "tbl_df", "raw"),
-                                    reset = reactive(NULL)) {
-
+                                    reset = reactive(NULL),
+                                    limit_data = NULL) {
   trigger_return <- match.arg(trigger_return)
   return_class <- match.arg(return_class)
 
   module <- function(input, output, session) {
-
     ns <- session$ns
     imported_rv <- reactiveValues(data = NULL, name = NULL)
-    temporary_rv <- reactiveValues(data = NULL, name = NULL, status = NULL)
+    temporary_rv <- reactiveValues(data = NULL,
+                                   name = NULL,
+                                   status = NULL)
 
     observeEvent(reset(), {
       temporary_rv$data <- NULL
@@ -130,6 +132,7 @@ import_globalenv_server <- function(id,
     })
 
     observeEvent(input$env, {
+      # browser()
       if (identical(input$env, "Global Environment")) {
         choices <- datamods:::search_obj("data.frame")
       } else {
@@ -139,9 +142,14 @@ import_globalenv_server <- function(id,
         choices <- i18n$t("No dataset here...")
         choicesOpt <- list(disabled = TRUE)
       } else {
-        choicesOpt <- list(
-          subtext = datamods:::get_dimensions(choices)
-        )
+        choicesOpt <- list(subtext = get_dimensions(choices,filter_df=TRUE))
+        # browser()
+        ## choices are corrected if GlobalEnv is not chosen
+        if (!identical(input$env, "Global Environment")) {
+          choices <- structure(names(choicesOpt$subtext),
+                               package = attr(choices, "package"))
+        }
+
       }
       temporary_rv$package <- attr(choices, "package")
       shinyWidgets::updatePickerInput(
@@ -152,7 +160,8 @@ import_globalenv_server <- function(id,
         choicesOpt = choicesOpt,
         options = list(
           title = i18n$t("List of datasets..."),
-                       "live-search" = TRUE)
+          "live-search" = TRUE
+        )
       )
     })
 
@@ -161,7 +170,9 @@ import_globalenv_server <- function(id,
         id = "import-result",
         status = "info",
         tags$b(i18n$t("No data selected!")),
-        i18n$t("Use a dataset from your environment or from the environment of a package."),
+        i18n$t(
+          "Use a dataset from your environment or from the environment of a package."
+        ),
         dismissible = TRUE
       )
     )
@@ -175,58 +186,68 @@ import_globalenv_server <- function(id,
 
 
 
-    observeEvent(input$data, {
-      if (!isTruthy(input$data)) {
-        datamods:::toggle_widget(inputId = "confirm", enable = FALSE)
-        datamods:::insert_alert(
-          selector = ns("import"),
-          status = "info",
-          tags$b(i18n$t("No data selected!")),
-          i18n$t("Use a dataset from your environment or from the environment of a package.")
-        )
-      } else {
-        name_df <- input$data
+    observeEvent(input$data,
+                 {
+                   if (!isTruthy(input$data)) {
+                     datamods:::toggle_widget(inputId = "confirm", enable = FALSE)
+                     datamods:::insert_alert(
+                       selector = ns("import"),
+                       status = "info",
+                       tags$b(i18n$t("No data selected!")),
+                       i18n$t(
+                         "Use a dataset from your environment or from the environment of a package."
+                       )
+                     )
+                   } else {
+                     # browser()
+                     name_df <- input$data
 
-        if (!is.null(temporary_rv$package)) {
-          attr(name_df, "package") <- temporary_rv$package
-        }
+                     if (!is.null(temporary_rv$package)) {
+                       attr(name_df, "package") <- temporary_rv$package
+                     }
 
-        imported <- try(get_env_data(name_df), silent = TRUE)
+                     imported <- try(get_env_data(name_df), silent = TRUE)
 
-        if (inherits(imported, "try-error") || NROW(imported) < 1) {
-          datamods:::toggle_widget(inputId = "confirm", enable = FALSE)
-          datamods:::insert_error(mssg = i18n$t(attr(imported, "condition")$message))
-          temporary_rv$status <- "error"
-          temporary_rv$data <- NULL
-          temporary_rv$name <- NULL
-        } else {
-          datamods:::toggle_widget(inputId = "confirm", enable = TRUE)
-          datamods:::insert_alert(
-            selector = ns("import"),
-            status = "success",
-            datamods:::make_success_alert(
-              imported,
-              trigger_return = trigger_return,
-              btn_show_data = btn_show_data
-            )
-          )
-          pkg <- attr(name_df, "package")
-          if (!is.null(pkg)) {
-            name <- paste(pkg, input$data, sep = "::")
-          } else {
-            name <- input$data
-          }
-          name <- trimws(sub("\\(([^\\)]+)\\)", "", name))
-          temporary_rv$status <- "success"
-          temporary_rv$data <- imported
-          temporary_rv$name <- name
-        }
-      }
-    }, ignoreInit = TRUE, ignoreNULL = FALSE)
+                     if (inherits(imported, "try-error") ||
+                         NROW(imported) < 1) {
+                       datamods:::toggle_widget(inputId = "confirm", enable = FALSE)
+                       datamods:::insert_error(mssg = i18n$t(attr(imported, "condition")$message))
+                       temporary_rv$status <- "error"
+                       temporary_rv$data <- NULL
+                       temporary_rv$name <- NULL
+                     } else {
+                       datamods:::toggle_widget(inputId = "confirm", enable = TRUE)
+                       datamods:::insert_alert(
+                         selector = ns("import"),
+                         status = "success",
+                         make_success_alert(
+                           data = imported,
+                           trigger_return = trigger_return,
+                           btn_show_data = btn_show_data
+                         )
+                       )
+                       pkg <- attr(name_df, "package")
+                       if (!is.null(pkg)) {
+                         name <- paste(pkg, input$data, sep = "::")
+                       } else {
+                         name <- input$data
+                       }
+                       name <- trimws(sub("\\(([^\\)]+)\\)", "", name))
+                       temporary_rv$status <- "success"
+
+                       temporary_rv$data <- limit_data_size(imported,limit = limit_data)
+                       temporary_rv$name <- name
+                     }
+                   }
+                 },
+                 ignoreInit = TRUE,
+                 ignoreNULL = FALSE)
 
 
     observeEvent(input$see_data, {
-      show_data(temporary_rv$data, title = i18n$t("Imported data"), type = show_data_in)
+      show_data(temporary_rv$data,
+                title = i18n$t("Imported data"),
+                type = show_data_in)
     })
 
     observeEvent(input$confirm, {
@@ -250,10 +271,7 @@ import_globalenv_server <- function(id,
     }
   }
 
-  moduleServer(
-    id = id,
-    module = module
-  )
+  moduleServer(id = id, module = module)
 }
 
 
@@ -300,6 +318,7 @@ get_data_packages <- function() {
 #' list_pkg_data("ggplot2")
 list_pkg_data <- function(pkg) {
   if (isTRUE(requireNamespace(pkg, quietly = TRUE))) {
+    # browser()
     list_data <- data(package = pkg, envir = environment())$results[, "Item"]
     list_data <- sort(list_data)
     attr(list_data, "package") <- pkg
@@ -317,17 +336,27 @@ list_pkg_data <- function(pkg) {
 get_env_data <- function(obj, env = globalenv()) {
   pkg <- attr(obj, "package")
   re <- regexpr(pattern = "\\(([^\\)]+)\\)", text = obj)
-  obj_ <- substr(x = obj, start = re + 1, stop = re + attr(re, "match.length") - 2)
-  obj <- gsub(pattern = "\\s.*", replacement = "", x = obj)
+  obj_ <- substr(
+    x = obj,
+    start = re + 1,
+    stop = re + attr(re, "match.length") - 2
+  )
+  obj <- gsub(pattern = "\\s.*",
+              replacement = "",
+              x = obj)
   if (obj %in% ls(name = env)) {
     get(x = obj, envir = env)
   } else if (!is.null(pkg) && !identical(pkg, "")) {
-    res <- suppressWarnings(try(
-      get(utils::data(list = obj, package = pkg, envir = environment())), silent = TRUE
-    ))
+    res <- suppressWarnings(try(get(utils::data(
+      list = obj,
+      package = pkg,
+      envir = environment()
+    )), silent = TRUE))
     if (!inherits(res, "try-error"))
       return(res)
-    data(list = obj_, package = pkg, envir = environment())
+    data(list = obj_,
+         package = pkg,
+         envir = environment())
     get(obj, envir = environment())
   } else {
     NULL
@@ -335,16 +364,23 @@ get_env_data <- function(obj, env = globalenv()) {
 }
 
 
-get_dimensions <- function(objs) {
-  if (is.null(objs))
+#' Extension of the helper function from datamods
+#'
+#' @param objs objs
+#' @param filter_df flag to only include data frames
+#'
+#' @returns vector of data frames with the package names as attr
+get_dimensions <- function(objs,filter_df=TRUE) {
+  if (is.null(objs)){
     return(NULL)
+    }
   dataframes_dims <- Map(
     f = function(name, pkg) {
       attr(name, "package") <- pkg
       tmp <- suppressWarnings(get_env_data(name))
       if (is.data.frame(tmp)) {
         sprintf("%d obs. of  %d variables", nrow(tmp), ncol(tmp))
-      } else {
+      } else if (isFALSE(filter_df)) {
         i18n$t("Not a data.frame")
       }
     },
