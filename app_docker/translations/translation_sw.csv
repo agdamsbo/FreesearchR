@@ -316,7 +316,6 @@
 "Reorder factor levels","Reorder factor levels"
 "Modify factor levels","Modify factor levels"
 "Reorder or rename the levels of factor/categorical variables.","Reorder or rename the levels of factor/categorical variables."
-"Start by loading data.","Start by loading data."
 "Maximum number of observations:","Maximum number of observations:"
 "setting to 0 includes all","setting to 0 includes all"
 "Select a dataset from your environment or sample dataset from a package.","Select a dataset from your environment or sample dataset from a package."
@@ -327,3 +326,4 @@
 "Click to see data","Click to see data"
 "No data present.","No data present."
 "You have provided a complete dataset with no missing values.","You have provided a complete dataset with no missing values."
+"Start by loading data.","Start by loading data."

@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpvRkTPP/file5ce31553c48a.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//Rtmpp0JgLn/file73e1594116cf.R 
 ########
 
 i18n_path <- here::here("translations")
@@ -72,7 +72,7 @@ if (!"global_freesearchR" %in% ls(name = globalenv())) {
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'26.2.1'
+app_version <- function()'26.2.2'
 
 
 ########
@@ -4524,7 +4524,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v26.2.1-260223'
+hosted_version <- function()'v26.2.2-260223'
 
 
 ########
@@ -6050,7 +6050,7 @@ data_missings_ui <- function(id, ...) {
             label = i18n$t("Evaluate"),
             width = "100%",
             icon = shiny::icon("calculator"),
-            disabled = FALSE
+            disabled = TRUE
           )
         ),
         do.call(bslib::accordion_panel, c(
@@ -6100,19 +6100,25 @@ data_missings_server <- function(id, data, max_level = 20, ...) {
       )
 
       output$missings <- shiny::reactive({
-        shiny::req(data())
-        any(is.na(data()))
+        # shiny::req(data())
+        any(is.na(datar()))
       })
       shiny::outputOptions(output, "missings", suspendWhenHidden = FALSE)
 
-      observe({
-        shiny::req(data())
-        if (!any(is.na(data()))) {
-          rv$feedback <- info_alert
-        } else {
-          rv$feedback <- NULL
-        }
-      })
+      shiny::observeEvent(list(datar(), input$missings_method, input$missings_var),
+                   {
+                     # shiny::req(data())
+                     # browser()
+                     if (!any(is.na(datar()))) {
+                       rv$feedback <- info_alert
+                       shiny::updateActionButton(inputId = "act_miss", disabled = TRUE)
+                       rv$table <- NULL
+                       output$missings_table <- gt::render_gt({ NULL })
+                     } else {
+                       rv$feedback <- NULL
+                       shiny::updateActionButton(inputId = "act_miss", disabled = FALSE)
+                     }
+                   },ignoreInit = TRUE)
 
 
       output$feedback <- renderUI(rv$feedback)
@@ -6123,7 +6129,7 @@ data_missings_server <- function(id, data, max_level = 20, ...) {
       ## Direct table export would be nice
 
       shiny::observe(output$missings_method <- shiny::renderUI({
-        shiny::req(data())
+        shiny::req(datar())
         vectorSelectInput(
           inputId = ns("missings_method"),
           label = i18n$t("Analysis method for missingness overview"),
@@ -6143,7 +6149,7 @@ data_missings_server <- function(id, data, max_level = 20, ...) {
           # browser()
           if (input$missings_method == "predictors") {
             label <- i18n$t("Select a variable for grouped overview")
-            df <- data_type_filter(data(), type = c("categorical", "dichotomous"))
+            df <- data_type_filter(datar(), type = c("categorical", "dichotomous"))
             col_subset <- c("none", names(df))
           } else {
             label <- i18n$t("Select outcome variable for overview")
