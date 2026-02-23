@@ -192,18 +192,16 @@ data_missings_server <- function(id, data, max_level = 20, ...) {
           }
         } else {
           ## Due to reactivity, the table updates too quickly. this mitigates that issue..
-
-
-          if (input$missings_var == "predictors") {
+          if (input$missings_method == "predictors") {
             title <- glue::glue(
               i18n$t(
-                "Missings across variables by the variable **'{input$missings_var}'**"
+                "Missing observations across variables grouped by **'{input$missings_var}'**"
               )
             )
           } else {
             title <- glue::glue(
               i18n$t(
-                "Missing vs non-missing observations in the variable **'{input$missings_var}'**"
+                "Differences by missing vs non-missing observations in **'{input$missings_var}'**"
               )
             )
           }

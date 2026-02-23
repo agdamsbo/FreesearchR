@@ -1,6 +1,8 @@
 # FreesearchR 26.2.2
 
-Minor addition to the previous update with correct activation of the missingness evaluation button.
+*FIX* Minor addition to the previous update with correct activation of the missingness evaluation button.
+
+*FIX* Correct table headers for evaluating missings across groups.
 
 # FreesearchR 26.2.1
 
