@@ -22,6 +22,7 @@ landing_page_ui <- function(i18n) {
             i18n$t("Start with FreesearchR for basic data evaluation and analysis."),
             i18n$t("The app contains a selelct number of features and will guide you through key analyses."),
             i18n$t("When you need more advanced tools, you'll be prepared to use R directly."),
+            shiny::actionLink(inputId = "act_data",label = i18n$t("Start by loading data.")),
             style = "font-size: 1.2rem; color: #555;"
           )
         ),
