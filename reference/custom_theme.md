@@ -11,9 +11,12 @@ custom_theme(
   primary = FreesearchR_colors("primary"),
   secondary = FreesearchR_colors("secondary"),
   bootswatch = "united",
-  base_font = bslib::font_google("Montserrat"),
-  heading_font = bslib::font_google("Public Sans", wght = "700"),
-  code_font = bslib::font_google("Open Sans"),
+  base_font = bslib::font_face(family = "Montserrat", src =
+    "url('/fonts/Montserrat-Regular.ttf') format('truetype')"),
+  heading_font = bslib::font_face(family = "PublicSans", src =
+    "url('/fonts/PublicSans-Bold.ttf') format('truetype')"),
+  code_font = bslib::font_face(family = "OpenSans", src =
+    "url('/fonts/OpenSans-Regular.ttf') format('truetype')"),
   success = FreesearchR_colors("success"),
   info = FreesearchR_colors("info"),
   warning = FreesearchR_colors("warning"),
