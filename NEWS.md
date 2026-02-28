@@ -1,3 +1,11 @@
+# FreesearchR 26.3.1
+
+*FIX* Include font files for static loading without dependency on Google.
+
+*NEW* Updated text strings to better reflect environment data availability.
+
+New strings translated.
+
 # FreesearchR 26.2.2
 
 *FIX* Minor addition to the previous update with correct activation of the missingness evaluation button.

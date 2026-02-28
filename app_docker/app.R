@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//Rtmpp0JgLn/file73e17b926733.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpDLoQCo/file14ced11821c07.R 
 ########
 
 i18n_path <- here::here("translations")
@@ -72,7 +72,7 @@ if (!"global_freesearchR" %in% ls(name = globalenv())) {
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'26.2.2'
+app_version <- function()'26.3.1'
 
 
 ########
@@ -4524,7 +4524,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v26.2.2-260223'
+hosted_version <- function()'v26.3.1-260228'
 
 
 ########
@@ -10469,9 +10469,21 @@ custom_theme <- function(...,
                          primary = FreesearchR_colors("primary"),
                          secondary = FreesearchR_colors("secondary"),
                          bootswatch = "united",
-                         base_font = bslib::font_google("Montserrat"),
-                         heading_font = bslib::font_google("Public Sans", wght = "700"),
-                         code_font = bslib::font_google("Open Sans"),
+                         # base_font = bslib::font_google("Montserrat"),
+                         base_font = bslib::font_face(
+                           family = "Montserrat",
+                           src = "url('/fonts/Montserrat-Regular.ttf') format('truetype')"
+                         ),
+                         # heading_font = bslib::font_google("Public Sans", wght = "700"),
+                         heading_font = bslib::font_face(
+                           family = "PublicSans",
+                           src = "url('/fonts/PublicSans-Bold.ttf') format('truetype')"
+                         ),
+                         # code_font = bslib::font_google("Open Sans"),
+                         code_font = bslib::font_face(
+                           family = "OpenSans",
+                           src = "url('/fonts/OpenSans-Regular.ttf') format('truetype')"
+                         ),
                          success = FreesearchR_colors("success"),
                          info = FreesearchR_colors("info"),
                          warning = FreesearchR_colors("warning"),
@@ -10664,11 +10676,12 @@ ui_elements <- function(selection) {
           ),
           # shiny::tags$script('document.querySelector("#source div").style.width = "100%"'),
           ## Update this to change depending on run locally or hosted
-          shiny::helpText(
-            i18n$t(
-              "Upload a file, get data directly from REDCap or use local or sample data."
-            )
-          ),
+          shiny::uiOutput(outputId = "data_sample_text"),
+          # shiny::helpText(
+          #   i18n$t(
+          #     "Upload a file, get data directly from REDCap or use local or sample data."
+          #   )
+          # ),
           shiny::br(),
           shiny::br(),
           shiny::conditionalPanel(
@@ -13496,16 +13509,6 @@ ui <- bslib::page_fixed(
 #### Current file: /Users/au301842/FreesearchR/app/server.R 
 ########
 
-data("mtcars")
-data("iris")
-
-# trial <- gtsummary::trial
-# starwars <- dplyr::starwars
-#
-# mtcars_na <- rbind(mtcars,NA,NA)
-
-# thematic::thematic_shiny()
-
 load_data <- function() {
   Sys.sleep(1)
   shinyjs::hide("loading_page")
@@ -13543,7 +13546,6 @@ server <- function(input, output, session) {
   #   if(input$dark_mode==FALSE)
   #     session$setCurrentTheme(bs_theme_update(theme = custom_theme(version = 5, bg = "#000",fg="#fff")))
   # })
-
 
   ##############################################################################
   #########
@@ -13637,15 +13639,32 @@ server <- function(input, output, session) {
     #   ),
     #   selected = "file"
     # )
+
+    if (isTRUE(global_freesearchR$include_globalenv)) {
+      env_label <- i18n$t("Local or sample data")
+      output$data_sample_text <- shiny::renderText(shiny::helpText(
+        i18n$t(
+          "Upload a file, get data directly from REDCap or use local or sample data."
+        )
+      ))
+    } else {
+      env_label <- i18n$t("Sample data")
+      output$data_sample_text <- shiny::renderUI(shiny::helpText(
+        i18n$t(
+          "Upload a file, get data directly from REDCap or use sample data."
+        )
+      ))
+    }
+
     shiny::updateSelectInput(inputId = "source", choices = setNames(c("file", "redcap", "env"), c(
       i18n$t("File upload"),
       i18n$t("REDCap server export"),
-      i18n$t("Local or sample data")
+      env_label
+      # i18n$t("Local or sample data")
     )))
 
     # output$intro_text <- renderUI(includeHTML(i18n$t("www/intro.html")))
   })
-
 
   shiny::observeEvent(input$language_select, {
     bslib::accordion_panel_update(id = "acc_chars",
@@ -13659,11 +13678,9 @@ server <- function(input, output, session) {
                                   target = "acc_pan_mis")
   })
 
-
   output$redcap_warning <- shiny::renderUI({
     rv_alerts$redcap_alert
   })
-
 
   ##############################################################################
   #########
@@ -13798,7 +13815,6 @@ server <- function(input, output, session) {
         rv$data_original <- temp_data |>
           default_parsing()
       }
-
     },
     ignoreNULL = FALSE
   )
@@ -13861,13 +13877,13 @@ server <- function(input, output, session) {
   shiny::observeEvent(list(rv$data_original, rv$data), {
     if (is.null(rv$data_original) |
         NROW(rv$data_original) == 0 |
-        is.null(rv$data) | !any(is_splittable(rv$data))) {
+        is.null(rv$data) |
+        !any(is_splittable(rv$data))) {
       shiny::updateActionButton(inputId = "modal_string", disabled = TRUE)
     } else if (!is.null(rv$data) && any(is_splittable(rv$data))) {
       shiny::updateActionButton(inputId = "modal_string", disabled = FALSE)
     }
   })
-
 
   ##############################################################################
   #########
@@ -13892,7 +13908,6 @@ server <- function(input, output, session) {
       rv$code$modify <- NULL
     }
   }, ignoreNULL = TRUE)
-
 
   shiny::observeEvent(input$data_reset, {
     shinyWidgets::ask_confirmation(
@@ -14216,7 +14231,6 @@ server <- function(input, output, session) {
     rv$list$table1 <- NULL
   })
 
-
   ##############################################################################
   #########
   #########  Code export
@@ -14280,18 +14294,17 @@ server <- function(input, output, session) {
     ))
   })
 
-
   ## Just a note to self
   ## This is a very rewarding couple of lines marking new insights to dynamically rendering code
   shiny::observe({
     shiny::req(rv$regression)
-    rv$regression()$regression$models |> purrr::imap(\(.x, .i) {
-      output[[paste0("code_", tolower(.i))]] <- shiny::renderUI({
-        prismCodeBlock(paste0(paste("#", .i, "regression model\n"), .x$code_table))
+    rv$regression()$regression$models |>
+      purrr::imap(\(.x, .i) {
+        output[[paste0("code_", tolower(.i))]] <- shiny::renderUI({
+          prismCodeBlock(paste0(paste("#", .i, "regression model\n"), .x$code_table))
+        })
       })
-    })
   })
-
 
   ##############################################################################
   #########
@@ -14305,7 +14318,8 @@ server <- function(input, output, session) {
       selected = "none",
       label = i18n$t("Select variable to stratify baseline"),
       data = shiny::reactive(rv$data_filtered)(),
-      col_subset = c("none", names(rv$data_filtered)[unlist(lapply(rv$data_filtered, data_type)) %in% c("dichotomous", "categorical", "ordinal")])
+      col_subset = c("none", names(rv$data_filtered)[unlist(lapply(rv$data_filtered, data_type)) %in%
+                                                       c("dichotomous", "categorical", "ordinal")])
     )
   })
 
@@ -14324,7 +14338,6 @@ server <- function(input, output, session) {
   #   )
   # })
 
-
   output$detail_level <- shiny::renderUI({
     shiny::radioButtons(
       inputId = "detail_level",
@@ -14336,13 +14349,11 @@ server <- function(input, output, session) {
     )
   })
 
-
   ##############################################################################
   #########
   #########  Descriptive evaluations
   #########
   ##############################################################################
-
 
   output$data_info_nochar <- shiny::renderUI({
     shiny::req(rv$list$data)
@@ -14362,13 +14373,11 @@ server <- function(input, output, session) {
   #
   #   })
 
-
   shiny::observeEvent(list(input$act_eval), {
     shiny::req(input$strat_var)
     # shiny::req(input$baseline_theme)
     shiny::req(input$detail_level)
     shiny::req(rv$list$data)
-
 
     parameters <- list(
       by.var = input$strat_var,
@@ -14410,7 +14419,6 @@ server <- function(input, output, session) {
     #   }
     # )
 
-
     rv$code$table1 <- glue::glue("FreesearchR::create_baseline(df,{list2str(parameters)})")
   })
 
@@ -14451,11 +14459,8 @@ server <- function(input, output, session) {
 
   ## Missingness evaluation
 
-
   rv$missings <- data_missings_server(id = "missingness",
                                       data = shiny::reactive(rv$data_filtered))
-
-
 
   #   shiny::observe({
   # req(rv$missings())
@@ -14464,7 +14469,6 @@ server <- function(input, output, session) {
   #
   #     mcar_validate(data=rv$missings()[["_data"]],outcome = input$missings_var)
   #   })
-
 
   ##############################################################################
   #########
