@@ -68,11 +68,12 @@ ui_elements <- function(selection) {
           ),
           # shiny::tags$script('document.querySelector("#source div").style.width = "100%"'),
           ## Update this to change depending on run locally or hosted
-          shiny::helpText(
-            i18n$t(
-              "Upload a file, get data directly from REDCap or use local or sample data."
-            )
-          ),
+          shiny::uiOutput(outputId = "data_sample_text"),
+          # shiny::helpText(
+          #   i18n$t(
+          #     "Upload a file, get data directly from REDCap or use local or sample data."
+          #   )
+          # ),
           shiny::br(),
           shiny::br(),
           shiny::conditionalPanel(
