@@ -2,8 +2,9 @@
 
 ## FreesearchR 26.3.1
 
-*FIX* Include font files for static loading without dependency on
-Google.
+*FIX* ~~Include font files for static loading without dependency on
+Google.~~ Kept webfonts from google as local fonts are not working for
+now.
 
 *NEW* Updated text strings to better reflect environment data
 availability.

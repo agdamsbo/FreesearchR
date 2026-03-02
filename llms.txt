@@ -126,6 +126,8 @@ No tracking data is sent running the app locally (see above).
 
 - [`FreesearchR_palette()`](https://agdamsbo.github.io/FreesearchR/reference/FreesearchR_palette.md)
   : Use the FreesearchR colors
+- [`FreesearchR_theme()`](https://agdamsbo.github.io/FreesearchR/reference/FreesearchR_theme.md)
+  : Custom theme based on unity
 - [`add_class_icon()`](https://agdamsbo.github.io/FreesearchR/reference/add_class_icon.md)
   : Convert class grid column to icon
 - [`add_sparkline()`](https://agdamsbo.github.io/FreesearchR/reference/add_sparkline.md)
@@ -175,8 +177,6 @@ No tracking data is sent running the app locally (see above).
   : Create summetric log ticks
 - [`create_overview_datagrid()`](https://agdamsbo.github.io/FreesearchR/reference/create_overview_datagrid.md)
   : Create a data overview datagrid
-- [`custom_theme()`](https://agdamsbo.github.io/FreesearchR/reference/custom_theme.md)
-  : Custom theme based on unity
 - [`cut_variable_ui()`](https://agdamsbo.github.io/FreesearchR/reference/cut-variable.md)
   [`cut_variable_server()`](https://agdamsbo.github.io/FreesearchR/reference/cut-variable.md)
   [`modal_cut_variable()`](https://agdamsbo.github.io/FreesearchR/reference/cut-variable.md)
