@@ -4,26 +4,68 @@
 #'
 #' @returns theme list
 #' @export
-custom_theme <- function(...,
+#'
+#' @examples
+#' if (interactive()) {
+#' bs_theme_preview(FreesearchR_theme)
+#' }
+#'
+FreesearchR_theme <- function(...,
                          version = 5,
                          primary = FreesearchR_colors("primary"),
                          secondary = FreesearchR_colors("secondary"),
                          bootswatch = "united",
-                         # base_font = bslib::font_google("Montserrat"),
-                         base_font = bslib::font_face(
-                           family = "Montserrat",
-                           src = "url('/fonts/Montserrat-Regular.ttf') format('truetype')"
-                         ),
-                         # heading_font = bslib::font_google("Public Sans", wght = "700"),
-                         heading_font = bslib::font_face(
-                           family = "PublicSans",
-                           src = "url('/fonts/PublicSans-Bold.ttf') format('truetype')"
-                         ),
-                         # code_font = bslib::font_google("Open Sans"),
-                         code_font = bslib::font_face(
-                           family = "OpenSans",
-                           src = "url('/fonts/OpenSans-Regular.ttf') format('truetype')"
-                         ),
+                         base_font = bslib::font_google("Montserrat"),
+                         # base_font = bslib::font_face(
+                         #   family = "Montserrat",
+                         #   src = "url('/fonts/Montserrat-VariableFont_wght.ttf') format('truetype')"
+                         # ),
+                         # base_font = bslib::font_face(
+                         #   family = "Montserrat",
+                         #   src = list(
+                         #     file = c(
+                         #       "fonts/montserrat/regular.ttf",
+                         #       # "fonts/montserrat/italic.ttf",
+                         #       "fonts/montserrat/bold.ttf"
+                         #       # "fonts/montserrat/bolditalic.ttf"
+                         #     )
+                         #   ),
+                         #   weight = c(400, 700)
+                         # ),
+                         heading_font = bslib::font_google("Public Sans", wght = "700"),
+                         # heading_font = bslib::font_face(
+                         #   family = "PublicSans",
+                         #   src = "url('/fonts/PublicSans-VariableFont_wght.ttf') format('truetype')"
+                         # ),
+                         # heading_font = bslib::font_face(
+                         #   family = "PublicSans",
+                         #   src = list(
+                         #     file = c(
+                         #       "fonts/publicsans/regular.ttf",
+                         #       # "fonts/montserrat/italic.ttf",
+                         #       "fonts/publicsans/bold.ttf"
+                         #       # "fonts/montserrat/bolditalic.ttf"
+                         #     )
+                         #   ),
+                         #   weight = c(400, 700)
+                         # ),
+                         code_font = bslib::font_google("Open Sans"),
+                         # code_font = bslib::font_face(
+                         #   family = "OpenSans",
+                         #   src = "url('/fonts/OpenSans-VariableFont_wght.ttf') format('truetype')"
+                         # ),
+                         # code_font = bslib::font_face(
+                         #   family = "OpenSans",
+                         #   src = list(
+                         #     file = c(
+                         #       "fonts/opensans/regular.ttf",
+                         #       # "fonts/montserrat/italic.ttf",
+                         #       "fonts/opensans/bold.ttf"
+                         #       # "fonts/montserrat/bolditalic.ttf"
+                         #     )
+                         #   ),
+                         #   weight = c(400, 700)
+                         # ),
                          success = FreesearchR_colors("success"),
                          info = FreesearchR_colors("info"),
                          warning = FreesearchR_colors("warning"),
@@ -51,6 +93,8 @@ custom_theme <- function(...,
     danger=danger
   )
 }
+
+
 
 
 FreesearchR_colors <- function(choose = NULL) {
