@@ -57,3 +57,91 @@ get_config <- function(var_name, default = NULL) {
 
   stop(paste("Required config variable not set:", var_name))
 }
+
+
+## File loader - based on the module, uses hard coded default values
+load_file <- function(path) {
+  read_fns <- list(
+    ods  = "import_ods",
+    dta  = "import_dta",
+    csv  = "import_delim",
+    tsv  = "import_delim",
+    txt  = "import_delim",
+    xls  = "import_xls",
+    xlsx = "import_xls",
+    rds  = "import_rds"
+  )
+
+  ext <- tolower(tools::file_ext(path))
+
+  if (!ext %in% names(read_fns)) {
+    message("Unsupported file type, skipping: ", basename(path), " (.", ext, ")")
+    return(NULL)
+  }
+
+  read_fn <- read_fns[[ext]]
+
+  parameters <- list(
+    file     = path,
+    sheet    = 1,
+    skip     = 0,
+    dec      = ".",
+    encoding = "unknown"
+  )
+
+  # Trim parameters to only those accepted by the target function
+  parameters <- parameters[which(names(parameters) %in% rlang::fn_fmls_names(get(read_fn)))]
+
+  result <- tryCatch(
+    rlang::exec(read_fn, !!!parameters),
+    error = function(e) {
+      # Fall back to rio::import
+      message("Primary loader failed for ", basename(path), ", trying rio::import")
+      tryCatch(
+        rio::import(path),
+        error = function(e2) {
+          message("Failed to load ", basename(path), ": ", e2$message)
+          NULL
+        }
+      )
+    }
+  )
+
+  if (!is.null(result) && NROW(result) < 1) {
+    message("File loaded but contains no rows, skipping: ", basename(path))
+    return(NULL)
+  }
+
+  result
+}
+
+
+load_folder <- function(folder = "/app/data", envir = .GlobalEnv) {
+  if (is.null(folder) || !dir.exists(folder)) {
+    message("No data folder found, skipping load")
+    return(invisible(NULL))
+  }
+
+  files <- list.files(folder, full.names = TRUE)
+  if (length(files) == 0) {
+    message("Data folder is empty, skipping load")
+    return(invisible(NULL))
+  }
+
+  loaded <- vapply(files, function(file) {
+    result <- load_file(file)
+    if (is.null(result))
+      return(FALSE)
+    name <- tools::file_path_sans_ext(basename(file))
+    assign(name, default_parsing(result), envir = envir)
+    TRUE
+  }, logical(1))
+
+  message(sprintf(
+    "Loaded %d/%d files from %s",
+    sum(loaded),
+    length(files),
+    folder
+  ))
+  invisible(loaded)
+}
