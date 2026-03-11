@@ -61,7 +61,6 @@
 "Factor variable to reorder:","Kigezo cha vipengele ili kupanga upya:"
 "Sort by levels","Panga kwa viwango"
 "Sort by count","Panga kwa hesabu"
-"Create a new variable (otherwise replaces the one selected)","Unda kigezo kipya (vinginevyo kinachukua nafasi ya kile kilichochaguliwa)"
 "Update factor variable","Sasisha kigezo cha kipengele"
 "Levels","Viwango"
 "Count","Hesabu"
@@ -328,3 +327,4 @@
 "You have provided a complete dataset with no missing values.","You have provided a complete dataset with no missing values."
 "Start by loading data.","Start by loading data."
 "Sample data","Sample data"
+"Create a new variable; otherwise replaces (Updating labels always creates new variable)","Create a new variable; otherwise replaces (Updating labels always creates new variable)"

@@ -70,7 +70,7 @@ update_factor_ui <- function(id) {
       class = "float-end",
       shinyWidgets::prettyCheckbox(
         inputId = ns("new_var"),
-        label = i18n$t("Create a new variable (otherwise replaces the one selected)"),
+        label = i18n$t("Create a new variable; otherwise replaces (Updating labels always creates new variable)"),
         value = FALSE,
         status = "primary",
         outline = TRUE,
@@ -201,15 +201,18 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
       parameters <- list(
         variable = variable,
         new_variable = isTRUE(input$new_var) |
-          any(grid[["Var1_toset"]] == "New label"),
+          any(grid[["Var1_toset"]] != "New label"),
         new_levels = as.character(grid[["Var1"]]),
         new_labels = as.character(grid[["Var1_toset"]]),
         ignore = "New label"
       )
 
       data <- tryCatch({
-        rlang::exec(factor_new_levels_labels,
-                    !!!modifyList(parameters, val = list(data = data)))
+        with_labels(data,{
+          rlang::exec(factor_new_levels_labels,
+                      !!!modifyList(parameters, val = list(data = data)))
+        })
+
       }, error = function(err) {
         showNotification(paste(
           "We encountered the following error creating the new factor:",

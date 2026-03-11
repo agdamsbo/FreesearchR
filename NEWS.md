@@ -1,3 +1,11 @@
+# FreesearchR 26.3.2
+
+*FIX* Updating factor levels always created new factor.
+
+*FIX* Label stripping behavior updating factors is fixed.
+
+*NEW* New with_labels() function (and helpers) added to allow easy preservation of labels.
+
 # FreesearchR 26.3.1
 
 *FIX* ~~Include font files for static loading without dependency on Google.~~ Kept webfonts from google as local fonts are not working for now.

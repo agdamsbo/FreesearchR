@@ -351,29 +351,17 @@ compare_missings <- function(data,
 #' ##   missings_logic_across() |>
 #' ##   gtsummary::tbl_summary()
 missings_logic_across <- function(data, exclude = NULL) {
-  # This function includes a approach way to preserve variable labels
+  # This function includes a way to preserve variable labels
+  with_labels(data,{
   names(data) |>
     lapply(\(.x) {
-      # browser()
-      # Saving original labels
-      lab <- REDCapCAST::get_attr(data[[.x]], attr = "label")
       if (!.x %in% exclude) {
-        out <- is.na(data[[.x]])
+        is.na(data[[.x]])
       } else {
-        out <- data[[.x]]
-      }
-      if (!is.na(lab)) {
-        # Restoring original labels, if not NA
-        REDCapCAST::set_attr(
-          data = out,
-          label = lab,
-          attr = "label",
-          overwrite = TRUE
-        )
-      } else {
-        out
+        data[[.x]]
       }
     }) |>
     dplyr::bind_cols(.name_repair = "unique_quiet") |>
     setNames(names(data))
+  })
 }

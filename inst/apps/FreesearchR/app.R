@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpxB1KWR/file173c92887da27.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpxB1KWR/file173c978fea931.R 
 ########
 
 i18n_path <- system.file("translations", package = "FreesearchR")
@@ -75,7 +75,7 @@ if (!"global_freesearchR" %in% ls(name = globalenv())) {
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'26.3.1'
+app_version <- function()'26.3.2'
 
 
 ########
@@ -4527,7 +4527,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v26.3.1-260302'
+hosted_version <- function()'v26.3.2-260311'
 
 
 ########
@@ -6367,31 +6367,19 @@ compare_missings <- function(data,
 #' ##   missings_logic_across() |>
 #' ##   gtsummary::tbl_summary()
 missings_logic_across <- function(data, exclude = NULL) {
-  # This function includes a approach way to preserve variable labels
+  # This function includes a way to preserve variable labels
+  with_labels(data,{
   names(data) |>
     lapply(\(.x) {
-      # browser()
-      # Saving original labels
-      lab <- REDCapCAST::get_attr(data[[.x]], attr = "label")
       if (!.x %in% exclude) {
-        out <- is.na(data[[.x]])
+        is.na(data[[.x]])
       } else {
-        out <- data[[.x]]
-      }
-      if (!is.na(lab)) {
-        # Restoring original labels, if not NA
-        REDCapCAST::set_attr(
-          data = out,
-          label = lab,
-          attr = "label",
-          overwrite = TRUE
-        )
-      } else {
-        out
+        data[[.x]]
       }
     }) |>
     dplyr::bind_cols(.name_repair = "unique_quiet") |>
     setNames(names(data))
+  })
 }
 
 
@@ -11435,7 +11423,7 @@ update_factor_ui <- function(id) {
       class = "float-end",
       shinyWidgets::prettyCheckbox(
         inputId = ns("new_var"),
-        label = i18n$t("Create a new variable (otherwise replaces the one selected)"),
+        label = i18n$t("Create a new variable; otherwise replaces (Updating labels always creates new variable)"),
         value = FALSE,
         status = "primary",
         outline = TRUE,
@@ -11566,15 +11554,18 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
       parameters <- list(
         variable = variable,
         new_variable = isTRUE(input$new_var) |
-          any(grid[["Var1_toset"]] == "New label"),
+          any(grid[["Var1_toset"]] != "New label"),
         new_levels = as.character(grid[["Var1"]]),
         new_labels = as.character(grid[["Var1_toset"]]),
         ignore = "New label"
       )
 
       data <- tryCatch({
-        rlang::exec(factor_new_levels_labels,
-                    !!!modifyList(parameters, val = list(data = data)))
+        with_labels(data,{
+          rlang::exec(factor_new_levels_labels,
+                      !!!modifyList(parameters, val = list(data = data)))
+        })
+
       }, error = function(err) {
         showNotification(paste(
           "We encountered the following error creating the new factor:",
@@ -12544,6 +12535,126 @@ clean_date <- function(data) {
     unname()
 }
 #
+
+
+########
+#### Current file: /Users/au301842/FreesearchR/R//utils-labels.R 
+########
+
+# =============================================================================
+# Column Label Utilities
+#
+# Coded with help from Claude to save time.
+# Could be seperated for its own package.
+# =============================================================================
+
+#' Extract column labels from a data frame
+#'
+#' @param df A data frame.
+#' @return A named character vector of label strings (only labelled columns included).
+#' @export
+extract_labels <- function(df) {
+  if (!is.data.frame(df)) stop("`df` must be a data frame.", call. = FALSE)
+
+  labels <- vapply(df, function(col) {
+    lbl <- attr(col, "label")
+    if (is.null(lbl)) NA_character_ else as.character(lbl)
+  }, FUN.VALUE = character(1))
+
+  labels[!is.na(labels)]
+}
+
+
+#' Apply a named label vector to a data frame
+#'
+#' @param df A data frame.
+#' @param labels A named character vector (names = column names, values = labels).
+#'   Typically the output of [extract_labels()]. Labels for absent columns are
+#'   silently ignored.
+#' @return `df` with `"label"` attributes set on matching columns.
+#' @export
+apply_labels <- function(df, labels) {
+  if (!is.data.frame(df)) stop("`df` must be a data frame.", call. = FALSE)
+  if (!is.character(labels) || is.null(names(labels))) {
+    stop("`labels` must be a named character vector.", call. = FALSE)
+  }
+
+  for (col in intersect(names(labels), names(df))) {
+    attr(df[[col]], "label") <- labels[[col]]
+  }
+
+  df
+}
+
+
+#' Restore column labels using a reference data frame
+#'
+#' Convenience wrapper around [extract_labels()] + [apply_labels()]. Labels are
+#' matched by column name; new columns in `df_modified` are left unchanged.
+#'
+#' @param df_modified A data frame whose columns should receive labels.
+#' @param df_reference A data frame carrying the authoritative `"label"` attributes.
+#' @return `df_modified` with labels restored on all columns present in `df_reference`.
+#' @export
+restore_labels <- function(df_modified, df_reference) {
+  if (!is.data.frame(df_modified))  stop("`df_modified` must be a data frame.",  call. = FALSE)
+  if (!is.data.frame(df_reference)) stop("`df_reference` must be a data frame.", call. = FALSE)
+
+  apply_labels(df_modified, extract_labels(df_reference))
+}
+
+
+#' Evaluate an expression while preserving column labels
+#'
+#' Snapshots labels from `df` before evaluating `expr`, then reapplies them to
+#' matching columns in the result. New columns created inside `expr` receive no
+#' label automatically.
+#'
+#' @param df A data frame carrying `"label"` attributes.
+#' @param expr An unquoted expression that transforms `df` and returns a data frame.
+#' @return The data frame produced by `expr`, with original labels restored.
+#' @export
+with_labels <- function(df, expr) {
+  if (!is.data.frame(df)) stop("`df` must be a data frame.", call. = FALSE)
+
+  labels <- extract_labels(df)
+  result <- eval(substitute(expr), parent.frame())
+
+  if (!is.data.frame(result)) {
+    stop("The expression passed to `with_labels()` must return a data frame.", call. = FALSE)
+  }
+
+  apply_labels(result, labels)
+}
+
+
+#' Print a tidy summary of column labels
+#'
+#' @param df A data frame.
+#' @param missing_marker String used when a column has no label. Default: `"(no label)"`.
+#' @return A `column / class / label` data frame, printed and returned invisibly.
+#' @export
+label_report <- function(df, missing_marker = "(no label)") {
+  if (!is.data.frame(df)) stop("`df` must be a data frame.", call. = FALSE)
+  if (!is.character(missing_marker) || length(missing_marker) != 1L) {
+    stop("`missing_marker` must be a single character string.", call. = FALSE)
+  }
+
+  labels <- vapply(df, function(col) {
+    lbl <- attr(col, "label")
+    if (is.null(lbl)) missing_marker else as.character(lbl)
+  }, FUN.VALUE = character(1))
+
+  report <- data.frame(
+    column = names(df),
+    class  = vapply(df, function(x) paste(class(x), collapse = "/"), character(1)),
+    label  = unname(labels),
+    stringsAsFactors = FALSE
+  )
+
+  print(report, row.names = FALSE)
+  invisible(report)
+}
 
 
 ########

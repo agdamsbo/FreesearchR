@@ -61,7 +61,6 @@
 "Factor variable to reorder:","Kategoriske variabel der skal ændres:"
 "Sort by levels","Sorter efter niveauer"
 "Sort by count","Sorter efter antal"
-"Create a new variable (otherwise replaces the one selected)","Opret en ny variabel (ellers erstattes den oprindelige)"
 "Update factor variable","Updater faktor-variabel"
 "Levels","Niveauer"
 "Count","Antal"
@@ -328,3 +327,4 @@
 "You have provided a complete dataset with no missing values.","Data er uden manglende observationer."
 "Start by loading data.","Start med at vælge data."
 "Sample data","Træningsdata"
+"Create a new variable; otherwise replaces (Updating labels always creates new variable)","Create a new variable; otherwise replaces (Updating labels always creates new variable)"
