@@ -22,6 +22,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/all_but.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/append_column.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/append_list.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/apply_labels.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/argsstring2list.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/baseline_table.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/class_icons.html</loc></url>
@@ -56,6 +57,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/dim_change_call.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/drop_empty_event.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/expression_string.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/extract_labels.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/factor_new_levels_labels.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/factorize.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/file_export.html</loc></url>
@@ -86,6 +88,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/is_splittable.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/is_valid_redcap_url.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/is_valid_token.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/label_report.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/landing_page_ui.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/launch_FreesearchR.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/limit_data_size.html</loc></url>
@@ -120,6 +123,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/remove_empty_cols.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/remove_nested_list.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/repeated_instruments.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/restore_labels.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/selectInputIcon.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/separate_string.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/set_column_label.html</loc></url>
@@ -147,6 +151,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/vertical_stacked_bars.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/visual-summary.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/wide2long.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/with_labels.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/wrap_plot_list.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/write_quarto.html</loc></url>
 </urlset>

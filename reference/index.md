@@ -18,6 +18,8 @@
   : Append a column to a data.frame
 - [`append_list()`](https://agdamsbo.github.io/FreesearchR/reference/append_list.md)
   : Append list with named index
+- [`apply_labels()`](https://agdamsbo.github.io/FreesearchR/reference/apply_labels.md)
+  : Apply a named label vector to a data frame
 - [`argsstring2list()`](https://agdamsbo.github.io/FreesearchR/reference/argsstring2list.md)
   : Convert string of arguments to list of arguments
 - [`baseline_table()`](https://agdamsbo.github.io/FreesearchR/reference/baseline_table.md)
@@ -108,6 +110,8 @@
 - [`expression_string()`](https://agdamsbo.github.io/FreesearchR/reference/expression_string.md)
   : Deparses expression as string, substitutes native pipe and adds
   assign
+- [`extract_labels()`](https://agdamsbo.github.io/FreesearchR/reference/extract_labels.md)
+  : Extract column labels from a data frame
 - [`factor_new_levels_labels()`](https://agdamsbo.github.io/FreesearchR/reference/factor_new_levels_labels.md)
   : Simple function to apply new levels and/or labels to factor
 - [`factorize()`](https://agdamsbo.github.io/FreesearchR/reference/factorize.md)
@@ -174,6 +178,8 @@
   : Test if url is valid format for REDCap API
 - [`is_valid_token()`](https://agdamsbo.github.io/FreesearchR/reference/is_valid_token.md)
   : Validate REDCap token
+- [`label_report()`](https://agdamsbo.github.io/FreesearchR/reference/label_report.md)
+  : Print a tidy summary of column labels
 - [`landing_page_ui()`](https://agdamsbo.github.io/FreesearchR/reference/landing_page_ui.md)
   : Tag list of elements for the FreesearchR landing page
 - [`launch_FreesearchR()`](https://agdamsbo.github.io/FreesearchR/reference/launch_FreesearchR.md)
@@ -251,6 +257,8 @@
   .rds
 - [`repeated_instruments()`](https://agdamsbo.github.io/FreesearchR/reference/repeated_instruments.md)
   : Get names of repeated instruments
+- [`restore_labels()`](https://agdamsbo.github.io/FreesearchR/reference/restore_labels.md)
+  : Restore column labels using a reference data frame
 - [`selectInputIcon()`](https://agdamsbo.github.io/FreesearchR/reference/selectInputIcon.md)
   : Create a select input control with icon(s)
 - [`separate_string()`](https://agdamsbo.github.io/FreesearchR/reference/separate_string.md)
@@ -319,6 +327,8 @@
 - [`wide2long()`](https://agdamsbo.github.io/FreesearchR/reference/wide2long.md)
   : Alternative pivoting method for easily pivoting based on name
   pattern
+- [`with_labels()`](https://agdamsbo.github.io/FreesearchR/reference/with_labels.md)
+  : Evaluate an expression while preserving column labels
 - [`wrap_plot_list()`](https://agdamsbo.github.io/FreesearchR/reference/wrap_plot_list.md)
   : Wrapping
 - [`write_quarto()`](https://agdamsbo.github.io/FreesearchR/reference/write_quarto.md)

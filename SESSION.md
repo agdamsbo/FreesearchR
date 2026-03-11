@@ -2,7 +2,7 @@
 
 | ——————————– R environment ———————————                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| \|setting \|value \| \|:———–\|:——————————————\| \|version \|R version 4.5.2 (2025-10-31) \| \|os \|macOS Tahoe 26.3 \| \|system \|aarch64, darwin20 \| \|ui \|RStudio \| \|language \|(EN) \| \|collate \|en_US.UTF-8 \| \|ctype \|en_US.UTF-8 \| \|tz \|Europe/Copenhagen \| \|date \|2026-03-02 \| \|rstudio \|2026.01.1+403 Apple Blossom (desktop) \| \|pandoc \|3.6.4 @ /opt/homebrew/bin/ (via rmarkdown) \| \|quarto \|1.7.30 @ /usr/local/bin/quarto \| \|FreesearchR \|26.3.1.260302 \| |
+| \|setting \|value \| \|:———–\|:——————————————\| \|version \|R version 4.5.2 (2025-10-31) \| \|os \|macOS Tahoe 26.3 \| \|system \|aarch64, darwin20 \| \|ui \|RStudio \| \|language \|(EN) \| \|collate \|en_US.UTF-8 \| \|ctype \|en_US.UTF-8 \| \|tz \|Europe/Copenhagen \| \|date \|2026-03-11 \| \|rstudio \|2026.01.1+403 Apple Blossom (desktop) \| \|pandoc \|3.6.4 @ /opt/homebrew/bin/ (via rmarkdown) \| \|quarto \|1.7.30 @ /usr/local/bin/quarto \| \|FreesearchR \|26.3.2.260311 \| |
 
 ## ———————————– packages ———————————–
 
@@ -11,6 +11,8 @@
 | apexcharter       | 0.4.5         | 2026-01-07 | CRAN (R 4.5.2) |
 | askpass           | 1.2.1         | 2024-10-04 | CRAN (R 4.5.0) |
 | assertthat        | 0.2.1         | 2019-03-21 | CRAN (R 4.5.0) |
+| attachment        | 0.4.5         | 2025-03-14 | CRAN (R 4.5.0) |
+| attempt           | 0.3.1         | 2020-05-03 | CRAN (R 4.5.0) |
 | backports         | 1.5.0         | 2024-05-23 | CRAN (R 4.5.0) |
 | base64enc         | 0.1-6         | 2026-02-02 | CRAN (R 4.5.2) |
 | bayestestR        | 0.17.0        | 2025-08-29 | CRAN (R 4.5.0) |
@@ -39,6 +41,7 @@
 | colorspace        | 2.1-2         | 2025-09-22 | CRAN (R 4.5.0) |
 | commonmark        | 2.0.0         | 2025-07-07 | CRAN (R 4.5.0) |
 | crayon            | 1.5.3         | 2024-06-20 | CRAN (R 4.5.0) |
+| credentials       | 2.0.3         | 2025-09-12 | CRAN (R 4.5.0) |
 | curl              | 7.0.0         | 2025-08-19 | CRAN (R 4.5.0) |
 | data.table        | 1.18.2.1      | 2026-01-27 | CRAN (R 4.5.2) |
 | datamods          | 1.5.3         | 2024-10-02 | CRAN (R 4.5.0) |
@@ -48,6 +51,7 @@
 | devtools          | 2.4.6         | 2025-10-03 | CRAN (R 4.5.0) |
 | DHARMa            | 0.4.7         | 2024-10-18 | CRAN (R 4.5.0) |
 | digest            | 0.6.39        | 2025-11-19 | CRAN (R 4.5.2) |
+| dockerfiler       | 0.2.5         | 2025-05-07 | CRAN (R 4.5.0) |
 | doParallel        | 1.0.17        | 2022-02-07 | CRAN (R 4.5.0) |
 | dplyr             | 1.2.0         | 2026-02-03 | CRAN (R 4.5.2) |
 | DT                | 0.34.0        | 2025-09-02 | CRAN (R 4.5.0) |
@@ -70,16 +74,19 @@
 | foreach           | 1.5.2         | 2022-02-02 | CRAN (R 4.5.0) |
 | foreign           | 0.8-90        | 2025-03-31 | CRAN (R 4.5.2) |
 | Formula           | 1.2-5         | 2023-02-24 | CRAN (R 4.5.0) |
-| FreesearchR       | 26.3.1        | NA         | NA             |
+| FreesearchR       | 26.3.2        | NA         | NA             |
 | fs                | 1.6.6         | 2025-04-12 | CRAN (R 4.5.0) |
 | gdtools           | 0.5.0         | 2026-02-09 | CRAN (R 4.5.2) |
 | generics          | 0.1.4         | 2025-05-09 | CRAN (R 4.5.0) |
+| gert              | 2.3.1         | 2026-01-11 | CRAN (R 4.5.2) |
 | ggalluvial        | 0.12.5        | 2023-02-22 | CRAN (R 4.5.0) |
 | ggcorrplot        | 0.1.4.1       | 2023-09-05 | CRAN (R 4.5.0) |
 | ggforce           | 0.5.0         | 2025-06-18 | CRAN (R 4.5.0) |
 | ggplot2           | 4.0.2         | 2026-02-03 | CRAN (R 4.5.2) |
 | ggridges          | 0.5.7         | 2025-08-27 | CRAN (R 4.5.0) |
 | ggstats           | 0.12.0        | 2025-12-22 | CRAN (R 4.5.2) |
+| gh                | 1.5.0         | 2025-05-26 | CRAN (R 4.5.0) |
+| gitcreds          | 0.1.2         | 2022-09-08 | CRAN (R 4.5.0) |
 | glue              | 1.8.0         | 2024-09-30 | CRAN (R 4.5.0) |
 | gridExtra         | 2.3           | 2017-09-09 | CRAN (R 4.5.0) |
 | gt                | 1.3.0         | 2026-01-22 | CRAN (R 4.5.2) |
@@ -93,6 +100,7 @@
 | htmltools         | 0.5.9         | 2025-12-04 | CRAN (R 4.5.2) |
 | htmlwidgets       | 1.6.4         | 2023-12-06 | CRAN (R 4.5.0) |
 | httpuv            | 1.6.16        | 2025-04-16 | CRAN (R 4.5.0) |
+| httr2             | 1.2.2         | 2025-12-08 | CRAN (R 4.5.2) |
 | IDEAFilter        | 0.2.1         | 2025-07-29 | CRAN (R 4.5.0) |
 | insight           | 1.4.6         | 2026-02-04 | CRAN (R 4.5.2) |
 | iterators         | 1.0.14        | 2022-02-05 | CRAN (R 4.5.0) |
@@ -105,9 +113,11 @@
 | later             | 1.4.6         | 2026-02-13 | CRAN (R 4.5.2) |
 | lattice           | 0.22-7        | 2025-04-02 | CRAN (R 4.5.2) |
 | lifecycle         | 1.0.5         | 2026-01-08 | CRAN (R 4.5.2) |
+| litedown          | 0.9           | 2025-12-18 | CRAN (R 4.5.2) |
 | lme4              | 1.1-38        | 2025-12-02 | CRAN (R 4.5.2) |
 | lubridate         | 1.9.5         | 2026-02-04 | CRAN (R 4.5.2) |
 | magrittr          | 2.0.4         | 2025-09-12 | CRAN (R 4.5.0) |
+| markdown          | 2.0           | 2025-03-23 | CRAN (R 4.5.0) |
 | MASS              | 7.3-65        | 2025-02-28 | CRAN (R 4.5.0) |
 | Matrix            | 1.7-4         | 2025-08-28 | CRAN (R 4.5.2) |
 | memoise           | 2.0.1         | 2021-11-26 | CRAN (R 4.5.0) |
@@ -123,6 +133,7 @@
 | openssl           | 2.3.4         | 2025-09-30 | CRAN (R 4.5.0) |
 | openxlsx2         | 1.23.1        | 2026-01-19 | CRAN (R 4.5.2) |
 | otel              | 0.2.0         | 2025-08-29 | CRAN (R 4.5.0) |
+| pak               | 0.9.2         | 2025-12-22 | CRAN (R 4.5.2) |
 | parameters        | 0.28.3        | 2025-11-25 | CRAN (R 4.5.2) |
 | patchwork         | 1.3.2         | 2025-08-25 | CRAN (R 4.5.0) |
 | pbmcapply         | 1.5.1         | 2022-04-28 | CRAN (R 4.5.0) |
@@ -179,6 +190,7 @@
 | sessioninfo       | 1.2.3         | 2025-02-05 | CRAN (R 4.5.0) |
 | shiny             | 1.13.0        | 2026-02-20 | CRAN (R 4.5.2) |
 | shiny.i18n        | 0.3.0         | 2023-01-16 | CRAN (R 4.5.0) |
+| shiny2docker      | 0.0.3         | 2025-06-28 | CRAN (R 4.5.0) |
 | shinybusy         | 0.3.3         | 2024-03-09 | CRAN (R 4.5.0) |
 | shinyjs           | 2.1.1         | 2026-01-15 | CRAN (R 4.5.2) |
 | shinyTime         | 1.0.3         | 2022-08-19 | CRAN (R 4.5.0) |
@@ -187,6 +199,7 @@
 | stringi           | 1.8.7         | 2025-03-27 | CRAN (R 4.5.0) |
 | stringr           | 1.6.0         | 2025-11-04 | CRAN (R 4.5.0) |
 | stRoke            | 25.9.2        | 2025-09-30 | CRAN (R 4.5.0) |
+| sys               | 3.4.3         | 2024-10-04 | CRAN (R 4.5.0) |
 | systemfonts       | 1.3.1         | 2025-10-01 | CRAN (R 4.5.0) |
 | testthat          | 3.3.2         | 2026-01-11 | CRAN (R 4.5.2) |
 | textshaping       | 1.0.4         | 2025-10-10 | CRAN (R 4.5.0) |
@@ -212,4 +225,5 @@
 | xml2              | 1.5.2         | 2026-01-17 | CRAN (R 4.5.2) |
 | xtable            | 1.8-4         | 2019-04-21 | CRAN (R 4.5.0) |
 | yaml              | 2.3.12        | 2025-12-10 | CRAN (R 4.5.2) |
+| yesno             | 0.1.3         | 2024-07-26 | CRAN (R 4.5.0) |
 | zip               | 2.3.3         | 2025-05-13 | CRAN (R 4.5.0) |
