@@ -356,33 +356,28 @@ missing_fraction <- function(data) {
 #'   sample(c(1:8, NA), 20, TRUE)
 #' ) |> data_description()
 data_description <- function(data, data_text = "Data") {
-  data <- if (shiny::is.reactive(data))
-    data()
-  else
-    data
+  # Resolve reactive once
+  if (shiny::is.reactive(data)) data <- data()
+
+  # Early return if null
+  if (is.null(data)) return(i18n$t("No data present."))
 
   n <- nrow(data)
+
+  # Early return if empty
+  if (n == 0L) return(i18n$t("No data present."))
+
   n_var <- ncol(data)
-  n_complete <- sum(complete.cases(data))
+
+  # Faster complete.cases alternative using rowSums on NA matrix
+  n_complete <- n - sum(rowSums(is.na(data)) > 0L)
   p_complete <- signif(100 * n_complete / n, 3)
 
-  if (is.null(data)) {
-    i18n$t("No data present.")
-  } else {
-    glue::glue(
-      i18n$t(
-        "{data_text} has {n} observations and {n_var} variables, with {n_complete} ({p_complete} %) complete cases."
-      )
+  glue::glue(
+    i18n$t(
+      "{data_text} has {n} observations and {n_var} variables, with {n_complete} ({p_complete} %) complete cases."
     )
-  }
-  # sprintf(
-  #   "%s has %s observations and %s variables, with %s (%s%%) complete cases.",
-  #   data_text,
-  #   n,
-  #   n_var,
-  #   n_complete,
-  #   p_complete
-  # )
+  )
 }
 
 
