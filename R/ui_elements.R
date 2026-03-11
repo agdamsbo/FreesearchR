@@ -83,9 +83,9 @@ ui_elements <- function(selection) {
               layout_params = "dropdown",
               # title = "Choose a datafile to upload",
               file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".ods", ".dta"),
-              limit_default = global_freesearchR$data_limit_default,
-              limit_lower = global_freesearchR$data_limit_lower,
-              limit_upper = global_freesearchR$data_limit_upper
+              limit_default = DATA_LIMIT_DEFAULT,
+              limit_lower = DATA_LIMIT_LOWER,
+              limit_upper = DATA_LIMIT_UPPER
 
             )
           ),
@@ -107,7 +107,7 @@ ui_elements <- function(selection) {
               id = "env",
               title = NULL,
               packages = c("NHANES", "stRoke", "datasets", "MASS"),
-              globalenv = global_freesearchR$include_globalenv
+              globalenv = isTruthy(INCLUDE_GLOBALENV)
             )
           ),
           # shiny::conditionalPanel(

@@ -23,11 +23,11 @@ launch_FreesearchR <- function(inlcude_globalenv = TRUE,
                                data_limit_upper = 100000,
                                data_limit_lower = 1,
                                ...) {
-  global_freesearchR <- list(
-    include_globalenv = include_globalenv,
-    data_limit_default = data_limit_default,
-    data_limit_upper = data_limit_upper,
-    data_limit_lower = data_limit_lower
+  Sys.setenv(
+    INCLUDE_GLOBALENV = include_globalenv,
+    DATA_LIMIT_DEFAULT = data_limit_default,
+    DATA_LIMIT_UPPER = data_limit_upper,
+    DATA_LIMIT_LOWER = data_limit_lower
   )
 
   appDir <- system.file("apps", "FreesearchR", package = "FreesearchR")
@@ -38,4 +38,22 @@ launch_FreesearchR <- function(inlcude_globalenv = TRUE,
 
   a <- shiny::runApp(appDir = paste0(appDir, "/app.R"), ...)
   return(invisible(a))
+}
+
+
+## Helper to set env variables
+get_config <- function(var_name, default = NULL) {
+  # First check environment variables (set by Docker)
+  val <- Sys.getenv(var_name, unset = NA)
+
+  if (!is.na(val) && nzchar(val)) {
+    return(val)
+  }
+
+  # Fall back to default (can be overridden when launching from R)
+  if (!is.null(default)) {
+    return(default)
+  }
+
+  stop(paste("Required config variable not set:", var_name))
 }
