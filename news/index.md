@@ -1,5 +1,11 @@
 # Changelog
 
+## FreesearchR 26.3.3
+
+*NEW* option to pass global settings when running as docker or launching
+from R. Support for INCLUDE_GLOBALENV, DATA_LIMIT_DEFAULT,
+DATA_LIMIT_UPPER and DATA_LIMIT_LOWER. Docs are missing…
+
 ## FreesearchR 26.3.2
 
 *FIX* Updating factor levels always created new factor.
@@ -8,10 +14,6 @@
 
 *NEW* New with_labels() function (and helpers) added to allow easy
 preservation of labels.
-
-*NEW* option to pass global settings when running as docker or launching
-from R. Support for INCLUDE_GLOBALENV, DATA_LIMIT_DEFAULT,
-DATA_LIMIT_UPPER and DATA_LIMIT_LOWER. Docs will follow.
 
 ## FreesearchR 26.3.1
 
