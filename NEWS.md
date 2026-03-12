@@ -4,6 +4,8 @@
 
 *FIX* faster data description function.
 
+Also added a few tests to the package.
+
 # FreesearchR 26.3.2
 
 *FIX* Updating factor levels always created new factor.
