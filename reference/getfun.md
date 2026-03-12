@@ -95,6 +95,6 @@ getfun("stats::lm")
 #>         z$qr <- NULL
 #>     z
 #> }
-#> <bytecode: 0x559cd171a190>
+#> <bytecode: 0x5643fbdd54b0>
 #> <environment: namespace:stats>
 ```

@@ -1,5 +1,7 @@
 # Changelog
 
+## FreesearchR 26.3.4
+
 ## FreesearchR 26.3.3
 
 *NEW* option to pass global settings when running as docker or launching
