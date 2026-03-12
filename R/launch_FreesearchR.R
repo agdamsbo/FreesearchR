@@ -18,7 +18,7 @@
 #' data(mtcars)
 #' launch_FreesearchR(launch.browser = TRUE)
 #' }
-launch_FreesearchR <- function(inlcude_globalenv = TRUE,
+launch_FreesearchR <- function(include_globalenv = TRUE,
                                data_limit_default = 1000,
                                data_limit_upper = 100000,
                                data_limit_lower = 1,
