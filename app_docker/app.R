@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpsadCw0/file14b247eddca29.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//Rtmprp4Sq1/fileb602d982aa3.R 
 ########
 
 i18n_path <- here::here("translations")
@@ -45,24 +45,13 @@ library(rlang)
 library(shiny.i18n)
 library(fontawesome)
 
-print(list.files("www/fonts/montserrat", full.names = TRUE))
-
+# print(list.files("www/fonts/montserrat", full.names = TRUE))
 
 ## Translation init
 i18n <- shiny.i18n::Translator$new(translation_csvs_path = i18n_path)
 
 # i18n <- shiny.i18n::Translator$new(translation_csvs_path = here::here("inst/translations/"))
 i18n$set_translation_language("en")
-
-## Global freesearchR vars
-if (!"global_freesearchR" %in% ls(name = globalenv())) {
-  global_freesearchR <- list(
-    include_globalenv = FALSE,
-    data_limit_default = 1000,
-    data_limit_upper = 10000,
-    data_limit_lower = 1
-  )
-}
 
 
 ########
@@ -75,7 +64,7 @@ if (!"global_freesearchR" %in% ls(name = globalenv())) {
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'26.3.2'
+app_version <- function()'26.3.3'
 
 
 ########
@@ -4035,33 +4024,28 @@ missing_fraction <- function(data) {
 #'   sample(c(1:8, NA), 20, TRUE)
 #' ) |> data_description()
 data_description <- function(data, data_text = "Data") {
-  data <- if (shiny::is.reactive(data))
-    data()
-  else
-    data
+  # Resolve reactive once
+  if (shiny::is.reactive(data)) data <- data()
+
+  # Early return if null
+  if (is.null(data)) return(i18n$t("No data present."))
 
   n <- nrow(data)
+
+  # Early return if empty
+  if (n == 0L) return(i18n$t("No data present."))
+
   n_var <- ncol(data)
-  n_complete <- sum(complete.cases(data))
+
+  # Faster complete.cases alternative using rowSums on NA matrix
+  n_complete <- n - sum(rowSums(is.na(data)) > 0L)
   p_complete <- signif(100 * n_complete / n, 3)
 
-  if (is.null(data)) {
-    i18n$t("No data present.")
-  } else {
-    glue::glue(
-      i18n$t(
-        "{data_text} has {n} observations and {n_var} variables, with {n_complete} ({p_complete} %) complete cases."
-      )
+  glue::glue(
+    i18n$t(
+      "{data_text} has {n} observations and {n_var} variables, with {n_complete} ({p_complete} %) complete cases."
     )
-  }
-  # sprintf(
-  #   "%s has %s observations and %s variables, with %s (%s%%) complete cases.",
-  #   data_text,
-  #   n,
-  #   n_var,
-  #   n_complete,
-  #   p_complete
-  # )
+  )
 }
 
 
@@ -4527,7 +4511,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v26.3.2-260311'
+hosted_version <- function()'v26.3.3-260312'
 
 
 ########
@@ -5987,16 +5971,16 @@ landing_page_ui <- function(i18n) {
 #' data(mtcars)
 #' launch_FreesearchR(launch.browser = TRUE)
 #' }
-launch_FreesearchR <- function(inlcude_globalenv = TRUE,
+launch_FreesearchR <- function(include_globalenv = TRUE,
                                data_limit_default = 1000,
                                data_limit_upper = 100000,
                                data_limit_lower = 1,
                                ...) {
-  global_freesearchR <- list(
-    include_globalenv = include_globalenv,
-    data_limit_default = data_limit_default,
-    data_limit_upper = data_limit_upper,
-    data_limit_lower = data_limit_lower
+  Sys.setenv(
+    INCLUDE_GLOBALENV = include_globalenv,
+    DATA_LIMIT_DEFAULT = data_limit_default,
+    DATA_LIMIT_UPPER = data_limit_upper,
+    DATA_LIMIT_LOWER = data_limit_lower
   )
 
   appDir <- system.file("apps", "FreesearchR", package = "FreesearchR")
@@ -6007,6 +5991,123 @@ launch_FreesearchR <- function(inlcude_globalenv = TRUE,
 
   a <- shiny::runApp(appDir = paste0(appDir, "/app.R"), ...)
   return(invisible(a))
+}
+
+
+## Helper to set env variables
+get_config <- function(var_name, default = NULL) {
+  val <- Sys.getenv(var_name, unset = NA_character_)
+
+  # Only use env var if it is explicitly set and non-empty
+  if (!is.na(val) && nzchar(trimws(val))) {
+    if (is.logical(default)) return(to_logical(val))
+    if (is.numeric(default)) return(as.numeric(val))
+    return(val)
+  }
+
+  if (!is.null(default)) {
+    return(default)
+  }
+
+  stop(paste("Required config variable not set:", var_name))
+}
+
+to_logical <- function(x) {
+  result <- switch(tolower(trimws(as.character(x))),
+                   "true"  = , "1" = , "yes" = TRUE,
+                   "false" = , "0" = , "no"  = FALSE,
+                   NA
+  )
+  if (is.na(result)) stop(paste("Cannot coerce to logical:", x))
+  result
+}
+
+
+## File loader - based on the module, uses hard coded default values
+load_file <- function(path) {
+  read_fns <- list(
+    ods  = "import_ods",
+    dta  = "import_dta",
+    csv  = "import_delim",
+    tsv  = "import_delim",
+    txt  = "import_delim",
+    xls  = "import_xls",
+    xlsx = "import_xls",
+    rds  = "import_rds"
+  )
+
+  ext <- tolower(tools::file_ext(path))
+
+  if (!ext %in% names(read_fns)) {
+    message("Unsupported file type, skipping: ", basename(path), " (.", ext, ")")
+    return(NULL)
+  }
+
+  read_fn <- read_fns[[ext]]
+
+  parameters <- list(
+    file     = path,
+    sheet    = 1,
+    skip     = 0,
+    dec      = ".",
+    encoding = "unknown"
+  )
+
+  # Trim parameters to only those accepted by the target function
+  parameters <- parameters[which(names(parameters) %in% rlang::fn_fmls_names(get(read_fn)))]
+
+  result <- tryCatch(
+    rlang::exec(read_fn, !!!parameters),
+    error = function(e) {
+      # Fall back to rio::import
+      message("Primary loader failed for ", basename(path), ", trying rio::import")
+      tryCatch(
+        rio::import(path),
+        error = function(e2) {
+          message("Failed to load ", basename(path), ": ", e2$message)
+          NULL
+        }
+      )
+    }
+  )
+
+  if (!is.null(result) && NROW(result) < 1) {
+    message("File loaded but contains no rows, skipping: ", basename(path))
+    return(NULL)
+  }
+
+  result
+}
+
+
+load_folder <- function(folder = "/app/data", envir = .GlobalEnv) {
+  if (is.null(folder) || !dir.exists(folder)) {
+    message("No data folder found, skipping load")
+    return(invisible(NULL))
+  }
+
+  files <- list.files(folder, full.names = TRUE)
+  if (length(files) == 0) {
+    message("Data folder is empty, skipping load")
+    return(invisible(NULL))
+  }
+
+  loaded <- vapply(files, function(file) {
+    result <- load_file(file)
+    if (is.null(result))
+      return(FALSE)
+    name <- tools::file_path_sans_ext(basename(file))
+    assign(name, default_parsing(result), envir = envir)
+    TRUE
+  }, logical(1))
+
+  message(sprintf(
+    "Loaded %d/%d files from %s",
+    sum(loaded),
+    length(files),
+    folder
+  ))
+  invisible(loaded)
 }
 
 
@@ -10726,9 +10827,9 @@ ui_elements <- function(selection) {
               layout_params = "dropdown",
               # title = "Choose a datafile to upload",
               file_extensions = c(".csv", ".tsv", ".txt", ".xls", ".xlsx", ".rds", ".ods", ".dta"),
-              limit_default = global_freesearchR$data_limit_default,
-              limit_lower = global_freesearchR$data_limit_lower,
-              limit_upper = global_freesearchR$data_limit_upper
+              limit_default = DATA_LIMIT_DEFAULT,
+              limit_lower = DATA_LIMIT_LOWER,
+              limit_upper = DATA_LIMIT_UPPER
 
             )
           ),
@@ -10750,7 +10851,7 @@ ui_elements <- function(selection) {
               id = "env",
               title = NULL,
               packages = c("NHANES", "stRoke", "datasets", "MASS"),
-              globalenv = global_freesearchR$include_globalenv
+              globalenv = isTruthy(INCLUDE_GLOBALENV)
             )
           ),
           # shiny::conditionalPanel(
@@ -13602,6 +13703,28 @@ dev_banner <- function(){
 
 
 ########
+#### Current file: /Users/au301842/FreesearchR/app/globals.R 
+########
+
+## Setting global variables
+INCLUDE_GLOBALENV <- get_config("INCLUDE_GLOBALENV", default = FALSE)
+DATA_LIMIT_DEFAULT <- get_config("DATA_LIMIT_DEFAULT", default = 10000)
+DATA_LIMIT_UPPER <- get_config("DATA_LIMIT_UPPER", default = 100000)
+DATA_LIMIT_LOWER <- get_config("DATA_LIMIT_LOWER", default = 1)
+
+## Loads folder passed to the docker container and mounted as below:
+##
+##    services:
+##      shiny:
+##        image: your-shiny-app
+##      volumes:
+##        - ./data:/app/data:ro
+##
+##  All files in the ./data/ folder is attempted loaded
+load_folder()
+
+
+########
 #### Current file: /Users/au301842/FreesearchR/app/ui.R 
 ########
 
@@ -13798,9 +13921,9 @@ server <- function(input, output, session) {
     #   selected = "file"
     # )
 
-    if (isTRUE(global_freesearchR$include_globalenv)) {
+    if (isTruthy(INCLUDE_GLOBALENV)) {
       env_label <- i18n$t("Local or sample data")
-      output$data_sample_text <- shiny::renderText(shiny::helpText(
+      output$data_sample_text <- shiny::renderUI(shiny::helpText(
         i18n$t(
           "Upload a file, get data directly from REDCap or use local or sample data."
         )
@@ -13893,7 +14016,7 @@ server <- function(input, output, session) {
     trigger_return = "change",
     btn_show_data = FALSE,
     reset = reactive(input$hidden),
-    limit_data = global_freesearchR$data_limit_upper
+    limit_data = DATA_LIMIT_UPPER
   )
 
   shiny::observeEvent(from_env$data(), {

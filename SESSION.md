@@ -11,11 +11,11 @@
 |collate     |en_US.UTF-8                                |
 |ctype       |en_US.UTF-8                                |
 |tz          |Europe/Copenhagen                          |
-|date        |2026-03-11                                 |
+|date        |2026-03-12                                 |
 |rstudio     |2026.01.1+403 Apple Blossom (desktop)      |
 |pandoc      |3.6.4 @ /opt/homebrew/bin/ (via rmarkdown) |
 |quarto      |1.7.30 @ /usr/local/bin/quarto             |
-|FreesearchR |26.3.3.260311                              |
+|FreesearchR |26.3.3.260312                              |
                                                                                 
                                                                                 
 --------------------------------------------------------------------------------
