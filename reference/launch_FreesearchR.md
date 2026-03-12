@@ -7,7 +7,7 @@ app.
 
 ``` r
 launch_FreesearchR(
-  inlcude_globalenv = TRUE,
+  include_globalenv = TRUE,
   data_limit_default = 1000,
   data_limit_upper = 1e+05,
   data_limit_lower = 1,
@@ -16,6 +16,10 @@ launch_FreesearchR(
 ```
 
 ## Arguments
+
+- include_globalenv:
+
+  flag to include global env (local data) as option when loading data
 
 - data_limit_default:
 
@@ -33,10 +37,6 @@ launch_FreesearchR(
 
   passed on to
   [`shiny::runApp()`](https://rdrr.io/pkg/shiny/man/runApp.html)
-
-- include_globalenv:
-
-  flag to include global env (local data) as option when loading data
 
 ## Value
 
