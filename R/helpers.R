@@ -219,20 +219,23 @@ file_export <- function(data,
 #'   head(5) |>
 #'   str()
 default_parsing <- function(data) {
-  name_labels <- lapply(data, \(.x) REDCapCAST::get_attr(.x, attr = "label"))
+  # name_labels <- lapply(data, \(.x) REDCapCAST::get_attr(.x, attr = "label"))
   # browser()
-  out <- data |>
-    setNames(make.names(names(data), unique = TRUE)) |>
-    ## Temporary step to avoid nested list and crashing
-    remove_nested_list() |>
-    REDCapCAST::parse_data() |>
-    REDCapCAST::as_factor() |>
-    REDCapCAST::numchar2fct(numeric.threshold = 8,
-                            character.throshold = 10) |>
-    REDCapCAST::as_logical() |>
-    REDCapCAST::fct_drop()
-
-  set_column_label(out, setNames(name_labels, names(out)), overwrite = FALSE)
+  with_labels(data,{
+    data |>
+      setNames(make.names(names(data), unique = TRUE)) |>
+      ## Temporary step to avoid nested list and crashing
+      remove_nested_list() |>
+      REDCapCAST::parse_data() |>
+      REDCapCAST::as_factor() |>
+      REDCapCAST::numchar2fct(numeric.threshold = 8,
+                              character.throshold = 10) |>
+      REDCapCAST::as_logical() |>
+      REDCapCAST::fct_drop()
+  })
+  # out <-
+  #
+  # set_column_label(out, setNames(name_labels, names(out)), overwrite = FALSE)
 
   # purrr::map2(
   #   out,
