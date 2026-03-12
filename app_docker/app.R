@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpmhqokQ/file1a1412a8be28.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//Rtmp6ipYJe/file24f61644daa6.R 
 ########
 
 i18n_path <- here::here("translations")
@@ -64,7 +64,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'26.3.3'
+app_version <- function()'26.3.4'
 
 
 ########
@@ -4514,7 +4514,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v26.3.3-260312'
+hosted_version <- function()'v26.3.4-260312'
 
 
 ########

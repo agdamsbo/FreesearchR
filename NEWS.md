@@ -1,3 +1,7 @@
+# FreesearchR 26.3.4
+
+
+
 # FreesearchR 26.3.3
 
 *NEW* option to pass global settings when running as docker or launching from R. Support for INCLUDE_GLOBALENV, DATA_LIMIT_DEFAULT, DATA_LIMIT_UPPER and DATA_LIMIT_LOWER. Described in the README.
