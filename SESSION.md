@@ -15,7 +15,7 @@
 |rstudio     |2026.01.1+403 Apple Blossom (desktop)      |
 |pandoc      |3.6.4 @ /opt/homebrew/bin/ (via rmarkdown) |
 |quarto      |1.7.30 @ /usr/local/bin/quarto             |
-|FreesearchR |26.3.2.260311                              |
+|FreesearchR |26.3.3.260311                              |
                                                                                 
                                                                                 
 --------------------------------------------------------------------------------
@@ -83,7 +83,7 @@
 |foreach           |1.5.2         |2022-02-02 |CRAN (R 4.5.0) |
 |foreign           |0.8-90        |2025-03-31 |CRAN (R 4.5.2) |
 |Formula           |1.2-5         |2023-02-24 |CRAN (R 4.5.0) |
-|FreesearchR       |26.3.2        |NA         |NA             |
+|FreesearchR       |26.3.3        |NA         |NA             |
 |fs                |1.6.6         |2025-04-12 |CRAN (R 4.5.0) |
 |gdtools           |0.5.0         |2026-02-09 |CRAN (R 4.5.2) |
 |generics          |0.1.4         |2025-05-09 |CRAN (R 4.5.0) |
