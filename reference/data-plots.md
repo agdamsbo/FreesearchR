@@ -688,7 +688,7 @@ create_plot(mtcars, "plot_violin", "mpg", "cyl") |> attributes()
 #> list()
 #> 
 #> $plot_env
-#> <environment: 0x56288e807a28>
+#> <environment: 0x55f4a5c59308>
 #> 
 #> $code
 #> FreesearchR::plot_violin(pri = "mpg", sec = "cyl", ter = NULL)
