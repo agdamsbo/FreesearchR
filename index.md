@@ -47,12 +47,12 @@ values are provided, the app will use the defaults listed below.
 
 **Configuration Variables**
 
-| Variable             | Description                                                             | Default   |
-|----------------------|-------------------------------------------------------------------------|-----------|
-| `INCLUDE_GLOBALENV`  | Load datasets already present in the global R environment into the app  | `FALSE`   |
-| `DATA_LIMIT_DEFAULT` | Default number of observations for previewing or working with a dataset | `10,000`  |
-| `DATA_LIMIT_UPPER`   | Maximum number of observations a user can set for the upper limit       | `100,000` |
-| `DATA_LIMIT_LOWER`   | Minimum number of observations a user can set for the lower limit       | `1`       |
+| Variable             | Description                                                                                                 | Default   |
+|----------------------|-------------------------------------------------------------------------------------------------------------|-----------|
+| `INCLUDE_GLOBALENV`  | Load datasets already present in the global R environment into the app                                      | `FALSE`   |
+| `DATA_LIMIT_DEFAULT` | Default number of observations for previewing or working with a dataset                                     | `10,000`  |
+| `DATA_LIMIT_UPPER`   | Maximum number of observations a user can set for the upper limit. If set to 0, no uppper limit is applied. | `100,000` |
+| `DATA_LIMIT_LOWER`   | Minimum number of observations a user can set for the lower limit                                           | `1`       |
 
 ### Run from R (or RStudio)
 
@@ -77,7 +77,9 @@ tool for exploratory analysis.
     ```
 
 All the variables specified above can also be passed to the app on
-launch from R.
+launch from R. Set DATA_LIMIT_UPPER=0 to remove upper data limit. This
+limit is set to protect the online app version from choking and crashing
+on large data sets.
 
 ### Running with Docker Compose
 

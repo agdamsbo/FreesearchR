@@ -126,7 +126,7 @@
 </tr>
 <tr class="odd">
 <td><code>DATA_LIMIT_UPPER</code></td>
-<td>Maximum number of observations a user can set for the upper limit</td>
+<td>Maximum number of observations a user can set for the upper limit. If set to 0, no uppper limit is applied.</td>
 <td><code>100,000</code></td>
 </tr>
 <tr class="even">
@@ -154,7 +154,7 @@
 <span><span class="fu"><a href="reference/launch_FreesearchR.html">launch_FreesearchR</a></span><span class="op">(</span>INCLUDE_GLOBALENV<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </li>
 </ol>
-<p>All the variables specified above can also be passed to the app on launch from R.</p>
+<p>All the variables specified above can also be passed to the app on launch from R. Set DATA_LIMIT_UPPER=0 to remove upper data limit. This limit is set to protect the online app version from choking and crashing on large data sets.</p>
 </div>
 <div class="section level3">
 <h3 id="running-with-docker-compose">Running with Docker Compose<a class="anchor" aria-label="anchor" href="#running-with-docker-compose"></a>

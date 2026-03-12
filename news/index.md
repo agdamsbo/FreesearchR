@@ -8,6 +8,8 @@ DATA_LIMIT_UPPER and DATA_LIMIT_LOWER. Described in the README.
 
 *FIX* faster data description function.
 
+Also added a few tests to the package.
+
 ## FreesearchR 26.3.2
 
 *FIX* Updating factor levels always created new factor.
