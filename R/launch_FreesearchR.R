@@ -43,19 +43,30 @@ launch_FreesearchR <- function(include_globalenv = TRUE,
 
 ## Helper to set env variables
 get_config <- function(var_name, default = NULL) {
-  # First check environment variables (set by Docker)
-  val <- Sys.getenv(var_name, unset = NA)
+  val <- Sys.getenv(var_name, unset = NA_character_)
 
-  if (!is.na(val) && nzchar(val)) {
+  # Only use env var if it is explicitly set and non-empty
+  if (!is.na(val) && nzchar(trimws(val))) {
+    if (is.logical(default)) return(to_logical(val))
+    if (is.numeric(default)) return(as.numeric(val))
     return(val)
   }
 
-  # Fall back to default (can be overridden when launching from R)
   if (!is.null(default)) {
     return(default)
   }
 
   stop(paste("Required config variable not set:", var_name))
+}
+
+to_logical <- function(x) {
+  result <- switch(tolower(trimws(as.character(x))),
+                   "true"  = , "1" = , "yes" = TRUE,
+                   "false" = , "0" = , "no"  = FALSE,
+                   NA
+  )
+  if (is.na(result)) stop(paste("Cannot coerce to logical:", x))
+  result
 }
 
 
