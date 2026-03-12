@@ -91,41 +91,93 @@
 <li><p>help learners get a good start analysing data and coding in <em>R</em></p></li>
 <li><p>ease quick data overview and basic visualisations for any clinical researcher</p></li>
 </ol>
+<p>Here’s a polished and restructured version of your README section for clarity, conciseness, and user-friendliness:</p>
 </div>
 <div class="section level2">
-<h2 id="run-locally-on-your-own-machine">Run locally on your own machine<a class="anchor" aria-label="anchor" href="#run-locally-on-your-own-machine"></a>
+<h2 id="run-locally-on-your-own-machine">Run Locally on Your Own Machine<a class="anchor" aria-label="anchor" href="#run-locally-on-your-own-machine"></a>
 </h2>
-<p>The <strong><em>FreesearchR</em></strong> app can also run on your own machine with no data transmitted anywhere. Blow are the available options.</p>
+<p>The <strong>FreesearchR</strong> app can be run locally on your machine, ensuring no data is transmitted externally. Below are the available options for setup and configuration.</p>
 <div class="section level3">
-<h3 id="run-from-r-or-rstduio">Run from R (or RStduio)<a class="anchor" aria-label="anchor" href="#run-from-r-or-rstduio"></a>
+<h3 id="configuration--data-loading">Configuration &amp; Data Loading<a class="anchor" aria-label="anchor" href="#configuration--data-loading"></a>
 </h3>
-<p>Working with data in R, FreesearchR is a quick and easy tool to get overview and perform the first explorative analyses to get you going.</p>
-<p>Any data available in the your R session will be available to the FreesearchR app. Just follow the below steps to get going:</p>
-<ol style="list-style-type: decimal">
-<li><p><strong>Requirement:</strong> You need to have <a href="https://www.r-project.org/" class="external-link"><em>R</em> installed</a> and possibly an editor like <a href="https://posit.co/download/rstudio-desktop/" class="external-link">RStudio</a>.</p></li>
-<li>
-<p>Then open the <em>R</em> console and copy/paste the following code, that will install the <a href="https://devtools.r-lib.org/" class="external-link">devtools</a> package and then the <a href="https://github.com/agdamsbo/FreesearchR" class="external-link">FreesearchR</a> <em>R</em>-package with its dependencies:</p>
-<pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://devtools.r-lib.org/" class="external-link">"devtools"</a></span><span class="op">)</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"agdamsbo/FreesearchR"</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/agdamsbo/FreesearchR" class="external-link">FreesearchR</a></span><span class="op">)</span></span>
-<span><span class="co"># By loading mtcars to the environment, it will be available</span></span>
-<span><span class="co"># in the interface like any other data.frame</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/launch_FreesearchR.html">launch_FreesearchR</a></span><span class="op">(</span><span class="op">)</span></span></code></pre>
-</li>
-</ol>
+<p>The app can be configured either by passing a named list to <code>run_app()</code> or by setting environment variables in a <strong>Docker Compose</strong> file. The following variables control data access and display behavior. If no values are provided, the app will use the defaults listed below.</p>
+<p><strong>Configuration Variables</strong></p>
+<table class="table">
+<colgroup>
+<col width="22%">
+<col width="68%">
+<col width="9%">
+</colgroup>
+<thead><tr class="header">
+<th>Variable</th>
+<th>Description</th>
+<th>Default</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>INCLUDE_GLOBALENV</code></td>
+<td>Load datasets already present in the global R environment into the app</td>
+<td><code>FALSE</code></td>
+</tr>
+<tr class="even">
+<td><code>DATA_LIMIT_DEFAULT</code></td>
+<td>Default number of observations for previewing or working with a dataset</td>
+<td><code>10,000</code></td>
+</tr>
+<tr class="odd">
+<td><code>DATA_LIMIT_UPPER</code></td>
+<td>Maximum number of observations a user can set for the upper limit</td>
+<td><code>100,000</code></td>
+</tr>
+<tr class="even">
+<td><code>DATA_LIMIT_LOWER</code></td>
+<td>Minimum number of observations a user can set for the lower limit</td>
+<td><code>1</code></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section level3">
-<h3 id="running-with-docker-compose">Running with docker compose<a class="anchor" aria-label="anchor" href="#running-with-docker-compose"></a>
+<h3 id="run-from-r-or-rstudio">Run from R (or RStudio)<a class="anchor" aria-label="anchor" href="#run-from-r-or-rstudio"></a>
 </h3>
-<p>For advanced users, wanting to deploy the FreesearchR app to run anywhere, a docker image is available.</p>
-<p>Below is the minimal <code>docker_compose.yml</code> file:</p>
-<pre><code><span><span class="va">services</span><span class="op">:</span></span>
-<span>  <span class="va">freesearchr</span><span class="op">:</span></span>
-<span>    <span class="va">image</span><span class="op">:</span> <span class="va">ghcr.io</span><span class="op">/</span><span class="va">agdamsbo</span><span class="op">/</span><span class="va">freesearchr</span><span class="op">:</span><span class="va">latest</span></span>
-<span>    <span class="va">ports</span><span class="op">:</span></span>
-<span>      <span class="op">-</span> <span class="st">'3838:3838'</span></span>
-<span>    <span class="va">restart</span><span class="op">:</span> <span class="va">on</span><span class="op">-</span><span class="va">failure</span></span></code></pre>
+<p>If you’re working with data in R, <strong>FreesearchR</strong> is a quick and easy tool for exploratory analysis.</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Requirement:</strong> Ensure you have <a href="https://www.r-project.org/" class="external-link">R</a> installed, and optionally an editor like <a href="https://posit.co/download/rstudio-desktop/" class="external-link">RStudio</a>.</p></li>
+<li>
+<p>Open the <strong>R console</strong> and run the following code to install the <a href="https://github.com/agdamsbo/FreesearchR" class="external-link">FreesearchR</a> package and launch the app:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://devtools.r-lib.org/" class="external-link">"devtools"</a></span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"agdamsbo/FreesearchR"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/agdamsbo/FreesearchR" class="external-link">FreesearchR</a></span><span class="op">)</span></span>
+<span><span class="co"># Load sample data (e.g., mtcars) to make it available in the app</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/launch_FreesearchR.html">launch_FreesearchR</a></span><span class="op">(</span>INCLUDE_GLOBALENV<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+</li>
+</ol>
+<p>All the variables specified above can also be passed to the app on launch from R.</p>
+</div>
+<div class="section level3">
+<h3 id="running-with-docker-compose">Running with Docker Compose<a class="anchor" aria-label="anchor" href="#running-with-docker-compose"></a>
+</h3>
+<p>For advanced users, you can deploy <strong>FreesearchR</strong> using Docker. A data folder can be mounted to <code>/app/data</code> to automatically load supported file types (<code>.csv</code>, <code>.tsv</code>, <code>.txt</code>, <code>.xls</code>, <code>.xlsx</code>, <code>.ods</code>, <code>.dta</code>, <code>.rds</code>) at startup.</p>
+<p>To mount a local data folder, add a <code>volumes</code> entry to your <code>docker-compose.yml</code> file:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="at">  </span><span class="fu">shiny</span><span class="kw">:</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> ghcr.io/agdamsbo/freesearchr:latest</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> ./data:/app/data:ro</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> INCLUDE_GLOBALENV=FALSE</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> DATA_LIMIT_DEFAULT=10000</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> DATA_LIMIT_UPPER=100000</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> DATA_LIMIT_LOWER=1</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">'3838:3838'</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="at">    </span><span class="fu">restart</span><span class="kw">:</span><span class="at"> on-failure</span></span></code></pre></div>
+<ul>
+<li><p>The <code>:ro</code> flag mounts the folder as <strong>read-only</strong>, preventing the app from modifying your original data files.</p></li>
+<li><p>If no volume is mounted, the app will start without any preloaded datasets.</p></li>
+</ul>
 </div>
 </div>
 <div class="section level2">

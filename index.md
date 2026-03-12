@@ -29,49 +29,87 @@ This app has the following simple goals:
 3.  ease quick data overview and basic visualisations for any clinical
     researcher
 
-## Run locally on your own machine
+Here’s a polished and restructured version of your README section for
+clarity, conciseness, and user-friendliness:
 
-The ***FreesearchR*** app can also run on your own machine with no data
-transmitted anywhere. Blow are the available options.
+## Run Locally on Your Own Machine
 
-### Run from R (or RStduio)
+The **FreesearchR** app can be run locally on your machine, ensuring no
+data is transmitted externally. Below are the available options for
+setup and configuration.
 
-Working with data in R, FreesearchR is a quick and easy tool to get
-overview and perform the first explorative analyses to get you going.
+### Configuration & Data Loading
 
-Any data available in the your R session will be available to the
-FreesearchR app. Just follow the below steps to get going:
+The app can be configured either by passing a named list to `run_app()`
+or by setting environment variables in a **Docker Compose** file. The
+following variables control data access and display behavior. If no
+values are provided, the app will use the defaults listed below.
 
-1.  **Requirement:** You need to have [*R*
-    installed](https://www.r-project.org/) and possibly an editor like
+**Configuration Variables**
+
+| Variable             | Description                                                             | Default   |
+|----------------------|-------------------------------------------------------------------------|-----------|
+| `INCLUDE_GLOBALENV`  | Load datasets already present in the global R environment into the app  | `FALSE`   |
+| `DATA_LIMIT_DEFAULT` | Default number of observations for previewing or working with a dataset | `10,000`  |
+| `DATA_LIMIT_UPPER`   | Maximum number of observations a user can set for the upper limit       | `100,000` |
+| `DATA_LIMIT_LOWER`   | Minimum number of observations a user can set for the lower limit       | `1`       |
+
+### Run from R (or RStudio)
+
+If you’re working with data in R, **FreesearchR** is a quick and easy
+tool for exploratory analysis.
+
+1.  **Requirement:** Ensure you have [R](https://www.r-project.org/)
+    installed, and optionally an editor like
     [RStudio](https://posit.co/download/rstudio-desktop/).
 
-2.  Then open the *R* console and copy/paste the following code, that
-    will install the [devtools](https://devtools.r-lib.org/) package and
-    then the [FreesearchR](https://github.com/agdamsbo/FreesearchR)
-    *R*-package with its dependencies:
+2.  Open the **R console** and run the following code to install the
+    [FreesearchR](https://github.com/agdamsbo/FreesearchR) package and
+    launch the app:
 
-        require("devtools")
-        devtools::install_github("agdamsbo/FreesearchR")
-        library(FreesearchR)
-        # By loading mtcars to the environment, it will be available
-        # in the interface like any other data.frame
-        data(mtcars)
-        launch_FreesearchR()
+    ``` r
+    if (!require("devtools")) install.packages("devtools")
+    devtools::install_github("agdamsbo/FreesearchR")
+    library(FreesearchR)
+    # Load sample data (e.g., mtcars) to make it available in the app
+    data(mtcars)
+    launch_FreesearchR(INCLUDE_GLOBALENV=TRUE)
+    ```
 
-### Running with docker compose
+All the variables specified above can also be passed to the app on
+launch from R.
 
-For advanced users, wanting to deploy the FreesearchR app to run
-anywhere, a docker image is available.
+### Running with Docker Compose
 
-Below is the minimal `docker_compose.yml` file:
+For advanced users, you can deploy **FreesearchR** using Docker. A data
+folder can be mounted to `/app/data` to automatically load supported
+file types (`.csv`, `.tsv`, `.txt`, `.xls`, `.xlsx`, `.ods`, `.dta`,
+`.rds`) at startup.
 
-    services:
-      freesearchr:
-        image: ghcr.io/agdamsbo/freesearchr:latest
-        ports:
-          - '3838:3838'
-        restart: on-failure
+To mount a local data folder, add a `volumes` entry to your
+`docker-compose.yml` file:
+
+``` yaml
+services:
+  shiny:
+    image: ghcr.io/agdamsbo/freesearchr:latest
+    volumes:
+      - ./data:/app/data:ro
+    environment:
+      - INCLUDE_GLOBALENV=FALSE
+      - DATA_LIMIT_DEFAULT=10000
+      - DATA_LIMIT_UPPER=100000
+      - DATA_LIMIT_LOWER=1
+    ports:
+      - '3838:3838'
+    restart: on-failure
+```
+
+- The `:ro` flag mounts the folder as **read-only**, preventing the app
+  from modifying your original data files.
+
+- If no volume is mounted, the app will start without any preloaded
+  datasets.
 
 ## Code of Conduct
 

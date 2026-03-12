@@ -4,7 +4,9 @@
 
 *NEW* option to pass global settings when running as docker or launching
 from R. Support for INCLUDE_GLOBALENV, DATA_LIMIT_DEFAULT,
-DATA_LIMIT_UPPER and DATA_LIMIT_LOWER. Docs are missing…
+DATA_LIMIT_UPPER and DATA_LIMIT_LOWER. Described in the README.
+
+*FIX* faster data description function.
 
 ## FreesearchR 26.3.2
 
