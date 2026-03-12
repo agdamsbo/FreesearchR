@@ -62,7 +62,7 @@ If you're working with data in R, **FreesearchR** is a quick and easy tool for e
    launch_FreesearchR(INCLUDE_GLOBALENV=TRUE)
    ```
 
-All the variables specified above can also be passed to the app on launch from R.
+All the variables specified above can also be passed to the app on launch from R. Set DATA_LIMIT_UPPER=0 to remove upper data limit. This limit is set to protect the online app version from choking and crashing on large data sets.
 
 ### Running with Docker Compose
 
