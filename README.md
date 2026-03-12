@@ -42,7 +42,7 @@ The app can be configured either by passing a named list to `run_app()` or by se
 |-------------------------|-----------------------------------------------------------------------------|-----------|
 | `INCLUDE_GLOBALENV`     | Load datasets already present in the global R environment into the app    | `FALSE`   |
 | `DATA_LIMIT_DEFAULT`    | Default number of observations for previewing or working with a dataset            | `10,000`  |
-| `DATA_LIMIT_UPPER`      | Maximum number of observations a user can set for the upper limit                    | `100,000` |
+| `DATA_LIMIT_UPPER`      | Maximum number of observations a user can set for the upper limit. If set to 0, no uppper limit is applied.                    | `100,000` |
 | `DATA_LIMIT_LOWER`      | Minimum number of observations a user can set for the lower limit                    | `1`       |
 
 ### Run from R (or RStudio)
