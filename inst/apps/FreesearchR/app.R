@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//Rtmprp4Sq1/fileb60491b0ce8.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpmhqokQ/file1a14715fd082.R 
 ########
 
 i18n_path <- system.file("translations", package = "FreesearchR")
@@ -2957,7 +2957,7 @@ add_sparkline <- function(grid, column = "vals", color.main = "#2a8484", color.s
         type <- "line"
         ds <- data.frame(x = NA, y = NA)
         horizontal <- FALSE
-      } else if (identical(data_cl, "factor")) {
+      } else if ("factor" %in% data_cl) {
         type <- "column"
         s <- summary(data)
         ds <- data.frame(x = names(s), y = s)
@@ -3887,20 +3887,23 @@ file_export <- function(data,
 #'   head(5) |>
 #'   str()
 default_parsing <- function(data) {
-  name_labels <- lapply(data, \(.x) REDCapCAST::get_attr(.x, attr = "label"))
+  # name_labels <- lapply(data, \(.x) REDCapCAST::get_attr(.x, attr = "label"))
   # browser()
-  out <- data |>
-    setNames(make.names(names(data), unique = TRUE)) |>
-    ## Temporary step to avoid nested list and crashing
-    remove_nested_list() |>
-    REDCapCAST::parse_data() |>
-    REDCapCAST::as_factor() |>
-    REDCapCAST::numchar2fct(numeric.threshold = 8,
-                            character.throshold = 10) |>
-    REDCapCAST::as_logical() |>
-    REDCapCAST::fct_drop()
-
-  set_column_label(out, setNames(name_labels, names(out)), overwrite = FALSE)
+  with_labels(data,{
+    data |>
+      setNames(make.names(names(data), unique = TRUE)) |>
+      ## Temporary step to avoid nested list and crashing
+      remove_nested_list() |>
+      REDCapCAST::parse_data() |>
+      REDCapCAST::as_factor() |>
+      REDCapCAST::numchar2fct(numeric.threshold = 8,
+                              character.throshold = 10) |>
+      REDCapCAST::as_logical() |>
+      REDCapCAST::fct_drop()
+  })
+  # out <-
+  #
+  # set_column_label(out, setNames(name_labels, names(out)), overwrite = FALSE)
 
   # purrr::map2(
   #   out,
