@@ -87,6 +87,7 @@ str_remove_last <- function(data, pattern = "\n") {
 #'   plot_sankey("cyl", "gear", "vs", color.group = "pri")
 #'
 #'   # stRoke::trial |> plot_sankey("mrs_1", "mrs_6")
+#'   # stRoke::trial |> plot_sankey("active", "male")
 plot_sankey <- function(data,
                         pri,
                         sec,
@@ -152,41 +153,49 @@ plot_sankey_single <- function(data,
                                ...) {
   color.group <- match.arg(color.group)
 
-
-  # browser()
-  # if (is.na(ds[c(pri,sec)]))
-
-  # browser()
   data_orig <- data
 
-  data[c(pri, sec)] <- data[c(pri, sec)] |>
-    dplyr::mutate(
-      dplyr::across(dplyr::where(is.logical), as.factor),
-      dplyr::across(dplyr::where(is.factor), forcats::fct_drop),
-      dplyr::across(dplyr::where(is.factor), \(.x) {
-        forcats::fct_na_value_to_level(.x, missing.level)
-      })
-    )
+  data[c(pri, sec)] <- with_labels(data,{
+    data[c(pri, sec)] |>
+      dplyr::mutate(
+        dplyr::across(dplyr::where(is.logical), as.factor),
+        dplyr::across(dplyr::where(is.factor), forcats::fct_drop),
+        dplyr::across(dplyr::where(is.factor), \(.x) {
+          if (anyNA(.x)) forcats::fct_na_value_to_level(.x, missing.level) else .x
+        })
+      )
+  })
 
-  data <- data |> sankey_ready(pri = pri, sec = sec, ...)
+
+  ## Aggregate data
+  data_aggr <- data |> sankey_ready(pri = pri, sec = sec, ...)
 
   na.color <- "#2986cc"
   box.color <- "#1E4B66"
 
   if (is.null(colors)) {
     if (color.group == "sec") {
+      if (anyNA(data_orig[[sec]])){
       main.colors <- viridisLite::viridis(n = length(levels(data_orig[[sec]])))
+      } else {
+        main.colors <- viridisLite::viridis(n = length(levels(data[[sec]])))
+      }
       ## Only keep colors for included levels
-      main.colors <- main.colors[match(levels(data[[sec]]), levels(data_orig[[sec]]))]
+        main.colors <- main.colors[match(levels(data[[sec]]), levels(data[[sec]]))]
 
       secondary.colors <- rep(na.color, length(levels(data[[pri]])))
       label.colors <- Reduce(c, lapply(list(
         secondary.colors, rev(main.colors)
       ), contrast_text))
     } else {
-      main.colors <- viridisLite::viridis(n = length(levels(data_orig[[pri]])))
+      if (anyNA(data_orig[[sec]])){
+        main.colors <- viridisLite::viridis(n = length(levels(data_orig[[pri]])))
+      } else {
+        main.colors <- viridisLite::viridis(n = length(levels(data[[pri]])))
+      }
+      # main.colors <- viridisLite::viridis(n = length(levels(data[[pri]])))
       ## Only keep colors for included levels
-      main.colors <- main.colors[match(levels(data[[pri]]), levels(data_orig[[pri]]))]
+      main.colors <- main.colors[match(levels(data[[pri]]), levels(data[[pri]]))]
 
       secondary.colors <- rep(na.color, length(levels(data[[sec]])))
       label.colors <- Reduce(c, lapply(list(
@@ -199,11 +208,13 @@ plot_sankey_single <- function(data,
     label.colors <- contrast_text(colors)
   }
 
-  group_labels <- c(get_label(data_orig, pri), get_label(data_orig, sec)) |>
+  group_labels <- c(get_label(data, pri), get_label(data, sec)) |>
     sapply(line_break) |>
     unname()
 
-  p <- ggplot2::ggplot(data, ggplot2::aes(y = n, axis1 = lx, axis2 = ly))
+  # browser()
+
+  p <- ggplot2::ggplot(data_aggr, ggplot2::aes(y = n, axis1 = lx, axis2 = ly))
 
   if (color.group == "sec") {
     p <- p +

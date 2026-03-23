@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpmhqokQ/file1a147dcf977e.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmprPVhaz/file70565b30c8af.R 
 ########
 
 i18n_path <- system.file("translations", package = "FreesearchR")
@@ -64,7 +64,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'26.3.3'
+app_version <- function()'26.3.4'
 
 
 ########
@@ -4514,7 +4514,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v26.3.3-260312'
+hosted_version <- function()'v26.3.4-260323'
 
 
 ########
@@ -5964,6 +5964,8 @@ landing_page_ui <- function(i18n) {
 #' @param data_limit_default default data set observations limit
 #' @param data_limit_upper data set observations upper limit
 #' @param data_limit_lower data set observations lower limit
+#' @param check_app_version always attempt to check app version against latest
+#' release on GitHub. Default is FALSE
 #' @param ... passed on to `shiny::runApp()`
 #'
 #' @returns shiny app
@@ -5978,12 +5980,14 @@ launch_FreesearchR <- function(include_globalenv = TRUE,
                                data_limit_default = 1000,
                                data_limit_upper = 100000,
                                data_limit_lower = 1,
+                               check_app_version = FALSE,
                                ...) {
   Sys.setenv(
     INCLUDE_GLOBALENV = include_globalenv,
     DATA_LIMIT_DEFAULT = data_limit_default,
     DATA_LIMIT_UPPER = data_limit_upper,
-    DATA_LIMIT_LOWER = data_limit_lower
+    DATA_LIMIT_LOWER = data_limit_lower,
+    CHECK_APP_VERSION = check_app_version
   )
 
   appDir <- system.file("apps", "FreesearchR", package = "FreesearchR")
@@ -7054,15 +7058,17 @@ sankey_ready <- function(data, pri, sec, numbers = "count", ...) {
     dplyr::ungroup()
 
   if (numbers == "count") {
-    out <- out |> dplyr::mutate(
-      lx = factor(paste0(!!dplyr::sym(pri), "\n(n=", gx.sum, ")")),
-      ly = factor(paste0(!!dplyr::sym(sec), "\n(n=", gy.sum, ")"))
-    )
+    out <- out |> dplyr::mutate(lx = factor(paste0(
+      !!dplyr::sym(pri), "\n(n=", gx.sum, ")"
+    )), ly = factor(paste0(
+      !!dplyr::sym(sec), "\n(n=", gy.sum, ")"
+    )))
   } else if (numbers == "percentage") {
-    out <- out |> dplyr::mutate(
-      lx = factor(paste0(!!dplyr::sym(pri), "\n(", round((gx.sum / sum(n)) * 100, 1), "%)")),
-      ly = factor(paste0(!!dplyr::sym(sec), "\n(", round((gy.sum / sum(n)) * 100, 1), "%)"))
-    )
+    out <- out |> dplyr::mutate(lx = factor(paste0(
+      !!dplyr::sym(pri), "\n(", round((gx.sum / sum(n)) * 100, 1), "%)"
+    )), ly = factor(paste0(
+      !!dplyr::sym(sec), "\n(", round((gy.sum / sum(n)) * 100, 1), "%)"
+    )))
   }
 
   if (is.factor(data[[pri]])) {
@@ -7104,19 +7110,37 @@ str_remove_last <- function(data, pattern = "\n") {
 #' mtcars |>
 #'   default_parsing() |>
 #'   plot_sankey("cyl", "gear", "vs", color.group = "pri")
-plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors = NULL,missing.level="Missing") {
+#'
+#'   # stRoke::trial |> plot_sankey("mrs_1", "mrs_6")
+plot_sankey <- function(data,
+                        pri,
+                        sec,
+                        ter = NULL,
+                        color.group = "pri",
+                        colors = NULL,
+                        missing.level = "Missing") {
   if (!is.null(ter)) {
     ds <- split(data, data[ter])
   } else {
     ds <- list(data)
   }
 
-  out <- lapply(ds, \(.ds){
-    plot_sankey_single(.ds, pri = pri, sec = sec, color.group = color.group, colors = colors,missing.level=missing.level)
+
+  out <- lapply(ds, \(.ds) {
+    plot_sankey_single(
+      .ds,
+      pri = pri,
+      sec = sec,
+      color.group = color.group,
+      colors = colors,
+      missing.level = missing.level
+    )
   })
 
   patchwork::wrap_plots(out)
 }
+
+
 
 #' Beautiful sankey plot
 #'
@@ -7144,18 +7168,30 @@ plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors 
 #' stRoke::trial |>
 #'   default_parsing() |>
 #'   plot_sankey_single("diabetes", "hypertension")
-plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), colors = NULL,missing.level="Missing", ...) {
+plot_sankey_single <- function(data,
+                               pri,
+                               sec,
+                               color.group = c("pri", "sec"),
+                               colors = NULL,
+                               missing.level = "Missing",
+                               ...) {
   color.group <- match.arg(color.group)
+
+
+  # browser()
+  # if (is.na(ds[c(pri,sec)]))
 
   # browser()
   data_orig <- data
+
   data[c(pri, sec)] <- data[c(pri, sec)] |>
     dplyr::mutate(
-      # dplyr::across(dplyr::where(is.logical), as.factor),
-      dplyr::across(dplyr::where(is.factor), forcats::fct_drop)#,
-      # dplyr::across(dplyr::where(is.factor), \(.x){forcats::fct_na_value_to_level(.x,missing.level)})
+      dplyr::across(dplyr::where(is.logical), as.factor),
+      dplyr::across(dplyr::where(is.factor), forcats::fct_drop),
+      dplyr::across(dplyr::where(is.factor), \(.x) {
+        forcats::fct_na_value_to_level(.x, missing.level)
+      })
     )
-
 
   data <- data |> sankey_ready(pri = pri, sec = sec, ...)
 
@@ -7169,21 +7205,26 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
       main.colors <- main.colors[match(levels(data[[sec]]), levels(data_orig[[sec]]))]
 
       secondary.colors <- rep(na.color, length(levels(data[[pri]])))
-      label.colors <- Reduce(c, lapply(list(secondary.colors, rev(main.colors)), contrast_text))
+      label.colors <- Reduce(c, lapply(list(
+        secondary.colors, rev(main.colors)
+      ), contrast_text))
     } else {
       main.colors <- viridisLite::viridis(n = length(levels(data_orig[[pri]])))
       ## Only keep colors for included levels
       main.colors <- main.colors[match(levels(data[[pri]]), levels(data_orig[[pri]]))]
 
       secondary.colors <- rep(na.color, length(levels(data[[sec]])))
-      label.colors <- Reduce(c, lapply(list(rev(main.colors), secondary.colors), contrast_text))
+      label.colors <- Reduce(c, lapply(list(
+        rev(main.colors), secondary.colors
+      ), contrast_text))
     }
     colors <- c(na.color, main.colors, secondary.colors)
+    colors[is.na(colors)] <- "grey80"
   } else {
     label.colors <- contrast_text(colors)
   }
 
-  group_labels <- c(get_label(data, pri), get_label(data, sec)) |>
+  group_labels <- c(get_label(data_orig, pri), get_label(data_orig, sec)) |>
     sapply(line_break) |>
     unname()
 
@@ -7202,9 +7243,8 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
         knot.pos = 0.4,
         curve_type = "sigmoid"
       ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(sec)),
-        size = 2,
-        width = 1 / 3.4
-      )
+                                   size = 2,
+                                   width = 1 / 3.4)
   } else {
     p <- p +
       ggalluvial::geom_alluvium(
@@ -7217,9 +7257,8 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
         knot.pos = 0.4,
         curve_type = "sigmoid"
       ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(pri)),
-        size = 2,
-        width = 1 / 3.4
-      )
+                                   size = 2,
+                                   width = 1 / 3.4)
   }
 
   ## Will fail to use stat="stratum" if library is not loaded.
@@ -7229,13 +7268,10 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
       stat = "stratum",
       ggplot2::aes(label = after_stat(stratum)),
       colour = label.colors,
-      size = 8,
+      size = 6,
       lineheight = 1
     ) +
-    ggplot2::scale_x_continuous(
-      breaks = 1:2,
-      labels = group_labels
-    ) +
+    ggplot2::scale_x_continuous(breaks = 1:2, labels = group_labels) +
     ggplot2::scale_fill_manual(values = colors[-1], na.value = colors[1]) +
     # ggplot2::scale_color_manual(values = main.colors) +
     ggplot2::theme_void() +
@@ -10772,6 +10808,7 @@ ui_elements <- function(selection) {
         ## Default just output "NULL"
         ## This could probably be achieved more legantly, but this works.
         dev_banner(),
+        version_banner,
         landing_page_ui(i18n = i18n),
         # shiny::column(width = 2),
         # shiny::column(
@@ -12832,33 +12869,6 @@ validation_server <- function(id,
 
       data_r <- if (shiny::is.reactive(data)) data else shiny::reactive(data)
 
-      # observeEvent(data_r(), {
-      #   to_validate <- data()
-      #   valid_dims <- check_data(to_validate, n_row = n_row, n_col = n_col)
-      #
-      #   if (all(c(valid_dims$nrows, valid_dims$ncols))) {
-      #     valid_status <- "OK"
-      #   } else {
-      #     valid_status <- "Failed"
-      #   }
-      #
-      #   valid_results <- lapply(
-      #     X = c("nrows", "ncols"),
-      #     FUN = function(x) {
-      #       if (is.null(valid_dims[[x]]))
-      #         return(NULL)
-      #       label <- switch(
-      #         x,
-      #         "nrows" = n_row_label,
-      #         "ncols" = n_col_label
-      #       )
-      #       list(
-      #         status = ifelse(valid_dims[[x]], "OK", "Failed"),
-      #         label = paste0("<b>", label, "</b>")
-      #       )
-      #     }
-      #   )
-
       shiny::observeEvent(
         data_r(),
         {
@@ -13239,6 +13249,337 @@ make_validation_alerts <- function(data) {
       }
     }
   )
+}
+
+
+########
+#### Current file: /Users/au301842/FreesearchR/R//version_check.R 
+########
+
+# version_check.R
+#
+# Runs a one-time version check at app startup and returns a ready-made
+# shinyWidgets::alert() UI element that can be placed directly in the UI
+# definition -- no server(), no renderUI(), no uiOutput() required.
+#
+# Because the check runs outside server(), it executes once when the app
+# process starts, so the banner is present immediately on first render with
+# no loading delay.
+#
+# Version detection uses two strategies, tried in order:
+#   1. utils::packageVersion() -- works when the package is installed locally.
+#   2. app_version argument    -- explicit fallback for environments where the
+#      package is not installed (e.g. shinyapps.io). Pass the result of your
+#      app_version() function here.
+#
+# Quick start:
+#
+#   # global.R (or top of app.R, before ui / server)
+#   source("version_check.R")
+#   version_banner <- check_app_version(
+#     github_user = "your-github-username",
+#     github_repo = "your-repo-name",
+#     app_version = app_version()   # fallback for shinyapps.io
+#   )
+#
+#   # ui.R -- drop the result anywhere in the UI tree
+#   fluidPage(
+#     version_banner,
+#     ...
+#   )
+#
+#   # Verbose / debug mode -- always show the banner:
+#   version_banner <- check_app_version(
+#     github_user = "your-github-username",
+#     github_repo = "your-repo-name",
+#     app_version = app_version(),
+#     verbose     = TRUE
+#   )
+
+
+# -- Internal helpers ----------------------------------------------------------
+
+#' Check internet connectivity
+#'
+#' @return Logical; TRUE if an internet connection is available.
+.has_internet <- function() {
+  tryCatch({
+    con <- url("https://api.github.com", open = "r")
+    close(con)
+    TRUE
+  }, error = function(e) FALSE)
+}
+
+
+#' Fetch the latest release version from a GitHub repository
+#'
+#' @param github_user GitHub username or organisation.
+#' @param github_repo Repository name.
+#'
+#' @return A character string with the version tag (e.g. "1.2.0"), or NULL on
+#'   failure.
+.get_latest_github_version <- function(github_user, github_repo) {
+  api_url <- sprintf(
+    "https://api.github.com/repos/%s/%s/releases/latest",
+    github_user,
+    github_repo
+  )
+
+  tryCatch({
+    response  <- readLines(url(api_url), warn = FALSE)
+    json_text <- paste(response, collapse = "")
+
+    tag <- regmatches(
+      json_text,
+      regexpr('"tag_name"\\s*:\\s*"([^"]+)"', json_text)
+    )
+
+    if (length(tag) == 0 || nchar(tag) == 0) return(NULL)
+
+    # Strip a leading "v" if present (e.g. "v1.2.0" -> "1.2.0")
+    sub('^"tag_name"\\s*:\\s*"v?([^"]+)"$', "\\1", tag)
+  }, error = function(e) NULL)
+}
+
+
+#' Resolve the current app version
+#'
+#' Tries two strategies in order:
+#' \enumerate{
+#'   \item \code{utils::packageVersion(package_name)} -- works when the package
+#'     is installed locally (development, local \code{runApp()}).
+#'   \item \code{app_version} argument -- an explicit version string supplied by
+#'     the caller, e.g. from an \code{app_version()} function bundled with the
+#'     app. Used on shinyapps.io where the package is not installed.
+#' }
+#'
+#' @param package_name Name of the package / repository.
+#' @param app_version  Optional fallback version string.
+#'
+#' @return A character string with the version (e.g. "1.1.0"), or NULL if
+#'   neither strategy succeeds.
+.resolve_app_version <- function(package_name, app_version = NULL) {
+
+  # Strategy 1: installed package
+  v <- tryCatch(
+    as.character(utils::packageVersion(package_name)),
+    error = function(e) NULL
+  )
+  if (!is.null(v)) {
+    message("[version_check] Version source: installed package")
+    return(v)
+  }
+
+  # Strategy 2: explicit fallback supplied by the caller
+  if (!is.null(app_version)) {
+    message("[version_check] Version source: app_version() fallback")
+    return(as.character(app_version))
+  }
+
+  NULL
+}
+
+
+#' Build a shinyWidgets::alert() UI element for the version banner
+#'
+#' @param current          Current installed version string.
+#' @param latest           Latest GitHub release version string, or NULL when
+#'   the check could not complete (e.g. no internet).
+#' @param update_available Logical; whether latest > current.
+#' @param github_user      GitHub username / organisation.
+#' @param github_repo      Repository name.
+#'
+#' @return A \code{shinyWidgets::alert()} UI element.
+.build_version_alert <- function(current,
+                                 latest,
+                                 update_available,
+                                 github_user,
+                                 github_repo) {
+
+  repo_url <- sprintf(
+    "https://github.com/%s/%s/releases/latest",
+    github_user,
+    github_repo
+  )
+
+  if (is.null(latest)) {
+    # Version check could not complete (no internet or API failure)
+    return(
+      shinyWidgets::alert(
+        tags$b("Version check failed. "),
+        sprintf(
+          "Running version %s. Could not reach GitHub to check for updates.",
+          current
+        ),
+        status      = "warning",
+        dismissible = TRUE
+      )
+    )
+  }
+
+  if (update_available) {
+    shinyWidgets::alert(
+      tags$b("Update available! "),
+      sprintf(
+        "You are running version %s. Version %s is available on GitHub.",
+        current, latest
+      ),
+      " ",
+      tags$a(href = repo_url, target = "_blank", "View release"),
+      status      = "warning",
+      dismissible = TRUE
+    )
+  } else {
+    # Up to date -- only shown in verbose mode
+    shinyWidgets::alert(
+      tags$b("Up to date. "),
+      sprintf(
+        "You are running version %s, which matches the latest release (%s).",
+        current, latest
+      ),
+      status      = "success",
+      dismissible = TRUE
+    )
+  }
+}
+
+
+# -- Public API ----------------------------------------------------------------
+
+#' Run a startup version check and return a banner UI element
+#'
+#' Call this \strong{outside} \code{server()} -- typically in
+#' \code{global.R} or at the top of \code{app.R} -- and embed the returned
+#' value directly in your UI definition. Because the check runs at startup
+#' the banner is present on first render with no loading delay, and no
+#' \code{uiOutput()} / \code{renderUI()} wiring is needed.
+#'
+#' \strong{Normal mode} (\code{verbose = FALSE}): returns a banner only when
+#' a newer version is available or when the check fails. Returns \code{NULL}
+#' when the app is up to date (Shiny silently ignores \code{NULL} in the UI).
+#'
+#' \strong{Verbose / debug mode} (\code{verbose = TRUE}): always returns a
+#' banner -- including a success banner when up to date -- so you can confirm
+#' the check ran and inspect both version strings during development.
+#'
+#' @param github_user  GitHub username or organisation that owns the repository.
+#' @param github_repo  Repository name. Also used as the package name for
+#'   \code{utils::packageVersion()}.
+#' @param app_version  Optional fallback version string for environments where
+#'   the package is not installed (e.g. shinyapps.io). Pass the result of your
+#'   \code{app_version()} function here. Ignored when \code{packageVersion()}
+#'   succeeds.
+#' @param verbose      Logical; if \code{TRUE} a banner is always returned.
+#'   Defaults to \code{FALSE}.
+#'
+#' @return A \code{shinyWidgets::alert()} UI element, or \code{NULL} when there
+#'   is nothing to show (up to date in non-verbose mode).
+#'
+#' @examples
+#' \dontrun{
+#' # global.R or top of app.R
+#' source("version_check.R")
+#' version_banner <- check_app_version(
+#'   github_user = "my-org",
+#'   github_repo = "my-shiny-app",
+#'   app_version = app_version()   # fallback for shinyapps.io
+#' )
+#'
+#' # ui.R
+#' fluidPage(
+#'   version_banner,
+#'   # ... rest of UI
+#' )
+#'
+#' # Verbose mode for development
+#' version_banner <- check_app_version(
+#'   github_user = "my-org",
+#'   github_repo = "my-shiny-app",
+#'   app_version = app_version(),
+#'   verbose     = TRUE
+#' )
+#' }
+check_app_version <- function(github_user,
+                              github_repo,
+                              app_version = NULL,
+                              verbose     = FALSE) {
+
+  # -- 1. Resolve current version ----------------------------------------------
+  local_version <- .resolve_app_version(github_repo, app_version)
+  if (is.null(local_version)) {
+    message(sprintf(
+      "[version_check] Could not determine version for '%s' (package not installed and no app_version() fallback supplied).",
+      github_repo
+    ))
+    return(NULL)
+  }
+
+  message(sprintf("[version_check] Current version: %s", local_version))
+
+  # -- 2. Internet check -------------------------------------------------------
+  if (!.has_internet()) {
+    message("[version_check] No internet connection detected -- skipping.")
+
+    if (verbose) {
+      return(.build_version_alert(
+        current          = local_version,
+        latest           = NULL,
+        update_available = FALSE,
+        github_user      = github_user,
+        github_repo      = github_repo
+      ))
+    }
+
+    return(NULL)
+  }
+
+  # -- 3. Fetch latest GitHub release ------------------------------------------
+  latest_version <- .get_latest_github_version(github_user, github_repo)
+  if (is.null(latest_version)) {
+    message("[version_check] Could not retrieve latest version from GitHub.")
+
+    if (verbose) {
+      return(.build_version_alert(
+        current          = local_version,
+        latest           = NULL,
+        update_available = FALSE,
+        github_user      = github_user,
+        github_repo      = github_repo
+      ))
+    }
+
+    return(NULL)
+  }
+
+  message(sprintf("[version_check] Latest GitHub release: %s", latest_version))
+
+  # -- 4. Compare versions -----------------------------------------------------
+  update_available <- numeric_version(latest_version) > numeric_version(local_version)
+
+  if (update_available) {
+    message(sprintf(
+      "[version_check] Update available: %s -> %s",
+      local_version, latest_version
+    ))
+  } else {
+    message(sprintf("[version_check] App is up to date (%s).", local_version))
+  }
+
+  # -- 5. Return banner --------------------------------------------------------
+  # An update was found       -> always return a warning banner
+  # Up to date + verbose      -> return a success banner
+  # Up to date + not verbose  -> return NULL (Shiny ignores NULL in the UI)
+  if (update_available || verbose) {
+    .build_version_alert(
+      current          = local_version,
+      latest           = latest_version,
+      update_available = update_available,
+      github_user      = github_user,
+      github_repo      = github_repo
+    )
+  } else {
+    NULL
+  }
 }
 
 
@@ -13714,6 +14055,7 @@ INCLUDE_GLOBALENV <- get_config("INCLUDE_GLOBALENV", default = FALSE)
 DATA_LIMIT_DEFAULT <- get_config("DATA_LIMIT_DEFAULT", default = 10000)
 DATA_LIMIT_UPPER <- get_config("DATA_LIMIT_UPPER", default = 100000)
 DATA_LIMIT_LOWER <- get_config("DATA_LIMIT_LOWER", default = 1)
+CHECK_APP_VERSION <- get_config("CHECK_APP_VERSION", default = FALSE)
 
 ## Loads folder passed to the docker container and mounted as below:
 ##
@@ -13725,6 +14067,10 @@ DATA_LIMIT_LOWER <- get_config("DATA_LIMIT_LOWER", default = 1)
 ##
 ##  All files in the ./data/ folder is attempted loaded
 load_folder()
+
+## App version check
+
+version_banner <- check_app_version("agdamsbo", "FreesearchR",app_version = app_version(),verbose=CHECK_APP_VERSION)
 
 
 ########
