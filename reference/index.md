@@ -24,6 +24,8 @@
   : Convert string of arguments to list of arguments
 - [`baseline_table()`](https://agdamsbo.github.io/FreesearchR/reference/baseline_table.md)
   : Print a flexible baseline characteristics table
+- [`check_app_version()`](https://agdamsbo.github.io/FreesearchR/reference/check_app_version.md)
+  : Run a startup version check and return a banner UI element
 - [`class_icons()`](https://agdamsbo.github.io/FreesearchR/reference/class_icons.md)
   : Get data class icons
 - [`clean_common_axis()`](https://agdamsbo.github.io/FreesearchR/reference/clean_common_axis.md)
@@ -105,6 +107,14 @@
   : Detect delimiters in string based on allowed delimiters
 - [`dim_change_call()`](https://agdamsbo.github.io/FreesearchR/reference/dim_change_call.md)
   : Dimensions validation
+- [`.build_version_alert()`](https://agdamsbo.github.io/FreesearchR/reference/dot-build_version_alert.md)
+  : Build a shinyWidgets::alert() UI element for the version banner
+- [`.get_latest_github_version()`](https://agdamsbo.github.io/FreesearchR/reference/dot-get_latest_github_version.md)
+  : Fetch the latest release version from a GitHub repository
+- [`.has_internet()`](https://agdamsbo.github.io/FreesearchR/reference/dot-has_internet.md)
+  : Check internet connectivity
+- [`.resolve_app_version()`](https://agdamsbo.github.io/FreesearchR/reference/dot-resolve_app_version.md)
+  : Resolve the current app version
 - [`drop_empty_event()`](https://agdamsbo.github.io/FreesearchR/reference/drop_empty_event.md)
   : Drop empty events from REDCap export
 - [`expression_string()`](https://agdamsbo.github.io/FreesearchR/reference/expression_string.md)

@@ -2,6 +2,12 @@
 
 ## FreesearchR 26.3.4
 
+*NEW* Added app version check against latest release on GitHub. Only
+runs if internet connection present. No other polling.
+
+*NEW* Added a “Missing” level to the sankey plot function and adjusted
+the label font size.
+
 ## FreesearchR 26.3.3
 
 *NEW* option to pass global settings when running as docker or launching

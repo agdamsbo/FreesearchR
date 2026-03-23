@@ -45,9 +45,6 @@ default_parsing(mtcars) |>
 default_parsing(mtcars) |>
   data_type_filter(type = NULL) |>
   attributes()
-#> $class
-#> [1] "tbl_df"     "tbl"        "data.frame"
-#> 
 #> $row.names
 #>  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
 #> [26] 26 27 28 29 30 31 32
@@ -55,6 +52,9 @@ default_parsing(mtcars) |>
 #> $names
 #>  [1] "mpg"  "cyl"  "disp" "hp"   "drat" "wt"   "qsec" "vs"   "am"   "gear"
 #> [11] "carb"
+#> 
+#> $class
+#> [1] "tbl_df"     "tbl"        "data.frame"
 #> 
 if (FALSE) { # \dontrun{
 default_parsing(mtcars) |> data_type_filter(type = c("test", "categorical", "continuous"))

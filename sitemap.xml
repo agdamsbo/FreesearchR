@@ -25,6 +25,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/apply_labels.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/argsstring2list.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/baseline_table.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/check_app_version.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/class_icons.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/clean_common_axis.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/clean_date.html</loc></url>
@@ -55,6 +56,10 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/default_parsing.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/detect_delimiter.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/dim_change_call.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/dot-build_version_alert.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/dot-get_latest_github_version.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/dot-has_internet.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/dot-resolve_app_version.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/drop_empty_event.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/expression_string.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/extract_labels.html</loc></url>

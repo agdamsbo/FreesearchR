@@ -315,8 +315,8 @@ gtsummary::trial |>
 #>     24, 24, 23.6, 24, 19.98, 15.55, 23.72, 22.41, 19.54, 16.57, 
 #>     24, 24, 24, 21.91, 24, 12.53, 24, 18.63, 14.82, 16.46, 24, 
 #>     9.24, 17.77, 24, 24, 9.92, 16.16, 10.51, 20.81, 24, 16.44, 
-#>     24, 22.4, 11.76, 24, 21.6, 24, 19.81, 24), label = "Months to Death/Censor")), class = c("tbl_df", 
-#> "tbl", "data.frame"), row.names = c(NA, -200L)))
+#>     24, 22.4, 11.76, 24, 21.6, 24, 19.81, 24), label = "Months to Death/Censor")), row.names = c(NA, 
+#> -200L), class = c("tbl_df", "tbl", "data.frame")))
 #> 
 #> Coefficients:
 #> (Intercept)    trtDrug B       marker      stageT2      stageT3      stageT4  

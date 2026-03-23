@@ -2,7 +2,7 @@
 
 | ——————————– R environment ———————————                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| \|setting \|value \| \|:———–\|:——————————————\| \|version \|R version 4.5.2 (2025-10-31) \| \|os \|macOS Tahoe 26.3 \| \|system \|aarch64, darwin20 \| \|ui \|RStudio \| \|language \|(EN) \| \|collate \|en_US.UTF-8 \| \|ctype \|en_US.UTF-8 \| \|tz \|Europe/Copenhagen \| \|date \|2026-03-12 \| \|rstudio \|2026.01.1+403 Apple Blossom (desktop) \| \|pandoc \|3.6.4 @ /opt/homebrew/bin/ (via rmarkdown) \| \|quarto \|1.7.30 @ /usr/local/bin/quarto \| \|FreesearchR \|26.3.4.260312 \| |
+| \|setting \|value \| \|:———–\|:——————————————\| \|version \|R version 4.5.2 (2025-10-31) \| \|os \|macOS Tahoe 26.3 \| \|system \|aarch64, darwin20 \| \|ui \|RStudio \| \|language \|(EN) \| \|collate \|en_US.UTF-8 \| \|ctype \|en_US.UTF-8 \| \|tz \|Europe/Copenhagen \| \|date \|2026-03-23 \| \|rstudio \|2026.01.1+403 Apple Blossom (desktop) \| \|pandoc \|3.6.4 @ /opt/homebrew/bin/ (via rmarkdown) \| \|quarto \|1.7.30 @ /usr/local/bin/quarto \| \|FreesearchR \|26.3.4.260323 \| |
 
 ## ———————————– packages ———————————–
 
@@ -18,6 +18,7 @@
 | bit64             | 4.6.0-1       | 2025-01-16 | CRAN (R 4.5.0) |
 | bitops            | 1.0-9         | 2024-10-03 | CRAN (R 4.5.0) |
 | boot              | 1.3-32        | 2025-08-29 | CRAN (R 4.5.0) |
+| brio              | 1.1.5         | 2024-04-24 | CRAN (R 4.5.0) |
 | broom             | 1.0.12        | 2026-01-27 | CRAN (R 4.5.2) |
 | broom.helpers     | 1.22.0        | 2025-09-17 | CRAN (R 4.5.0) |
 | bsicons           | 0.1.2         | 2023-11-04 | CRAN (R 4.5.0) |
@@ -28,6 +29,7 @@
 | cardx             | 0.3.2         | 2026-02-05 | CRAN (R 4.5.2) |
 | caTools           | 1.18.3        | 2024-09-04 | CRAN (R 4.5.0) |
 | cellranger        | 1.1.0         | 2016-07-27 | CRAN (R 4.5.0) |
+| cffr              | 1.2.1         | 2026-01-12 | CRAN (R 4.5.2) |
 | checkmate         | 2.3.4         | 2026-02-03 | CRAN (R 4.5.2) |
 | class             | 7.3-23        | 2025-01-01 | CRAN (R 4.5.0) |
 | classInt          | 0.4-11        | 2025-01-08 | CRAN (R 4.5.0) |
@@ -37,6 +39,7 @@
 | colorspace        | 2.1-2         | 2025-09-22 | CRAN (R 4.5.0) |
 | commonmark        | 2.0.0         | 2025-07-07 | CRAN (R 4.5.0) |
 | crayon            | 1.5.3         | 2024-06-20 | CRAN (R 4.5.0) |
+| curl              | 7.0.0         | 2025-08-19 | CRAN (R 4.5.0) |
 | data.table        | 1.18.2.1      | 2026-01-27 | CRAN (R 4.5.2) |
 | datamods          | 1.5.3         | 2024-10-02 | CRAN (R 4.5.0) |
 | datawizard        | 1.3.0         | 2025-10-11 | CRAN (R 4.5.0) |
@@ -51,7 +54,7 @@
 | e1071             | 1.7-17        | 2025-12-18 | CRAN (R 4.5.2) |
 | easystats         | 0.7.5         | 2025-07-11 | CRAN (R 4.5.0) |
 | ellipsis          | 0.3.2         | 2021-04-29 | CRAN (R 4.5.0) |
-| emmeans           | 2.0.2         | 2026-03-05 | CRAN (R 4.5.2) |
+| emmeans           | 2.0.1         | 2025-12-16 | CRAN (R 4.5.2) |
 | esquisse          | 2.1.0         | 2025-02-21 | CRAN (R 4.5.0) |
 | estimability      | 1.5.1         | 2024-05-12 | CRAN (R 4.5.0) |
 | eulerr            | 7.0.4         | 2025-09-24 | CRAN (R 4.5.0) |
@@ -59,6 +62,7 @@
 | farver            | 2.1.2         | 2024-05-13 | CRAN (R 4.5.0) |
 | fastmap           | 1.2.0         | 2024-05-15 | CRAN (R 4.5.0) |
 | flextable         | 0.9.11        | 2026-02-13 | CRAN (R 4.5.2) |
+| fontawesome       | 0.5.3         | 2024-11-16 | CRAN (R 4.5.0) |
 | fontBitstreamVera | 0.1.1         | 2017-02-01 | CRAN (R 4.5.0) |
 | fontLiberation    | 0.1.0         | 2016-10-15 | CRAN (R 4.5.0) |
 | fontquiver        | 0.2.1         | 2017-02-01 | CRAN (R 4.5.0) |
@@ -94,9 +98,11 @@
 | iterators         | 1.0.14        | 2022-02-05 | CRAN (R 4.5.0) |
 | jquerylib         | 0.1.4         | 2021-04-26 | CRAN (R 4.5.0) |
 | jsonlite          | 2.0.0         | 2025-03-27 | CRAN (R 4.5.0) |
+| jsonvalidate      | 1.5.0         | 2025-02-07 | CRAN (R 4.5.0) |
 | KernSmooth        | 2.23-26       | 2025-01-01 | CRAN (R 4.5.0) |
 | keyring           | 1.4.1         | 2025-06-15 | CRAN (R 4.5.0) |
 | knitr             | 1.51          | 2025-12-20 | CRAN (R 4.5.2) |
+| labeling          | 0.4.3         | 2023-08-29 | CRAN (R 4.5.0) |
 | later             | 1.4.8         | 2026-03-05 | CRAN (R 4.5.2) |
 | lattice           | 0.22-7        | 2025-04-02 | CRAN (R 4.5.2) |
 | lifecycle         | 1.0.5         | 2026-01-08 | CRAN (R 4.5.2) |
@@ -108,7 +114,7 @@
 | memoise           | 2.0.1         | 2021-11-26 | CRAN (R 4.5.0) |
 | mime              | 0.13          | 2025-03-17 | CRAN (R 4.5.0) |
 | minqa             | 1.2.8         | 2024-08-17 | CRAN (R 4.5.0) |
-| mvtnorm           | 1.3-5         | 2026-03-11 | CRAN (R 4.5.2) |
+| mvtnorm           | 1.3-2         | 2024-11-04 | CRAN (R 4.5.2) |
 | NHANES            | 2.1.0         | 2015-07-02 | CRAN (R 4.5.0) |
 | nlme              | 3.1-168       | 2025-03-31 | CRAN (R 4.5.0) |
 | nloptr            | 2.2.1         | 2025-03-17 | CRAN (R 4.5.0) |
@@ -141,6 +147,7 @@
 | R6                | 2.6.1         | 2025-02-15 | CRAN (R 4.5.0) |
 | ragg              | 1.5.1         | 2026-03-06 | CRAN (R 4.5.2) |
 | rankinPlot        | 1.1.0         | 2023-01-30 | CRAN (R 4.5.0) |
+| rappdirs          | 0.3.4         | 2026-01-17 | CRAN (R 4.5.2) |
 | rbibutils         | 2.4.1         | 2026-01-21 | CRAN (R 4.5.2) |
 | RColorBrewer      | 1.1-3         | 2022-04-03 | CRAN (R 4.5.0) |
 | Rcpp              | 1.1.1         | 2026-01-10 | CRAN (R 4.5.2) |
@@ -182,6 +189,7 @@
 | stringr           | 1.6.0         | 2025-11-04 | CRAN (R 4.5.0) |
 | stRoke            | 25.9.2        | 2025-09-30 | CRAN (R 4.5.0) |
 | systemfonts       | 1.3.2         | 2026-03-05 | CRAN (R 4.5.2) |
+| testthat          | 3.3.2         | 2026-01-11 | CRAN (R 4.5.2) |
 | textshaping       | 1.0.5         | 2026-03-06 | CRAN (R 4.5.2) |
 | thematic          | 0.1.8         | 2025-09-29 | CRAN (R 4.5.0) |
 | tibble            | 3.3.1         | 2026-01-11 | CRAN (R 4.5.2) |
@@ -193,7 +201,9 @@
 | twosamples        | 2.0.1         | 2023-06-23 | CRAN (R 4.5.0) |
 | tzdb              | 0.5.0         | 2025-03-15 | CRAN (R 4.5.0) |
 | usethis           | 3.2.1         | 2025-09-06 | CRAN (R 4.5.0) |
+| utf8              | 1.2.6         | 2025-06-08 | CRAN (R 4.5.0) |
 | uuid              | 1.2-2         | 2026-01-23 | CRAN (R 4.5.2) |
+| V8                | 8.0.1         | 2025-10-10 | CRAN (R 4.5.0) |
 | vctrs             | 0.7.1         | 2026-01-23 | CRAN (R 4.5.2) |
 | viridis           | 0.6.5         | 2024-01-29 | CRAN (R 4.5.0) |
 | viridisLite       | 0.4.3         | 2026-02-04 | CRAN (R 4.5.2) |

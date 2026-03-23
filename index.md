@@ -53,6 +53,7 @@ values are provided, the app will use the defaults listed below.
 | `DATA_LIMIT_DEFAULT` | Default number of observations for previewing or working with a dataset                                     | `10,000`  |
 | `DATA_LIMIT_UPPER`   | Maximum number of observations a user can set for the upper limit. If set to 0, no uppper limit is applied. | `100,000` |
 | `DATA_LIMIT_LOWER`   | Minimum number of observations a user can set for the lower limit                                           | `1`       |
+| `CHECK_APP_VERSION`  | Always print version check results. Checks app version against latest release on GitHub.                    | `FALSE`   |
 
 ### Run from R (or RStudio)
 
@@ -73,7 +74,7 @@ tool for exploratory analysis.
     library(FreesearchR)
     # Load sample data (e.g., mtcars) to make it available in the app
     data(mtcars)
-    launch_FreesearchR(INCLUDE_GLOBALENV=TRUE)
+    launch_FreesearchR(INCLUDE_GLOBALENV=TRUE,CHECK_APP_VERSION=TRUE)
     ```
 
 All the variables specified above can also be passed to the app on

@@ -688,7 +688,7 @@ create_plot(mtcars, "plot_violin", "mpg", "cyl") |> attributes()
 #> list()
 #> 
 #> $plot_env
-#> <environment: 0x55cb96189f30>
+#> <environment: 0x55fda1fb5b88>
 #> 
 #> $code
 #> FreesearchR::plot_violin(pri = "mpg", sec = "cyl", ter = NULL)
@@ -844,6 +844,8 @@ mtcars |>
 #> Warning: Some strata appear at multiple axes.
 #> Warning: Some strata appear at multiple axes.
 
+
+  # stRoke::trial |> plot_sankey("mrs_1", "mrs_6")
 mtcars |> plot_scatter(pri = "mpg", sec = "wt")
 #> Ignoring unknown labels:
 #> • legend.title : ""
