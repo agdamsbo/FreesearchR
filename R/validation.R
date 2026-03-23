@@ -65,33 +65,6 @@ validation_server <- function(id,
 
       data_r <- if (shiny::is.reactive(data)) data else shiny::reactive(data)
 
-      # observeEvent(data_r(), {
-      #   to_validate <- data()
-      #   valid_dims <- check_data(to_validate, n_row = n_row, n_col = n_col)
-      #
-      #   if (all(c(valid_dims$nrows, valid_dims$ncols))) {
-      #     valid_status <- "OK"
-      #   } else {
-      #     valid_status <- "Failed"
-      #   }
-      #
-      #   valid_results <- lapply(
-      #     X = c("nrows", "ncols"),
-      #     FUN = function(x) {
-      #       if (is.null(valid_dims[[x]]))
-      #         return(NULL)
-      #       label <- switch(
-      #         x,
-      #         "nrows" = n_row_label,
-      #         "ncols" = n_col_label
-      #       )
-      #       list(
-      #         status = ifelse(valid_dims[[x]], "OK", "Failed"),
-      #         label = paste0("<b>", label, "</b>")
-      #       )
-      #     }
-      #   )
-
       shiny::observeEvent(
         data_r(),
         {
