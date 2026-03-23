@@ -9,6 +9,7 @@ launch_FreesearchR(
   data_limit_default = 1000,
   data_limit_upper = 1e+05,
   data_limit_lower = 1,
+  check_app_version = FALSE,
   ...
 )
 }
@@ -21,6 +22,9 @@ when loading data}
 \item{data_limit_upper}{data set observations upper limit}
 
 \item{data_limit_lower}{data set observations lower limit}
+
+\item{check_app_version}{always attempt to check app version against latest
+release on GitHub. Default is FALSE}
 
 \item{...}{passed on to \code{shiny::runApp()}}
 }

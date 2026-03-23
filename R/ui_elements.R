@@ -25,6 +25,7 @@ ui_elements <- function(selection) {
         ## Default just output "NULL"
         ## This could probably be achieved more legantly, but this works.
         dev_banner(),
+        version_banner,
         landing_page_ui(i18n = i18n),
         # shiny::column(width = 2),
         # shiny::column(
