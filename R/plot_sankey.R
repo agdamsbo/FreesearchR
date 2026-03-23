@@ -33,15 +33,17 @@ sankey_ready <- function(data, pri, sec, numbers = "count", ...) {
     dplyr::ungroup()
 
   if (numbers == "count") {
-    out <- out |> dplyr::mutate(
-      lx = factor(paste0(!!dplyr::sym(pri), "\n(n=", gx.sum, ")")),
-      ly = factor(paste0(!!dplyr::sym(sec), "\n(n=", gy.sum, ")"))
-    )
+    out <- out |> dplyr::mutate(lx = factor(paste0(
+      !!dplyr::sym(pri), "\n(n=", gx.sum, ")"
+    )), ly = factor(paste0(
+      !!dplyr::sym(sec), "\n(n=", gy.sum, ")"
+    )))
   } else if (numbers == "percentage") {
-    out <- out |> dplyr::mutate(
-      lx = factor(paste0(!!dplyr::sym(pri), "\n(", round((gx.sum / sum(n)) * 100, 1), "%)")),
-      ly = factor(paste0(!!dplyr::sym(sec), "\n(", round((gy.sum / sum(n)) * 100, 1), "%)"))
-    )
+    out <- out |> dplyr::mutate(lx = factor(paste0(
+      !!dplyr::sym(pri), "\n(", round((gx.sum / sum(n)) * 100, 1), "%)"
+    )), ly = factor(paste0(
+      !!dplyr::sym(sec), "\n(", round((gy.sum / sum(n)) * 100, 1), "%)"
+    )))
   }
 
   if (is.factor(data[[pri]])) {
@@ -83,19 +85,37 @@ str_remove_last <- function(data, pattern = "\n") {
 #' mtcars |>
 #'   default_parsing() |>
 #'   plot_sankey("cyl", "gear", "vs", color.group = "pri")
-plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors = NULL,missing.level="Missing") {
+#'
+#'   # stRoke::trial |> plot_sankey("mrs_1", "mrs_6")
+plot_sankey <- function(data,
+                        pri,
+                        sec,
+                        ter = NULL,
+                        color.group = "pri",
+                        colors = NULL,
+                        missing.level = "Missing") {
   if (!is.null(ter)) {
     ds <- split(data, data[ter])
   } else {
     ds <- list(data)
   }
 
-  out <- lapply(ds, \(.ds){
-    plot_sankey_single(.ds, pri = pri, sec = sec, color.group = color.group, colors = colors,missing.level=missing.level)
+
+  out <- lapply(ds, \(.ds) {
+    plot_sankey_single(
+      .ds,
+      pri = pri,
+      sec = sec,
+      color.group = color.group,
+      colors = colors,
+      missing.level = missing.level
+    )
   })
 
   patchwork::wrap_plots(out)
 }
+
+
 
 #' Beautiful sankey plot
 #'
@@ -123,18 +143,30 @@ plot_sankey <- function(data, pri, sec, ter = NULL, color.group = "pri", colors 
 #' stRoke::trial |>
 #'   default_parsing() |>
 #'   plot_sankey_single("diabetes", "hypertension")
-plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), colors = NULL,missing.level="Missing", ...) {
+plot_sankey_single <- function(data,
+                               pri,
+                               sec,
+                               color.group = c("pri", "sec"),
+                               colors = NULL,
+                               missing.level = "Missing",
+                               ...) {
   color.group <- match.arg(color.group)
+
+
+  # browser()
+  # if (is.na(ds[c(pri,sec)]))
 
   # browser()
   data_orig <- data
+
   data[c(pri, sec)] <- data[c(pri, sec)] |>
     dplyr::mutate(
-      # dplyr::across(dplyr::where(is.logical), as.factor),
-      dplyr::across(dplyr::where(is.factor), forcats::fct_drop)#,
-      # dplyr::across(dplyr::where(is.factor), \(.x){forcats::fct_na_value_to_level(.x,missing.level)})
+      dplyr::across(dplyr::where(is.logical), as.factor),
+      dplyr::across(dplyr::where(is.factor), forcats::fct_drop),
+      dplyr::across(dplyr::where(is.factor), \(.x) {
+        forcats::fct_na_value_to_level(.x, missing.level)
+      })
     )
-
 
   data <- data |> sankey_ready(pri = pri, sec = sec, ...)
 
@@ -148,21 +180,26 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
       main.colors <- main.colors[match(levels(data[[sec]]), levels(data_orig[[sec]]))]
 
       secondary.colors <- rep(na.color, length(levels(data[[pri]])))
-      label.colors <- Reduce(c, lapply(list(secondary.colors, rev(main.colors)), contrast_text))
+      label.colors <- Reduce(c, lapply(list(
+        secondary.colors, rev(main.colors)
+      ), contrast_text))
     } else {
       main.colors <- viridisLite::viridis(n = length(levels(data_orig[[pri]])))
       ## Only keep colors for included levels
       main.colors <- main.colors[match(levels(data[[pri]]), levels(data_orig[[pri]]))]
 
       secondary.colors <- rep(na.color, length(levels(data[[sec]])))
-      label.colors <- Reduce(c, lapply(list(rev(main.colors), secondary.colors), contrast_text))
+      label.colors <- Reduce(c, lapply(list(
+        rev(main.colors), secondary.colors
+      ), contrast_text))
     }
     colors <- c(na.color, main.colors, secondary.colors)
+    colors[is.na(colors)] <- "grey80"
   } else {
     label.colors <- contrast_text(colors)
   }
 
-  group_labels <- c(get_label(data, pri), get_label(data, sec)) |>
+  group_labels <- c(get_label(data_orig, pri), get_label(data_orig, sec)) |>
     sapply(line_break) |>
     unname()
 
@@ -181,9 +218,8 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
         knot.pos = 0.4,
         curve_type = "sigmoid"
       ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(sec)),
-        size = 2,
-        width = 1 / 3.4
-      )
+                                   size = 2,
+                                   width = 1 / 3.4)
   } else {
     p <- p +
       ggalluvial::geom_alluvium(
@@ -196,9 +232,8 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
         knot.pos = 0.4,
         curve_type = "sigmoid"
       ) + ggalluvial::geom_stratum(ggplot2::aes(fill = !!dplyr::sym(pri)),
-        size = 2,
-        width = 1 / 3.4
-      )
+                                   size = 2,
+                                   width = 1 / 3.4)
   }
 
   ## Will fail to use stat="stratum" if library is not loaded.
@@ -208,13 +243,10 @@ plot_sankey_single <- function(data, pri, sec, color.group = c("pri", "sec"), co
       stat = "stratum",
       ggplot2::aes(label = after_stat(stratum)),
       colour = label.colors,
-      size = 8,
+      size = 6,
       lineheight = 1
     ) +
-    ggplot2::scale_x_continuous(
-      breaks = 1:2,
-      labels = group_labels
-    ) +
+    ggplot2::scale_x_continuous(breaks = 1:2, labels = group_labels) +
     ggplot2::scale_fill_manual(values = colors[-1], na.value = colors[1]) +
     # ggplot2::scale_color_manual(values = main.colors) +
     ggplot2::theme_void() +

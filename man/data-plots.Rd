@@ -170,6 +170,8 @@ mtcars |>
 mtcars |>
   default_parsing() |>
   plot_sankey("cyl", "gear", "vs", color.group = "pri")
+
+  # stRoke::trial |> plot_sankey("mrs_1", "mrs_6")
 mtcars |> plot_scatter(pri = "mpg", sec = "wt")
 mtcars |> plot_violin(pri = "mpg", sec = "cyl", ter = "gear")
 }

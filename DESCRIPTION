@@ -141,5 +141,6 @@ Collate:
     'update-variables-ext.R'
     'utils-labels.R'
     'validation.R'
+    'version_check.R'
     'visual_summary.R'
     'wide2long.R'

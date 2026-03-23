@@ -8,6 +8,8 @@
 #' @param data_limit_default default data set observations limit
 #' @param data_limit_upper data set observations upper limit
 #' @param data_limit_lower data set observations lower limit
+#' @param check_app_version always attempt to check app version against latest
+#' release on GitHub. Default is FALSE
 #' @param ... passed on to `shiny::runApp()`
 #'
 #' @returns shiny app
@@ -22,12 +24,14 @@ launch_FreesearchR <- function(include_globalenv = TRUE,
                                data_limit_default = 1000,
                                data_limit_upper = 100000,
                                data_limit_lower = 1,
+                               check_app_version = FALSE,
                                ...) {
   Sys.setenv(
     INCLUDE_GLOBALENV = include_globalenv,
     DATA_LIMIT_DEFAULT = data_limit_default,
     DATA_LIMIT_UPPER = data_limit_upper,
-    DATA_LIMIT_LOWER = data_limit_lower
+    DATA_LIMIT_LOWER = data_limit_lower,
+    CHECK_APP_VERSION = check_app_version
   )
 
   appDir <- system.file("apps", "FreesearchR", package = "FreesearchR")

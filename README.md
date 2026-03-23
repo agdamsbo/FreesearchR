@@ -1,10 +1,9 @@
-# FreesearchR <a href="https://agdamsbo.github.io/FreesearchR/"><img src="man/figures/logo.png" align="right" height="70" alt="FreesearchR website" /></a>
+# FreesearchR <a href="https://agdamsbo.github.io/FreesearchR/"><img src="man/figures/logo.png" alt="FreesearchR website" align="right" height="70"/></a>
 
 <!-- badges: start -->
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14527429.svg)](https://doi.org/10.5281/zenodo.14527429) 
-[![rhub](https://github.com/agdamsbo/FreesearchR/actions/workflows/rhub.yaml/badge.svg)](https://github.com/agdamsbo/FreesearchR/actions/workflows/rhub.yaml)
-[![FreesearchR](https://img.shields.io/badge/Shiny-shinyapps.io-blue?style=flat&labelColor=white&logo=RStudio&logoColor=blue)](https://agdamsbo.shinyapps.io/FreesearchR/)
+
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14527429.svg)](https://doi.org/10.5281/zenodo.14527429) [![rhub](https://github.com/agdamsbo/FreesearchR/actions/workflows/rhub.yaml/badge.svg)](https://github.com/agdamsbo/FreesearchR/actions/workflows/rhub.yaml) [![FreesearchR](https://img.shields.io/badge/Shiny-shinyapps.io-blue?style=flat&labelColor=white&logo=RStudio&logoColor=blue)](https://agdamsbo.shinyapps.io/FreesearchR/)
+
 <!-- badges: end -->
 
 The [***FreesearchR***](https://app.freesearchr.org) is a simple, clinical health data exploration and analysis tool to democratise clinical research by assisting any researcher to easily evaluate and analyse data and export publication ready results.
@@ -19,11 +18,11 @@ All feedback is welcome and can be shared as a GitHub issue. Any suggestions on 
 
 This app has the following simple goals:
 
-1.   help the health clinician getting an overview of data in quality improvement projects and clinical research
+1.  help the health clinician getting an overview of data in quality improvement projects and clinical research
 
-1.   help learners get a good start analysing data and coding in *R*
+2.  help learners get a good start analysing data and coding in *R*
 
-1.   ease quick data overview and basic visualisations for any clinical researcher
+3.  ease quick data overview and basic visualisations for any clinical researcher
 
 Here’s a polished and restructured version of your README section for clarity, conciseness, and user-friendliness:
 
@@ -35,32 +34,32 @@ The **FreesearchR** app can be run locally on your machine, ensuring no data is 
 
 The app can be configured either by passing a named list to `run_app()` or by setting environment variables in a **Docker Compose** file. The following variables control data access and display behavior. If no values are provided, the app will use the defaults listed below.
 
-
 **Configuration Variables**
 
-| Variable                | Description                                                                 | Default   |
-|-------------------------|-----------------------------------------------------------------------------|-----------|
-| `INCLUDE_GLOBALENV`     | Load datasets already present in the global R environment into the app    | `FALSE`   |
-| `DATA_LIMIT_DEFAULT`    | Default number of observations for previewing or working with a dataset            | `10,000`  |
-| `DATA_LIMIT_UPPER`      | Maximum number of observations a user can set for the upper limit. If set to 0, no uppper limit is applied.                    | `100,000` |
-| `DATA_LIMIT_LOWER`      | Minimum number of observations a user can set for the lower limit                    | `1`       |
+| Variable | Description | Default |
+|--------------|--------------------------------------------|--------------|
+| `INCLUDE_GLOBALENV` | Load datasets already present in the global R environment into the app | `FALSE` |
+| `DATA_LIMIT_DEFAULT` | Default number of observations for previewing or working with a dataset | `10,000` |
+| `DATA_LIMIT_UPPER` | Maximum number of observations a user can set for the upper limit. If set to 0, no uppper limit is applied. | `100,000` |
+| `DATA_LIMIT_LOWER` | Minimum number of observations a user can set for the lower limit | `1` |
+| `CHECK_APP_VERSION` | Always print version check results. Checks app version against latest release on GitHub. | `FALSE` |
 
 ### Run from R (or RStudio)
 
 If you're working with data in R, **FreesearchR** is a quick and easy tool for exploratory analysis.
 
-1. **Requirement:** Ensure you have [R](https://www.r-project.org/) installed, and optionally an editor like [RStudio](https://posit.co/download/rstudio-desktop/).
+1.  **Requirement:** Ensure you have [R](https://www.r-project.org/) installed, and optionally an editor like [RStudio](https://posit.co/download/rstudio-desktop/).
 
-2. Open the **R console** and run the following code to install the `{FreesearchR}` package and launch the app:
+2.  Open the **R console** and run the following code to install the `{FreesearchR}` package and launch the app:
 
-   ```r
-   if (!require("devtools")) install.packages("devtools")
-   devtools::install_github("agdamsbo/FreesearchR")
-   library(FreesearchR)
-   # Load sample data (e.g., mtcars) to make it available in the app
-   data(mtcars)
-   launch_FreesearchR(INCLUDE_GLOBALENV=TRUE)
-   ```
+    ``` r
+    if (!require("devtools")) install.packages("devtools")
+    devtools::install_github("agdamsbo/FreesearchR")
+    library(FreesearchR)
+    # Load sample data (e.g., mtcars) to make it available in the app
+    data(mtcars)
+    launch_FreesearchR(INCLUDE_GLOBALENV=TRUE,CHECK_APP_VERSION=TRUE)
+    ```
 
 All the variables specified above can also be passed to the app on launch from R. Set DATA_LIMIT_UPPER=0 to remove upper data limit. This limit is set to protect the online app version from choking and crashing on large data sets.
 
@@ -70,7 +69,7 @@ For advanced users, you can deploy **FreesearchR** using Docker. A data folder c
 
 To mount a local data folder, add a `volumes` entry to your `docker-compose.yml` file:
 
-```yaml
+``` yaml
 services:
   shiny:
     image: ghcr.io/agdamsbo/freesearchr:latest
@@ -86,9 +85,9 @@ services:
     restart: on-failure
 ```
 
-- The `:ro` flag mounts the folder as **read-only**, preventing the app from modifying your original data files.
+-   The `:ro` flag mounts the folder as **read-only**, preventing the app from modifying your original data files.
 
-- If no volume is mounted, the app will start without any preloaded datasets.
+-   If no volume is mounted, the app will start without any preloaded datasets.
 
 ## Code of Conduct
 
