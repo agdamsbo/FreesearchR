@@ -2345,7 +2345,7 @@
     },
     "datamods": {
       "Package": "datamods",
-      "Version": "1.5.3",
+      "Version": "1.5.2",
       "Source": "Repository",
       "Title": "Modules to Import and Manipulate Data in 'Shiny'",
       "Authors@R": "c(person(given = \"Victor\", family = \"Perrier\", role = c(\"aut\", \"cre\", \"cph\"), email = \"victor.perrier@dreamrs.fr\"), person(given = \"Fanny\", family = \"Meyer\", role = \"aut\"), person(given = \"Samra\", family = \"Goumri\", role = \"aut\"), person(given = \"Zauad Shahreer\", family = \"Abeer\", role = \"aut\", email = \"shahreyar.abeer@gmail.com\"), person(given = \"Eduard\", family = \"Szöcs\", role = \"ctb\", email = \"eduardszoecs@gmail.com\") )",
@@ -8357,7 +8357,7 @@
     },
     "shinybusy": {
       "Package": "shinybusy",
-      "Version": "0.3.3",
+      "Version": "0.3.2",
       "Source": "Repository",
       "Title": "Busy Indicators and Notifications for 'Shiny' Applications",
       "Authors@R": "c(person(\"Fanny\", \"Meyer\", role = \"aut\"), person(\"Victor\", \"Perrier\", email = \"victor.perrier@dreamrs.fr\", role = c(\"aut\", \"cre\")), person(\"Silex Technologies\", comment = \"https://www.silex-ip.com\", role = \"fnd\"))",
@@ -8370,8 +8370,8 @@
         "jsonlite",
         "htmlwidgets"
       ],
-      "RoxygenNote": "7.3.1",
-      "URL": "https://github.com/dreamRs/shinybusy, https://dreamrs.github.io/shinybusy/",
+      "RoxygenNote": "7.2.3",
+      "URL": "https://github.com/dreamRs/shinybusy",
       "BugReports": "https://github.com/dreamRs/shinybusy/issues",
       "Suggests": [
         "testthat",
