@@ -22,11 +22,16 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
             title = "Create plot",
             icon = bsicons::bs_icon("graph-up"),
             shiny::uiOutput(outputId = ns("primary")),
-            shiny::helpText(i18n$t('Only non-text variables are available for plotting. Go the "Data" to reclass data to plot.')),
+            shiny::helpText(
+              i18n$t(
+                'Only non-text variables are available for plotting. Go the "Data" to reclass data to plot.'
+              )
+            ),
             shiny::tags$br(),
             shiny::uiOutput(outputId = ns("type")),
             shiny::uiOutput(outputId = ns("secondary")),
             shiny::uiOutput(outputId = ns("tertiary")),
+            shiny::uiOutput(outputId = ns("color_palette")),
             shiny::br(),
             shiny::actionButton(
               inputId = ns("act_plot"),
@@ -72,14 +77,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
             shiny::selectInput(
               inputId = ns("plot_type"),
               label = i18n$t("File format"),
-              choices = list(
-                "png",
-                "tiff",
-                "eps",
-                "pdf",
-                "jpeg",
-                "svg"
-              )
+              choices = list("png", "tiff", "eps", "pdf", "jpeg", "svg")
             ),
             shiny::br(),
             # Button
@@ -90,12 +88,15 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
             )
           )
         ),
-        shiny::p("We have collected a few notes on visualising data and details on the options included in FreesearchR:", shiny::tags$a(
-          href = "https://agdamsbo.github.io/FreesearchR/articles/visuals.html",
-          "View notes in new tab",
-          target = "_blank",
-          rel = "noopener noreferrer"
-        ))
+        shiny::p(
+          "We have collected a few notes on visualising data and details on the options included in FreesearchR:",
+          shiny::tags$a(
+            href = "https://agdamsbo.github.io/FreesearchR/articles/visuals.html",
+            "View notes in new tab",
+            target = "_blank",
+            rel = "noopener noreferrer"
+          )
+        )
       ),
       shiny::plotOutput(ns("plot"), height = "70vh"),
       shiny::tags$br(),
@@ -116,21 +117,37 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
 #' @export
 data_visuals_server <- function(id,
                                 data,
+                                palettes = c(
+                                  "Perceptual (blue-yellow)"   = "viridis",
+                                  "Perceptual (fire)"          = "plasma",
+                                  "Colour-blind friendly"      = "Okabe-Ito",
+                                  "Qualitative (bold)"         = "Dark 2",
+                                  "Qualitative (paired)"       = "Paired",
+                                  "Sequential (blues)"         = "Blues",
+                                  "Diverging (red-blue)"       = "RdBu",
+                                  "Tableau style"              = "Tableau 10",
+                                  "Pastel"                     = "Pastel 1",
+                                  "Rainbow"                    = "rainbow"
+                                ),
                                 ...) {
   shiny::moduleServer(
     id = id,
     module = function(input, output, session) {
       ns <- session$ns
 
-      rv <- shiny::reactiveValues(
-        plot.params = NULL,
-        plot = NULL,
-        code = NULL
-      )
+      rv <- shiny::reactiveValues(plot.params = NULL,
+                                  plot = NULL,
+                                  code = NULL)
 
       shiny::observe({
-        bslib::accordion_panel_update(id = "acc_plot", target = "acc_pan_plot",title = i18n$t("Create plot"))
-        bslib::accordion_panel_update(id = "acc_plot", target = "acc_pan_download",title = i18n$t("Download"))
+        bslib::accordion_panel_update(
+          id = "acc_plot",
+          target = "acc_pan_plot",
+          title = i18n$t("Create plot")
+        )
+        bslib::accordion_panel_update(id = "acc_plot",
+                                      target = "acc_pan_download",
+                                      title = i18n$t("Download"))
       })
 
       # ## --- New attempt
@@ -259,12 +276,10 @@ data_visuals_server <- function(id,
           plot_data <- data()[input$primary]
         }
 
-        plots <- possible_plots(
-          data = plot_data
-        )
+        plots <- possible_plots(data = plot_data)
 
         plots_named <- get_plot_options(plots) |>
-          lapply(\(.x){
+          lapply(\(.x) {
             stats::setNames(.x$descr, .x$note)
           })
 
@@ -284,23 +299,19 @@ data_visuals_server <- function(id,
       output$secondary <- shiny::renderUI({
         shiny::req(input$type)
 
-        cols <- c(
-          rv$plot.params()[["secondary.extra"]],
-          all_but(
-            colnames(subset_types(
-              data(),
-              rv$plot.params()[["secondary.type"]]
-            )),
-            input$primary
-          )
-        )
+        cols <- c(rv$plot.params()[["secondary.extra"]], all_but(colnames(
+          subset_types(data(), rv$plot.params()[["secondary.type"]])
+        ), input$primary))
 
         columnSelectInput(
           inputId = ns("secondary"),
           data = data,
           selected = cols[1],
           placeholder = i18n$t("Please select"),
-          label = if (isTRUE(rv$plot.params()[["secondary.multi"]])) i18n$t("Additional variables") else i18n$t("Secondary variable"),
+          label = if (isTRUE(rv$plot.params()[["secondary.multi"]]))
+            i18n$t("Additional variables")
+          else
+            i18n$t("Secondary variable"),
           multiple = rv$plot.params()[["secondary.multi"]],
           maxItems = rv$plot.params()[["secondary.max"]],
           col_subset = cols,
@@ -319,10 +330,7 @@ data_visuals_server <- function(id,
           col_subset = c(
             "none",
             all_but(
-              colnames(subset_types(
-                data(),
-                rv$plot.params()[["tertiary.type"]]
-              )),
+              colnames(subset_types(data(), rv$plot.params()[["tertiary.type"]])),
               input$primary,
               input$secondary
             )
@@ -331,64 +339,59 @@ data_visuals_server <- function(id,
         )
       })
 
-      shiny::observeEvent(input$act_plot,
-        {
-          if (NROW(data()) > 0) {
-            tryCatch(
-              {
-                parameters <- list(
-                  type = rv$plot.params()[["fun"]],
-                  pri = input$primary,
-                  sec = input$secondary,
-                  ter = input$tertiary
-                )
+      ### Color option
+      output$color_palette <- shiny::renderUI({
+        # shiny::req(input$type)
+        colorSelectInput(
+          inputId = ns("color_palette"),
+          label = i18n$t("Choose color palette"),
+          choices = palettes
+        )
+      })
 
-                ## If the dictionary holds additional arguments to pass to the
-                ## plotting function, these are included
-                if (!is.null(rv$plot.params()[["fun.args"]])){
-                  parameters <- modifyList(parameters,rv$plot.params()[["fun.args"]])
-                }
-
-                shiny::withProgress(message = i18n$t("Drawing the plot. Hold tight for a moment.."), {
-                  rv$plot <- rlang::exec(
-                    create_plot,
-                    !!!append_list(
-                      data(),
-                      parameters,
-                      "data"
-                    )
-                  )
-                })
-
-                rv$code <- glue::glue("FreesearchR::create_plot(df,{list2str(parameters)})")
-              },
-              # warning = function(warn) {
-              #   showNotification(paste0(warn), type = "warning")
-              # },
-              error = function(err) {
-                showNotification(paste0(err), type = "err")
-              }
+      shiny::observeEvent(input$act_plot, {
+        if (NROW(data()) > 0) {
+          tryCatch({
+            parameters <- list(
+              type = rv$plot.params()[["fun"]],
+              pri = input$primary,
+              sec = input$secondary,
+              ter = input$tertiary,
+              color.palette = input$color_palette
             )
-          }
-        },
-        ignoreInit = TRUE
-      )
+
+            ## If the dictionary holds additional arguments to pass to the
+            ## plotting function, these are included
+            if (!is.null(rv$plot.params()[["fun.args"]])) {
+              parameters <- modifyList(parameters, rv$plot.params()[["fun.args"]])
+            }
+
+            shiny::withProgress(message = i18n$t("Drawing the plot. Hold tight for a moment.."),
+                                {
+                                  rv$plot <- rlang::exec(create_plot,
+                                                         !!!append_list(data(), parameters, "data"))
+                                })
+
+            rv$code <- glue::glue("FreesearchR::create_plot(df,{list2str(parameters)})")
+          }, # warning = function(warn) {
+          #   showNotification(paste0(warn), type = "warning")
+          # },
+          error = function(err) {
+            showNotification(paste0(err), type = "err")
+          })
+        }
+      }, ignoreInit = TRUE)
 
       output$code_plot <- shiny::renderUI({
         shiny::req(rv$code)
         prismCodeBlock(paste0(i18n$t("#Plotting\n"), rv$code))
       })
 
-      shiny::observeEvent(
-        list(
-          data()
-        ),
-        {
-          shiny::req(data())
+      shiny::observeEvent(list(data()), {
+        shiny::req(data())
 
-          rv$plot <- NULL
-        }
-      )
+        rv$plot <- NULL
+      })
 
       output$plot <- shiny::renderPlot({
         # shiny::req(rv$plot)
@@ -428,16 +431,15 @@ data_visuals_server <- function(id,
               width = input$width,
               height = input$height_slide,
               dpi = 300,
-              units = "mm", scale = 2
+              units = "mm",
+              scale = 2
             )
           })
         }
       )
 
 
-      shiny::observe(
-        return(rv$plot)
-      )
+      shiny::observe(return(rv$plot))
     }
   )
 }
@@ -500,9 +502,11 @@ supported_plots <- function() {
   list(
     plot_bar_rel = list(
       fun = "plot_bar",
-      fun.args =list(style="fill"),
+      fun.args = list(style = "fill"),
       descr = i18n$t("Stacked relative barplot"),
-      note = i18n$t("Create relative stacked barplots to show the distribution of categorical levels"),
+      note = i18n$t(
+        "Create relative stacked barplots to show the distribution of categorical levels"
+      ),
       primary.type = c("dichotomous", "categorical"),
       secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
@@ -511,9 +515,11 @@ supported_plots <- function() {
     ),
     plot_bar_abs = list(
       fun = "plot_bar",
-      fun.args =list(style="dodge"),
+      fun.args = list(style = "dodge"),
       descr = i18n$t("Side-by-side barplot"),
-      note = i18n$t("Create side-by-side barplot to show the distribution of categorical levels"),
+      note = i18n$t(
+        "Create side-by-side barplot to show the distribution of categorical levels"
+      ),
       primary.type = c("dichotomous", "categorical"),
       secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
@@ -523,7 +529,9 @@ supported_plots <- function() {
     plot_hbars = list(
       fun = "plot_hbars",
       descr = i18n$t("Stacked horizontal bars"),
-      note = i18n$t("A classical way of visualising the distribution of an ordinal scale like the modified Ranking Scale and known as Grotta bars"),
+      note = i18n$t(
+        "A classical way of visualising the distribution of an ordinal scale like the modified Ranking Scale and known as Grotta bars"
+      ),
       primary.type = c("dichotomous", "categorical"),
       secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
@@ -533,7 +541,9 @@ supported_plots <- function() {
     plot_violin = list(
       fun = "plot_violin",
       descr = i18n$t("Violin plot"),
-      note = i18n$t("A modern alternative to the classic boxplot to visualise data distribution"),
+      note = i18n$t(
+        "A modern alternative to the classic boxplot to visualise data distribution"
+      ),
       primary.type = c("datatime", "continuous"),
       secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
@@ -581,7 +591,9 @@ supported_plots <- function() {
     plot_euler = list(
       fun = "plot_euler",
       descr = i18n$t("Euler diagram"),
-      note = i18n$t("Generate area-proportional Euler diagrams to display set relationships"),
+      note = i18n$t(
+        "Generate area-proportional Euler diagrams to display set relationships"
+      ),
       primary.type = c("dichotomous"),
       secondary.type = c("dichotomous"),
       secondary.multi = TRUE,
@@ -622,7 +634,7 @@ possible_plots <- function(data) {
     out <- type
   } else {
     out <- supported_plots() |>
-      lapply(\(.x){
+      lapply(\(.x) {
         if (type %in% .x$primary.type) {
           .x$descr
         }
@@ -650,12 +662,12 @@ possible_plots <- function(data) {
 #'   get_plot_options()
 get_plot_options <- function(data) {
   descrs <- supported_plots() |>
-    lapply(\(.x){
+    lapply(\(.x) {
       .x$descr
     }) |>
     unlist()
   supported_plots() |>
-    (\(.x){
+    (\(.x) {
       .x[match(data, descrs)]
     })()
 }
@@ -669,6 +681,7 @@ get_plot_options <- function(data) {
 #' @param sec secondary variable
 #' @param ter tertiary variable
 #' @param type plot type (derived from possible_plots() and matches custom function)
+#' @param color.palette choose color palette. See \code{\link{plot_colors}} for support.
 #' @param ... ignored for now
 #'
 #' @name data-plots
@@ -678,7 +691,13 @@ get_plot_options <- function(data) {
 #'
 #' @examples
 #' create_plot(mtcars, "plot_violin", "mpg", "cyl") |> attributes()
-create_plot <- function(data, type, pri, sec, ter = NULL, ...) {
+create_plot <- function(data,
+                        type,
+                        pri,
+                        sec,
+                        ter = NULL,
+                        color.palette = "viridis",
+                        ...) {
   if (!is.null(sec)) {
     if (!any(sec %in% names(data))) {
       sec <- NULL
@@ -695,13 +714,11 @@ create_plot <- function(data, type, pri, sec, ter = NULL, ...) {
     pri = pri,
     sec = sec,
     ter = ter,
+    color.palette = color.palette,
     ...
   )
 
-  out <- do.call(
-    type,
-    modifyList(parameters, list(data = data))
-  )
+  out <- do.call(type, modifyList(parameters, list(data = data)))
 
   code <- rlang::call2(type, !!!parameters, .ns = "FreesearchR")
 
@@ -758,10 +775,14 @@ get_label <- function(data, var = NULL) {
 #' @examples
 #' "Lorem ipsum... you know the routine" |> line_break()
 #' paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(force = TRUE)
-line_break <- function(data, lineLength = 20, force = FALSE) {
+line_break <- function(data,
+                       lineLength = 20,
+                       force = FALSE) {
   if (isTRUE(force)) {
     ## This eats some letters when splitting a sentence... ??
-    gsub(paste0("(.{1,", lineLength, "})(\\s|[[:alnum:]])"), "\\1\n", data)
+    gsub(paste0("(.{1,", lineLength, "})(\\s|[[:alnum:]])"),
+         "\\1\n",
+         data)
   } else {
     paste(strwrap(data, lineLength), collapse = "\n")
   }
@@ -793,9 +814,9 @@ wrap_plot_list <- function(data,
   if (ggplot2::is_ggplot(data[[1]])) {
     if (length(data) > 1) {
       out <- data |>
-        (\(.x){
+        (\(.x) {
           if (rlang::is_named(.x)) {
-            purrr::imap(.x, \(.y, .i){
+            purrr::imap(.x, \(.y, .i) {
               .y + ggplot2::ggtitle(.i)
             })
           } else {
@@ -803,12 +824,10 @@ wrap_plot_list <- function(data,
           }
         })() |>
         align_axes() |>
-        patchwork::wrap_plots(
-          guides = guides,
-          axes = axes,
-          axis_titles = axis_titles,
-          ...
-        )
+        patchwork::wrap_plots(guides = guides,
+                              axes = axes,
+                              axis_titles = axis_titles,
+                              ...)
       if (!is.null(tag_levels)) {
         out <- out + patchwork::plot_annotation(tag_levels = tag_levels)
       }
@@ -847,7 +866,9 @@ wrap_plot_list <- function(data,
 #' @returns list of ggplot2 objects
 #' @export
 #'
-align_axes <- function(..., x.axis = TRUE, y.axis = TRUE) {
+align_axes <- function(...,
+                       x.axis = TRUE,
+                       y.axis = TRUE) {
   # https://stackoverflow.com/questions/62818776/get-axis-limits-from-ggplot-object
   # https://github.com/thomasp85/patchwork/blob/main/R/plot_multipage.R#L150
   if (ggplot2::is_ggplot(..1)) {
@@ -865,7 +886,7 @@ align_axes <- function(..., x.axis = TRUE, y.axis = TRUE) {
   xr <- clean_common_axis(p, "x")
 
   suppressWarnings({
-    purrr::map(p, \(.x){
+    purrr::map(p, \(.x) {
       out <- .x
       if (isTRUE(x.axis)) {
         out <- out + ggplot2::xlim(xr)
@@ -889,7 +910,7 @@ align_axes <- function(..., x.axis = TRUE, y.axis = TRUE) {
 clean_common_axis <- function(p, axis) {
   purrr::map(p, ~ ggplot2::layer_scales(.x)[[axis]]$get_limits()) |>
     unlist() |>
-    (\(.x){
+    (\(.x) {
       if (is.numeric(.x)) {
         range(.x)
       } else {

@@ -19,7 +19,7 @@ sankey_ready <- function(data, pri, sec, numbers = "count", ...) {
   ## TODO: Ensure ordering x and y
 
   ## Ensure all are factors
-  data[c(pri, sec)] <- data[c(pri, sec)] |>
+  data <- data[c(pri, sec)] |>
     dplyr::mutate(dplyr::across(!dplyr::where(is.factor), forcats::as_factor))
 
   out <- dplyr::count(data, !!dplyr::sym(pri), !!dplyr::sym(sec), .drop = FALSE)
@@ -84,16 +84,17 @@ str_remove_last <- function(data, pattern = "\n") {
 #' ## Dont know why...
 #' mtcars |>
 #'   default_parsing() |>
-#'   plot_sankey("cyl", "gear", "vs", color.group = "pri")
-#'
-#'   # stRoke::trial |> plot_sankey("mrs_1", "mrs_6")
-#'   # stRoke::trial |> plot_sankey("active", "male")
+#'   plot_sankey("cyl", "gear", "vs", color.group = "pri",color.palette="inferno")
 plot_sankey <- function(data,
                         pri,
                         sec,
                         ter = NULL,
                         color.group = "pri",
                         colors = NULL,
+                        color.palette = "viridis",
+                        default.color = "#2986cc",
+                        box.color = "#1E4B66",
+                        na.color = "grey80",
                         missing.level = "Missing") {
   if (!is.null(ter)) {
     ds <- split(data, data[ter])
@@ -101,12 +102,14 @@ plot_sankey <- function(data,
     ds <- list(data)
   }
 
+  # browser()
 
   out <- lapply(ds, \(.ds) {
     plot_sankey_single(
       .ds,
       pri = pri,
       sec = sec,
+      color.palette = color.palette,
       color.group = color.group,
       colors = colors,
       missing.level = missing.level
@@ -144,12 +147,22 @@ plot_sankey <- function(data,
 #' stRoke::trial |>
 #'   default_parsing() |>
 #'   plot_sankey_single("diabetes", "hypertension")
+#'
+#'
+#'  # stRoke::trial |> plot_sankey_single("mrs_1", "mrs_6", color.palette="magma")
+#'  # stRoke::trial |> plot_sankey_single("active", "male")
+#'  # stRoke::trial |> plot_sankey_single("diabetes", "active", color.group="sec")
+#'  # stRoke::trial |> plot_sankey_single("active", "diabetes", color.group="sec", color.palette="topo")
 plot_sankey_single <- function(data,
                                pri,
                                sec,
                                color.group = c("pri", "sec"),
-                               colors = NULL,
+                               color.palette = "viridis",
+                               colors=NULL,
                                missing.level = "Missing",
+                               default.color = "#2986cc",
+                               box.color = "#1E4B66",
+                               na.color = "grey80",
                                ...) {
   color.group <- match.arg(color.group)
 
@@ -157,53 +170,35 @@ plot_sankey_single <- function(data,
 
   data[c(pri, sec)] <- with_labels(data,{
     data[c(pri, sec)] |>
-      dplyr::mutate(
-        dplyr::across(dplyr::where(is.logical), as.factor),
-        dplyr::across(dplyr::where(is.factor), forcats::fct_drop),
-        dplyr::across(dplyr::where(is.factor), \(.x) {
-          if (anyNA(.x)) forcats::fct_na_value_to_level(.x, missing.level) else .x
-        })
-      )
+      to_clean_levels() |>
+      missing_to_text_levels(missing.text=missing.level)
   })
-
 
   ## Aggregate data
   data_aggr <- data |> sankey_ready(pri = pri, sec = sec, ...)
 
-  na.color <- "#2986cc"
-  box.color <- "#1E4B66"
+  default.color = default.color
+  box.color = box.color
+  na.color = na.color
 
   if (is.null(colors)) {
     if (color.group == "sec") {
-      if (anyNA(data_orig[[sec]])){
-      main.colors <- viridisLite::viridis(n = length(levels(data_orig[[sec]])))
-      } else {
-        main.colors <- viridisLite::viridis(n = length(levels(data[[sec]])))
-      }
-      ## Only keep colors for included levels
-        main.colors <- main.colors[match(levels(data[[sec]]), levels(data[[sec]]))]
+      main.colors <- color_levels_gen(data_orig[[sec]],palette=color.palette)
 
-      secondary.colors <- rep(na.color, length(levels(data[[pri]])))
+      secondary.colors <- rep(default.color, length(levels(data[[pri]])))
       label.colors <- Reduce(c, lapply(list(
         secondary.colors, rev(main.colors)
       ), contrast_text))
     } else {
-      if (anyNA(data_orig[[sec]])){
-        main.colors <- viridisLite::viridis(n = length(levels(data_orig[[pri]])))
-      } else {
-        main.colors <- viridisLite::viridis(n = length(levels(data[[pri]])))
-      }
-      # main.colors <- viridisLite::viridis(n = length(levels(data[[pri]])))
-      ## Only keep colors for included levels
-      main.colors <- main.colors[match(levels(data[[pri]]), levels(data[[pri]]))]
+      main.colors <- color_levels_gen(data_orig[[pri]],palette=color.palette)
 
-      secondary.colors <- rep(na.color, length(levels(data[[sec]])))
+      secondary.colors <- rep(default.color, length(levels(data[[sec]])))
       label.colors <- Reduce(c, lapply(list(
         rev(main.colors), secondary.colors
       ), contrast_text))
     }
-    colors <- c(na.color, main.colors, secondary.colors)
-    colors[is.na(colors)] <- "grey80"
+    colors <- c(default.color, main.colors, secondary.colors)
+    colors[is.na(colors)] <- na.color
   } else {
     label.colors <- contrast_text(colors)
   }
@@ -211,8 +206,6 @@ plot_sankey_single <- function(data,
   group_labels <- c(get_label(data, pri), get_label(data, sec)) |>
     sapply(line_break) |>
     unname()
-
-  # browser()
 
   p <- ggplot2::ggplot(data_aggr, ggplot2::aes(y = n, axis1 = lx, axis2 = ly))
 
@@ -274,4 +267,49 @@ plot_sankey_single <- function(data,
       plot.background = ggplot2::element_rect(fill = "white"),
       panel.border = ggplot2::element_blank()
     )
+}
+
+
+# stRoke::trial["male"] |> to_clean_levels()
+to_clean_levels <- function(data,missing.text="Missing"){
+  if (is.data.frame(data)){
+    data |>
+      lapply(all_levels_clean) |>
+      dplyr::bind_cols()
+  } else {
+    data |>
+      all_levels_clean()
+  }
+
+
+
+}
+
+# stRoke::trial["mrs_1"] |> missing_to_text_levels()
+missing_to_text_levels <- function(data,missing.text="Missing"){
+  data |>
+    dplyr::mutate(
+      dplyr::across(dplyr::where(is.factor), \(.x) {
+        if (anyNA(.x)) forcats::fct_na_value_to_level(.x, missing.text) else .x
+      })
+    )
+}
+
+all_levels_clean <- function(data){
+  data |>
+    (\(.x){
+      if (is.logical(.x)) as.factor(.x) else .x
+    })() |>
+    (\(.x){
+      if (is.factor(.x)) forcats::fct_drop(.x) else .x
+    })()
+}
+
+# stRoke::trial$mrs_1 |> color_levels_gen()
+color_levels_gen <- function(data,na.color="grey80",palette="viridis"){
+  out <- generate_colors(n = length(levels(to_clean_levels(data))),palette = palette)
+  if (anyNA(data)){
+    out <- c(out,na.color)
+  }
+  out
 }

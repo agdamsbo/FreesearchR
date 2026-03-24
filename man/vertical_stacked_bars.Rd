@@ -13,7 +13,9 @@ vertical_stacked_bars(
   l.color = "black",
   l.size = 0.5,
   draw.lines = TRUE,
-  label.str = "{n}\\n{round(100 * p,0)}\%"
+  label.str = "{n}\\n{round(100 * p,0)}\%",
+  color.palette = "viridis",
+  reverse = TRUE
 )
 }
 \arguments{

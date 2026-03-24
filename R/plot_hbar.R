@@ -8,11 +8,21 @@
 #' @examples
 #' mtcars |> plot_hbars(pri = "carb", sec = "cyl")
 #' mtcars |> plot_hbars(pri = "carb", sec = "cyl", ter="am")
-#' mtcars |> plot_hbars(pri = "carb", sec = NULL)
-plot_hbars <- function(data, pri, sec, ter = NULL) {
-  out <- vertical_stacked_bars(data = data, score = pri, group = sec, strata = ter)
-
-  out
+#' mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Blues")
+#' mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Magma")
+#' mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Viridis")
+plot_hbars <- function(data,
+                       pri,
+                       sec,
+                       ter = NULL,
+                       color.palette = "viridis") {
+  vertical_stacked_bars(
+    data = data,
+    score = pri,
+    group = sec,
+    strata = ter,
+    color.palette = color.palette
+  )
 }
 
 
@@ -35,7 +45,9 @@ vertical_stacked_bars <- function(data,
                                   l.color = "black",
                                   l.size = .5,
                                   draw.lines = TRUE,
-                                  label.str="{n}\n{round(100 * p,0)}%") {
+                                  label.str = "{n}\n{round(100 * p,0)}%",
+                                  color.palette = "viridis",
+                                  reverse = TRUE) {
   if (is.null(group)) {
     df.table <- data[c(score, group, strata)] |>
       dplyr::mutate("All" = 1) |>
@@ -60,15 +72,19 @@ vertical_stacked_bars <- function(data,
       returnData = TRUE
     )
 
-  colors <- viridisLite::viridis(nrow(df.table))
+  colors <- generate_colors(n = nrow(df.table), palette = color.palette)
+  ## Colors are reversed by default as that usually gives the best result
+  if (isTRUE(reverse)) {
+    colors <- rev(colors)
+  }
   contrast_cut <-
-    sum(contrast_text(colors, threshold = .3) == "white")
+    contrast_text(colors, threshold = .3) == "white"
 
   score_label <- data |> get_label(var = score)
   group_label <- data |> get_label(var = group)
 
   p |>
-    (\(.x){
+    (\(.x) {
       .x$plot +
         ggplot2::geom_text(
           data = .x$rectData[which(.x$rectData$n >
@@ -78,20 +94,18 @@ vertical_stacked_bars <- function(data,
           ggplot2::aes(
             x = group,
             y = p_prev + 0.49 * p,
-            color = as.numeric(score) > contrast_cut,
+            color = contrast_cut,
             # label = paste0(sprintf("%2.0f", 100 * p),"%"),
             # label = sprintf("%2.0f", 100 * p)
             label = glue::glue(label.str)
           )
         ) +
         ggplot2::labs(fill = score_label) +
-        ggplot2::scale_fill_manual(values = rev(colors)) +
-        ggplot2::theme(
-          legend.position = "bottom",
-          axis.title = ggplot2::element_text(),
+        ggplot2::scale_fill_manual(values = colors) +
+        ggplot2::theme(legend.position = "bottom",
+                       axis.title = ggplot2::element_text(),
         ) +
         ggplot2::xlab(group_label) +
         ggplot2::ylab(NULL)
-      # viridis::scale_fill_viridis(discrete = TRUE, direction = -1, option = "D")
     })()
 }

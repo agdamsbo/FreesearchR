@@ -1,4 +1,5 @@
-plot_bar <- function(data, pri, sec, ter = NULL, style = c("stack", "dodge", "fill"), max_level = 30, ...) {
+plot_bar <- function(data, pri, sec, ter = NULL, style = c("stack", "dodge", "fill"),
+                     color.palette = "viridis", max_level = 30, ...) {
   style <- match.arg(style)
 
   if (!is.null(ter)) {
@@ -13,7 +14,8 @@ plot_bar <- function(data, pri, sec, ter = NULL, style = c("stack", "dodge", "fi
       pri = pri,
       sec = sec,
       style = style,
-      max_level = max_level
+      max_level = max_level,
+      color.palette = color.palette
     )
   })
 
@@ -38,8 +40,9 @@ plot_bar <- function(data, pri, sec, ter = NULL, style = c("stack", "dodge", "fi
 #'
 #' mtcars |>
 #'   dplyr::mutate(cyl = factor(cyl), am = factor(am)) |>
-#'   plot_bar_single(pri = "cyl", style = "stack")
-plot_bar_single <- function(data, pri, sec = NULL, style = c("stack", "dodge", "fill"), max_level = 30) {
+#'   plot_bar_single(pri = "cyl", style = "stack",color.palette="turbo")
+plot_bar_single <- function(data, pri, sec = NULL, style = c("stack", "dodge", "fill"), max_level = 30,
+                            color.palette = "viridis") {
   style <- match.arg(style)
 
   if (identical(sec, "none")) {
@@ -98,6 +101,7 @@ plot_bar_single <- function(data, pri, sec = NULL, style = c("stack", "dodge", "
   ) +
     ggplot2::geom_bar(position = style, stat = "identity") +
     ggplot2::scale_y_continuous(labels = scales::percent) +
+    scale_fill_generate(palette=color.palette) +
     ggplot2::ylab("Percentage") +
     ggplot2::xlab(get_label(data,pri))+
     ggplot2::guides(fill = ggplot2::guide_legend(title = get_label(data,fill)))

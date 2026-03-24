@@ -102,7 +102,7 @@ ggeulerr <- function(
 #'   plot_euler("mfi_cut", "mdi_cut")
 #' stRoke::trial |>
 #'   plot_euler(pri="male", sec=c("hypertension"))
-plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
+plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103,color.palette="viridis") {
   set.seed(seed = seed)
   if (!is.null(ter)) {
     ds <- split(data, data[ter])
@@ -112,7 +112,7 @@ plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
   out <- lapply(ds, \(.x){
     .x[c(pri, sec)] |>
       na.omit() |>
-      plot_euler_single()
+      plot_euler_single(color.palette=color.palette)
   })
 
   wrap_plot_list(out, title = glue::glue(i18n$t("Grouped by {get_label(data,ter)}")))
@@ -130,16 +130,12 @@ plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
 #'   C = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE),
 #'   D = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE)
 #' ) |> plot_euler_single()
-#' mtcars[c("vs", "am")] |> plot_euler_single()
-plot_euler_single <- function(data) {
-  # if (any("categorical" %in% data_type(data))){
-  #   shape <- "ellipse"
-  # } else {
-  #   shape <- "circle"
-  # }
+#' mtcars[c("vs", "am")] |> plot_euler_single("magma")
+plot_euler_single <- function(data,color.palette="viridis") {
 
   data |>
     ggeulerr(shape = "circle") +
+    scale_fill_generate(palette=color.palette) +
     ggplot2::theme_void() +
     ggplot2::theme(
       legend.position = "none",

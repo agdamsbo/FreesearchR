@@ -4,7 +4,7 @@
 \alias{plot_euler_single}
 \title{Easily plot single euler diagrams}
 \usage{
-plot_euler_single(data)
+plot_euler_single(data, color.palette = "viridis")
 }
 \value{
 ggplot2 object
@@ -19,5 +19,5 @@ data.frame(
   C = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE),
   D = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE)
 ) |> plot_euler_single()
-mtcars[c("vs", "am")] |> plot_euler_single()
+mtcars[c("vs", "am")] |> plot_euler_single("magma")
 }

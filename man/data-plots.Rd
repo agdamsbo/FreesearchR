@@ -20,25 +20,35 @@
 \usage{
 data_visuals_ui(id, tab_title = "Plots", ...)
 
-data_visuals_server(id, data, ...)
+data_visuals_server(
+  id,
+  data,
+  palettes = c(`Perceptual (blue-yellow)` = "viridis", `Perceptual (fire)` = "plasma",
+    `Colour-blind friendly` = "Okabe-Ito", `Qualitative (bold)` = "Dark 2",
+    `Qualitative (paired)` = "Paired", `Sequential (blues)` = "Blues",
+    `Diverging (red-blue)` = "RdBu", `Tableau style` = "Tableau 10", Pastel = "Pastel 1",
+    Rainbow = "rainbow"),
+  ...
+)
 
-create_plot(data, type, pri, sec, ter = NULL, ...)
+create_plot(data, type, pri, sec, ter = NULL, color.palette = "viridis", ...)
 
 plot_bar_single(
   data,
   pri,
   sec = NULL,
   style = c("stack", "dodge", "fill"),
-  max_level = 30
+  max_level = 30,
+  color.palette = "viridis"
 )
 
-plot_box(data, pri, sec, ter = NULL, ...)
+plot_box(data, pri, sec, ter = NULL, color.palette = "viridis", ...)
 
-plot_box_single(data, pri, sec = NULL, seed = 2103)
+plot_box_single(data, pri, sec = NULL, seed = 2103, color.palette = "viridis")
 
-plot_hbars(data, pri, sec, ter = NULL)
+plot_hbars(data, pri, sec, ter = NULL, color.palette = "viridis")
 
-plot_ridge(data, x, y, z = NULL, ...)
+plot_ridge(data, x, y, z = NULL, color.palette = "viridis", ...)
 
 sankey_ready(data, pri, sec, numbers = "count", ...)
 
@@ -49,12 +59,16 @@ plot_sankey(
   ter = NULL,
   color.group = "pri",
   colors = NULL,
+  color.palette = "viridis",
+  default.color = "#2986cc",
+  box.color = "#1E4B66",
+  na.color = "grey80",
   missing.level = "Missing"
 )
 
-plot_scatter(data, pri, sec, ter = NULL)
+plot_scatter(data, pri, sec, ter = NULL, color.palette = "viridis")
 
-plot_violin(data, pri, sec, ter = NULL)
+plot_violin(data, pri, sec, ter = NULL, color.palette = "viridis")
 }
 \arguments{
 \item{id}{Module id. (Use 'ns("id")')}
@@ -70,6 +84,8 @@ plot_violin(data, pri, sec, ter = NULL)
 \item{sec}{secondary variable}
 
 \item{ter}{tertiary variable}
+
+\item{color.palette}{choose color palette. See \code{\link{plot_colors}} for support.}
 
 \item{style}{barplot style passed to geom_bar position argument.
 One of c("stack", "dodge", "fill")}
@@ -120,7 +136,7 @@ Beautiful sankey plot with option to split by a tertiary group
 
 Beautiful violin plot
 
-Beatiful violin plot
+Beautiful violin plot
 }
 \examples{
 create_plot(mtcars, "plot_violin", "mpg", "cyl") |> attributes()
@@ -130,7 +146,7 @@ mtcars |>
 
 mtcars |>
   dplyr::mutate(cyl = factor(cyl), am = factor(am)) |>
-  plot_bar_single(pri = "cyl", style = "stack")
+  plot_bar_single(pri = "cyl", style = "stack",color.palette="turbo")
 mtcars |> plot_box(pri = "mpg", sec = "gear")
 mtcars |> plot_box(pri = "mpg", sec="cyl")
 mtcars |>
@@ -140,11 +156,14 @@ mtcars |>
   default_parsing() |>
   plot_box(pri = "mpg", sec = "cyl", ter = "gear",axis.font.family="mono")
 mtcars |> plot_box_single("mpg")
-mtcars |> plot_box_single("mpg","cyl")
+mtcars |> plot_box_single("mpg","cyl",color.palette="Blues")
+stRoke::trial |> plot_box_single("age","active",color.palette="Blues")
 gtsummary::trial |> plot_box_single("age","trt")
 mtcars |> plot_hbars(pri = "carb", sec = "cyl")
 mtcars |> plot_hbars(pri = "carb", sec = "cyl", ter="am")
-mtcars |> plot_hbars(pri = "carb", sec = NULL)
+mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Blues")
+mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Magma")
+mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Viridis")
 mtcars |>
   default_parsing() |>
   plot_ridge(x = "mpg", y = "cyl")
@@ -169,9 +188,9 @@ mtcars |>
 ## Dont know why...
 mtcars |>
   default_parsing() |>
-  plot_sankey("cyl", "gear", "vs", color.group = "pri")
-
-  # stRoke::trial |> plot_sankey("mrs_1", "mrs_6")
+  plot_sankey("cyl", "gear", "vs", color.group = "pri",color.palette="inferno")
 mtcars |> plot_scatter(pri = "mpg", sec = "wt")
-mtcars |> plot_violin(pri = "mpg", sec = "cyl", ter = "gear")
+mtcars |> plot_scatter(pri = "mpg", sec = "wt",ter="carb")
+mtcars |> plot_violin(pri = "mpg", sec = "cyl")
+mtcars |> plot_violin(pri = "mpg", sec = "cyl", ter = "gear", color.palette="Blues")
 }

@@ -4,7 +4,7 @@
 \alias{plot_euler}
 \title{Easily plot euler diagrams}
 \usage{
-plot_euler(data, pri, sec, ter = NULL, seed = 2103)
+plot_euler(data, pri, sec, ter = NULL, seed = 2103, color.palette = "viridis")
 }
 \arguments{
 \item{data}{data}

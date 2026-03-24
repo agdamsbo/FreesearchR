@@ -7,7 +7,8 @@
 #'
 #' @examples
 #' mtcars |> plot_scatter(pri = "mpg", sec = "wt")
-plot_scatter <- function(data, pri, sec, ter = NULL) {
+#' mtcars |> plot_scatter(pri = "mpg", sec = "wt",ter="carb")
+plot_scatter <- function(data, pri, sec, ter = NULL, color.palette="viridis") {
   if (is.null(ter)) {
     rempsyc::nice_scatter(
       data = data,
@@ -24,6 +25,7 @@ plot_scatter <- function(data, pri, sec, ter = NULL) {
       group = ter,
       xtitle = get_label(data, var = sec),
       ytitle = get_label(data, var = pri)
-    )
+    )+
+     scale_color_generate(palette=color.palette)
   }
 }

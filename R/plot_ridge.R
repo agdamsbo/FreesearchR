@@ -10,7 +10,7 @@
 #'   default_parsing() |>
 #'   plot_ridge(x = "mpg", y = "cyl")
 #' mtcars |> plot_ridge(x = "mpg", y = "cyl", z = "gear")
-plot_ridge <- function(data, x, y, z = NULL, ...) {
+plot_ridge <- function(data, x, y, z = NULL, color.palette="viridis", ...) {
   if (!is.null(z)) {
     ds <- split(data, data[z])
   } else {
@@ -21,6 +21,7 @@ plot_ridge <- function(data, x, y, z = NULL, ...) {
     ggplot2::ggplot(.ds, ggplot2::aes(x = !!dplyr::sym(x), y = !!dplyr::sym(y), fill = !!dplyr::sym(y))) +
       ggridges::geom_density_ridges() +
       ggridges::theme_ridges() +
+      scale_fill_generate(palette=color.palette) +
       ggplot2::theme(legend.position = "none") |> rempsyc:::theme_apa()
   })
 

@@ -20,7 +20,7 @@
 #' mtcars |>
 #'   default_parsing() |>
 #'   plot_box(pri = "mpg", sec = "cyl", ter = "gear",axis.font.family="mono")
-plot_box <- function(data, pri, sec, ter = NULL,...) {
+plot_box <- function(data, pri, sec, ter = NULL,color.palette="viridis",...) {
   if (!is.null(ter)) {
     ds <- split(data, data[ter])
   } else {
@@ -31,7 +31,8 @@ plot_box <- function(data, pri, sec, ter = NULL,...) {
     plot_box_single(
       data = .ds,
       pri = pri,
-      sec = sec
+      sec = sec,
+      color.palette=color.palette
     )
   })
 
@@ -48,9 +49,10 @@ plot_box <- function(data, pri, sec, ter = NULL,...) {
 #'
 #' @examples
 #' mtcars |> plot_box_single("mpg")
-#' mtcars |> plot_box_single("mpg","cyl")
+#' mtcars |> plot_box_single("mpg","cyl",color.palette="Blues")
+#' stRoke::trial |> plot_box_single("age","active",color.palette="Blues")
 #' gtsummary::trial |> plot_box_single("age","trt")
-plot_box_single <- function(data, pri, sec=NULL, seed = 2103) {
+plot_box_single <- function(data, pri, sec=NULL, seed = 2103,color.palette="viridis") {
   set.seed(seed)
 
   if (is.null(sec)) {
@@ -68,7 +70,7 @@ plot_box_single <- function(data, pri, sec=NULL, seed = 2103) {
     ggplot2::xlab(get_label(data,pri))+
     ggplot2::ylab(get_label(data,sec)) +
     ggplot2::coord_flip() +
-    viridis::scale_fill_viridis(discrete = discrete, option = "D") +
+    scale_fill_generate(discrete = discrete,palette = color.palette) +
     # ggplot2::theme_void() +
     ggplot2::theme_bw(base_size = 24) +
     ggplot2::theme(
