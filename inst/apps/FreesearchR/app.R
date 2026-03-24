@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmprPVhaz/file70565b30c8af.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpoawSeD/fileab3b2f3ac087.R 
 ########
 
 i18n_path <- system.file("translations", package = "FreesearchR")
@@ -871,30 +871,36 @@ make_choices_with_infos <- function(data) {
 #' @importFrom shiny selectizeInput
 #' @export
 #'
-columnSelectInput <- function(
-  inputId,
-  label,
-  data,
-  selected = "",
-  ...,
-  col_subset = NULL,
-  placeholder = "",
-  onInitialize,
-  none_label = "No variable selected",
-  maxItems = NULL
-) {
-  datar <- if (is.reactive(data)) data else reactive(data)
-  col_subsetr <- if (is.reactive(col_subset)) col_subset else reactive(col_subset)
+columnSelectInput <- function(inputId,
+                              label,
+                              data,
+                              selected = "",
+                              ...,
+                              col_subset = NULL,
+                              placeholder = "",
+                              onInitialize,
+                              none_label = "No variable selected",
+                              maxItems = NULL) {
+  datar <- if (is.reactive(data))
+    data
+  else
+    reactive(data)
+  col_subsetr <- if (is.reactive(col_subset))
+    col_subset
+  else
+    reactive(col_subset)
 
   labels <- Map(function(col) {
     json <- sprintf(
-      IDEAFilter:::strip_leading_ws('
+      IDEAFilter:::strip_leading_ws(
+        '
     {
       "name": "%s",
       "label": "%s",
       "dataclass": "%s",
       "datatype": "%s"
-    }'),
+    }'
+      ),
       col,
       attr(datar()[[col]], "label") %||% "",
       IDEAFilter:::get_dataFilter_class(datar()[[col]]),
@@ -903,12 +909,25 @@ columnSelectInput <- function(
   }, col = names(datar()))
 
   if (!"none" %in% names(datar())) {
-    labels <- c("none" = list(sprintf('\n    {\n      \"name\": \"none\",\n      \"label\": \"%s\",\n      \"dataclass\": \"\",\n      \"datatype\": \"\"\n    }', none_label)), labels)
+    labels <- c("none" = list(
+      sprintf(
+        '\n    {\n      \"name\": \"none\",\n      \"label\": \"%s\",\n      \"dataclass\": \"\",\n      \"datatype\": \"\"\n    }',
+        none_label
+      )
+    ), labels)
     choices <- setNames(names(labels), labels)
-    choices <- choices[match(if (length(col_subsetr()) == 0 || isTRUE(col_subsetr() == "")) names(datar()) else col_subsetr(), choices)]
+    choices <- choices[match(if (length(col_subsetr()) == 0 ||
+                                 isTRUE(col_subsetr() == ""))
+      names(datar())
+      else
+        col_subsetr(), choices)]
   } else {
     choices <- setNames(names(datar()), labels)
-    choices <- choices[match(if (length(col_subsetr()) == 0 || isTRUE(col_subsetr() == "")) choices else col_subsetr(), choices)]
+    choices <- choices[match(if (length(col_subsetr()) == 0 ||
+                                 isTRUE(col_subsetr() == ""))
+      choices
+      else
+        col_subsetr(), choices)]
   }
 
   shiny::selectizeInput(
@@ -917,8 +936,9 @@ columnSelectInput <- function(
     choices = choices,
     selected = selected,
     ...,
-    options = c(
-      list(render = I("{
+    options = c(list(
+      render = I(
+        "{
         // format the way that options are rendered
         option: function(item, escape) {
           item.data = JSON.parse(item.label);
@@ -946,9 +966,10 @@ columnSelectInput <- function(
                  escape(item.data.name) +
                '</div>';
         }
-      }")),
-      if (!is.null(maxItems)) list(maxItems = maxItems)
-    )
+      }"
+      )
+    ), if (!is.null(maxItems))
+      list(maxItems = maxItems))
   )
 }
 
@@ -1001,7 +1022,10 @@ vectorSelectInput <- function(inputId,
                               ...,
                               placeholder = "",
                               onInitialize) {
-  datar <- if (shiny::is.reactive(choices)) data else shiny::reactive(choices)
+  datar <- if (shiny::is.reactive(choices))
+    data
+  else
+    shiny::reactive(choices)
 
   labels <- sprintf(
     IDEAFilter:::strip_leading_ws('
@@ -1021,8 +1045,9 @@ vectorSelectInput <- function(inputId,
     choices = choices_new,
     selected = selected,
     ...,
-    options = c(
-      list(render = I("{
+    options = c(list(
+      render = I(
+        "{
         // format the way that options are rendered
         option: function(item, escape) {
           item.data = JSON.parse(item.label);
@@ -1041,7 +1066,123 @@ vectorSelectInput <- function(inputId,
                  escape(item.data.name) +
                '</div>';
         }
-      }"))
+      }"
+      )
+    ))
+  )
+}
+
+
+#' A selectizeInput customized for named vectors of color names supported by
+#' \code{\link{generate_colors}}
+#'
+#' @param inputId passed to \code{\link[shiny]{selectizeInput}}
+#' @param label passed to \code{\link[shiny]{selectizeInput}}
+#' @param choices A named \code{vector} from which fields should be populated
+#' @param selected default selection
+#' @param previews number of preview colors. Default is 4.
+#' @param ... passed to \code{\link[shiny]{selectizeInput}}
+#' @param placeholder passed to \code{\link[shiny]{selectizeInput}} options
+#' @param onInitialize passed to \code{\link[shiny]{selectizeInput}} options
+#'
+#' @returns a \code{\link[shiny]{selectizeInput}} dropdown element
+#' @export
+#'
+#' @examples
+#' if (shiny::interactive()) {
+#'top_palettes <- c(
+#'"Perceptual (blue-yellow)"   = "viridis",
+#'"Perceptual (fire)"          = "plasma",
+#'"Colour-blind friendly"      = "Okabe-Ito",
+#'"Qualitative (bold)"         = "Dark 2",
+#'"Qualitative (paired)"       = "Paired",
+#'"Sequential (blues)"         = "Blues",
+#'"Diverging (red-blue)"       = "RdBu",
+#'"Tableau style"              = "Tableau 10",
+#'"Pastel"                     = "Pastel 1",
+#'"Rainbow"                    = "rainbow"
+#')
+#'   shinyApp(
+#'     ui = fluidPage(
+#'     titlePanel("Color Palette Select Test"),
+#'     colorSelectInput(
+#'       inputId  = "palette",
+#'       label    = "Color palette",
+#'       choices  = top_palettes,
+#'       selected = "viridis"
+#'     ),
+#'     verbatimTextOutput("selected")
+#'     ),
+#'     server = function(input, output, session) {
+#'     output$selected <- renderPrint(input$palette)
+#'     }
+#'   )
+#' }
+colorSelectInput <- function(inputId,
+                             label,
+                             choices,
+                             selected = "",
+                             previews = 4,
+                             ...,
+                             placeholder = "") {
+  vals <- if (shiny::is.reactive(choices)) {
+    choices()
+  } else{
+    choices
+  }
+
+  swatch_html <- function(palette_name) {
+    colors <- tryCatch(
+      suppressMessages(generate_colors(previews, palette_name)),
+      error = function(e)
+        rep("#cccccc", 3)
+    )
+    # Strip alpha channel to ensure valid 6-digit CSS hex
+    colors <- substr(colors, 1, 7)
+    paste0(
+      sprintf(
+        "<span style='display:inline-block;width:12px;height:12px;background:%s;border-radius:2px;margin-right:1px;'></span>",
+        colors
+      ),
+      collapse = ""
+    )
+  }
+
+  labels <- sprintf(
+    '{"name": "%s", "label": "%s", "swatch": "%s"}',
+    vals,
+    names(vals) %||% "",
+    vapply(vals, swatch_html, character(1))
+  )
+
+  choices_new <- stats::setNames(vals, labels)
+
+  shiny::selectizeInput(
+    inputId  = inputId,
+    label    = label,
+    choices  = choices_new,
+    selected = selected,
+    ...,
+    options  = list(
+      render = I(
+        "{
+        option: function(item, escape) {
+          item.data = JSON.parse(item.label);
+          return '<div style=\"padding:3px 12px\">' +
+                   '<div><strong>' + escape(item.data.name) + '</strong></div>' +
+                   (item.data.label != '' ? '<div><small>' + escape(item.data.label) + '</small></div>' : '') +
+                   '<div style=\"margin-top:4px\">' + item.data.swatch + '</div>' +
+                 '</div>';
+        },
+        item: function(item, escape) {
+          item.data = JSON.parse(item.label);
+          return '<div style=\"display:flex;align-items:center;gap:6px\">' +
+                   '<span>' + escape(item.data.name) + '</span>' +
+                   item.data.swatch +
+                 '</div>';
+        }
+      }"
+      )
     )
   )
 }
@@ -1998,11 +2139,16 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
             title = "Create plot",
             icon = bsicons::bs_icon("graph-up"),
             shiny::uiOutput(outputId = ns("primary")),
-            shiny::helpText(i18n$t('Only non-text variables are available for plotting. Go the "Data" to reclass data to plot.')),
+            shiny::helpText(
+              i18n$t(
+                'Only non-text variables are available for plotting. Go the "Data" to reclass data to plot.'
+              )
+            ),
             shiny::tags$br(),
             shiny::uiOutput(outputId = ns("type")),
             shiny::uiOutput(outputId = ns("secondary")),
             shiny::uiOutput(outputId = ns("tertiary")),
+            shiny::uiOutput(outputId = ns("color_palette")),
             shiny::br(),
             shiny::actionButton(
               inputId = ns("act_plot"),
@@ -2048,14 +2194,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
             shiny::selectInput(
               inputId = ns("plot_type"),
               label = i18n$t("File format"),
-              choices = list(
-                "png",
-                "tiff",
-                "eps",
-                "pdf",
-                "jpeg",
-                "svg"
-              )
+              choices = list("png", "tiff", "eps", "pdf", "jpeg", "svg")
             ),
             shiny::br(),
             # Button
@@ -2066,12 +2205,15 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
             )
           )
         ),
-        shiny::p("We have collected a few notes on visualising data and details on the options included in FreesearchR:", shiny::tags$a(
-          href = "https://agdamsbo.github.io/FreesearchR/articles/visuals.html",
-          "View notes in new tab",
-          target = "_blank",
-          rel = "noopener noreferrer"
-        ))
+        shiny::p(
+          "We have collected a few notes on visualising data and details on the options included in FreesearchR:",
+          shiny::tags$a(
+            href = "https://agdamsbo.github.io/FreesearchR/articles/visuals.html",
+            "View notes in new tab",
+            target = "_blank",
+            rel = "noopener noreferrer"
+          )
+        )
       ),
       shiny::plotOutput(ns("plot"), height = "70vh"),
       shiny::tags$br(),
@@ -2092,21 +2234,37 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
 #' @export
 data_visuals_server <- function(id,
                                 data,
+                                palettes = c(
+                                  "Perceptual (blue-yellow)"   = "viridis",
+                                  "Perceptual (fire)"          = "plasma",
+                                  "Colour-blind friendly"      = "Okabe-Ito",
+                                  "Qualitative (bold)"         = "Dark 2",
+                                  "Qualitative (paired)"       = "Paired",
+                                  "Sequential (blues)"         = "Blues",
+                                  "Diverging (red-blue)"       = "RdBu",
+                                  "Tableau style"              = "Tableau 10",
+                                  "Pastel"                     = "Pastel 1",
+                                  "Rainbow"                    = "rainbow"
+                                ),
                                 ...) {
   shiny::moduleServer(
     id = id,
     module = function(input, output, session) {
       ns <- session$ns
 
-      rv <- shiny::reactiveValues(
-        plot.params = NULL,
-        plot = NULL,
-        code = NULL
-      )
+      rv <- shiny::reactiveValues(plot.params = NULL,
+                                  plot = NULL,
+                                  code = NULL)
 
       shiny::observe({
-        bslib::accordion_panel_update(id = "acc_plot", target = "acc_pan_plot",title = i18n$t("Create plot"))
-        bslib::accordion_panel_update(id = "acc_plot", target = "acc_pan_download",title = i18n$t("Download"))
+        bslib::accordion_panel_update(
+          id = "acc_plot",
+          target = "acc_pan_plot",
+          title = i18n$t("Create plot")
+        )
+        bslib::accordion_panel_update(id = "acc_plot",
+                                      target = "acc_pan_download",
+                                      title = i18n$t("Download"))
       })
 
       # ## --- New attempt
@@ -2235,12 +2393,10 @@ data_visuals_server <- function(id,
           plot_data <- data()[input$primary]
         }
 
-        plots <- possible_plots(
-          data = plot_data
-        )
+        plots <- possible_plots(data = plot_data)
 
         plots_named <- get_plot_options(plots) |>
-          lapply(\(.x){
+          lapply(\(.x) {
             stats::setNames(.x$descr, .x$note)
           })
 
@@ -2260,23 +2416,19 @@ data_visuals_server <- function(id,
       output$secondary <- shiny::renderUI({
         shiny::req(input$type)
 
-        cols <- c(
-          rv$plot.params()[["secondary.extra"]],
-          all_but(
-            colnames(subset_types(
-              data(),
-              rv$plot.params()[["secondary.type"]]
-            )),
-            input$primary
-          )
-        )
+        cols <- c(rv$plot.params()[["secondary.extra"]], all_but(colnames(
+          subset_types(data(), rv$plot.params()[["secondary.type"]])
+        ), input$primary))
 
         columnSelectInput(
           inputId = ns("secondary"),
           data = data,
           selected = cols[1],
           placeholder = i18n$t("Please select"),
-          label = if (isTRUE(rv$plot.params()[["secondary.multi"]])) i18n$t("Additional variables") else i18n$t("Secondary variable"),
+          label = if (isTRUE(rv$plot.params()[["secondary.multi"]]))
+            i18n$t("Additional variables")
+          else
+            i18n$t("Secondary variable"),
           multiple = rv$plot.params()[["secondary.multi"]],
           maxItems = rv$plot.params()[["secondary.max"]],
           col_subset = cols,
@@ -2295,10 +2447,7 @@ data_visuals_server <- function(id,
           col_subset = c(
             "none",
             all_but(
-              colnames(subset_types(
-                data(),
-                rv$plot.params()[["tertiary.type"]]
-              )),
+              colnames(subset_types(data(), rv$plot.params()[["tertiary.type"]])),
               input$primary,
               input$secondary
             )
@@ -2307,64 +2456,59 @@ data_visuals_server <- function(id,
         )
       })
 
-      shiny::observeEvent(input$act_plot,
-        {
-          if (NROW(data()) > 0) {
-            tryCatch(
-              {
-                parameters <- list(
-                  type = rv$plot.params()[["fun"]],
-                  pri = input$primary,
-                  sec = input$secondary,
-                  ter = input$tertiary
-                )
+      ### Color option
+      output$color_palette <- shiny::renderUI({
+        # shiny::req(input$type)
+        colorSelectInput(
+          inputId = ns("color_palette"),
+          label = i18n$t("Choose color palette"),
+          choices = palettes
+        )
+      })
 
-                ## If the dictionary holds additional arguments to pass to the
-                ## plotting function, these are included
-                if (!is.null(rv$plot.params()[["fun.args"]])){
-                  parameters <- modifyList(parameters,rv$plot.params()[["fun.args"]])
-                }
-
-                shiny::withProgress(message = i18n$t("Drawing the plot. Hold tight for a moment.."), {
-                  rv$plot <- rlang::exec(
-                    create_plot,
-                    !!!append_list(
-                      data(),
-                      parameters,
-                      "data"
-                    )
-                  )
-                })
-
-                rv$code <- glue::glue("FreesearchR::create_plot(df,{list2str(parameters)})")
-              },
-              # warning = function(warn) {
-              #   showNotification(paste0(warn), type = "warning")
-              # },
-              error = function(err) {
-                showNotification(paste0(err), type = "err")
-              }
+      shiny::observeEvent(input$act_plot, {
+        if (NROW(data()) > 0) {
+          tryCatch({
+            parameters <- list(
+              type = rv$plot.params()[["fun"]],
+              pri = input$primary,
+              sec = input$secondary,
+              ter = input$tertiary,
+              color.palette = input$color_palette
             )
-          }
-        },
-        ignoreInit = TRUE
-      )
+
+            ## If the dictionary holds additional arguments to pass to the
+            ## plotting function, these are included
+            if (!is.null(rv$plot.params()[["fun.args"]])) {
+              parameters <- modifyList(parameters, rv$plot.params()[["fun.args"]])
+            }
+
+            shiny::withProgress(message = i18n$t("Drawing the plot. Hold tight for a moment.."),
+                                {
+                                  rv$plot <- rlang::exec(create_plot,
+                                                         !!!append_list(data(), parameters, "data"))
+                                })
+
+            rv$code <- glue::glue("FreesearchR::create_plot(df,{list2str(parameters)})")
+          }, # warning = function(warn) {
+          #   showNotification(paste0(warn), type = "warning")
+          # },
+          error = function(err) {
+            showNotification(paste0(err), type = "err")
+          })
+        }
+      }, ignoreInit = TRUE)
 
       output$code_plot <- shiny::renderUI({
         shiny::req(rv$code)
         prismCodeBlock(paste0(i18n$t("#Plotting\n"), rv$code))
       })
 
-      shiny::observeEvent(
-        list(
-          data()
-        ),
-        {
-          shiny::req(data())
+      shiny::observeEvent(list(data()), {
+        shiny::req(data())
 
-          rv$plot <- NULL
-        }
-      )
+        rv$plot <- NULL
+      })
 
       output$plot <- shiny::renderPlot({
         # shiny::req(rv$plot)
@@ -2404,16 +2548,15 @@ data_visuals_server <- function(id,
               width = input$width,
               height = input$height_slide,
               dpi = 300,
-              units = "mm", scale = 2
+              units = "mm",
+              scale = 2
             )
           })
         }
       )
 
 
-      shiny::observe(
-        return(rv$plot)
-      )
+      shiny::observe(return(rv$plot))
     }
   )
 }
@@ -2476,9 +2619,11 @@ supported_plots <- function() {
   list(
     plot_bar_rel = list(
       fun = "plot_bar",
-      fun.args =list(style="fill"),
+      fun.args = list(style = "fill"),
       descr = i18n$t("Stacked relative barplot"),
-      note = i18n$t("Create relative stacked barplots to show the distribution of categorical levels"),
+      note = i18n$t(
+        "Create relative stacked barplots to show the distribution of categorical levels"
+      ),
       primary.type = c("dichotomous", "categorical"),
       secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
@@ -2487,9 +2632,11 @@ supported_plots <- function() {
     ),
     plot_bar_abs = list(
       fun = "plot_bar",
-      fun.args =list(style="dodge"),
+      fun.args = list(style = "dodge"),
       descr = i18n$t("Side-by-side barplot"),
-      note = i18n$t("Create side-by-side barplot to show the distribution of categorical levels"),
+      note = i18n$t(
+        "Create side-by-side barplot to show the distribution of categorical levels"
+      ),
       primary.type = c("dichotomous", "categorical"),
       secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
@@ -2499,7 +2646,9 @@ supported_plots <- function() {
     plot_hbars = list(
       fun = "plot_hbars",
       descr = i18n$t("Stacked horizontal bars"),
-      note = i18n$t("A classical way of visualising the distribution of an ordinal scale like the modified Ranking Scale and known as Grotta bars"),
+      note = i18n$t(
+        "A classical way of visualising the distribution of an ordinal scale like the modified Ranking Scale and known as Grotta bars"
+      ),
       primary.type = c("dichotomous", "categorical"),
       secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
@@ -2509,7 +2658,9 @@ supported_plots <- function() {
     plot_violin = list(
       fun = "plot_violin",
       descr = i18n$t("Violin plot"),
-      note = i18n$t("A modern alternative to the classic boxplot to visualise data distribution"),
+      note = i18n$t(
+        "A modern alternative to the classic boxplot to visualise data distribution"
+      ),
       primary.type = c("datatime", "continuous"),
       secondary.type = c("dichotomous", "categorical"),
       secondary.multi = FALSE,
@@ -2557,7 +2708,9 @@ supported_plots <- function() {
     plot_euler = list(
       fun = "plot_euler",
       descr = i18n$t("Euler diagram"),
-      note = i18n$t("Generate area-proportional Euler diagrams to display set relationships"),
+      note = i18n$t(
+        "Generate area-proportional Euler diagrams to display set relationships"
+      ),
       primary.type = c("dichotomous"),
       secondary.type = c("dichotomous"),
       secondary.multi = TRUE,
@@ -2598,7 +2751,7 @@ possible_plots <- function(data) {
     out <- type
   } else {
     out <- supported_plots() |>
-      lapply(\(.x){
+      lapply(\(.x) {
         if (type %in% .x$primary.type) {
           .x$descr
         }
@@ -2626,12 +2779,12 @@ possible_plots <- function(data) {
 #'   get_plot_options()
 get_plot_options <- function(data) {
   descrs <- supported_plots() |>
-    lapply(\(.x){
+    lapply(\(.x) {
       .x$descr
     }) |>
     unlist()
   supported_plots() |>
-    (\(.x){
+    (\(.x) {
       .x[match(data, descrs)]
     })()
 }
@@ -2645,6 +2798,7 @@ get_plot_options <- function(data) {
 #' @param sec secondary variable
 #' @param ter tertiary variable
 #' @param type plot type (derived from possible_plots() and matches custom function)
+#' @param color.palette choose color palette. See \code{\link{plot_colors}} for support.
 #' @param ... ignored for now
 #'
 #' @name data-plots
@@ -2654,7 +2808,13 @@ get_plot_options <- function(data) {
 #'
 #' @examples
 #' create_plot(mtcars, "plot_violin", "mpg", "cyl") |> attributes()
-create_plot <- function(data, type, pri, sec, ter = NULL, ...) {
+create_plot <- function(data,
+                        type,
+                        pri,
+                        sec,
+                        ter = NULL,
+                        color.palette = "viridis",
+                        ...) {
   if (!is.null(sec)) {
     if (!any(sec %in% names(data))) {
       sec <- NULL
@@ -2671,13 +2831,11 @@ create_plot <- function(data, type, pri, sec, ter = NULL, ...) {
     pri = pri,
     sec = sec,
     ter = ter,
+    color.palette = color.palette,
     ...
   )
 
-  out <- do.call(
-    type,
-    modifyList(parameters, list(data = data))
-  )
+  out <- do.call(type, modifyList(parameters, list(data = data)))
 
   code <- rlang::call2(type, !!!parameters, .ns = "FreesearchR")
 
@@ -2734,10 +2892,14 @@ get_label <- function(data, var = NULL) {
 #' @examples
 #' "Lorem ipsum... you know the routine" |> line_break()
 #' paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(force = TRUE)
-line_break <- function(data, lineLength = 20, force = FALSE) {
+line_break <- function(data,
+                       lineLength = 20,
+                       force = FALSE) {
   if (isTRUE(force)) {
     ## This eats some letters when splitting a sentence... ??
-    gsub(paste0("(.{1,", lineLength, "})(\\s|[[:alnum:]])"), "\\1\n", data)
+    gsub(paste0("(.{1,", lineLength, "})(\\s|[[:alnum:]])"),
+         "\\1\n",
+         data)
   } else {
     paste(strwrap(data, lineLength), collapse = "\n")
   }
@@ -2769,9 +2931,9 @@ wrap_plot_list <- function(data,
   if (ggplot2::is_ggplot(data[[1]])) {
     if (length(data) > 1) {
       out <- data |>
-        (\(.x){
+        (\(.x) {
           if (rlang::is_named(.x)) {
-            purrr::imap(.x, \(.y, .i){
+            purrr::imap(.x, \(.y, .i) {
               .y + ggplot2::ggtitle(.i)
             })
           } else {
@@ -2779,12 +2941,10 @@ wrap_plot_list <- function(data,
           }
         })() |>
         align_axes() |>
-        patchwork::wrap_plots(
-          guides = guides,
-          axes = axes,
-          axis_titles = axis_titles,
-          ...
-        )
+        patchwork::wrap_plots(guides = guides,
+                              axes = axes,
+                              axis_titles = axis_titles,
+                              ...)
       if (!is.null(tag_levels)) {
         out <- out + patchwork::plot_annotation(tag_levels = tag_levels)
       }
@@ -2823,7 +2983,9 @@ wrap_plot_list <- function(data,
 #' @returns list of ggplot2 objects
 #' @export
 #'
-align_axes <- function(..., x.axis = TRUE, y.axis = TRUE) {
+align_axes <- function(...,
+                       x.axis = TRUE,
+                       y.axis = TRUE) {
   # https://stackoverflow.com/questions/62818776/get-axis-limits-from-ggplot-object
   # https://github.com/thomasp85/patchwork/blob/main/R/plot_multipage.R#L150
   if (ggplot2::is_ggplot(..1)) {
@@ -2841,7 +3003,7 @@ align_axes <- function(..., x.axis = TRUE, y.axis = TRUE) {
   xr <- clean_common_axis(p, "x")
 
   suppressWarnings({
-    purrr::map(p, \(.x){
+    purrr::map(p, \(.x) {
       out <- .x
       if (isTRUE(x.axis)) {
         out <- out + ggplot2::xlim(xr)
@@ -2865,7 +3027,7 @@ align_axes <- function(..., x.axis = TRUE, y.axis = TRUE) {
 clean_common_axis <- function(p, axis) {
   purrr::map(p, ~ ggplot2::layer_scales(.x)[[axis]]$get_limits()) |>
     unlist() |>
-    (\(.x){
+    (\(.x) {
       if (is.numeric(.x)) {
         range(.x)
       } else {
@@ -3659,6 +3821,249 @@ footer_ui <- function(i18n) {
       )
     )
   )
+}
+
+
+########
+#### Current file: /Users/au301842/FreesearchR/R//generate_colors.R 
+########
+
+#' Generate N Colors from a Specified Color Palette
+#'
+#' A flexible wrapper around multiple color palette libraries, returning N
+#' colors as a character vector of hex codes. Supports palettes from
+#' \pkg{viridisLite}, base R \pkg{grDevices}, and \pkg{RColorBrewer}.
+#'
+#' @param n \code{integer}. Number of colors to generate. Must be a positive
+#'   integer.
+#' @param palette \code{character(1)}. Name of the color palette to use.
+#'   Case-insensitive. Supported options:
+#'   \describe{
+#'     \item{\strong{viridisLite}}{`"viridis"`, `"magma"`, `"plasma"`,
+#'       `"inferno"`, `"cividis"`, `"mako"`, `"rocket"`, `"turbo"`}
+#'     \item{\strong{grDevices}}{`"hcl"`, `"rainbow"`, `"heat"`,
+#'       `"terrain"`, `"topo"`}
+#'     \item{\strong{RColorBrewer}}{Any palette name from
+#'       \code{RColorBrewer::brewer.pal.info}, e.g. `"Set1"`, `"Blues"`,
+#'       `"Dark2"`. If \code{n} exceeds the palette maximum, colors are
+#'       interpolated via \code{\link[grDevices]{colorRampPalette}}.}
+#'   }
+#' @param ... Additional arguments passed to the underlying palette function.
+#'   For example, \code{alpha}, \code{direction}, \code{begin}, \code{end}
+#'   are forwarded to \code{\link[viridisLite]{viridis}}; \code{palette} is
+#'   forwarded to \code{\link[grDevices]{hcl.colors}}.
+#'
+#' @return A \code{character} vector of length \code{n} containing hex color
+#'   codes (e.g. \code{"#440154FF"}).
+#'
+#' @examples
+#' # viridisLite palettes
+#' generate_colors(5, "viridis")
+#' generate_colors(5, "plasma")
+#' generate_colors(5, "viridis", alpha = 0.8, direction = -1)
+#'
+#' # Base R grDevices
+#' generate_colors(5, "rainbow")
+#' generate_colors(8, "hcl", palette = "Dark 3")
+#'
+#' # RColorBrewer
+#' generate_colors(5, "Set1")
+#' generate_colors(5, "Blues")
+#' generate_colors(12, "Set1")  # interpolates beyond palette max of 9
+#'
+#' # Drop-in replacement for viridisLite::viridis()
+#' # generate_colors(n = length(levels(data_orig[[pri]])), palette = "viridis")
+#'
+#' @seealso
+#' \code{\link[viridisLite]{viridis}},
+#' \code{\link[grDevices]{hcl.colors}},
+#' \code{\link[RColorBrewer]{brewer.pal}}
+#'
+#' @importFrom viridisLite viridis
+#' @importFrom grDevices hcl.colors rainbow heat.colors terrain.colors
+#'   topo.colors colorRampPalette
+#' @importFrom RColorBrewer brewer.pal brewer.pal.info
+#'
+#' @export
+generate_colors <- function(n, palette = "viridis", ...) {
+  if (!is.numeric(n) || length(n) != 1 || n < 1 || n != as.integer(n)) {
+    stop("`n` must be a single positive integer.")
+  }
+
+  # Function passthrough — call directly with n and ...
+  if (is.function(palette)) {
+    return(palette(n, ...))
+  }
+
+  if (!is.character(palette) || length(palette) != 1) {
+    stop("`palette` must be a single character string or a function.")
+  }
+
+  if (!is.numeric(n) || length(n) != 1 || n < 1 || n != as.integer(n)) {
+    stop("`n` must be a single positive integer.")
+  }
+  if (!is.character(palette) || length(palette) != 1) {
+    stop("`palette` must be a single character string.")
+  }
+
+  palette_lower <- tolower(palette)
+
+  viridis_palettes <- c(
+    "viridis", "magma", "plasma", "inferno",
+    "cividis", "mako", "rocket", "turbo"
+  )
+
+  if (palette_lower %in% viridis_palettes) {
+    viridisLite::viridis(n = n, option = palette_lower, ...)
+
+  } else if (palette_lower == "hcl") {
+    grDevices::hcl.colors(n = n, ...)
+
+  } else if (palette_lower == "rainbow") {
+    grDevices::rainbow(n = n, ...)
+
+  } else if (palette_lower == "heat") {
+    grDevices::heat.colors(n = n, ...)
+
+  } else if (palette_lower == "terrain") {
+    grDevices::terrain.colors(n = n, ...)
+
+  } else if (palette_lower == "topo") {
+    grDevices::topo.colors(n = n, ...)
+
+  } else if (palette %in% rownames(RColorBrewer::brewer.pal.info)) {
+    max_n       <- RColorBrewer::brewer.pal.info[palette, "maxcolors"]
+    fetch_n     <- max(min(n, max_n), 3L)          # clamp to [3, max_n] for brewer.pal()
+    base_colors <- RColorBrewer::brewer.pal(n = fetch_n, name = palette)
+    grDevices::colorRampPalette(base_colors)(n)
+
+  } else if (palette %in% grDevices::palette.pals()) {
+    grDevices::colorRampPalette(palette.colors(palette = palette))(n)
+
+  } else if (palette %in% grDevices::hcl.pals()) {
+    grDevices::hcl.colors(n = n, palette = palette, ...)
+
+  } else {
+    message(paste0(
+      "Unknown palette: '", palette, "'. ",
+      "Falling back to default R colors.\n",
+      "Available options:\n",
+      "  viridisLite  : viridis, magma, plasma, inferno, cividis, mako, rocket, turbo\n",
+      "  grDevices    : hcl, rainbow, heat, terrain, topo\n",
+      "  grDevices HCL: use grDevices::hcl.pals() to see all options\n",
+      "  grDevices    : use grDevices::palette.pals() to see all options\n",
+      "  RColorBrewer : use RColorBrewer::brewer.pal.info to see all options"
+    ))
+    viridisLite::viridis(n = n, option = "viridis")
+    # grDevices::hcl.colors(n = n)
+  }
+}
+
+
+#' Create a Continuous Color Function from a Palette
+#'
+#' Wraps \code{\link{generate_colors}} into a function that accepts a value
+#' between 0 and 1 and returns the corresponding color. Useful for mapping
+#' continuous variables to colors.
+#'
+#' @param palette Passed directly to [generate_colors()]. Either a palette
+#'   name string or a function.
+#' @param n \code{integer}. Resolution of the underlying color ramp — higher
+#'   values give smoother gradients. Defaults to 256.
+#' @param ... Additional arguments passed to [generate_colors()].
+#'
+#' @return A function that takes a numeric vector of values in \code{[0, 1]}
+#'   and returns a character vector of hex colors.
+#'
+#' @examples
+#' pal <- continuous_colors("viridis")
+#' pal(0)    # first color
+#' pal(1)    # last color
+#' pal(0.5)  # midpoint
+#'
+#' # Map a continuous variable to colors
+#' values <- seq(0, 1, length.out = 10)
+#' pal(values)
+#'
+#' # Works with any palette generate_colors() accepts
+#' pal <- continuous_colors("plasma", direction = -1)
+#' pal <- continuous_colors(\(n) hcl.colors(n, palette = "Blue-Red"))
+#'
+#' @seealso [generate_colors()]
+#' @export
+continuous_colors <- function(palette = "viridis", n = 256, ...) {
+  colors <- generate_colors(n, palette, ...)
+  ramp   <- grDevices::colorRamp(colors)
+
+  function(x) {
+    if (any(x < 0 | x > 1, na.rm = TRUE)) stop("Values must be in [0, 1].")
+    rgb_vals <- ramp(x)
+    grDevices::rgb(rgb_vals[, 1], rgb_vals[, 2], rgb_vals[, 3], maxColorValue = 255)
+  }
+}
+
+
+#' Discrete and Continuous Fill Scale Using generate_colors
+#'
+#' Drop-in replacement for [viridis::scale_fill_viridis()] that works with
+#' any palette supported by [generate_colors()].
+#'
+#' @param palette Passed to [generate_colors()]. Either a palette name string
+#'   or a function.
+#' @param discrete \code{logical}. If \code{TRUE} (default), a discrete scale
+#'   is returned. If \code{FALSE}, a continuous scale is returned.
+#' @param ... Additional arguments passed to [ggplot2::scale_fill_manual()]
+#'   (discrete) or [ggplot2::scale_fill_gradientn()] (continuous).
+#'
+#' @examples
+#' library(ggplot2)
+#'
+#' # Discrete
+#' ggplot(mtcars, aes(x = wt, y = mpg, fill = factor(cyl))) +
+#'   geom_col() +
+#'   scale_fill_generate(palette = "Set1")
+#'
+#' # Continuous
+#' ggplot(mtcars, aes(x = wt, y = mpg, fill = mpg)) +
+#'   geom_point(shape = 21, size = 3) +
+#'   scale_fill_generate(palette = "viridis", discrete = FALSE)
+#'
+#' @seealso [scale_color_generate()], [generate_colors()], [continuous_colors()]
+#' @export
+scale_fill_generate <- function(palette = "viridis", discrete = TRUE, ...) {
+  if (discrete) {
+    ggplot2::discrete_scale(
+      aesthetics = "fill",
+      palette    = function(n) generate_colors(n, palette),
+      ...
+    )
+  } else {
+    ggplot2::scale_fill_gradientn(
+      colors = continuous_colors(palette)(seq(0, 1, length.out = 256)),
+      ...
+    )
+  }
+}
+
+#' @rdname scale_fill_generate
+#' @examples
+#' ggplot(mtcars, aes(x = wt, y = mpg, color = factor(cyl))) +
+#'   geom_point() +
+#'   scale_color_generate(palette = "Set1")
+#' @export
+scale_color_generate <- function(palette = "viridis", discrete = TRUE, ...) {
+  if (discrete) {
+    ggplot2::discrete_scale(
+      aesthetics = "colour",
+      palette    = function(n) generate_colors(n, palette),
+      ...
+    )
+  } else {
+    ggplot2::scale_color_gradientn(
+      colors = continuous_colors(palette)(seq(0, 1, length.out = 256)),
+      ...
+    )
+  }
 }
 
 
@@ -4514,7 +4919,7 @@ data_types <- function() {
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v26.3.4-260323'
+hosted_version <- function()'v26.3.4-260324'
 
 
 ########
@@ -6495,7 +6900,8 @@ missings_logic_across <- function(data, exclude = NULL) {
 #### Current file: /Users/au301842/FreesearchR/R//plot_bar.R 
 ########
 
-plot_bar <- function(data, pri, sec, ter = NULL, style = c("stack", "dodge", "fill"), max_level = 30, ...) {
+plot_bar <- function(data, pri, sec, ter = NULL, style = c("stack", "dodge", "fill"),
+                     color.palette = "viridis", max_level = 30, ...) {
   style <- match.arg(style)
 
   if (!is.null(ter)) {
@@ -6510,7 +6916,8 @@ plot_bar <- function(data, pri, sec, ter = NULL, style = c("stack", "dodge", "fi
       pri = pri,
       sec = sec,
       style = style,
-      max_level = max_level
+      max_level = max_level,
+      color.palette = color.palette
     )
   })
 
@@ -6535,8 +6942,9 @@ plot_bar <- function(data, pri, sec, ter = NULL, style = c("stack", "dodge", "fi
 #'
 #' mtcars |>
 #'   dplyr::mutate(cyl = factor(cyl), am = factor(am)) |>
-#'   plot_bar_single(pri = "cyl", style = "stack")
-plot_bar_single <- function(data, pri, sec = NULL, style = c("stack", "dodge", "fill"), max_level = 30) {
+#'   plot_bar_single(pri = "cyl", style = "stack",color.palette="turbo")
+plot_bar_single <- function(data, pri, sec = NULL, style = c("stack", "dodge", "fill"), max_level = 30,
+                            color.palette = "viridis") {
   style <- match.arg(style)
 
   if (identical(sec, "none")) {
@@ -6595,6 +7003,7 @@ plot_bar_single <- function(data, pri, sec = NULL, style = c("stack", "dodge", "
   ) +
     ggplot2::geom_bar(position = style, stat = "identity") +
     ggplot2::scale_y_continuous(labels = scales::percent) +
+    scale_fill_generate(palette=color.palette) +
     ggplot2::ylab("Percentage") +
     ggplot2::xlab(get_label(data,pri))+
     ggplot2::guides(fill = ggplot2::guide_legend(title = get_label(data,fill)))
@@ -6648,7 +7057,7 @@ plot_bar_single <- function(data, pri, sec = NULL, style = c("stack", "dodge", "
 #' mtcars |>
 #'   default_parsing() |>
 #'   plot_box(pri = "mpg", sec = "cyl", ter = "gear",axis.font.family="mono")
-plot_box <- function(data, pri, sec, ter = NULL,...) {
+plot_box <- function(data, pri, sec, ter = NULL,color.palette="viridis",...) {
   if (!is.null(ter)) {
     ds <- split(data, data[ter])
   } else {
@@ -6659,7 +7068,8 @@ plot_box <- function(data, pri, sec, ter = NULL,...) {
     plot_box_single(
       data = .ds,
       pri = pri,
-      sec = sec
+      sec = sec,
+      color.palette=color.palette
     )
   })
 
@@ -6676,9 +7086,10 @@ plot_box <- function(data, pri, sec, ter = NULL,...) {
 #'
 #' @examples
 #' mtcars |> plot_box_single("mpg")
-#' mtcars |> plot_box_single("mpg","cyl")
+#' mtcars |> plot_box_single("mpg","cyl",color.palette="Blues")
+#' stRoke::trial |> plot_box_single("age","active",color.palette="Blues")
 #' gtsummary::trial |> plot_box_single("age","trt")
-plot_box_single <- function(data, pri, sec=NULL, seed = 2103) {
+plot_box_single <- function(data, pri, sec=NULL, seed = 2103,color.palette="viridis") {
   set.seed(seed)
 
   if (is.null(sec)) {
@@ -6696,7 +7107,7 @@ plot_box_single <- function(data, pri, sec=NULL, seed = 2103) {
     ggplot2::xlab(get_label(data,pri))+
     ggplot2::ylab(get_label(data,sec)) +
     ggplot2::coord_flip() +
-    viridis::scale_fill_viridis(discrete = discrete, option = "D") +
+    scale_fill_generate(discrete = discrete,palette = color.palette) +
     # ggplot2::theme_void() +
     ggplot2::theme_bw(base_size = 24) +
     ggplot2::theme(
@@ -6827,7 +7238,7 @@ ggeulerr <- function(
 #'   plot_euler("mfi_cut", "mdi_cut")
 #' stRoke::trial |>
 #'   plot_euler(pri="male", sec=c("hypertension"))
-plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
+plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103,color.palette="viridis") {
   set.seed(seed = seed)
   if (!is.null(ter)) {
     ds <- split(data, data[ter])
@@ -6837,7 +7248,7 @@ plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
   out <- lapply(ds, \(.x){
     .x[c(pri, sec)] |>
       na.omit() |>
-      plot_euler_single()
+      plot_euler_single(color.palette=color.palette)
   })
 
   wrap_plot_list(out, title = glue::glue(i18n$t("Grouped by {get_label(data,ter)}")))
@@ -6855,16 +7266,12 @@ plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103) {
 #'   C = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE),
 #'   D = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE)
 #' ) |> plot_euler_single()
-#' mtcars[c("vs", "am")] |> plot_euler_single()
-plot_euler_single <- function(data) {
-  # if (any("categorical" %in% data_type(data))){
-  #   shape <- "ellipse"
-  # } else {
-  #   shape <- "circle"
-  # }
+#' mtcars[c("vs", "am")] |> plot_euler_single("magma")
+plot_euler_single <- function(data,color.palette="viridis") {
 
   data |>
     ggeulerr(shape = "circle") +
+    scale_fill_generate(palette=color.palette) +
     ggplot2::theme_void() +
     ggplot2::theme(
       legend.position = "none",
@@ -6896,11 +7303,21 @@ plot_euler_single <- function(data) {
 #' @examples
 #' mtcars |> plot_hbars(pri = "carb", sec = "cyl")
 #' mtcars |> plot_hbars(pri = "carb", sec = "cyl", ter="am")
-#' mtcars |> plot_hbars(pri = "carb", sec = NULL)
-plot_hbars <- function(data, pri, sec, ter = NULL) {
-  out <- vertical_stacked_bars(data = data, score = pri, group = sec, strata = ter)
-
-  out
+#' mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Blues")
+#' mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Magma")
+#' mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Viridis")
+plot_hbars <- function(data,
+                       pri,
+                       sec,
+                       ter = NULL,
+                       color.palette = "viridis") {
+  vertical_stacked_bars(
+    data = data,
+    score = pri,
+    group = sec,
+    strata = ter,
+    color.palette = color.palette
+  )
 }
 
 
@@ -6923,7 +7340,9 @@ vertical_stacked_bars <- function(data,
                                   l.color = "black",
                                   l.size = .5,
                                   draw.lines = TRUE,
-                                  label.str="{n}\n{round(100 * p,0)}%") {
+                                  label.str = "{n}\n{round(100 * p,0)}%",
+                                  color.palette = "viridis",
+                                  reverse = TRUE) {
   if (is.null(group)) {
     df.table <- data[c(score, group, strata)] |>
       dplyr::mutate("All" = 1) |>
@@ -6948,15 +7367,19 @@ vertical_stacked_bars <- function(data,
       returnData = TRUE
     )
 
-  colors <- viridisLite::viridis(nrow(df.table))
+  colors <- generate_colors(n = nrow(df.table), palette = color.palette)
+  ## Colors are reversed by default as that usually gives the best result
+  if (isTRUE(reverse)) {
+    colors <- rev(colors)
+  }
   contrast_cut <-
-    sum(contrast_text(colors, threshold = .3) == "white")
+    contrast_text(colors, threshold = .3) == "white"
 
   score_label <- data |> get_label(var = score)
   group_label <- data |> get_label(var = group)
 
   p |>
-    (\(.x){
+    (\(.x) {
       .x$plot +
         ggplot2::geom_text(
           data = .x$rectData[which(.x$rectData$n >
@@ -6966,21 +7389,19 @@ vertical_stacked_bars <- function(data,
           ggplot2::aes(
             x = group,
             y = p_prev + 0.49 * p,
-            color = as.numeric(score) > contrast_cut,
+            color = contrast_cut,
             # label = paste0(sprintf("%2.0f", 100 * p),"%"),
             # label = sprintf("%2.0f", 100 * p)
             label = glue::glue(label.str)
           )
         ) +
         ggplot2::labs(fill = score_label) +
-        ggplot2::scale_fill_manual(values = rev(colors)) +
-        ggplot2::theme(
-          legend.position = "bottom",
-          axis.title = ggplot2::element_text(),
+        ggplot2::scale_fill_manual(values = colors) +
+        ggplot2::theme(legend.position = "bottom",
+                       axis.title = ggplot2::element_text(),
         ) +
         ggplot2::xlab(group_label) +
         ggplot2::ylab(NULL)
-      # viridis::scale_fill_viridis(discrete = TRUE, direction = -1, option = "D")
     })()
 }
 
@@ -7001,7 +7422,7 @@ vertical_stacked_bars <- function(data,
 #'   default_parsing() |>
 #'   plot_ridge(x = "mpg", y = "cyl")
 #' mtcars |> plot_ridge(x = "mpg", y = "cyl", z = "gear")
-plot_ridge <- function(data, x, y, z = NULL, ...) {
+plot_ridge <- function(data, x, y, z = NULL, color.palette="viridis", ...) {
   if (!is.null(z)) {
     ds <- split(data, data[z])
   } else {
@@ -7012,6 +7433,7 @@ plot_ridge <- function(data, x, y, z = NULL, ...) {
     ggplot2::ggplot(.ds, ggplot2::aes(x = !!dplyr::sym(x), y = !!dplyr::sym(y), fill = !!dplyr::sym(y))) +
       ggridges::geom_density_ridges() +
       ggridges::theme_ridges() +
+      scale_fill_generate(palette=color.palette) +
       ggplot2::theme(legend.position = "none") |> rempsyc:::theme_apa()
   })
 
@@ -7044,7 +7466,7 @@ sankey_ready <- function(data, pri, sec, numbers = "count", ...) {
   ## TODO: Ensure ordering x and y
 
   ## Ensure all are factors
-  data[c(pri, sec)] <- data[c(pri, sec)] |>
+  data <- data[c(pri, sec)] |>
     dplyr::mutate(dplyr::across(!dplyr::where(is.factor), forcats::as_factor))
 
   out <- dplyr::count(data, !!dplyr::sym(pri), !!dplyr::sym(sec), .drop = FALSE)
@@ -7109,15 +7531,17 @@ str_remove_last <- function(data, pattern = "\n") {
 #' ## Dont know why...
 #' mtcars |>
 #'   default_parsing() |>
-#'   plot_sankey("cyl", "gear", "vs", color.group = "pri")
-#'
-#'   # stRoke::trial |> plot_sankey("mrs_1", "mrs_6")
+#'   plot_sankey("cyl", "gear", "vs", color.group = "pri",color.palette="inferno")
 plot_sankey <- function(data,
                         pri,
                         sec,
                         ter = NULL,
                         color.group = "pri",
                         colors = NULL,
+                        color.palette = "viridis",
+                        default.color = "#2986cc",
+                        box.color = "#1E4B66",
+                        na.color = "grey80",
                         missing.level = "Missing") {
   if (!is.null(ter)) {
     ds <- split(data, data[ter])
@@ -7125,12 +7549,14 @@ plot_sankey <- function(data,
     ds <- list(data)
   }
 
+  # browser()
 
   out <- lapply(ds, \(.ds) {
     plot_sankey_single(
       .ds,
       pri = pri,
       sec = sec,
+      color.palette = color.palette,
       color.group = color.group,
       colors = colors,
       missing.level = missing.level
@@ -7168,67 +7594,67 @@ plot_sankey <- function(data,
 #' stRoke::trial |>
 #'   default_parsing() |>
 #'   plot_sankey_single("diabetes", "hypertension")
+#'
+#'
+#'  # stRoke::trial |> plot_sankey_single("mrs_1", "mrs_6", color.palette="magma")
+#'  # stRoke::trial |> plot_sankey_single("active", "male")
+#'  # stRoke::trial |> plot_sankey_single("diabetes", "active", color.group="sec")
+#'  # stRoke::trial |> plot_sankey_single("active", "diabetes", color.group="sec", color.palette="topo")
 plot_sankey_single <- function(data,
                                pri,
                                sec,
                                color.group = c("pri", "sec"),
-                               colors = NULL,
+                               color.palette = "viridis",
+                               colors=NULL,
                                missing.level = "Missing",
+                               default.color = "#2986cc",
+                               box.color = "#1E4B66",
+                               na.color = "grey80",
                                ...) {
   color.group <- match.arg(color.group)
 
-
-  # browser()
-  # if (is.na(ds[c(pri,sec)]))
-
-  # browser()
   data_orig <- data
 
-  data[c(pri, sec)] <- data[c(pri, sec)] |>
-    dplyr::mutate(
-      dplyr::across(dplyr::where(is.logical), as.factor),
-      dplyr::across(dplyr::where(is.factor), forcats::fct_drop),
-      dplyr::across(dplyr::where(is.factor), \(.x) {
-        forcats::fct_na_value_to_level(.x, missing.level)
-      })
-    )
+  data[c(pri, sec)] <- with_labels(data,{
+    data[c(pri, sec)] |>
+      to_clean_levels() |>
+      missing_to_text_levels(missing.text=missing.level)
+  })
 
-  data <- data |> sankey_ready(pri = pri, sec = sec, ...)
+  ## Aggregate data
+  data_aggr <- data |> sankey_ready(pri = pri, sec = sec, ...)
 
-  na.color <- "#2986cc"
-  box.color <- "#1E4B66"
+  default.color = default.color
+  box.color = box.color
+  na.color = na.color
 
   if (is.null(colors)) {
     if (color.group == "sec") {
-      main.colors <- viridisLite::viridis(n = length(levels(data_orig[[sec]])))
-      ## Only keep colors for included levels
-      main.colors <- main.colors[match(levels(data[[sec]]), levels(data_orig[[sec]]))]
+      main.colors <- color_levels_gen(data_orig[[sec]],palette=color.palette)
 
-      secondary.colors <- rep(na.color, length(levels(data[[pri]])))
+      secondary.colors <- rep(default.color, length(levels(data[[pri]])))
       label.colors <- Reduce(c, lapply(list(
         secondary.colors, rev(main.colors)
       ), contrast_text))
     } else {
-      main.colors <- viridisLite::viridis(n = length(levels(data_orig[[pri]])))
-      ## Only keep colors for included levels
-      main.colors <- main.colors[match(levels(data[[pri]]), levels(data_orig[[pri]]))]
+      main.colors <- color_levels_gen(data_orig[[pri]],palette=color.palette)
 
-      secondary.colors <- rep(na.color, length(levels(data[[sec]])))
+      secondary.colors <- rep(default.color, length(levels(data[[sec]])))
       label.colors <- Reduce(c, lapply(list(
         rev(main.colors), secondary.colors
       ), contrast_text))
     }
-    colors <- c(na.color, main.colors, secondary.colors)
-    colors[is.na(colors)] <- "grey80"
+    colors <- c(default.color, main.colors, secondary.colors)
+    colors[is.na(colors)] <- na.color
   } else {
     label.colors <- contrast_text(colors)
   }
 
-  group_labels <- c(get_label(data_orig, pri), get_label(data_orig, sec)) |>
+  group_labels <- c(get_label(data, pri), get_label(data, sec)) |>
     sapply(line_break) |>
     unname()
 
-  p <- ggplot2::ggplot(data, ggplot2::aes(y = n, axis1 = lx, axis2 = ly))
+  p <- ggplot2::ggplot(data_aggr, ggplot2::aes(y = n, axis1 = lx, axis2 = ly))
 
   if (color.group == "sec") {
     p <- p +
@@ -7291,6 +7717,51 @@ plot_sankey_single <- function(data,
 }
 
 
+# stRoke::trial["male"] |> to_clean_levels()
+to_clean_levels <- function(data,missing.text="Missing"){
+  if (is.data.frame(data)){
+    data |>
+      lapply(all_levels_clean) |>
+      dplyr::bind_cols()
+  } else {
+    data |>
+      all_levels_clean()
+  }
+
+
+
+}
+
+# stRoke::trial["mrs_1"] |> missing_to_text_levels()
+missing_to_text_levels <- function(data,missing.text="Missing"){
+  data |>
+    dplyr::mutate(
+      dplyr::across(dplyr::where(is.factor), \(.x) {
+        if (anyNA(.x)) forcats::fct_na_value_to_level(.x, missing.text) else .x
+      })
+    )
+}
+
+all_levels_clean <- function(data){
+  data |>
+    (\(.x){
+      if (is.logical(.x)) as.factor(.x) else .x
+    })() |>
+    (\(.x){
+      if (is.factor(.x)) forcats::fct_drop(.x) else .x
+    })()
+}
+
+# stRoke::trial$mrs_1 |> color_levels_gen()
+color_levels_gen <- function(data,na.color="grey80",palette="viridis"){
+  out <- generate_colors(n = length(levels(to_clean_levels(data))),palette = palette)
+  if (anyNA(data)){
+    out <- c(out,na.color)
+  }
+  out
+}
+
+
 ########
 #### Current file: /Users/au301842/FreesearchR/R//plot_scatter.R 
 ########
@@ -7304,7 +7775,8 @@ plot_sankey_single <- function(data,
 #'
 #' @examples
 #' mtcars |> plot_scatter(pri = "mpg", sec = "wt")
-plot_scatter <- function(data, pri, sec, ter = NULL) {
+#' mtcars |> plot_scatter(pri = "mpg", sec = "wt",ter="carb")
+plot_scatter <- function(data, pri, sec, ter = NULL, color.palette="viridis") {
   if (is.null(ter)) {
     rempsyc::nice_scatter(
       data = data,
@@ -7321,7 +7793,8 @@ plot_scatter <- function(data, pri, sec, ter = NULL) {
       group = ter,
       xtitle = get_label(data, var = sec),
       ytitle = get_label(data, var = pri)
-    )
+    )+
+     scale_color_generate(palette=color.palette)
   }
 }
 
@@ -7330,7 +7803,7 @@ plot_scatter <- function(data, pri, sec, ter = NULL) {
 #### Current file: /Users/au301842/FreesearchR/R//plot_violin.R 
 ########
 
-#' Beatiful violin plot
+#' Beautiful violin plot
 #'
 #' @returns ggplot2 object
 #' @export
@@ -7338,8 +7811,9 @@ plot_scatter <- function(data, pri, sec, ter = NULL) {
 #' @name data-plots
 #'
 #' @examples
-#' mtcars |> plot_violin(pri = "mpg", sec = "cyl", ter = "gear")
-plot_violin <- function(data, pri, sec, ter = NULL) {
+#' mtcars |> plot_violin(pri = "mpg", sec = "cyl")
+#' mtcars |> plot_violin(pri = "mpg", sec = "cyl", ter = "gear", color.palette="Blues")
+plot_violin <- function(data, pri, sec, ter = NULL, color.palette="viridis") {
   if (!is.null(ter)) {
     ds <- split(data, data[ter])
   } else {
@@ -7355,7 +7829,8 @@ plot_violin <- function(data, pri, sec, ter = NULL) {
         response = pri,
         xtitle = get_label(data, var = sec),
         ytitle = get_label(data, var = pri)
-      )
+      )+
+        scale_fill_generate(palette=color.palette)
     })
 
     wrap_plot_list(out, title = glue::glue(i18n$t("Grouped by {get_label(data,ter)}")))
