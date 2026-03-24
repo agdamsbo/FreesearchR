@@ -10,8 +10,12 @@ plot_sankey_single(
   pri,
   sec,
   color.group = c("pri", "sec"),
+  color.palette = "viridis",
   colors = NULL,
   missing.level = "Missing",
+  default.color = "#2986cc",
+  box.color = "#1E4B66",
+  na.color = "grey80",
   ...
 )
 ```
@@ -60,4 +64,11 @@ stRoke::trial |>
 #> Warning: Some strata appear at multiple axes.
 #> Warning: Some strata appear at multiple axes.
 #> Warning: Some strata appear at multiple axes.
+
+
+
+ # stRoke::trial |> plot_sankey_single("mrs_1", "mrs_6", color.palette="magma")
+ # stRoke::trial |> plot_sankey_single("active", "male")
+ # stRoke::trial |> plot_sankey_single("diabetes", "active", color.group="sec")
+ # stRoke::trial |> plot_sankey_single("active", "diabetes", color.group="sec", color.palette="topo")
 ```

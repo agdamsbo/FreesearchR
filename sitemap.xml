@@ -31,8 +31,10 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/clean_date.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/clean_sep.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/collapse_spaces.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/colorSelectInput.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/columnSelectInput.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/compare_missings.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/continuous_colors.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/contrast_text.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/corr_pairs_validate.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/correlation_pairs.html</loc></url>
@@ -67,6 +69,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/factorize.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/file_export.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/format_writer.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/generate_colors.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/get_data_packages.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/get_dimensions.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/get_fun_options.html</loc></url>
@@ -129,6 +132,7 @@
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/remove_nested_list.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/repeated_instruments.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/restore_labels.html</loc></url>
+<url><loc>https://agdamsbo.github.io/FreesearchR/reference/scale_fill_generate.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/selectInputIcon.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/separate_string.html</loc></url>
 <url><loc>https://agdamsbo.github.io/FreesearchR/reference/set_column_label.html</loc></url>

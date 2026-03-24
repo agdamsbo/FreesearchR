@@ -20,32 +20,42 @@ Beautiful sankey plot with option to split by a tertiary group
 
 Beautiful violin plot
 
-Beatiful violin plot
+Beautiful violin plot
 
 ## Usage
 
 ``` r
 data_visuals_ui(id, tab_title = "Plots", ...)
 
-data_visuals_server(id, data, ...)
+data_visuals_server(
+  id,
+  data,
+  palettes = c(`Perceptual (blue-yellow)` = "viridis", `Perceptual (fire)` = "plasma",
+    `Colour-blind friendly` = "Okabe-Ito", `Qualitative (bold)` = "Dark 2",
+    `Qualitative (paired)` = "Paired", `Sequential (blues)` = "Blues",
+    `Diverging (red-blue)` = "RdBu", `Tableau style` = "Tableau 10", Pastel = "Pastel 1",
+    Rainbow = "rainbow"),
+  ...
+)
 
-create_plot(data, type, pri, sec, ter = NULL, ...)
+create_plot(data, type, pri, sec, ter = NULL, color.palette = "viridis", ...)
 
 plot_bar_single(
   data,
   pri,
   sec = NULL,
   style = c("stack", "dodge", "fill"),
-  max_level = 30
+  max_level = 30,
+  color.palette = "viridis"
 )
 
-plot_box(data, pri, sec, ter = NULL, ...)
+plot_box(data, pri, sec, ter = NULL, color.palette = "viridis", ...)
 
-plot_box_single(data, pri, sec = NULL, seed = 2103)
+plot_box_single(data, pri, sec = NULL, seed = 2103, color.palette = "viridis")
 
-plot_hbars(data, pri, sec, ter = NULL)
+plot_hbars(data, pri, sec, ter = NULL, color.palette = "viridis")
 
-plot_ridge(data, x, y, z = NULL, ...)
+plot_ridge(data, x, y, z = NULL, color.palette = "viridis", ...)
 
 sankey_ready(data, pri, sec, numbers = "count", ...)
 
@@ -56,12 +66,16 @@ plot_sankey(
   ter = NULL,
   color.group = "pri",
   colors = NULL,
+  color.palette = "viridis",
+  default.color = "#2986cc",
+  box.color = "#1E4B66",
+  na.color = "grey80",
   missing.level = "Missing"
 )
 
-plot_scatter(data, pri, sec, ter = NULL)
+plot_scatter(data, pri, sec, ter = NULL, color.palette = "viridis")
 
-plot_violin(data, pri, sec, ter = NULL)
+plot_violin(data, pri, sec, ter = NULL, color.palette = "viridis")
 ```
 
 ## Arguments
@@ -93,6 +107,10 @@ plot_violin(data, pri, sec, ter = NULL)
 - ter:
 
   tertiary variable
+
+- color.palette:
+
+  choose color palette. See `plot_colors` for support.
 
 - style:
 
@@ -688,10 +706,11 @@ create_plot(mtcars, "plot_violin", "mpg", "cyl") |> attributes()
 #> list()
 #> 
 #> $plot_env
-#> <environment: 0x55fda1fb5b88>
+#> <environment: 0x56500f1c2250>
 #> 
 #> $code
-#> FreesearchR::plot_violin(pri = "mpg", sec = "cyl", ter = NULL)
+#> FreesearchR::plot_violin(pri = "mpg", sec = "cyl", ter = NULL, 
+#>     color.palette = "viridis")
 #> 
 mtcars |>
   dplyr::mutate(cyl = factor(cyl), am = factor(am)) |>
@@ -700,7 +719,7 @@ mtcars |>
 
 mtcars |>
   dplyr::mutate(cyl = factor(cyl), am = factor(am)) |>
-  plot_bar_single(pri = "cyl", style = "stack")
+  plot_bar_single(pri = "cyl", style = "stack",color.palette="turbo")
 
 mtcars |> plot_box(pri = "mpg", sec = "gear")
 
@@ -716,7 +735,9 @@ mtcars |>
 #> Error in plot_box(default_parsing(mtcars), pri = "mpg", sec = "cyl", ter = "gear",     axis.font.family = "mono"): object 'i18n' not found
 mtcars |> plot_box_single("mpg")
 
-mtcars |> plot_box_single("mpg","cyl")
+mtcars |> plot_box_single("mpg","cyl",color.palette="Blues")
+
+stRoke::trial |> plot_box_single("age","active",color.palette="Blues")
 
 gtsummary::trial |> plot_box_single("age","trt")
 #> Warning: Removed 11 rows containing non-finite outside the scale range
@@ -727,12 +748,28 @@ gtsummary::trial |> plot_box_single("age","trt")
 mtcars |> plot_hbars(pri = "carb", sec = "cyl")
 #> Scale for fill is already present.
 #> Adding another scale for fill, which will replace the existing scale.
-
+#> Error in ggplot2::geom_text(data = .x$rectData[which(.x$rectData$n > 0),     ], size = t.size, fontface = "plain", ggplot2::aes(x = group,     y = p_prev + 0.49 * p, color = contrast_cut, label = glue::glue(label.str))): Problem while computing aesthetics.
+#> ℹ Error occurred in the 3rd layer.
+#> Caused by error in `check_aesthetics()`:
+#> ! Aesthetics must be either length 1 or the same as the data (9).
+#> ✖ Fix the following mappings: `colour`.
 mtcars |> plot_hbars(pri = "carb", sec = "cyl", ter="am")
 #> Scale for fill is already present.
 #> Adding another scale for fill, which will replace the existing scale.
+#> Error in ggplot2::geom_text(data = .x$rectData[which(.x$rectData$n > 0),     ], size = t.size, fontface = "plain", ggplot2::aes(x = group,     y = p_prev + 0.49 * p, color = contrast_cut, label = glue::glue(label.str))): Problem while computing aesthetics.
+#> ℹ Error occurred in the 3rd layer.
+#> Caused by error in `check_aesthetics()`:
+#> ! Aesthetics must be either length 1 or the same as the data (13).
+#> ✖ Fix the following mappings: `colour`.
+mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Blues")
+#> Scale for fill is already present.
+#> Adding another scale for fill, which will replace the existing scale.
 
-mtcars |> plot_hbars(pri = "carb", sec = NULL)
+mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Magma")
+#> Scale for fill is already present.
+#> Adding another scale for fill, which will replace the existing scale.
+
+mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Viridis")
 #> Scale for fill is already present.
 #> Adding another scale for fill, which will replace the existing scale.
 
@@ -839,17 +876,21 @@ mtcars |>
 ## Dont know why...
 mtcars |>
   default_parsing() |>
-  plot_sankey("cyl", "gear", "vs", color.group = "pri")
+  plot_sankey("cyl", "gear", "vs", color.group = "pri",color.palette="inferno")
 #> Warning: Some strata appear at multiple axes.
 #> Warning: Some strata appear at multiple axes.
 #> Warning: Some strata appear at multiple axes.
 
-
-  # stRoke::trial |> plot_sankey("mrs_1", "mrs_6")
 mtcars |> plot_scatter(pri = "mpg", sec = "wt")
 #> Ignoring unknown labels:
 #> • legend.title : ""
 
-mtcars |> plot_violin(pri = "mpg", sec = "cyl", ter = "gear")
-#> Error in plot_violin(mtcars, pri = "mpg", sec = "cyl", ter = "gear"): object 'i18n' not found
+mtcars |> plot_scatter(pri = "mpg", sec = "wt",ter="carb")
+#> Ignoring unknown labels:
+#> • legend.title : ""
+
+mtcars |> plot_violin(pri = "mpg", sec = "cyl")
+
+mtcars |> plot_violin(pri = "mpg", sec = "cyl", ter = "gear", color.palette="Blues")
+#> Error in plot_violin(mtcars, pri = "mpg", sec = "cyl", ter = "gear", color.palette = "Blues"): object 'i18n' not found
 ```
