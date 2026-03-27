@@ -230,8 +230,8 @@ default_parsing <- function(data) {
       REDCapCAST::as_factor() |>
       REDCapCAST::numchar2fct(numeric.threshold = 8,
                               character.throshold = 10) |>
-      REDCapCAST::as_logical() |>
-      REDCapCAST::fct_drop()
+      REDCapCAST::as_logical() #|>
+      # REDCapCAST::fct_drop()
   })
   # out <-
   #

@@ -29,13 +29,24 @@ update_factor_ui <- function(id) {
     ),
     fluidRow(
       column(
-        width = 6,
+        width = 3,
         shinyWidgets::virtualSelectInput(
           inputId = ns("variable"),
-          label = i18n$t("Factor variable to reorder:"),
+          label = i18n$t("Choose variable:"),
           choices = NULL,
           width = "100%",
           zIndex = 50
+        )
+      ),
+      column(
+        width = 3,
+        class = "d-flex align-items-end",
+        actionButton(
+          disabled = TRUE,
+          inputId = ns("drop_levels"),
+          label = tagList(phosphoricons::ph("sort-ascending"), i18n$t("Drop empty")),
+          class = "btn-outline-primary mb-3",
+          width = "100%"
         )
       ),
       column(
@@ -70,7 +81,9 @@ update_factor_ui <- function(id) {
       class = "float-end",
       shinyWidgets::prettyCheckbox(
         inputId = ns("new_var"),
-        label = i18n$t("Create a new variable; otherwise replaces (Updating labels always creates new variable)"),
+        label = i18n$t(
+          "Create a new variable; otherwise replaces (Updating labels always creates new variable)"
+        ),
         value = FALSE,
         status = "primary",
         outline = TRUE,
@@ -123,6 +136,20 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
       variable <- req(input$variable)
       grid <- as.data.frame(table(data[[variable]]))
       rv$data_grid <- grid
+    })
+
+    observeEvent(rv$data_grid, {
+      variable <- req(input$variable)
+      if (isTRUE(has_empty_levels(rv$data[[variable]]))) {
+        # browser()
+        updateActionButton(inputId = "drop_levels", disabled = FALSE)
+      } else {
+        updateActionButton(inputId = "drop_levels", disabled = TRUE)
+      }
+    })
+
+    observeEvent(input$drop_levels, {
+      rv$data_grid <- rv$data_grid[!rv$data_grid$Freq==0,]
     })
 
     observeEvent(input$sort_levels, {
@@ -208,7 +235,7 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
       )
 
       data <- tryCatch({
-        with_labels(data,{
+        with_labels(data, {
           rlang::exec(factor_new_levels_labels,
                       !!!modifyList(parameters, val = list(data = data)))
         })
@@ -369,4 +396,13 @@ unique_names <- function(new, existing = character()) {
   new_names <- make.unique(c(existing, new), sep = "_")
 
   new_names[-seq_along(existing)]
+}
+
+
+has_empty_levels <- function(x) {
+  if (is.factor(x)) {
+    any(!levels(x) %in% x)
+  } else {
+    return(FALSE)
+  }
 }
