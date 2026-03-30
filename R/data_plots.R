@@ -351,7 +351,7 @@ data_visuals_server <- function(id,
 
       shiny::observeEvent(input$act_plot, {
         if (NROW(data()) > 0) {
-          tryCatch({
+            tryCatch({
             parameters <- list(
               type = rv$plot.params()[["fun"]],
               pri = input$primary,
@@ -377,7 +377,7 @@ data_visuals_server <- function(id,
           #   showNotification(paste0(warn), type = "warning")
           # },
           error = function(err) {
-            showNotification(paste0(err), type = "err")
+            showNotification(paste0(err), type = "error")
           })
         }
       }, ignoreInit = TRUE)
@@ -599,6 +599,18 @@ supported_plots <- function() {
       secondary.multi = TRUE,
       secondary.max = 4,
       tertiary.type = c("dichotomous"),
+      secondary.extra = NULL
+    ),
+    plot_euler = list(
+      fun = "plot_likert",
+      descr = i18n$t("Likert diagram"),
+      note = i18n$t(
+        "Plot survey results"
+      ),
+      primary.type = c("dichotomous", "categorical"),
+      secondary.type = c("dichotomous", "categorical"),
+      secondary.multi = TRUE,
+      tertiary.type = c("dichotomous", "categorical"),
       secondary.extra = NULL
     )
   )
