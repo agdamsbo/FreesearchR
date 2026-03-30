@@ -11,7 +11,10 @@
 #' @examples
 #' mtcars |> baseline_table()
 #' mtcars |> baseline_table(fun.args = list(by = "gear"))
-baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, vars = NULL) {
+baseline_table <- function(data,
+                           fun.args = NULL,
+                           fun = gtsummary::tbl_summary,
+                           vars = NULL) {
   out <- do.call(fun, c(list(data = data), fun.args))
   return(out)
 }
@@ -37,7 +40,15 @@ baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, 
 #' mtcars |> create_baseline(by.var = "gear", detail_level = "extended",type = list(gtsummary::all_dichotomous() ~ "categorical"),theme="nejm")
 #'
 #' create_baseline(default_parsing(mtcars), by.var = "am", add.p = FALSE, add.overall = FALSE, theme = "lancet")
-create_baseline <- function(data, ..., by.var, add.p = FALSE, add.diff=FALSE, add.overall = FALSE, theme = c("jama", "lancet", "nejm", "qjecon"), detail_level = c("minimal", "extended")) {
+create_baseline <- function(data,
+                            ...,
+                            by.var,
+                            add.p = FALSE,
+                            add.diff = FALSE,
+                            add.overall = FALSE,
+                            theme = c("jama", "lancet", "nejm", "qjecon"),
+                            detail_level = c("minimal", "extended"),
+                            drop_empty = FALSE) {
   theme <- match.arg(theme)
 
   detail_level <- match.arg(detail_level)
@@ -64,31 +75,28 @@ create_baseline <- function(data, ..., by.var, add.p = FALSE, add.diff=FALSE, ad
   if (!any(hasName(args, c("type", "statistic")))) {
     if (detail_level == "extended") {
       args <-
-        modifyList(
-          args,
-          list(
-            type = list(gtsummary::all_continuous() ~ "continuous2",
-                        gtsummary::all_dichotomous() ~ "categorical"),
-            statistic = list(gtsummary::all_continuous() ~ c(
-              "{median} ({p25}, {p75})",
-              "{mean} ({sd})",
-              "{min}, {max}"))
+        modifyList(args, list(
+          type = list(
+            gtsummary::all_continuous() ~ "continuous2",
+            gtsummary::all_dichotomous() ~ "categorical"
+          ),
+          statistic = list(
+            gtsummary::all_continuous() ~ c("{median} ({p25}, {p75})", "{mean} ({sd})", "{min}, {max}")
           )
-        )
+        ))
     }
   }
 
-  parameters <- list(
-    data = data,
-    fun.args = purrr::list_flatten(list(by = by.var, args))
-  )
+  if (isTRUE(drop_empty)) {
+    ## Drops empty levels if minimal
+    data <- data |> REDCapCAST::fct_drop()
+  }
+
+  parameters <- list(data = data, fun.args = purrr::list_flatten(list(by = by.var, args)))
 
 
   # browser()
-  out <- do.call(
-    baseline_table,
-    parameters
-  )
+  out <- do.call(baseline_table, parameters)
 
 
   if (!is.null(by.var)) {

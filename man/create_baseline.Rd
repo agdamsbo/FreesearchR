@@ -12,7 +12,8 @@ create_baseline(
   add.diff = FALSE,
   add.overall = FALSE,
   theme = c("jama", "lancet", "nejm", "qjecon"),
-  detail_level = c("minimal", "extended")
+  detail_level = c("minimal", "extended"),
+  drop_empty = FALSE
 )
 }
 \arguments{
