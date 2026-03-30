@@ -840,3 +840,54 @@ data_types <- function() {
                        "Any other class")
   )
 }
+
+non_character_cols <- function(df) {
+  if (shiny::is.reactive(df)) df <- df()
+  df[, !sapply(df, is.character), drop = FALSE]
+}
+
+apply_idea_filter <- function(filtered_reactive, df_target, env = parent.frame()) {
+  # If this ever brakes, the solution will have to be to modify the original filter function
+  if (shiny::is.reactive(df_target)) df_target <- df_target()
+
+  result      <- if (shiny::is.reactive(filtered_reactive)) filtered_reactive() else filtered_reactive
+  filter_code <- attr(result, "code")
+
+  if (is.null(filter_code)) return(df_target)
+
+  deparsed <- paste(deparse(filter_code), collapse = "")
+
+  if (is.symbol(filter_code) || !grepl("filter(", deparsed, fixed = TRUE)) {
+    return(df_target)
+  }
+
+  extract_filters <- function(code) {
+    filters <- list()
+    while (!is.symbol(code) && deparse(code[[1]]) == "%>%") {
+      rhs <- code[[3]]
+      if (deparse(rhs[[1]]) == "filter") {
+        filters <- c(list(rhs), filters)
+      }
+      code <- code[[2]]
+    }
+    if (!is.symbol(code) && deparse(code[[1]]) == "filter") {
+      filters <- c(list(code), filters)
+    }
+    filters
+  }
+
+  tryCatch({
+    out <- df_target
+    for (f in extract_filters(filter_code)) {
+      args <- lapply(rlang::call_args(f), function(arg) {
+        rlang::new_quosure(arg, env = env)
+      })
+      out <- dplyr::filter(out, !!!args)
+    }
+    out
+  },
+  error = function(e) {
+    warning("Could not apply filter: ", conditionMessage(e))
+    df_target
+  })
+}
