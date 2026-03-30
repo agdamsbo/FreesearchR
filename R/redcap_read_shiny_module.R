@@ -71,13 +71,17 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
       shiny::textInput(
         inputId = ns("filter"),
         label = i18n$t("Optional filter logic (e.g., ⁠[gender] = 'female')")
-      )
+      ),
+      uiOutput(ns("filter_feedback"))
     )
 
   params_ui <-
     shiny::tagList(
       shiny::tags$h4(i18n$t("Data import parameters")),
       shiny::tags$div(
+        ####
+        #### All below was deactivated to deactivate filtering
+        ####
         style = htmltools::css(
           display = "grid",
           gridTemplateColumns = "1fr 50px",
@@ -164,7 +168,8 @@ m_redcap_readServer <- function(id) {
       dd_list = NULL,
       data = NULL,
       rep_fields = NULL,
-      code = NULL
+      code = NULL,
+      filter_valid = NULL
     )
 
     shiny::observeEvent(list(input$api, input$uri), {
@@ -249,7 +254,7 @@ m_redcap_readServer <- function(id) {
     }, warning = function(warn) {
       showNotification(paste0(warn), type = "warning")
     }, error = function(err) {
-      showNotification(paste0(err), type = "err")
+      showNotification(paste0(err), type = "error")
     })
 
     output$connect_success <- shiny::reactive(identical(data_rv$dd_status, "success"))
@@ -363,11 +368,48 @@ m_redcap_readServer <- function(id) {
       }
     })
 
+
+    filter_validation <- reactive({
+      val <- trimws(input$filter)
+      if (nchar(val) == 0)
+        return(NULL)
+      validate_redcap_filter(val, purrr::pluck(data_rv$dd_list, "data"))
+    })
+
+    output$filter_feedback <- renderUI({
+      result <- filter_validation()
+      if (is.null(result)) {
+        data_rv$filter_valid <- NULL
+        return(NULL)
+      }
+
+      if (result$valid) {
+        data_rv$filter_valid <- TRUE
+        tags$span(style = "color: green;", "\u2713 Filter is valid")
+      } else {
+        data_rv$filter_valid <- FALSE
+
+        tags$span(style = "color: red;",
+                  "\u2717 ",
+                  line_break(result$message, lineLength = 30))
+      }
+    })
+
     shiny::observeEvent(input$data_import, {
       shiny::req(input$fields)
 
       # browser()
       record_id <- purrr::pluck(data_rv$dd_list, "data")[[1]][1]
+
+      if (!is.null(data_rv$filter_valid)) {
+        if (isTRUE(data_rv$filter_valid)) {
+          filter <- trimws(input$filter)
+        } else {
+          filter <- ""
+        }
+      } else {
+        filter <- ""
+      }
 
       parameters <- list(
         uri = data_rv$uri,
@@ -375,7 +417,8 @@ m_redcap_readServer <- function(id) {
         fields = unique(c(record_id, input$fields)),
         events = input$arms,
         raw_or_label = "both",
-        filter_logic = input$filter,
+        filter_logic = filter,
+        # filter_logic = "",
         split_forms = ifelse(
           input$data_type == "long" && !is.null(input$data_type),
           "none",
@@ -384,8 +427,17 @@ m_redcap_readServer <- function(id) {
       )
 
       shiny::withProgress(message = "Downloading REDCap data. Hold on for a moment..", {
-        imported <- tryCatch(rlang::exec(REDCapCAST::read_redcap_tables, !!!parameters),
-                        silent = TRUE)
+        imported <- try({
+          rlang::exec(REDCapCAST::read_redcap_tables, !!!parameters)
+          # if (nrow(out)==0){
+          #   stop("No data was exported")
+          # } else {
+          #   out
+          # }
+        }, # error = function(err) {
+        #   showNotification(i18n$t("An error was encountered exporting data. Please review data filter."), type = "error")
+        # },
+        silent = TRUE)
       })
 
       # d <- REDCapCAST::apply_factor_labels(data = imported$survey, meta = data_rv$dd_list$data)
@@ -410,10 +462,13 @@ m_redcap_readServer <- function(id) {
                            ),
                            .ns = "REDCapCAST")
 
-      if (inherits(imported, "try-error") || NROW(imported) < 1) {
+      if (inherits(imported, "try-error") |
+          NROW(imported) == 0 |
+          (length(imported) == 1 & !is.list(imported))) {
         data_rv$data_status <- "error"
         data_rv$data_list <- NULL
-        data_rv$data_message <- imported$raw_text
+        data_rv$data_message <- i18n$t("An empty data set was imported. Please review data filter.")
+        data_rv$data <- NULL
       } else {
         data_rv$data_status <- "success"
         data_rv$data_message <- i18n$t("Requested data was retrieved!")
@@ -426,7 +481,7 @@ m_redcap_readServer <- function(id) {
             # redcap_wider()
             REDCapCAST::redcap_wider()
         } else {
-          if (input$fill == "yes") {
+          if (identical(input$fill, "yes")) {
             ## Repeated fields
 
 
@@ -480,10 +535,21 @@ m_redcap_readServer <- function(id) {
     })
 
     shiny::observeEvent(data_rv$data_status, {
-      # browser()
       if (identical(data_rv$data_status, "error")) {
-        datamods:::insert_error(mssg = data_rv$data_message,
-                                selector = ns("retrieved"))
+        ## The insert error wouldn't work. Inserted through regular.
+        # datamods:::insert_error(mssg = data_rv$data_message,
+        #                         selector = ns("retrieved"))
+        datamods:::insert_alert(
+          selector = ns("retrieved"),
+          status = "danger",
+          tags$p(
+            tags$b(
+              phosphoricons::ph("warning", weight = "bold"),
+              "Warning!"
+            ),
+            data_rv$data_message
+          )
+        )
       } else if (identical(data_rv$data_status, "success")) {
         datamods:::insert_alert(
           selector = ns("retrieved"),
@@ -663,6 +729,327 @@ drop_empty_event <- function(data, event = "redcap_event_name") {
 
   data[data[[event]] %in% names(filt)[!filt], ]
 }
+
+
+#' Validate a REDCap server-side filter string against a data dictionary
+#'
+#' Checks that a REDCap filter expression is syntactically correct and
+#' consistent with the field types defined in the project data dictionary.
+#' Plain text without field references is always rejected. Multi-clause
+#' filters joined by \code{AND} or \code{OR} are supported.
+#'
+#' @param filter A single character string containing the filter expression,
+#'   e.g. \code{"[age] > 18"} or \code{"[cohabitation] = '1' AND [age] > 18"}.
+#' @param dictionary A data frame representing the REDCap data dictionary in
+#'   API export format, as returned by e.g. \code{REDCapCAST::get_redcap_metadata()}.
+#'   Must contain at least the columns \code{field_name} and \code{field_type}.
+#'   The columns \code{text_validation_type_or_show_slider_number} and
+#'   \code{select_choices_or_calculations} are used when present for stricter
+#'   type and choice validation.
+#'
+#' @return A named list with two elements:
+#'   \describe{
+#'     \item{\code{valid}}{Logical. \code{TRUE} if the filter passes all checks.}
+#'     \item{\code{message}}{Character. \code{"Filter is valid."} on success, or
+#'       a newline-separated string of error messages describing every problem
+#'       found.}
+#'   }
+#'
+#' @details
+#' Validation rules by field type:
+#' \describe{
+#'   \item{\code{calc}}{Numeric fields. Value must be an unquoted number.
+#'     All comparison operators (\code{=}, \code{!=}, \code{<}, \code{>},
+#'     \code{<=}, \code{>=}) are accepted.}
+#'   \item{\code{text} with date validation}{Fields with validation type
+#'     \code{date_ymd}, \code{date_dmy}, \code{datetime_*}, etc. Value must be
+#'     a quoted date/datetime string in \code{'YYYY-MM-DD'} format. All
+#'     comparison operators are accepted.}
+#'   \item{\code{text} with time validation}{Fields with validation type
+#'     \code{time_hh_mm_ss} or \code{time_mm_ss}. Value must be a quoted time
+#'     string, e.g. \code{'14:30:00'}. All comparison operators are accepted.}
+#'   \item{\code{radio} / \code{dropdown}}{Categorical fields. Value must be a
+#'     quoted choice code (e.g. \code{'1'}) that exists in the field's choice
+#'     list. Only \code{=} and \code{!=} are accepted.}
+#'   \item{\code{text} (plain)}{Free-text fields. Value must be a quoted string.
+#'     Only \code{=} and \code{!=} are accepted.}
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' dict <- REDCapCAST::get_redcap_metadata(
+#'   uri    = "https://redcap.example.com/api/",
+#'   token  = Sys.getenv("REDCAP_TOKEN")
+#' )
+#'
+#' validate_redcap_filter("[age] > 18", dict)
+#' #> list(valid = TRUE, message = "Filter is valid.")
+#'
+#' validate_redcap_filter("only plain text", dict)
+#' #> list(valid = FALSE, message = "Filter must contain at least one field ...")
+#'
+#' validate_redcap_filter("[cohabitation] = '1' AND [age] > 18", dict)
+#' #> list(valid = TRUE, message = "Filter is valid.")
+#' }
+#'
+#' @export
+# REDCap filter validation based on data dictionary
+#
+# REDCap filter format: [field_name] operator value
+# Example: [age] > 18
+#          [cohabitation] = '1'
+#          [inclusion] > '2020-01-01'
+#
+# Supported field types and their allowed operators/value formats:
+#   text (no validation) -> string values, = != operators only
+#   text (date_ymd/date_dmy) -> quoted date strings, all comparison operators
+#   text (time_hh_mm_ss) -> quoted time strings, all comparison operators
+#   text (datetime_*) -> quoted datetime strings, all comparison operators
+#   text (autocomplete) -> string values, = != operators only
+#   calc -> numeric values, all comparison operators
+#   radio/dropdown -> quoted numeric codes, = != operators only
+
+validate_redcap_filter <- function(filter, dictionary) {
+  # --- Input checks ---
+  if (!is.character(filter) ||
+      length(filter) != 1 || nchar(trimws(filter)) == 0) {
+    return(list(valid = FALSE, message = "Filter must be a non-empty string."))
+  }
+
+  if (!grepl("\\[.+\\]", filter)) {
+    return(
+      list(valid = FALSE, message = "Filter must contain at least one field reference in [brackets]. Plain text is not accepted.")
+    )
+  }
+
+  # --- Column names (API export format) ---
+  col_field    <- "field_name"
+  col_type     <- "field_type"
+  col_val_type <- "text_validation_type_or_show_slider_number"
+  col_choices  <- "select_choices_or_calculations"
+
+  missing_cols <- setdiff(c(col_field, col_type), names(dictionary))
+  if (length(missing_cols) > 0) {
+    stop("Dictionary is missing required columns: ",
+         paste(missing_cols, collapse = ", "))
+  }
+
+  # --- Build lookup index once for O(1) field access ---
+  field_idx    <- setNames(seq_len(nrow(dictionary)), dictionary[[col_field]])
+  has_val_type <- col_val_type %in% names(dictionary)
+  has_choices  <- col_choices  %in% names(dictionary)
+
+  # --- Classify field types ---
+  numeric_types    <- c("calc")
+  date_validations <- c(
+    "date_ymd",
+    "date_dmy",
+    "datetime_ymd",
+    "datetime_dmy",
+    "datetime_seconds_ymd",
+    "datetime_seconds_dmy"
+  )
+  time_validations <- c("time_hh_mm_ss", "time_mm_ss")
+  categorical_types <- c("radio", "dropdown", "checkbox")
+  text_types        <- c("text", "autocomplete")
+
+  num_ops  <- c("=", "!=", "<", ">", "<=", ">=")
+  cat_ops  <- c("=", "!=")
+  text_ops <- c("=", "!=")
+
+  # --- Parse filter into clauses ---
+  # Split on AND/OR (REDCap uses 'and'/'or' or 'AND'/'OR')
+  clauses <- trimws(strsplit(filter, "(?i)\\s+(and|or)\\s+", perl = TRUE)[[1]])
+
+  clause_pattern <- "^\\[([^\\]]+)\\]\\s*(=|!=|<=|>=|<|>)\\s*(.+)$"
+
+  errors <- character(0)
+
+  for (clause in clauses) {
+    if (!grepl(clause_pattern, clause, perl = TRUE)) {
+      errors <- c(
+        errors,
+        sprintf(
+          "Clause '%s' does not match expected format: [field] operator value",
+          clause
+        )
+      )
+      next
+    }
+
+    parts    <- regmatches(clause, regexec(clause_pattern, clause, perl = TRUE))[[1]]
+    field    <- parts[2]
+    operator <- parts[3]
+    value    <- trimws(parts[4])
+
+    # --- Check field exists using pre-built index ---
+    row_i <- field_idx[field]
+    if (is.na(row_i)) {
+      errors <- c(errors, sprintf("Unknown field: [%s]", field))
+      next
+    }
+
+    field_type <- dictionary[[col_type]][row_i]
+    val_type   <- if (has_val_type)
+      dictionary[[col_val_type]][row_i]
+    else
+      ""
+    if (is.na(val_type))
+      val_type <- ""
+
+    # --- Determine expected value format and allowed operators ---
+    if (field_type %in% numeric_types ||
+        grepl("^integer$|^number", val_type)) {
+      if (!operator %in% num_ops) {
+        errors <- c(
+          errors,
+          sprintf(
+            "[%s] is numeric — operator '%s' is not valid. Use one of: %s",
+            field,
+            operator,
+            paste(num_ops, collapse = ", ")
+          )
+        )
+      }
+      if (!grepl("^-?[0-9]+(\\.[0-9]+)?$", value)) {
+        errors <- c(
+          errors,
+          sprintf(
+            "[%s] is numeric — value '%s' should be an unquoted number (e.g. 18 or 3.5)",
+            field,
+            value
+          )
+        )
+      }
+
+    } else if (val_type %in% date_validations) {
+      if (!operator %in% num_ops) {
+        errors <- c(
+          errors,
+          sprintf(
+            "[%s] is a date — operator '%s' is not valid. Use one of: %s",
+            field,
+            operator,
+            paste(num_ops, collapse = ", ")
+          )
+        )
+      }
+      if (!grepl(
+        "^'[0-9]{4}-[0-9]{2}-[0-9]{2}(\\s[0-9]{2}:[0-9]{2}(:[0-9]{2})?)?'$",
+        value
+      )) {
+        errors <- c(
+          errors,
+          sprintf(
+            "[%s] is a date — value '%s' should be a quoted date string, e.g. '2020-01-31'",
+            field,
+            value
+          )
+        )
+      }
+
+    } else if (val_type %in% time_validations) {
+      if (!operator %in% num_ops) {
+        errors <- c(
+          errors,
+          sprintf(
+            "[%s] is a time — operator '%s' is not valid. Use one of: %s",
+            field,
+            operator,
+            paste(num_ops, collapse = ", ")
+          )
+        )
+      }
+      if (!grepl("^'[0-9]{2}:[0-9]{2}(:[0-9]{2})?'$", value)) {
+        errors <- c(
+          errors,
+          sprintf(
+            "[%s] is a time — value '%s' should be a quoted time string, e.g. '14:30:00'",
+            field,
+            value
+          )
+        )
+      }
+
+    } else if (field_type %in% categorical_types) {
+      if (!operator %in% cat_ops) {
+        errors <- c(
+          errors,
+          sprintf(
+            "[%s] is categorical — operator '%s' is not valid. Use one of: %s",
+            field,
+            operator,
+            paste(cat_ops, collapse = ", ")
+          )
+        )
+      }
+
+      # Validate value is a known choice code
+      choices_raw <- if (has_choices)
+        dictionary[[col_choices]][row_i]
+      else
+        NA
+      if (!is.na(choices_raw) && nchar(trimws(choices_raw)) > 0) {
+        choice_codes <- trimws(gsub(",.+?(\\||$)", "", gsub(
+          "^\\s*", "", strsplit(choices_raw, "\\|")[[1]]
+        )))
+        value_unquoted <- gsub("^'|'$", "", value)
+        if (!value_unquoted %in% choice_codes) {
+          errors <- c(
+            errors,
+            sprintf(
+              "[%s] is categorical — '%s' is not a valid choice code. Valid codes: %s",
+              field,
+              value_unquoted,
+              paste(choice_codes, collapse = ", ")
+            )
+          )
+        }
+      }
+
+      if (!grepl("^'.*'$", value)) {
+        errors <- c(errors,
+                    sprintf(
+                      "[%s] is categorical — value should be quoted, e.g. '1'",
+                      field
+                    ))
+      }
+
+    } else {
+      # Plain text field
+      if (!operator %in% text_ops) {
+        errors <- c(
+          errors,
+          sprintf(
+            "[%s] is a text field — operator '%s' is not valid. Use one of: %s",
+            field,
+            operator,
+            paste(text_ops, collapse = ", ")
+          )
+        )
+      }
+      if (!grepl("^'.*'$", value)) {
+        errors <- c(
+          errors,
+          sprintf(
+            "[%s] is a text field — value should be quoted, e.g. 'some text'",
+            field
+          )
+        )
+      }
+    }
+  }
+
+  if (length(errors) > 0) {
+    return(list(
+      valid = FALSE,
+      message = paste(errors, collapse = "\n")
+    ))
+  }
+
+  list(valid = TRUE, message = "Filter is valid.")
+}
+
 
 
 #' Test app for the redcap_read_shiny_module
