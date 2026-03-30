@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpoawSeD/fileab3b7554cf72.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpgCu9u6/file55d839c4d43b.R 
 ########
 
 i18n_path <- system.file("translations", package = "FreesearchR")
@@ -64,7 +64,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'26.3.4'
+app_version <- function()'26.3.5'
 
 
 ########
@@ -84,7 +84,10 @@ app_version <- function()'26.3.4'
 #' @examples
 #' mtcars |> baseline_table()
 #' mtcars |> baseline_table(fun.args = list(by = "gear"))
-baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, vars = NULL) {
+baseline_table <- function(data,
+                           fun.args = NULL,
+                           fun = gtsummary::tbl_summary,
+                           vars = NULL) {
   out <- do.call(fun, c(list(data = data), fun.args))
   return(out)
 }
@@ -110,7 +113,15 @@ baseline_table <- function(data, fun.args = NULL, fun = gtsummary::tbl_summary, 
 #' mtcars |> create_baseline(by.var = "gear", detail_level = "extended",type = list(gtsummary::all_dichotomous() ~ "categorical"),theme="nejm")
 #'
 #' create_baseline(default_parsing(mtcars), by.var = "am", add.p = FALSE, add.overall = FALSE, theme = "lancet")
-create_baseline <- function(data, ..., by.var, add.p = FALSE, add.diff=FALSE, add.overall = FALSE, theme = c("jama", "lancet", "nejm", "qjecon"), detail_level = c("minimal", "extended")) {
+create_baseline <- function(data,
+                            ...,
+                            by.var,
+                            add.p = FALSE,
+                            add.diff = FALSE,
+                            add.overall = FALSE,
+                            theme = c("jama", "lancet", "nejm", "qjecon"),
+                            detail_level = c("minimal", "extended"),
+                            drop_empty = FALSE) {
   theme <- match.arg(theme)
 
   detail_level <- match.arg(detail_level)
@@ -137,31 +148,28 @@ create_baseline <- function(data, ..., by.var, add.p = FALSE, add.diff=FALSE, ad
   if (!any(hasName(args, c("type", "statistic")))) {
     if (detail_level == "extended") {
       args <-
-        modifyList(
-          args,
-          list(
-            type = list(gtsummary::all_continuous() ~ "continuous2",
-                        gtsummary::all_dichotomous() ~ "categorical"),
-            statistic = list(gtsummary::all_continuous() ~ c(
-              "{median} ({p25}, {p75})",
-              "{mean} ({sd})",
-              "{min}, {max}"))
+        modifyList(args, list(
+          type = list(
+            gtsummary::all_continuous() ~ "continuous2",
+            gtsummary::all_dichotomous() ~ "categorical"
+          ),
+          statistic = list(
+            gtsummary::all_continuous() ~ c("{median} ({p25}, {p75})", "{mean} ({sd})", "{min}, {max}")
           )
-        )
+        ))
     }
   }
 
-  parameters <- list(
-    data = data,
-    fun.args = purrr::list_flatten(list(by = by.var, args))
-  )
+  if (isTRUE(drop_empty)) {
+    ## Drops empty levels if minimal
+    data <- data |> REDCapCAST::fct_drop()
+  }
+
+  parameters <- list(data = data, fun.args = purrr::list_flatten(list(by = by.var, args)))
 
 
   # browser()
-  out <- do.call(
-    baseline_table,
-    parameters
-  )
+  out <- do.call(baseline_table, parameters)
 
 
   if (!is.null(by.var)) {
@@ -1121,7 +1129,7 @@ vectorSelectInput <- function(inputId,
 colorSelectInput <- function(inputId,
                              label,
                              choices,
-                             selected = "",
+                             selected = NULL,
                              previews = 4,
                              ...,
                              placeholder = "") {
@@ -1157,31 +1165,43 @@ colorSelectInput <- function(inputId,
 
   choices_new <- stats::setNames(vals, labels)
 
+  if (is.null(selected) || selected == "") {
+    selected <- vals[[1]]
+  }
+
   shiny::selectizeInput(
     inputId  = inputId,
     label    = label,
     choices  = choices_new,
     selected = selected,
     ...,
-    options  = list(
+    options = list(
       render = I(
         "{
-        option: function(item, escape) {
-          item.data = JSON.parse(item.label);
-          return '<div style=\"padding:3px 12px\">' +
-                   '<div><strong>' + escape(item.data.name) + '</strong></div>' +
-                   (item.data.label != '' ? '<div><small>' + escape(item.data.label) + '</small></div>' : '') +
-                   '<div style=\"margin-top:4px\">' + item.data.swatch + '</div>' +
-                 '</div>';
-        },
-        item: function(item, escape) {
-          item.data = JSON.parse(item.label);
-          return '<div style=\"display:flex;align-items:center;gap:6px\">' +
-                   '<span>' + escape(item.data.name) + '</span>' +
-                   item.data.swatch +
-                 '</div>';
-        }
-      }"
+    option: function(item, escape) {
+      item.data = JSON.parse(item.label);
+      return '<div style=\"padding:3px 12px\">' +
+               '<div><strong>' + escape(item.data.name) + '</strong></div>' +
+               (item.data.label != '' ? '<div><small>' + escape(item.data.label) + '</small></div>' : '') +
+               '<div style=\"margin-top:4px\">' + item.data.swatch + '</div>' +
+             '</div>';
+    },
+    item: function(item, escape) {
+      item.data = JSON.parse(item.label);
+      return '<div style=\"display:flex;align-items:center;gap:6px\">' +
+               '<span>' + escape(item.data.name) + '</span>' +
+               item.data.swatch +
+             '</div>';
+    }
+  }"
+      ),
+      onInitialize = I(
+        "function() {
+    var self = this;
+    self.$control_input.prop('readonly', true);
+    self.$control_input.css('cursor', 'default');
+    self.$control.css('cursor', 'pointer');
+  }"
       )
     )
   )
@@ -1862,7 +1882,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
             rlang::exec(cut_var, !!!parameters)
           },
           error = function(err) {
-            showNotification(paste("We encountered the following error creating the new factor:", err), type = "err")
+            showNotification(paste("We encountered the following error creating the new factor:", err), type = "error")
           }
         )
 
@@ -2468,7 +2488,7 @@ data_visuals_server <- function(id,
 
       shiny::observeEvent(input$act_plot, {
         if (NROW(data()) > 0) {
-          tryCatch({
+            tryCatch({
             parameters <- list(
               type = rv$plot.params()[["fun"]],
               pri = input$primary,
@@ -2494,7 +2514,7 @@ data_visuals_server <- function(id,
           #   showNotification(paste0(warn), type = "warning")
           # },
           error = function(err) {
-            showNotification(paste0(err), type = "err")
+            showNotification(paste0(err), type = "error")
           })
         }
       }, ignoreInit = TRUE)
@@ -2716,6 +2736,18 @@ supported_plots <- function() {
       secondary.multi = TRUE,
       secondary.max = 4,
       tertiary.type = c("dichotomous"),
+      secondary.extra = NULL
+    ),
+    plot_euler = list(
+      fun = "plot_likert",
+      descr = i18n$t("Likert diagram"),
+      note = i18n$t(
+        "Plot survey results"
+      ),
+      primary.type = c("dichotomous", "categorical"),
+      secondary.type = c("dichotomous", "categorical"),
+      secondary.multi = TRUE,
+      tertiary.type = c("dichotomous", "categorical"),
       secondary.extra = NULL
     )
   )
@@ -4303,8 +4335,8 @@ default_parsing <- function(data) {
       REDCapCAST::as_factor() |>
       REDCapCAST::numchar2fct(numeric.threshold = 8,
                               character.throshold = 10) |>
-      REDCapCAST::as_logical() |>
-      REDCapCAST::fct_drop()
+      REDCapCAST::as_logical() #|>
+      # REDCapCAST::fct_drop()
   })
   # out <-
   #
@@ -4914,12 +4946,63 @@ data_types <- function() {
   )
 }
 
+non_character_cols <- function(df) {
+  if (shiny::is.reactive(df)) df <- df()
+  df[, !sapply(df, is.character), drop = FALSE]
+}
+
+apply_idea_filter <- function(filtered_reactive, df_target, env = parent.frame()) {
+  # If this ever brakes, the solution will have to be to modify the original filter function
+  if (shiny::is.reactive(df_target)) df_target <- df_target()
+
+  result      <- if (shiny::is.reactive(filtered_reactive)) filtered_reactive() else filtered_reactive
+  filter_code <- attr(result, "code")
+
+  if (is.null(filter_code)) return(df_target)
+
+  deparsed <- paste(deparse(filter_code), collapse = "")
+
+  if (is.symbol(filter_code) || !grepl("filter(", deparsed, fixed = TRUE)) {
+    return(df_target)
+  }
+
+  extract_filters <- function(code) {
+    filters <- list()
+    while (!is.symbol(code) && deparse(code[[1]]) == "%>%") {
+      rhs <- code[[3]]
+      if (deparse(rhs[[1]]) == "filter") {
+        filters <- c(list(rhs), filters)
+      }
+      code <- code[[2]]
+    }
+    if (!is.symbol(code) && deparse(code[[1]]) == "filter") {
+      filters <- c(list(code), filters)
+    }
+    filters
+  }
+
+  tryCatch({
+    out <- df_target
+    for (f in extract_filters(filter_code)) {
+      args <- lapply(rlang::call_args(f), function(arg) {
+        rlang::new_quosure(arg, env = env)
+      })
+      out <- dplyr::filter(out, !!!args)
+    }
+    out
+  },
+  error = function(e) {
+    warning("Could not apply filter: ", conditionMessage(e))
+    df_target
+  })
+}
+
 
 ########
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v26.3.4-260324'
+hosted_version <- function()'v26.3.5-260330'
 
 
 ########
@@ -5698,7 +5781,7 @@ import_file_server <- function(id,
       #     showNotification(warn, type = "warning")
       # },
       error = function(err) {
-        showNotification(err, type = "err")
+        showNotification(err, type = "error")
       })
     })
 
@@ -5715,7 +5798,7 @@ import_file_server <- function(id,
           minBodyHeight = 250
         )
       }, error = function(err) {
-        showNotification(err, type = "err")
+        showNotification(err, type = "error")
       })
     })
 
@@ -5830,7 +5913,7 @@ import_xls <- function(file, sheet, skip, na.strings) {
   #   showNotification(paste0(warn), type = "warning")
   # },
   error = function(err) {
-    showNotification(paste0(err), type = "err")
+    showNotification(paste0(err), type = "error")
   })
 }
 
@@ -5858,7 +5941,7 @@ import_ods <- function(file, sheet, skip, na.strings) {
   #   showNotification(paste0(warn), type = "warning")
   # },
   error = function(err) {
-    showNotification(paste0(err), type = "err")
+    ?showNotification(paste0(err), type = "error")
   })
 }
 
@@ -6701,7 +6784,7 @@ data_missings_server <- function(id, data, max_level = 20, ...) {
             out <- do.call(compare_missings, modifyList(parameters, list(data = df_tbl)))
           })
         }, error = function(err) {
-          showNotification(paste0("Error: ", err), type = "err")
+          showNotification(paste0("Error: ", err), type = "error")
         })
 
         if (is.null(input$missings_var) ||
@@ -7407,6 +7490,62 @@ vertical_stacked_bars <- function(data,
 
 
 ########
+#### Current file: /Users/au301842/FreesearchR/R//plot_likert.R 
+########
+
+#' Nice horizontal bar plot centred on the central category
+#'
+#' @returns ggplot2 object
+#' @export
+#'
+#' @name data-plots
+#'
+#' @examples
+#' mtcars |> plot_likert(pri = "carb", sec = "cyl")
+#' mtcars |> plot_likert(pri = "carb", sec = "cyl", ter="am")
+#' mtcars |> plot_likert(pri = "cyl",color.palette="Blues")
+#' mtcars |> plot_likert(pri = "carb", sec = NULL,color.palette="Magma")
+#' mtcars |> plot_likert(pri = "carb", sec = c("cyl","am"),color.palette="Viridis")
+plot_likert <- function(data,
+                        pri,
+                        sec = NULL,
+                        ter = NULL,
+                        color.palette = "viridis") {
+  if (!is.null(ter)) {
+    ds <- split(data, data[ter])
+  } else {
+    ds <- list(data)
+  }
+  out <- lapply(ds, \(.x) {
+    .x[c(pri, sec)] |>
+      # na.omit() |>
+      plot_likert_single(color.palette = color.palette)
+  })
+
+  wrap_plot_list(out, title = glue::glue(i18n$t("Grouped by {get_label(data,ter)}")))
+}
+
+
+plot_likert_single <- function(data, color.palette = "viridis") {
+  ggstats::gglikert(data = data) +
+    scale_fill_generate(palette=color.palette)+
+    ggplot2::theme(
+      # legend.position = "none",
+      # panel.grid.major = element_blank(),
+      # panel.grid.minor = element_blank(),
+      # axis.text.y = ggplot2::element_blank(),
+      # axis.title.y = ggplot2::element_blank(),
+      text = ggplot2::element_text(size = 12)
+      # axis.text = ggplot2::element_blank(),
+      # plot.title = element_blank(),
+      # panel.background = ggplot2::element_rect(fill = "white"),
+      # plot.background = ggplot2::element_rect(fill = "white"),
+      # panel.border = ggplot2::element_blank()
+    )
+}
+
+
+########
 #### Current file: /Users/au301842/FreesearchR/R//plot_ridge.R 
 ########
 
@@ -7990,10 +8129,7 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
   ns <- shiny::NS(id)
 
   if (isTRUE(title)) {
-    title <- shiny::tags$h4(
-      i18n$t("Import data from REDCap"),
-      class = "redcap-module-title"
-    )
+    title <- shiny::tags$h4(i18n$t("Import data from REDCap"), class = "redcap-module-title")
   }
 
   server_ui <- shiny::tagList(
@@ -8004,7 +8140,11 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
       value = if_not_missing(url, "https://redcap.your.institution/"),
       width = "100%"
     ),
-    shiny::helpText(i18n$t("Format should be either 'https://redcap.your.institution/' or 'https://your.institution/redcap/'")),
+    shiny::helpText(
+      i18n$t(
+        "Format should be either 'https://redcap.your.institution/' or 'https://your.institution/redcap/'"
+      )
+    ),
     shiny::br(),
     shiny::br(),
     shiny::passwordInput(
@@ -8013,7 +8153,9 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
       value = "",
       width = "100%"
     ),
-    shiny::helpText(i18n$t("The token is a string of 32 numbers and letters.")),
+    shiny::helpText(i18n$t(
+      "The token is a string of 32 numbers and letters."
+    )),
     shiny::br(),
     shiny::br(),
     shiny::actionButton(
@@ -8030,7 +8172,10 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
       shinyWidgets::alert(
         id = ns("connect-result"),
         status = "info",
-        tags$p(phosphoricons::ph("info", weight = "bold"), i18n$t("Please fill in web address and API token, then press 'Connect'."))
+        tags$p(
+          phosphoricons::ph("info", weight = "bold"),
+          i18n$t("Please fill in web address and API token, then press 'Connect'.")
+        )
       ),
       dismissible = TRUE
     ),
@@ -8043,14 +8188,18 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
       shiny::uiOutput(outputId = ns("arms")),
       shiny::textInput(
         inputId = ns("filter"),
-        label = i18n$t("Optional filter logic (e.g., ⁠[gender] = 'female')"
-      ))
+        label = i18n$t("Optional filter logic (e.g., ⁠[gender] = 'female')")
+      ),
+      uiOutput(ns("filter_feedback"))
     )
 
   params_ui <-
     shiny::tagList(
       shiny::tags$h4(i18n$t("Data import parameters")),
       shiny::tags$div(
+        ####
+        #### All below was deactivated to deactivate filtering
+        ####
         style = htmltools::css(
           display = "grid",
           gridTemplateColumns = "1fr 50px",
@@ -8075,7 +8224,11 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
           )
         )
       ),
-      shiny::helpText(i18n$t("Select fields/variables to import and click the funnel to apply optional filters")),
+      shiny::helpText(
+        i18n$t(
+          "Select fields/variables to import and click the funnel to apply optional filters"
+        )
+      ),
       shiny::tags$br(),
       shiny::tags$br(),
       shiny::uiOutput(outputId = ns("data_type")),
@@ -8094,7 +8247,10 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
         shinyWidgets::alert(
           id = ns("retrieved-result"),
           status = "info",
-          tags$p(phosphoricons::ph("info", weight = "bold"), "Please specify data to download, then press 'Import'.")
+          tags$p(
+            phosphoricons::ph("info", weight = "bold"),
+            "Please specify data to download, then press 'Import'."
+          )
         ),
         dismissible = TRUE
       )
@@ -8105,11 +8261,7 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
     title = title,
     server_ui,
     # shiny::uiOutput(ns("params_ui")),
-    shiny::conditionalPanel(
-      condition = "output.connect_success == true",
-      params_ui,
-      ns = ns
-    ),
+    shiny::conditionalPanel(condition = "output.connect_success == true", params_ui, ns = ns),
     shiny::br()
   )
 }
@@ -8134,14 +8286,19 @@ m_redcap_readServer <- function(id) {
       dd_list = NULL,
       data = NULL,
       rep_fields = NULL,
-      code = NULL
+      code = NULL,
+      filter_valid = NULL
     )
 
     shiny::observeEvent(list(input$api, input$uri), {
       shiny::req(input$api)
       shiny::req(input$uri)
       if (!is.null(input$uri)) {
-        uri <- paste0(ifelse(endsWith(input$uri, "/"), input$uri, paste0(input$uri, "/")), "api/")
+        uri <- paste0(ifelse(
+          endsWith(input$uri, "/"),
+          input$uri,
+          paste0(input$uri, "/")
+        ), "api/")
       } else {
         uri <- input$uri
       }
@@ -8155,75 +8312,68 @@ m_redcap_readServer <- function(id) {
     })
 
 
-    tryCatch(
-      {
-        shiny::observeEvent(
-          list(
-            input$data_connect
-          ),
-          {
-            shiny::req(input$api)
-            shiny::req(data_rv$uri)
+    tryCatch({
+      shiny::observeEvent(list(input$data_connect), {
+        shiny::req(input$api)
+        shiny::req(data_rv$uri)
 
-            parameters <- list(
-              redcap_uri = data_rv$uri,
-              token = input$api
-            )
+        parameters <- list(redcap_uri = data_rv$uri, token = input$api)
 
-            # browser()
-            shiny::withProgress(
-              {
-                imported <- try(rlang::exec(REDCapR::redcap_metadata_read, !!!parameters), silent = TRUE)
-              },
-              message = paste("Connecting to", data_rv$uri)
-            )
+        # browser()
+        shiny::withProgress({
+          imported <- try(rlang::exec(REDCapR::redcap_metadata_read, !!!parameters),
+                          silent = TRUE)
+        }, message = paste("Connecting to", data_rv$uri))
 
-            ## TODO: Simplify error messages
-            if (inherits(imported, "try-error") || NROW(imported) < 1 || ifelse(is.list(imported), !isTRUE(imported$success), FALSE)) {
-              if (ifelse(is.list(imported), !isTRUE(imported$success), FALSE)) {
-                mssg <- imported$raw_text
-              } else {
-                mssg <- attr(imported, "condition")$message
-              }
+        ## TODO: Simplify error messages
+        if (inherits(imported, "try-error") ||
+            NROW(imported) < 1 ||
+            ifelse(is.list(imported), !isTRUE(imported$success), FALSE)) {
+          if (ifelse(is.list(imported),
+                     !isTRUE(imported$success),
+                     FALSE)) {
+            mssg <- imported$raw_text
+          } else {
+            mssg <- attr(imported, "condition")$message
+          }
 
-              datamods:::insert_error(mssg = mssg, selector = "connect")
-              data_rv$dd_status <- "error"
-              data_rv$dd_list <- NULL
-            } else if (isTRUE(imported$success)) {
-              data_rv$dd_status <- "success"
+          datamods:::insert_error(mssg = mssg, selector = "connect")
+          data_rv$dd_status <- "error"
+          data_rv$dd_list <- NULL
+        } else if (isTRUE(imported$success)) {
+          data_rv$dd_status <- "success"
 
-              data_rv$info <- REDCapR::redcap_project_info_read(
-                redcap_uri = data_rv$uri,
-                token = input$api
-              )$data
+          data_rv$info <- REDCapR::redcap_project_info_read(redcap_uri = data_rv$uri, token = input$api)$data
 
-              datamods:::insert_alert(
-                selector = ns("connect"),
-                status = "success",
-                include_data_alert(
-                  see_data_text = i18n$t("Click to see data dictionary"),
-                  dataIdName = "see_dd",
-                  extra = tags$p(
-                    tags$b(phosphoricons::ph("check", weight = "bold"), i18n$t("Connected to server!")),
-                    glue::glue(i18n$t("The {data_rv$info$project_title} project is loaded."))
-                  ),
-                  btn_show_data = TRUE
+          datamods:::insert_alert(
+            selector = ns("connect"),
+            status = "success",
+            include_data_alert(
+              see_data_text = i18n$t("Click to see data dictionary"),
+              dataIdName = "see_dd",
+              extra = tags$p(
+                tags$b(
+                  phosphoricons::ph("check", weight = "bold"),
+                  i18n$t("Connected to server!")
+                ),
+                glue::glue(
+                  i18n$t(
+                    "The {data_rv$info$project_title} project is loaded."
+                  )
                 )
-              )
+              ),
+              btn_show_data = TRUE
+            )
+          )
 
-              data_rv$dd_list <- imported
-            }
-          },
-          ignoreInit = TRUE
-        )
-      },
-      warning = function(warn) {
-        showNotification(paste0(warn), type = "warning")
-      },
-      error = function(err) {
-        showNotification(paste0(err), type = "err")
-      }
-    )
+          data_rv$dd_list <- imported
+        }
+      }, ignoreInit = TRUE)
+    }, warning = function(warn) {
+      showNotification(paste0(warn), type = "warning")
+    }, error = function(err) {
+      showNotification(paste0(err), type = "error")
+    })
 
     output$connect_success <- shiny::reactive(identical(data_rv$dd_status, "success"))
     shiny::outputOptions(output, "connect_success", suspendWhenHidden = FALSE)
@@ -8254,10 +8404,7 @@ m_redcap_readServer <- function(id) {
       shiny::req(input$api)
       shiny::req(data_rv$uri)
 
-      REDCapR::redcap_event_read(
-        redcap_uri = data_rv$uri,
-        token = input$api
-      )$data
+      REDCapR::redcap_event_read(redcap_uri = data_rv$uri, token = input$api)$data
     })
 
     output$fields <- shiny::renderUI({
@@ -8267,7 +8414,7 @@ m_redcap_readServer <- function(id) {
         label = i18n$t("Select fields/variables to import:"),
         choices = purrr::pluck(data_rv$dd_list, "data") |>
           dplyr::select(field_name, form_name) |>
-          (\(.x){
+          (\(.x) {
             split(.x$field_name, REDCapCAST::as_factor(.x$form_name))
           })(),
         updateOn = "change",
@@ -8300,14 +8447,10 @@ m_redcap_readServer <- function(id) {
       shiny::req(input$data_type)
 
       ## Get repeated field
-      data_rv$rep_fields <- data_rv$dd_list$data$field_name[
-        data_rv$dd_list$data$form_name %in% repeated_instruments(
-          uri = data_rv$uri,
-          token = input$api
-        )
-      ]
+      data_rv$rep_fields <- data_rv$dd_list$data$field_name[data_rv$dd_list$data$form_name %in% repeated_instruments(uri = data_rv$uri, token = input$api)]
 
-      if (input$data_type == "long" && isTRUE(any(input$fields %in% data_rv$rep_fields))) {
+      if (input$data_type == "long" &&
+          isTRUE(any(input$fields %in% data_rv$rep_fields))) {
         vectorSelectInput(
           inputId = ns("fill"),
           label = i18n$t("Fill missing values?"),
@@ -8343,12 +8486,48 @@ m_redcap_readServer <- function(id) {
       }
     })
 
+
+    filter_validation <- reactive({
+      val <- trimws(input$filter)
+      if (nchar(val) == 0)
+        return(NULL)
+      validate_redcap_filter(val, purrr::pluck(data_rv$dd_list, "data"))
+    })
+
+    output$filter_feedback <- renderUI({
+      result <- filter_validation()
+      if (is.null(result)) {
+        data_rv$filter_valid <- NULL
+        return(NULL)
+      }
+
+      if (result$valid) {
+        data_rv$filter_valid <- TRUE
+        tags$span(style = "color: green;", "\u2713 Filter is valid")
+      } else {
+        data_rv$filter_valid <- FALSE
+
+        tags$span(style = "color: red;",
+                  "\u2717 ",
+                  line_break(result$message, lineLength = 30))
+      }
+    })
+
     shiny::observeEvent(input$data_import, {
       shiny::req(input$fields)
 
       # browser()
       record_id <- purrr::pluck(data_rv$dd_list, "data")[[1]][1]
 
+      if (!is.null(data_rv$filter_valid)) {
+        if (isTRUE(data_rv$filter_valid)) {
+          filter <- trimws(input$filter)
+        } else {
+          filter <- ""
+        }
+      } else {
+        filter <- ""
+      }
 
       parameters <- list(
         uri = data_rv$uri,
@@ -8356,7 +8535,8 @@ m_redcap_readServer <- function(id) {
         fields = unique(c(record_id, input$fields)),
         events = input$arms,
         raw_or_label = "both",
-        filter_logic = input$filter,
+        filter_logic = filter,
+        # filter_logic = "",
         split_forms = ifelse(
           input$data_type == "long" && !is.null(input$data_type),
           "none",
@@ -8365,31 +8545,48 @@ m_redcap_readServer <- function(id) {
       )
 
       shiny::withProgress(message = "Downloading REDCap data. Hold on for a moment..", {
-        imported <- try(rlang::exec(REDCapCAST::read_redcap_tables, !!!parameters), silent = TRUE)
+        imported <- try({
+          rlang::exec(REDCapCAST::read_redcap_tables, !!!parameters)
+          # if (nrow(out)==0){
+          #   stop("No data was exported")
+          # } else {
+          #   out
+          # }
+        }, # error = function(err) {
+        #   showNotification(i18n$t("An error was encountered exporting data. Please review data filter."), type = "error")
+        # },
+        silent = TRUE)
       })
 
-      parameters_code <- parameters[c("uri", "fields", "events", "raw_or_label", "filter_logic")]
+      # d <- REDCapCAST::apply_factor_labels(data = imported$survey, meta = data_rv$dd_list$data)
 
-      code <- rlang::call2(
-        "easy_redcap",
-        !!!utils::modifyList(
-          parameters_code,
-          list(
-            data_format = ifelse(
-              input$data_type == "long" && !is.null(input$data_type),
-              "long",
-              "wide"
-            ),
-            project.name = simple_snake(data_rv$info$project_title)
-          )
-        ),
-        .ns = "REDCapCAST"
-      )
+      parameters_code <- parameters[c("uri",
+                                      "fields",
+                                      "events",
+                                      "raw_or_label",
+                                      "filter_logic")]
 
-      if (inherits(imported, "try-error") || NROW(imported) < 1) {
+      code <- rlang::call2("easy_redcap",
+                           !!!utils::modifyList(
+                             parameters_code,
+                             list(
+                               data_format = ifelse(
+                                 input$data_type == "long" && !is.null(input$data_type),
+                                 "long",
+                                 "wide"
+                               ),
+                               project.name = simple_snake(data_rv$info$project_title)
+                             )
+                           ),
+                           .ns = "REDCapCAST")
+
+      if (inherits(imported, "try-error") |
+          NROW(imported) == 0 |
+          (length(imported) == 1 & !is.list(imported))) {
         data_rv$data_status <- "error"
         data_rv$data_list <- NULL
-        data_rv$data_message <- imported$raw_text
+        data_rv$data_message <- i18n$t("An empty data set was imported. Please review data filter.")
+        data_rv$data <- NULL
       } else {
         data_rv$data_status <- "success"
         data_rv$data_message <- i18n$t("Requested data was retrieved!")
@@ -8398,12 +8595,11 @@ m_redcap_readServer <- function(id) {
         ## "wide"/"long" without re-importing data
 
         if (parameters$split_form == "all") {
-          # browser()
           out <- imported |>
             # redcap_wider()
             REDCapCAST::redcap_wider()
         } else {
-          if (input$fill == "yes") {
+          if (identical(input$fill, "yes")) {
             ## Repeated fields
 
 
@@ -8421,78 +8617,102 @@ m_redcap_readServer <- function(id) {
           }
         }
 
-        # browser()
+        ## Ensure correct factor labels
+        ## It is a little hacky and should be included in the read_redcap_tables, but is lost along the way
+        out <- REDCapCAST::apply_factor_labels(data = out, meta = data_rv$dd_list$data)
+
+
         in_data_check <- parameters$fields %in% names(out) |
-          sapply(names(out), \(.x) any(sapply(parameters$fields, \(.y) startsWith(.x, .y))))
+          sapply(names(out), \(.x) any(sapply(
+            parameters$fields, \(.y) startsWith(.x, .y)
+          )))
 
         if (!any(in_data_check[-1])) {
           data_rv$data_status <- "warning"
-          data_rv$data_message <- i18n$t("Data retrieved, but it looks like only the ID was retrieved from the server. Please check with your REDCap administrator that you have required permissions for data access.")
+          data_rv$data_message <- i18n$t(
+            "Data retrieved, but it looks like only the ID was retrieved from the server. Please check with your REDCap administrator that you have required permissions for data access."
+          )
         }
 
         if (!all(in_data_check)) {
           data_rv$data_status <- "warning"
-          data_rv$data_message <- i18n$t("Data retrieved, but it looks like not all requested fields were retrieved from the server. Please check with your REDCap administrator that you have required permissions for data access.")
+          data_rv$data_message <- i18n$t(
+            "Data retrieved, but it looks like not all requested fields were retrieved from the server. Please check with your REDCap administrator that you have required permissions for data access."
+          )
         }
 
         data_rv$code <- code
 
+        ## Level labels nare lost at this point...
         data_rv$data <- out |>
           dplyr::select(-dplyr::ends_with("_complete")) |>
           # dplyr::select(-dplyr::any_of(record_id)) |>
           REDCapCAST::suffix2label()
+
       }
     })
 
-    shiny::observeEvent(
-      data_rv$data_status,
-      {
-        # browser()
-        if (identical(data_rv$data_status, "error")) {
-          datamods:::insert_error(mssg = data_rv$data_message, selector = ns("retrieved"))
-        } else if (identical(data_rv$data_status, "success")) {
-          datamods:::insert_alert(
-            selector = ns("retrieved"),
-            status = data_rv$data_status,
-            # tags$p(
-            #   tags$b(phosphoricons::ph("check", weight = "bold"), "Success!"),
-            #   data_rv$data_message
-            # ),
-            include_data_alert(
-              see_data_text = i18n$t("Click to see the imported data"),
-              dataIdName = "see_data",
-              extra = tags$p(
-                tags$b(phosphoricons::ph("check", weight = "bold"), data_rv$data_message)
-              ),
-              btn_show_data = TRUE
-            )
+    shiny::observeEvent(data_rv$data_status, {
+      if (identical(data_rv$data_status, "error")) {
+        ## The insert error wouldn't work. Inserted through regular.
+        # datamods:::insert_error(mssg = data_rv$data_message,
+        #                         selector = ns("retrieved"))
+        datamods:::insert_alert(
+          selector = ns("retrieved"),
+          status = "danger",
+          tags$p(
+            tags$b(
+              phosphoricons::ph("warning", weight = "bold"),
+              "Warning!"
+            ),
+            data_rv$data_message
           )
-        } else {
-          datamods:::insert_alert(
-            selector = ns("retrieved"),
-            status = data_rv$data_status,
-            tags$p(
-              tags$b(phosphoricons::ph("warning", weight = "bold"), "Warning!"),
+        )
+      } else if (identical(data_rv$data_status, "success")) {
+        datamods:::insert_alert(
+          selector = ns("retrieved"),
+          status = data_rv$data_status,
+          # tags$p(
+          #   tags$b(phosphoricons::ph("check", weight = "bold"), "Success!"),
+          #   data_rv$data_message
+          # ),
+          include_data_alert(
+            see_data_text = i18n$t("Click to see the imported data"),
+            dataIdName = "see_data",
+            extra = tags$p(tags$b(
+              phosphoricons::ph("check", weight = "bold"),
               data_rv$data_message
-            )
+            )),
+            btn_show_data = TRUE
           )
-        }
+        )
+      } else {
+        datamods:::insert_alert(
+          selector = ns("retrieved"),
+          status = data_rv$data_status,
+          tags$p(
+            tags$b(
+              phosphoricons::ph("warning", weight = "bold"),
+              "Warning!"
+            ),
+            data_rv$data_message
+          )
+        )
       }
-    )
+    })
 
-    return(list(
-      status = shiny::reactive(data_rv$data_status),
-      name = shiny::reactive(data_rv$info$project_title),
-      info = shiny::reactive(data_rv$info),
-      code = shiny::reactive(data_rv$code),
-      data = shiny::reactive(data_rv$data)
-    ))
+    return(
+      list(
+        status = shiny::reactive(data_rv$data_status),
+        name = shiny::reactive(data_rv$info$project_title),
+        info = shiny::reactive(data_rv$info),
+        code = shiny::reactive(data_rv$code),
+        data = shiny::reactive(data_rv$data)
+      )
+    )
   }
 
-  shiny::moduleServer(
-    id = id,
-    module = module
-  )
+  shiny::moduleServer(id = id, module = module)
 }
 
 #' @importFrom htmltools tagList tags
@@ -8503,14 +8723,12 @@ include_data_alert <- function(dataIdName = "see_data",
                                extra = NULL,
                                session = shiny::getDefaultReactiveDomain()) {
   if (isTRUE(btn_show_data)) {
-    success_message <- tagList(
-      extra,
-      tags$br(),
-      shiny::actionLink(
-        inputId = session$ns(dataIdName),
-        label = tagList(phosphoricons::ph("book-open-text"), see_data_text)
-      )
-    )
+    success_message <- tagList(extra,
+                               tags$br(),
+                               shiny::actionLink(
+                                 inputId = session$ns(dataIdName),
+                                 label = tagList(phosphoricons::ph("book-open-text"), see_data_text)
+                               ))
   }
   return(success_message)
 }
@@ -8562,20 +8780,18 @@ is_valid_redcap_url <- function(url) {
 #' @examples
 #' token <- paste(sample(c(1:9, LETTERS[1:6]), 32, TRUE), collapse = "")
 #' is_valid_token(token)
-is_valid_token <- function(token, pattern_env = NULL, nchar = 32) {
+is_valid_token <- function(token,
+                           pattern_env = NULL,
+                           nchar = 32) {
   checkmate::assert_character(token, any.missing = TRUE, len = 1)
 
   if (!is.null(pattern_env)) {
-    checkmate::assert_character(pattern_env,
-      any.missing = FALSE,
-      len = 1
-    )
+    checkmate::assert_character(pattern_env, any.missing = FALSE, len = 1)
     pattern <- pattern_env
   } else {
     pattern <- glue::glue("^([0-9A-Fa-f]{<nchar>})(?:\\n)?$",
-      .open = "<",
-      .close = ">"
-    )
+                          .open = "<",
+                          .close = ">")
   }
 
   if (is.na(token)) {
@@ -8615,10 +8831,15 @@ repeated_instruments <- function(uri, token) {
 #' @export
 #'
 drop_empty_event <- function(data, event = "redcap_event_name") {
-  generics <- c(names(data)[1], "redcap_event_name", "redcap_repeat_instrument", "redcap_repeat_instance")
+  generics <- c(
+    names(data)[1],
+    "redcap_event_name",
+    "redcap_repeat_instrument",
+    "redcap_repeat_instance"
+  )
 
   filt <- split(data, data[[event]]) |>
-    lapply(\(.x){
+    lapply(\(.x) {
       dplyr::select(.x, -tidyselect::all_of(generics)) |>
         REDCapCAST::all_na()
     }) |>
@@ -8626,6 +8847,327 @@ drop_empty_event <- function(data, event = "redcap_event_name") {
 
   data[data[[event]] %in% names(filt)[!filt], ]
 }
+
+
+#' Validate a REDCap server-side filter string against a data dictionary
+#'
+#' Checks that a REDCap filter expression is syntactically correct and
+#' consistent with the field types defined in the project data dictionary.
+#' Plain text without field references is always rejected. Multi-clause
+#' filters joined by \code{AND} or \code{OR} are supported.
+#'
+#' @param filter A single character string containing the filter expression,
+#'   e.g. \code{"[age] > 18"} or \code{"[cohabitation] = '1' AND [age] > 18"}.
+#' @param dictionary A data frame representing the REDCap data dictionary in
+#'   API export format, as returned by e.g. \code{REDCapCAST::get_redcap_metadata()}.
+#'   Must contain at least the columns \code{field_name} and \code{field_type}.
+#'   The columns \code{text_validation_type_or_show_slider_number} and
+#'   \code{select_choices_or_calculations} are used when present for stricter
+#'   type and choice validation.
+#'
+#' @return A named list with two elements:
+#'   \describe{
+#'     \item{\code{valid}}{Logical. \code{TRUE} if the filter passes all checks.}
+#'     \item{\code{message}}{Character. \code{"Filter is valid."} on success, or
+#'       a newline-separated string of error messages describing every problem
+#'       found.}
+#'   }
+#'
+#' @details
+#' Validation rules by field type:
+#' \describe{
+#'   \item{\code{calc}}{Numeric fields. Value must be an unquoted number.
+#'     All comparison operators (\code{=}, \code{!=}, \code{<}, \code{>},
+#'     \code{<=}, \code{>=}) are accepted.}
+#'   \item{\code{text} with date validation}{Fields with validation type
+#'     \code{date_ymd}, \code{date_dmy}, \code{datetime_*}, etc. Value must be
+#'     a quoted date/datetime string in \code{'YYYY-MM-DD'} format. All
+#'     comparison operators are accepted.}
+#'   \item{\code{text} with time validation}{Fields with validation type
+#'     \code{time_hh_mm_ss} or \code{time_mm_ss}. Value must be a quoted time
+#'     string, e.g. \code{'14:30:00'}. All comparison operators are accepted.}
+#'   \item{\code{radio} / \code{dropdown}}{Categorical fields. Value must be a
+#'     quoted choice code (e.g. \code{'1'}) that exists in the field's choice
+#'     list. Only \code{=} and \code{!=} are accepted.}
+#'   \item{\code{text} (plain)}{Free-text fields. Value must be a quoted string.
+#'     Only \code{=} and \code{!=} are accepted.}
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' dict <- REDCapCAST::get_redcap_metadata(
+#'   uri    = "https://redcap.example.com/api/",
+#'   token  = Sys.getenv("REDCAP_TOKEN")
+#' )
+#'
+#' validate_redcap_filter("[age] > 18", dict)
+#' #> list(valid = TRUE, message = "Filter is valid.")
+#'
+#' validate_redcap_filter("only plain text", dict)
+#' #> list(valid = FALSE, message = "Filter must contain at least one field ...")
+#'
+#' validate_redcap_filter("[cohabitation] = '1' AND [age] > 18", dict)
+#' #> list(valid = TRUE, message = "Filter is valid.")
+#' }
+#'
+#' @export
+# REDCap filter validation based on data dictionary
+#
+# REDCap filter format: [field_name] operator value
+# Example: [age] > 18
+#          [cohabitation] = '1'
+#          [inclusion] > '2020-01-01'
+#
+# Supported field types and their allowed operators/value formats:
+#   text (no validation) -> string values, = != operators only
+#   text (date_ymd/date_dmy) -> quoted date strings, all comparison operators
+#   text (time_hh_mm_ss) -> quoted time strings, all comparison operators
+#   text (datetime_*) -> quoted datetime strings, all comparison operators
+#   text (autocomplete) -> string values, = != operators only
+#   calc -> numeric values, all comparison operators
+#   radio/dropdown -> quoted numeric codes, = != operators only
+
+validate_redcap_filter <- function(filter, dictionary) {
+  # --- Input checks ---
+  if (!is.character(filter) ||
+      length(filter) != 1 || nchar(trimws(filter)) == 0) {
+    return(list(valid = FALSE, message = "Filter must be a non-empty string."))
+  }
+
+  if (!grepl("\\[.+\\]", filter)) {
+    return(
+      list(valid = FALSE, message = "Filter must contain at least one field reference in [brackets]. Plain text is not accepted.")
+    )
+  }
+
+  # --- Column names (API export format) ---
+  col_field    <- "field_name"
+  col_type     <- "field_type"
+  col_val_type <- "text_validation_type_or_show_slider_number"
+  col_choices  <- "select_choices_or_calculations"
+
+  missing_cols <- setdiff(c(col_field, col_type), names(dictionary))
+  if (length(missing_cols) > 0) {
+    stop("Dictionary is missing required columns: ",
+         paste(missing_cols, collapse = ", "))
+  }
+
+  # --- Build lookup index once for O(1) field access ---
+  field_idx    <- setNames(seq_len(nrow(dictionary)), dictionary[[col_field]])
+  has_val_type <- col_val_type %in% names(dictionary)
+  has_choices  <- col_choices  %in% names(dictionary)
+
+  # --- Classify field types ---
+  numeric_types    <- c("calc")
+  date_validations <- c(
+    "date_ymd",
+    "date_dmy",
+    "datetime_ymd",
+    "datetime_dmy",
+    "datetime_seconds_ymd",
+    "datetime_seconds_dmy"
+  )
+  time_validations <- c("time_hh_mm_ss", "time_mm_ss")
+  categorical_types <- c("radio", "dropdown", "checkbox")
+  text_types        <- c("text", "autocomplete")
+
+  num_ops  <- c("=", "!=", "<", ">", "<=", ">=")
+  cat_ops  <- c("=", "!=")
+  text_ops <- c("=", "!=")
+
+  # --- Parse filter into clauses ---
+  # Split on AND/OR (REDCap uses 'and'/'or' or 'AND'/'OR')
+  clauses <- trimws(strsplit(filter, "(?i)\\s+(and|or)\\s+", perl = TRUE)[[1]])
+
+  clause_pattern <- "^\\[([^\\]]+)\\]\\s*(=|!=|<=|>=|<|>)\\s*(.+)$"
+
+  errors <- character(0)
+
+  for (clause in clauses) {
+    if (!grepl(clause_pattern, clause, perl = TRUE)) {
+      errors <- c(
+        errors,
+        sprintf(
+          "Clause '%s' does not match expected format: [field] operator value",
+          clause
+        )
+      )
+      next
+    }
+
+    parts    <- regmatches(clause, regexec(clause_pattern, clause, perl = TRUE))[[1]]
+    field    <- parts[2]
+    operator <- parts[3]
+    value    <- trimws(parts[4])
+
+    # --- Check field exists using pre-built index ---
+    row_i <- field_idx[field]
+    if (is.na(row_i)) {
+      errors <- c(errors, sprintf("Unknown field: [%s]", field))
+      next
+    }
+
+    field_type <- dictionary[[col_type]][row_i]
+    val_type   <- if (has_val_type)
+      dictionary[[col_val_type]][row_i]
+    else
+      ""
+    if (is.na(val_type))
+      val_type <- ""
+
+    # --- Determine expected value format and allowed operators ---
+    if (field_type %in% numeric_types ||
+        grepl("^integer$|^number", val_type)) {
+      if (!operator %in% num_ops) {
+        errors <- c(
+          errors,
+          sprintf(
+            "[%s] is numeric — operator '%s' is not valid. Use one of: %s",
+            field,
+            operator,
+            paste(num_ops, collapse = ", ")
+          )
+        )
+      }
+      if (!grepl("^-?[0-9]+(\\.[0-9]+)?$", value)) {
+        errors <- c(
+          errors,
+          sprintf(
+            "[%s] is numeric — value '%s' should be an unquoted number (e.g. 18 or 3.5)",
+            field,
+            value
+          )
+        )
+      }
+
+    } else if (val_type %in% date_validations) {
+      if (!operator %in% num_ops) {
+        errors <- c(
+          errors,
+          sprintf(
+            "[%s] is a date — operator '%s' is not valid. Use one of: %s",
+            field,
+            operator,
+            paste(num_ops, collapse = ", ")
+          )
+        )
+      }
+      if (!grepl(
+        "^'[0-9]{4}-[0-9]{2}-[0-9]{2}(\\s[0-9]{2}:[0-9]{2}(:[0-9]{2})?)?'$",
+        value
+      )) {
+        errors <- c(
+          errors,
+          sprintf(
+            "[%s] is a date — value '%s' should be a quoted date string, e.g. '2020-01-31'",
+            field,
+            value
+          )
+        )
+      }
+
+    } else if (val_type %in% time_validations) {
+      if (!operator %in% num_ops) {
+        errors <- c(
+          errors,
+          sprintf(
+            "[%s] is a time — operator '%s' is not valid. Use one of: %s",
+            field,
+            operator,
+            paste(num_ops, collapse = ", ")
+          )
+        )
+      }
+      if (!grepl("^'[0-9]{2}:[0-9]{2}(:[0-9]{2})?'$", value)) {
+        errors <- c(
+          errors,
+          sprintf(
+            "[%s] is a time — value '%s' should be a quoted time string, e.g. '14:30:00'",
+            field,
+            value
+          )
+        )
+      }
+
+    } else if (field_type %in% categorical_types) {
+      if (!operator %in% cat_ops) {
+        errors <- c(
+          errors,
+          sprintf(
+            "[%s] is categorical — operator '%s' is not valid. Use one of: %s",
+            field,
+            operator,
+            paste(cat_ops, collapse = ", ")
+          )
+        )
+      }
+
+      # Validate value is a known choice code
+      choices_raw <- if (has_choices)
+        dictionary[[col_choices]][row_i]
+      else
+        NA
+      if (!is.na(choices_raw) && nchar(trimws(choices_raw)) > 0) {
+        choice_codes <- trimws(gsub(",.+?(\\||$)", "", gsub(
+          "^\\s*", "", strsplit(choices_raw, "\\|")[[1]]
+        )))
+        value_unquoted <- gsub("^'|'$", "", value)
+        if (!value_unquoted %in% choice_codes) {
+          errors <- c(
+            errors,
+            sprintf(
+              "[%s] is categorical — '%s' is not a valid choice code. Valid codes: %s",
+              field,
+              value_unquoted,
+              paste(choice_codes, collapse = ", ")
+            )
+          )
+        }
+      }
+
+      if (!grepl("^'.*'$", value)) {
+        errors <- c(errors,
+                    sprintf(
+                      "[%s] is categorical — value should be quoted, e.g. '1'",
+                      field
+                    ))
+      }
+
+    } else {
+      # Plain text field
+      if (!operator %in% text_ops) {
+        errors <- c(
+          errors,
+          sprintf(
+            "[%s] is a text field — operator '%s' is not valid. Use one of: %s",
+            field,
+            operator,
+            paste(text_ops, collapse = ", ")
+          )
+        )
+      }
+      if (!grepl("^'.*'$", value)) {
+        errors <- c(
+          errors,
+          sprintf(
+            "[%s] is a text field — value should be quoted, e.g. 'some text'",
+            field
+          )
+        )
+      }
+    }
+  }
+
+  if (length(errors) > 0) {
+    return(list(
+      valid = FALSE,
+      message = paste(errors, collapse = "\n")
+    ))
+  }
+
+  list(valid = TRUE, message = "Filter is valid.")
+}
+
 
 
 #' Test app for the redcap_read_shiny_module
@@ -8646,16 +9188,10 @@ redcap_demo_app <- function() {
   server <- function(input, output, session) {
     data_val <- m_redcap_readServer(id = "data")
 
-    output$data <- DT::renderDataTable(
-      {
-        shiny::req(data_val$data)
-        data_val$data()
-      },
-      options = list(
-        scrollX = TRUE,
-        pageLength = 5
-      ),
-    )
+    output$data <- DT::renderDataTable({
+      shiny::req(data_val$data)
+      data_val$data()
+    }, options = list(scrollX = TRUE, pageLength = 5), )
     output$code <- shiny::renderPrint({
       shiny::req(data_val$code)
       data_val$code()
@@ -10054,7 +10590,7 @@ regression_server <- function(id,
               rv$list$regression$models <- model_lists
             },
             error = function(err) {
-              showNotification(paste(i18n$t("Creating regression models failed with the following error:"), err), type = "err")
+              showNotification(paste(i18n$t("Creating regression models failed with the following error:"), err), type = "error")
             }
           )
         }
@@ -10119,7 +10655,7 @@ regression_server <- function(id,
               showNotification(paste0(warn), type = "warning")
             },
             error = function(err) {
-              showNotification(paste(i18n$t("Creating a regression table failed with the following error:"), err), type = "err")
+              showNotification(paste(i18n$t("Creating a regression table failed with the following error:"), err), type = "error")
             }
           )
         }
@@ -10197,7 +10733,7 @@ regression_server <- function(id,
               gg_theme_shiny()
           },
           error = function(err) {
-            showNotification(paste0(err), type = "err")
+            showNotification(paste0(err), type = "error")
           }
         )
       })
@@ -10257,7 +10793,7 @@ regression_server <- function(id,
             #   showNotification(paste0(warn), type = "warning")
             # },
             error = function(err) {
-              showNotification(paste(i18n$t("Running model assumptions checks failed with the following error:"), err), type = "err")
+              showNotification(paste(i18n$t("Running model assumptions checks failed with the following error:"), err), type = "error")
             }
           )
         }
@@ -10328,7 +10864,7 @@ regression_server <- function(id,
                 out <- patchwork::wrap_plots(ls, ncol = if (length(ls) == 1) 1 else 2)
               },
               error = function(err) {
-                showNotification(err, type = "err")
+                showNotification(err, type = "error")
               }
             )
 
@@ -11998,13 +12534,24 @@ update_factor_ui <- function(id) {
     ),
     fluidRow(
       column(
-        width = 6,
+        width = 3,
         shinyWidgets::virtualSelectInput(
           inputId = ns("variable"),
-          label = i18n$t("Factor variable to reorder:"),
+          label = i18n$t("Choose variable:"),
           choices = NULL,
           width = "100%",
           zIndex = 50
+        )
+      ),
+      column(
+        width = 3,
+        class = "d-flex align-items-end",
+        actionButton(
+          disabled = TRUE,
+          inputId = ns("drop_levels"),
+          label = tagList(phosphoricons::ph("sort-ascending"), i18n$t("Drop empty")),
+          class = "btn-outline-primary mb-3",
+          width = "100%"
         )
       ),
       column(
@@ -12039,7 +12586,9 @@ update_factor_ui <- function(id) {
       class = "float-end",
       shinyWidgets::prettyCheckbox(
         inputId = ns("new_var"),
-        label = i18n$t("Create a new variable; otherwise replaces (Updating labels always creates new variable)"),
+        label = i18n$t(
+          "Create a new variable; otherwise replaces (Updating labels always creates new variable)"
+        ),
         value = FALSE,
         status = "primary",
         outline = TRUE,
@@ -12092,6 +12641,20 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
       variable <- req(input$variable)
       grid <- as.data.frame(table(data[[variable]]))
       rv$data_grid <- grid
+    })
+
+    observeEvent(rv$data_grid, {
+      variable <- req(input$variable)
+      if (isTRUE(has_empty_levels(rv$data[[variable]]))) {
+        # browser()
+        updateActionButton(inputId = "drop_levels", disabled = FALSE)
+      } else {
+        updateActionButton(inputId = "drop_levels", disabled = TRUE)
+      }
+    })
+
+    observeEvent(input$drop_levels, {
+      rv$data_grid <- rv$data_grid[!rv$data_grid$Freq==0,]
     })
 
     observeEvent(input$sort_levels, {
@@ -12177,7 +12740,7 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
       )
 
       data <- tryCatch({
-        with_labels(data,{
+        with_labels(data, {
           rlang::exec(factor_new_levels_labels,
                       !!!modifyList(parameters, val = list(data = data)))
         })
@@ -12187,7 +12750,7 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
           "We encountered the following error creating the new factor:",
           err
         ),
-        type = "err")
+        type = "error")
       })
 
       # browser()
@@ -12338,6 +12901,15 @@ unique_names <- function(new, existing = character()) {
   new_names <- make.unique(c(existing, new), sep = "_")
 
   new_names[-seq_along(existing)]
+}
+
+
+has_empty_levels <- function(x) {
+  if (is.factor(x)) {
+    any(!levels(x) %in% x)
+  } else {
+    return(FALSE)
+  }
 }
 
 
@@ -14871,7 +15443,7 @@ server <- function(input, output, session) {
       showNotification(paste(
         i18n$t("We encountered the following error showing missingness:"),
         err
-      ), type = "err")
+      ), type = "error")
     })
   })
 
@@ -15128,6 +15700,7 @@ server <- function(input, output, session) {
       inputId = "column_filter",
       label = i18n$t("Select data types to include"),
       selected = unique(data_type(rv$data)),
+      #[unique(data_type(rv$data))!="text"],
       choices = unique(data_type(rv$data)),
       updateOn = "change",
       multiple = TRUE,
@@ -15220,47 +15793,57 @@ server <- function(input, output, session) {
   #########  Data filter
   # IDEAFilter has the least cluttered UI, but might have a License issue
   # Consider using shinyDataFilter, though not on CRAN
-  data_filter <- IDEAFilter::IDEAFilter(
+  data_filter_raw <- IDEAFilter::IDEAFilter(
     "data_filter",
-    data = shiny::reactive(rv$data_variables),
+    data = shiny::reactive(non_character_cols(rv$data_variables)),
     verbose = TRUE
   )
 
-  shiny::observeEvent(list(
-    shiny::reactive(rv$data_variables),
-    shiny::reactive(rv$data_original),
-    data_filter(),
-    # regression_vars(),
-    input$complete_cutoff
-  ),
-  {
-    ###  Save filtered data
-    rv$data_filtered <- data_filter()
-
-    ###  Save filtered data
-    ###  without empty factor levels
-    rv$list$data <- data_filter() |>
-      REDCapCAST::fct_drop() |>
-      (\(.x) {
-        .x[!sapply(.x, is.character)]
-      })()
-
-    ## This looks messy!! But it works as intended for now
-
-    out <- gsub("filter", "dplyr::filter", gsub("\\s{2,}", " ", paste0(capture.output(
-      attr(rv$data_filtered, "code")
-    ), collapse = " ")))
-
-    out <- strsplit(out, "%>%") |>
-      unlist() |>
-      (\(.x) {
-        paste(c("df <- df", .x[-1], "REDCapCAST::fct_drop()"), collapse = "|> \n ")
-      })()
-
-    rv$code <- append_list(data = out,
-                           list = rv$code,
-                           index = "filter")
+  data_filter <- reactive({
+    apply_idea_filter(data_filter_raw, rv$data_variables)
   })
+
+  shiny::observeEvent(
+    list(
+      shiny::reactive(rv$data_variables),
+      shiny::reactive(rv$data_original),
+      data_filter_raw(),
+      # regression_vars(),
+      input$complete_cutoff
+    ),
+    {
+      ###  Save filtered data
+      # browser()
+      # rv$data_filtered <- apply_idea_filter(data_filter_raw, rv$data_variables)()
+      rv$data_filtered <- data_filter()
+
+      ###  Save filtered data
+      ###  ~~without empty factor levels~~
+      ###  All factor levels are kept, but can be manually removed
+      # browser()
+      rv$list$data <- rv$data_filtered #|>
+      # # REDCapCAST::fct_drop() |>
+      # (\(.x) {
+      #   .x[!sapply(.x, is.character)]
+      # })()
+
+      ## This looks messy!! But it works as intended for now
+      # browser()
+      out <- gsub("filter", "dplyr::filter", gsub("\\s{2,}", " ", paste0(capture.output(
+        attr(data_filter_raw(), "code")
+      ), collapse = " ")))
+
+      out <- strsplit(out, "%>%") |>
+        unlist() |>
+        (\(.x) {
+          paste(c("df <- df", .x[-1]), collapse = "|> \n ")
+        })()
+
+      rv$code <- append_list(data = out,
+                             list = rv$code,
+                             index = "filter")
+    }
+  )
 
   #########  Data preview
 
@@ -15279,7 +15862,7 @@ server <- function(input, output, session) {
   observeEvent(input$modal_browse, {
     tryCatch({
       show_data(
-        REDCapCAST::fct_drop(rv$data_filtered),
+        rv$data_filtered,
         title = i18n$t("Uploaded data overview"),
         type = "modal"
       )
@@ -15287,7 +15870,7 @@ server <- function(input, output, session) {
       showNotification(paste(
         i18n$t("We encountered the following error browsing your data:"),
         err
-      ), type = "err")
+      ), type = "error")
     })
   })
 
@@ -15313,7 +15896,7 @@ server <- function(input, output, session) {
       showNotification(paste(
         i18n$t("We encountered the following error showing missingness:"),
         err
-      ), type = "err")
+      ), type = "error")
     })
   })
 
@@ -15520,7 +16103,7 @@ server <- function(input, output, session) {
     #     }
     #   },
     #   error = function(err) {
-    #     showNotification(err, type = "err")
+    #     showNotification(err, type = "error")
     #   }
     # )
 
@@ -15679,7 +16262,7 @@ server <- function(input, output, session) {
               "We encountered the following error creating your report: "
             ),
             err
-          ), type = "err")
+          ), type = "error")
         })
       })
       file.rename(paste0("www/report.", type), file)
