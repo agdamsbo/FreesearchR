@@ -9,7 +9,7 @@ colorSelectInput(
   inputId,
   label,
   choices,
-  selected = "",
+  selected = NULL,
   previews = 4,
   ...,
   placeholder = ""

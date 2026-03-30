@@ -270,7 +270,7 @@ vectorSelectInput <- function(inputId,
 colorSelectInput <- function(inputId,
                              label,
                              choices,
-                             selected = "",
+                             selected = NULL,
                              previews = 4,
                              ...,
                              placeholder = "") {
@@ -306,31 +306,43 @@ colorSelectInput <- function(inputId,
 
   choices_new <- stats::setNames(vals, labels)
 
+  if (is.null(selected) || selected == "") {
+    selected <- vals[[1]]
+  }
+
   shiny::selectizeInput(
     inputId  = inputId,
     label    = label,
     choices  = choices_new,
     selected = selected,
     ...,
-    options  = list(
+    options = list(
       render = I(
         "{
-        option: function(item, escape) {
-          item.data = JSON.parse(item.label);
-          return '<div style=\"padding:3px 12px\">' +
-                   '<div><strong>' + escape(item.data.name) + '</strong></div>' +
-                   (item.data.label != '' ? '<div><small>' + escape(item.data.label) + '</small></div>' : '') +
-                   '<div style=\"margin-top:4px\">' + item.data.swatch + '</div>' +
-                 '</div>';
-        },
-        item: function(item, escape) {
-          item.data = JSON.parse(item.label);
-          return '<div style=\"display:flex;align-items:center;gap:6px\">' +
-                   '<span>' + escape(item.data.name) + '</span>' +
-                   item.data.swatch +
-                 '</div>';
-        }
-      }"
+    option: function(item, escape) {
+      item.data = JSON.parse(item.label);
+      return '<div style=\"padding:3px 12px\">' +
+               '<div><strong>' + escape(item.data.name) + '</strong></div>' +
+               (item.data.label != '' ? '<div><small>' + escape(item.data.label) + '</small></div>' : '') +
+               '<div style=\"margin-top:4px\">' + item.data.swatch + '</div>' +
+             '</div>';
+    },
+    item: function(item, escape) {
+      item.data = JSON.parse(item.label);
+      return '<div style=\"display:flex;align-items:center;gap:6px\">' +
+               '<span>' + escape(item.data.name) + '</span>' +
+               item.data.swatch +
+             '</div>';
+    }
+  }"
+      ),
+      onInitialize = I(
+        "function() {
+    var self = this;
+    self.$control_input.prop('readonly', true);
+    self.$control_input.css('cursor', 'default');
+    self.$control.css('cursor', 'pointer');
+  }"
       )
     )
   )
