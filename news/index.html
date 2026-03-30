@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FreesearchR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.3.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.3.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,10 +42,18 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="26.3.5" id="freesearchr-2635">FreesearchR 26.3.5<a class="anchor" aria-label="anchor" href="#freesearchr-2635"></a></h2>
+<p><em>FIX</em> Labelled categorical variables were not handled correctly importing from REDCap resulting in lost labels. Fixed!</p>
+<p><em>CHANGE</em> Testing in new data I realised, that automatically removing empty levels in categorical variables/factors is not desired. It should be a concious decision to remove levels. This is now possible in the “Modify factor” pop-up.</p>
+<p><em>CHANGE</em> REDCap export now throws an error if no data was exported. The server side filtering prior to export is now validated and feedback is printed. Only valid filter statements are used when exporting data from the REDCap server. This is an advanced use case, but a great way to ensure only the minimum required data is exported from the server.</p>
+<p><em>FIX</em> Applying filters now works also when the data contains text variables.</p>
+<p><em>NEW</em> Initial support for plotting Likert scale survey results. This is expected to be further improved. For based on ggstats::gglikert.</p>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="26.3.4" id="freesearchr-2634">FreesearchR 26.3.4<a class="anchor" aria-label="anchor" href="#freesearchr-2634"></a></h2>
 <p><em>NEW</em> Color select for plotting across all plots for even more option. Ten palettes have been chosen, to provide varied and interpretable options. The selector will always show a preview of four colors.</p>
 <p><em>NEW</em> Added app version check against latest release on GitHub. Only runs if internet connection present. No other polling.</p>
-<p><em>NEW</em> Added a “Missing” level to the sankey plot function and adjusted the label font size. And fixed support for dichotomous data.</p>
+<p><em>NEW</em> Added a “Missing” level to the Sankey plot function and adjusted the label font size. And fixed support for dichotomous data.</p>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="26.3.3" id="freesearchr-2633">FreesearchR 26.3.3<a class="anchor" aria-label="anchor" href="#freesearchr-2633"></a></h2>

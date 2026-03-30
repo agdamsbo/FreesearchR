@@ -120,6 +120,7 @@
   [`plot_box()`](https://agdamsbo.github.io/FreesearchR/reference/data-plots.md)
   [`plot_box_single()`](https://agdamsbo.github.io/FreesearchR/reference/data-plots.md)
   [`plot_hbars()`](https://agdamsbo.github.io/FreesearchR/reference/data-plots.md)
+  [`plot_likert()`](https://agdamsbo.github.io/FreesearchR/reference/data-plots.md)
   [`plot_ridge()`](https://agdamsbo.github.io/FreesearchR/reference/data-plots.md)
   [`sankey_ready()`](https://agdamsbo.github.io/FreesearchR/reference/data-plots.md)
   [`plot_sankey()`](https://agdamsbo.github.io/FreesearchR/reference/data-plots.md)
@@ -466,6 +467,10 @@
 
 - [`update_variables_datagrid()`](https://agdamsbo.github.io/FreesearchR/reference/update_variables_datagrid.md)
   : Modified from the datamods pacakge
+
+- [`validate_redcap_filter()`](https://agdamsbo.github.io/FreesearchR/reference/validate_redcap_filter.md)
+  : Validate a REDCap server-side filter string against a data
+  dictionary
 
 - [`validation_ui()`](https://agdamsbo.github.io/FreesearchR/reference/validation.md)
   [`validation_server()`](https://agdamsbo.github.io/FreesearchR/reference/validation.md)

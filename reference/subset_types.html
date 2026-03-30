@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FreesearchR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.3.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.3.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,22 +75,41 @@
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="default_parsing.html">default_parsing</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">subset_types</span><span class="op">(</span><span class="st">"ordinal"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 32 × 0</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> data frame with 0 columns and 32 rows</span>
 <span class="r-in"><span><span class="fu"><a href="default_parsing.html">default_parsing</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">subset_types</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dichotomous"</span>, <span class="st">"categorical"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 32 × 5</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    cyl   vs    am    gear  carb </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 6     FALSE TRUE  4     4    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 6     FALSE TRUE  4     4    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 4     TRUE  TRUE  4     1    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 6     TRUE  FALSE 3     1    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 8     FALSE FALSE 3     2    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 6     TRUE  FALSE 3     1    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 8     FALSE FALSE 3     4    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 4     TRUE  FALSE 4     2    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 4     TRUE  FALSE 4     2    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 6     TRUE  FALSE 4     4    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 22 more rows</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    cyl    vs    am gear carb</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    6 FALSE  TRUE    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    6 FALSE  TRUE    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    4  TRUE  TRUE    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    6  TRUE FALSE    3    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    8 FALSE FALSE    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6    6  TRUE FALSE    3    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7    8 FALSE FALSE    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8    4  TRUE FALSE    4    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9    4  TRUE FALSE    4    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10   6  TRUE FALSE    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11   6  TRUE FALSE    4    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12   8 FALSE FALSE    3    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13   8 FALSE FALSE    3    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14   8 FALSE FALSE    3    3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15   8 FALSE FALSE    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16   8 FALSE FALSE    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17   8 FALSE FALSE    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18   4  TRUE  TRUE    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19   4  TRUE  TRUE    4    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20   4  TRUE  TRUE    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21   4  TRUE FALSE    3    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22   8 FALSE FALSE    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23   8 FALSE FALSE    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24   8 FALSE FALSE    3    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25   8 FALSE FALSE    3    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26   4  TRUE  TRUE    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27   4 FALSE  TRUE    5    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28   4  TRUE  TRUE    5    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29   8 FALSE  TRUE    5    4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30   6 FALSE  TRUE    5    6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31   8 FALSE  TRUE    5    8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 32   4  TRUE  TRUE    4    2</span>
 <span class="r-in"><span><span class="co">#' default_parsing(mtcars) |&gt; subset_types("factor",class)</span></span></span>
 </code></pre></div>
     </div>

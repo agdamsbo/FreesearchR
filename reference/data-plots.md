@@ -12,6 +12,8 @@ Create nice box-plots
 
 Nice horizontal stacked bars (Grotta bars)
 
+Nice horizontal bar plot centred on the central category
+
 Plot nice ridge plot
 
 Readying data for sankey plot
@@ -54,6 +56,8 @@ plot_box(data, pri, sec, ter = NULL, color.palette = "viridis", ...)
 plot_box_single(data, pri, sec = NULL, seed = 2103, color.palette = "viridis")
 
 plot_hbars(data, pri, sec, ter = NULL, color.palette = "viridis")
+
+plot_likert(data, pri, sec = NULL, ter = NULL, color.palette = "viridis")
 
 plot_ridge(data, x, y, z = NULL, color.palette = "viridis", ...)
 
@@ -130,6 +134,8 @@ ggplot object
 ggplot2 object
 
 ggplot object
+
+ggplot2 object
 
 ggplot2 object
 
@@ -706,7 +712,7 @@ create_plot(mtcars, "plot_violin", "mpg", "cyl") |> attributes()
 #> list()
 #> 
 #> $plot_env
-#> <environment: 0x5578ebf42900>
+#> <environment: 0x5612160723b8>
 #> 
 #> $code
 #> FreesearchR::plot_violin(pri = "mpg", sec = "cyl", ter = NULL, 
@@ -770,6 +776,38 @@ mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Magma")
 #> Adding another scale for fill, which will replace the existing scale.
 
 mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Viridis")
+#> Scale for fill is already present.
+#> Adding another scale for fill, which will replace the existing scale.
+
+mtcars |> plot_likert(pri = "carb", sec = "cyl")
+#> Scale for fill is already present.
+#> Adding another scale for fill, which will replace the existing scale.
+
+mtcars |> plot_likert(pri = "carb", sec = "cyl", ter="am")
+#> Scale for fill is already present.
+#> Adding another scale for fill, which will replace the existing scale.
+#> Scale for fill is already present.
+#> Adding another scale for fill, which will replace the existing scale.
+#> Scale for x is already present.
+#> Adding another scale for x, which will replace the existing scale.
+#> Scale for y is already present.
+#> Adding another scale for y, which will replace the existing scale.
+#> Scale for x is already present.
+#> Adding another scale for x, which will replace the existing scale.
+#> Scale for y is already present.
+#> Adding another scale for y, which will replace the existing scale.
+#> Error in plot_likert(mtcars, pri = "carb", sec = "cyl", ter = "am"): object 'i18n' not found
+mtcars |> plot_likert(pri = "cyl",color.palette="Blues")
+#> Error in dplyr::mutate(data, dplyr::bind_cols(forcats::fct_unify(data[,     variables]))): ℹ In argument: `dplyr::bind_cols(forcats::fct_unify(data[,
+#>   variables]))`.
+#> Caused by error in `forcats::fct_unify()`:
+#> ! `fs` must be a list, not a <factor> object.
+mtcars |> plot_likert(pri = "carb", sec = NULL,color.palette="Magma")
+#> Error in dplyr::mutate(data, dplyr::bind_cols(forcats::fct_unify(data[,     variables]))): ℹ In argument: `dplyr::bind_cols(forcats::fct_unify(data[,
+#>   variables]))`.
+#> Caused by error in `forcats::fct_unify()`:
+#> ! `fs` must be a list, not a <factor> object.
+mtcars |> plot_likert(pri = "carb", sec = c("cyl","am"),color.palette="Viridis")
 #> Scale for fill is already present.
 #> Adding another scale for fill, which will replace the existing scale.
 
