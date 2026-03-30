@@ -416,7 +416,7 @@ regression_server <- function(id,
               rv$list$regression$models <- model_lists
             },
             error = function(err) {
-              showNotification(paste(i18n$t("Creating regression models failed with the following error:"), err), type = "err")
+              showNotification(paste(i18n$t("Creating regression models failed with the following error:"), err), type = "error")
             }
           )
         }
@@ -481,7 +481,7 @@ regression_server <- function(id,
               showNotification(paste0(warn), type = "warning")
             },
             error = function(err) {
-              showNotification(paste(i18n$t("Creating a regression table failed with the following error:"), err), type = "err")
+              showNotification(paste(i18n$t("Creating a regression table failed with the following error:"), err), type = "error")
             }
           )
         }
@@ -559,7 +559,7 @@ regression_server <- function(id,
               gg_theme_shiny()
           },
           error = function(err) {
-            showNotification(paste0(err), type = "err")
+            showNotification(paste0(err), type = "error")
           }
         )
       })
@@ -619,7 +619,7 @@ regression_server <- function(id,
             #   showNotification(paste0(warn), type = "warning")
             # },
             error = function(err) {
-              showNotification(paste(i18n$t("Running model assumptions checks failed with the following error:"), err), type = "err")
+              showNotification(paste(i18n$t("Running model assumptions checks failed with the following error:"), err), type = "error")
             }
           )
         }
@@ -690,7 +690,7 @@ regression_server <- function(id,
                 out <- patchwork::wrap_plots(ls, ncol = if (length(ls) == 1) 1 else 2)
               },
               error = function(err) {
-                showNotification(err, type = "err")
+                showNotification(err, type = "error")
               }
             )
 

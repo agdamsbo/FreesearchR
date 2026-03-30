@@ -245,7 +245,7 @@ update_factor_server <- function(id, data_r = reactive(NULL)) {
           "We encountered the following error creating the new factor:",
           err
         ),
-        type = "err")
+        type = "error")
       })
 
       # browser()

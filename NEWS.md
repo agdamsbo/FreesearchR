@@ -1,10 +1,22 @@
+# FreesearchR 26.3.5
+
+*FIX* Labelled categorical variables were not handled correctly importing from REDCap resulting in lost labels. Fixed!
+
+*CHANGE* Testing in new data I realised, that automatically removing empty levels in categorical variables/factors is not desired. It should be a concious decision to remove levels. This is now possible in the "Modify factor" pop-up.
+
+*CHANGE* REDCap export now throws an error if no data was exported. The server side filtering prior to export is now validated and feedback is printed. Only valid filter statements are used when exporting data from the REDCap server. This is an advanced use case, but a great way to ensure only the minimum required data is exported from the server.
+
+*FIX* Applying filters now works also when the data contains text variables.
+
+*NEW* Initial support for plotting Likert scale survey results. This is expected to be further improved. For based on ggstats::gglikert.
+
 # FreesearchR 26.3.4
 
 *NEW* Color select for plotting across all plots for even more option. Ten palettes have been chosen, to provide varied and interpretable options. The selector will always show a preview of four colors.
 
 *NEW* Added app version check against latest release on GitHub. Only runs if internet connection present. No other polling.
 
-*NEW* Added a "Missing" level to the sankey plot function and adjusted the label font size. And fixed support for dichotomous data.
+*NEW* Added a "Missing" level to the Sankey plot function and adjusted the label font size. And fixed support for dichotomous data.
 
 # FreesearchR 26.3.3
 

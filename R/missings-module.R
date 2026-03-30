@@ -172,7 +172,7 @@ data_missings_server <- function(id, data, max_level = 20, ...) {
             out <- do.call(compare_missings, modifyList(parameters, list(data = df_tbl)))
           })
         }, error = function(err) {
-          showNotification(paste0("Error: ", err), type = "err")
+          showNotification(paste0("Error: ", err), type = "error")
         })
 
         if (is.null(input$missings_var) ||

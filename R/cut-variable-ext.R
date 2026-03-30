@@ -378,7 +378,7 @@ cut_variable_server <- function(id, data_r = reactive(NULL)) {
             rlang::exec(cut_var, !!!parameters)
           },
           error = function(err) {
-            showNotification(paste("We encountered the following error creating the new factor:", err), type = "err")
+            showNotification(paste("We encountered the following error creating the new factor:", err), type = "error")
           }
         )
 

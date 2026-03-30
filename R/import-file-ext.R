@@ -353,7 +353,7 @@ import_file_server <- function(id,
       #     showNotification(warn, type = "warning")
       # },
       error = function(err) {
-        showNotification(err, type = "err")
+        showNotification(err, type = "error")
       })
     })
 
@@ -370,7 +370,7 @@ import_file_server <- function(id,
           minBodyHeight = 250
         )
       }, error = function(err) {
-        showNotification(err, type = "err")
+        showNotification(err, type = "error")
       })
     })
 
@@ -485,7 +485,7 @@ import_xls <- function(file, sheet, skip, na.strings) {
   #   showNotification(paste0(warn), type = "warning")
   # },
   error = function(err) {
-    showNotification(paste0(err), type = "err")
+    showNotification(paste0(err), type = "error")
   })
 }
 
@@ -513,7 +513,7 @@ import_ods <- function(file, sheet, skip, na.strings) {
   #   showNotification(paste0(warn), type = "warning")
   # },
   error = function(err) {
-    showNotification(paste0(err), type = "err")
+    ?showNotification(paste0(err), type = "error")
   })
 }
 

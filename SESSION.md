@@ -11,11 +11,11 @@
 |collate     |en_US.UTF-8                                |
 |ctype       |en_US.UTF-8                                |
 |tz          |Europe/Copenhagen                          |
-|date        |2026-03-24                                 |
+|date        |2026-03-30                                 |
 |rstudio     |2026.01.1+403 Apple Blossom (desktop)      |
 |pandoc      |3.6.4 @ /opt/homebrew/bin/ (via rmarkdown) |
 |quarto      |1.7.30 @ /usr/local/bin/quarto             |
-|FreesearchR |26.3.4.260324                              |
+|FreesearchR |26.3.5.260330                              |
                                                                                 
                                                                                 
 --------------------------------------------------------------------------------
@@ -53,6 +53,7 @@
 |colorspace        |2.1-2         |2025-09-22 |CRAN (R 4.5.0) |
 |commonmark        |2.0.0         |2025-07-07 |CRAN (R 4.5.0) |
 |crayon            |1.5.3         |2024-06-20 |CRAN (R 4.5.0) |
+|curl              |7.0.0         |2025-08-19 |CRAN (R 4.5.0) |
 |data.table        |1.18.2.1      |2026-01-27 |CRAN (R 4.5.2) |
 |datamods          |1.5.3         |2024-10-02 |CRAN (R 4.5.0) |
 |datawizard        |1.3.0         |2025-10-11 |CRAN (R 4.5.0) |
@@ -83,7 +84,7 @@
 |foreach           |1.5.2         |2022-02-02 |CRAN (R 4.5.0) |
 |foreign           |0.8-91        |2026-01-29 |CRAN (R 4.5.2) |
 |Formula           |1.2-5         |2023-02-24 |CRAN (R 4.5.0) |
-|FreesearchR       |26.3.4        |NA         |NA             |
+|FreesearchR       |26.3.5        |NA         |NA             |
 |fs                |1.6.7         |2026-03-06 |CRAN (R 4.5.2) |
 |gdtools           |0.5.0         |2026-02-09 |CRAN (R 4.5.2) |
 |generics          |0.1.4         |2025-05-09 |CRAN (R 4.5.0) |
@@ -106,6 +107,7 @@
 |htmltools         |0.5.9         |2025-12-04 |CRAN (R 4.5.2) |
 |htmlwidgets       |1.6.4         |2023-12-06 |CRAN (R 4.5.0) |
 |httpuv            |1.6.16        |2025-04-16 |CRAN (R 4.5.0) |
+|httr              |1.4.8         |2026-02-13 |CRAN (R 4.5.2) |
 |IDEAFilter        |0.2.1         |2025-07-29 |CRAN (R 4.5.0) |
 |insight           |1.4.6         |2026-02-04 |CRAN (R 4.5.2) |
 |iterators         |1.0.14        |2022-02-05 |CRAN (R 4.5.0) |
@@ -115,6 +117,7 @@
 |keyring           |1.4.1         |2025-06-15 |CRAN (R 4.5.0) |
 |knitr             |1.51          |2025-12-20 |CRAN (R 4.5.2) |
 |labeling          |0.4.3         |2023-08-29 |CRAN (R 4.5.0) |
+|labelled          |2.16.0        |2025-10-22 |CRAN (R 4.5.0) |
 |later             |1.4.8         |2026-03-05 |CRAN (R 4.5.2) |
 |lattice           |0.22-7        |2025-04-02 |CRAN (R 4.5.2) |
 |lifecycle         |1.0.5         |2026-01-08 |CRAN (R 4.5.2) |
@@ -124,7 +127,6 @@
 |MASS              |7.3-65        |2025-02-28 |CRAN (R 4.5.0) |
 |Matrix            |1.7-4         |2025-08-28 |CRAN (R 4.5.0) |
 |memoise           |2.0.1         |2021-11-26 |CRAN (R 4.5.0) |
-|mgcv              |1.9-4         |2025-11-07 |CRAN (R 4.5.0) |
 |mime              |0.13          |2025-03-17 |CRAN (R 4.5.0) |
 |minqa             |1.2.8         |2024-08-17 |CRAN (R 4.5.0) |
 |mvtnorm           |1.3-2         |2024-11-04 |CRAN (R 4.5.2) |
@@ -148,7 +150,6 @@
 |pkgload           |1.5.0         |2026-02-03 |CRAN (R 4.5.2) |
 |plyr              |1.8.9         |2023-10-02 |CRAN (R 4.5.0) |
 |polyclip          |1.10-7        |2024-07-23 |CRAN (R 4.5.0) |
-|polylabelr        |1.0.0         |2026-01-19 |CRAN (R 4.5.2) |
 |pracma            |2.4.6         |2025-10-22 |CRAN (R 4.5.0) |
 |processx          |3.8.6         |2025-02-21 |CRAN (R 4.5.0) |
 |promises          |1.5.0         |2025-11-01 |CRAN (R 4.5.0) |
