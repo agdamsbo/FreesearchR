@@ -56,7 +56,8 @@
 #'
 #' @export
 generate_colors <- function(n, palette = "viridis", ...) {
-  if (!is.numeric(n) || length(n) != 1 || n < 1 || n != as.integer(n)) {
+  if (!is.numeric(n) ||
+      length(n) != 1 || n < 1 || n != as.integer(n)) {
     stop("`n` must be a single positive integer.")
   }
 
@@ -69,7 +70,8 @@ generate_colors <- function(n, palette = "viridis", ...) {
     stop("`palette` must be a single character string or a function.")
   }
 
-  if (!is.numeric(n) || length(n) != 1 || n < 1 || n != as.integer(n)) {
+  if (!is.numeric(n) ||
+      length(n) != 1 || n < 1 || n != as.integer(n)) {
     stop("`n` must be a single positive integer.")
   }
   if (!is.character(palette) || length(palette) != 1) {
@@ -78,10 +80,14 @@ generate_colors <- function(n, palette = "viridis", ...) {
 
   palette_lower <- tolower(palette)
 
-  viridis_palettes <- c(
-    "viridis", "magma", "plasma", "inferno",
-    "cividis", "mako", "rocket", "turbo"
-  )
+  viridis_palettes <- c("viridis",
+                        "magma",
+                        "plasma",
+                        "inferno",
+                        "cividis",
+                        "mako",
+                        "rocket",
+                        "turbo")
 
   if (palette_lower %in% viridis_palettes) {
     viridisLite::viridis(n = n, option = palette_lower, ...)
@@ -114,16 +120,20 @@ generate_colors <- function(n, palette = "viridis", ...) {
     grDevices::hcl.colors(n = n, palette = palette, ...)
 
   } else {
-    message(paste0(
-      "Unknown palette: '", palette, "'. ",
-      "Falling back to default R colors.\n",
-      "Available options:\n",
-      "  viridisLite  : viridis, magma, plasma, inferno, cividis, mako, rocket, turbo\n",
-      "  grDevices    : hcl, rainbow, heat, terrain, topo\n",
-      "  grDevices HCL: use grDevices::hcl.pals() to see all options\n",
-      "  grDevices    : use grDevices::palette.pals() to see all options\n",
-      "  RColorBrewer : use RColorBrewer::brewer.pal.info to see all options"
-    ))
+    message(
+      paste0(
+        "Unknown palette: '",
+        palette,
+        "'. ",
+        "Falling back to default R colors.\n",
+        "Available options:\n",
+        "  viridisLite  : viridis, magma, plasma, inferno, cividis, mako, rocket, turbo\n",
+        "  grDevices    : hcl, rainbow, heat, terrain, topo\n",
+        "  grDevices HCL: use grDevices::hcl.pals() to see all options\n",
+        "  grDevices    : use grDevices::palette.pals() to see all options\n",
+        "  RColorBrewer : use RColorBrewer::brewer.pal.info to see all options"
+      )
+    )
     viridisLite::viridis(n = n, option = "viridis")
     # grDevices::hcl.colors(n = n)
   }
@@ -166,7 +176,9 @@ continuous_colors <- function(palette = "viridis", n = 256, ...) {
   ramp   <- grDevices::colorRamp(colors)
 
   function(x) {
-    if (any(x < 0 | x > 1, na.rm = TRUE)) stop("Values must be in [0, 1].")
+    if (any(x < 0 |
+            x > 1, na.rm = TRUE))
+      stop("Values must be in [0, 1].")
     rgb_vals <- ramp(x)
     grDevices::rgb(rgb_vals[, 1], rgb_vals[, 2], rgb_vals[, 3], maxColorValue = 255)
   }
@@ -200,18 +212,18 @@ continuous_colors <- function(palette = "viridis", n = 256, ...) {
 #'
 #' @seealso [scale_color_generate()], [generate_colors()], [continuous_colors()]
 #' @export
-scale_fill_generate <- function(palette = "viridis", discrete = TRUE, ...) {
+scale_fill_generate <- function(palette = "viridis",
+                                discrete = TRUE,
+                                ...) {
   if (discrete) {
     ggplot2::discrete_scale(
       aesthetics = "fill",
-      palette    = function(n) generate_colors(n, palette),
+      palette    = function(n)
+        generate_colors(n, palette),
       ...
     )
   } else {
-    ggplot2::scale_fill_gradientn(
-      colors = continuous_colors(palette)(seq(0, 1, length.out = 256)),
-      ...
-    )
+    ggplot2::scale_fill_gradientn(colors = continuous_colors(palette)(seq(0, 1, length.out = 256)), ...)
   }
 }
 
@@ -221,17 +233,33 @@ scale_fill_generate <- function(palette = "viridis", discrete = TRUE, ...) {
 #'   geom_point() +
 #'   scale_color_generate(palette = "Set1")
 #' @export
-scale_color_generate <- function(palette = "viridis", discrete = TRUE, ...) {
+scale_color_generate <- function(palette = "viridis",
+                                 discrete = TRUE,
+                                 ...) {
   if (discrete) {
     ggplot2::discrete_scale(
       aesthetics = "colour",
-      palette    = function(n) generate_colors(n, palette),
+      palette    = function(n)
+        generate_colors(n, palette),
       ...
     )
   } else {
-    ggplot2::scale_color_gradientn(
-      colors = continuous_colors(palette)(seq(0, 1, length.out = 256)),
-      ...
-    )
+    ggplot2::scale_color_gradientn(colors = continuous_colors(palette)(seq(0, 1, length.out = 256)), ...)
   }
+}
+
+
+color_choices <- function() {
+  c(
+    "Perceptual (blue-yellow)"   = "viridis",
+    "Perceptual (fire)"          = "plasma",
+    "Colour-blind friendly"      = "Okabe-Ito",
+    "Qualitative (bold)"         = "Dark 2",
+    "Qualitative (paired)"       = "Paired",
+    "Sequential (blues)"         = "Blues",
+    "Diverging (red-blue)"       = "RdBu",
+    "Tableau style"              = "Tableau 10",
+    "Pastel"                     = "Pastel 1",
+    "Rainbow"                    = "rainbow"
+  )
 }
