@@ -9,7 +9,7 @@ vertical_stacked_bars(
   score = "full_score",
   group = "pase_0_q",
   strata = NULL,
-  t.size = 10,
+  t.size = 8,
   l.color = "black",
   l.size = 0.5,
   draw.lines = TRUE,

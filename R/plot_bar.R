@@ -56,30 +56,12 @@ plot_bar_single <- function(data, pri, sec = NULL, style = c("stack", "dodge", "
 
 
   if (nrow(p_data) > max_level) {
-    # browser()
     p_data <- sort_by(
       p_data,
       p_data[["Freq"]],
       decreasing = TRUE
     ) |>
       head(max_level)
-    # if (is.null(sec)){
-    #   p_data <- sort_by(
-    #     p_data,
-    #     p_data[["Freq"]],
-    #     decreasing=TRUE) |>
-    #     head(max_level)
-    # } else {
-    #   split(p_data,p_data[[sec]]) |>
-    #     lapply(\(.x){
-    #       # browser()
-    #     sort_by(
-    #       .x,
-    #       .x[["Freq"]],
-    #       decreasing=TRUE) |>
-    #       head(max_level)
-    #   }) |> dplyr::bind_rows()
-    # }
   }
 
   ## Shortens long level names

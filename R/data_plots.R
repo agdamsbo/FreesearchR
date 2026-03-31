@@ -117,18 +117,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
 #' @export
 data_visuals_server <- function(id,
                                 data,
-                                palettes = c(
-                                  "Perceptual (blue-yellow)"   = "viridis",
-                                  "Perceptual (fire)"          = "plasma",
-                                  "Colour-blind friendly"      = "Okabe-Ito",
-                                  "Qualitative (bold)"         = "Dark 2",
-                                  "Qualitative (paired)"       = "Paired",
-                                  "Sequential (blues)"         = "Blues",
-                                  "Diverging (red-blue)"       = "RdBu",
-                                  "Tableau style"              = "Tableau 10",
-                                  "Pastel"                     = "Pastel 1",
-                                  "Rainbow"                    = "rainbow"
-                                ),
+                                palettes,
                                 ...) {
   shiny::moduleServer(
     id = id,
@@ -150,100 +139,6 @@ data_visuals_server <- function(id,
                                       title = i18n$t("Download"))
       })
 
-      # ## --- New attempt
-      #
-      # rv$plot.params <- shiny::reactive({
-      #   get_plot_options(input$type) |> purrr::pluck(1)
-      # })
-      #
-      # c(output,
-      #            list(shiny::renderUI({
-      #   columnSelectInput(
-      #     inputId = ns("primary"),
-      #     data = data,
-      #     placeholder = "Select variable",
-      #     label = "Response variable",
-      #     multiple = FALSE
-      #   )
-      # }),
-      # shiny::renderUI({
-      #   shiny::req(input$primary)
-      #   # browser()
-      #
-      #   if (!input$primary %in% names(data())) {
-      #     plot_data <- data()[1]
-      #   } else {
-      #     plot_data <- data()[input$primary]
-      #   }
-      #
-      #   plots <- possible_plots(
-      #     data = plot_data
-      #   )
-      #
-      #   plots_named <- get_plot_options(plots) |>
-      #     lapply(\(.x){
-      #       stats::setNames(.x$descr, .x$note)
-      #     })
-      #
-      #   vectorSelectInput(
-      #     inputId = ns("type"),
-      #     selected = NULL,
-      #     label = shiny::h4("Plot type"),
-      #     choices = Reduce(c, plots_named),
-      #     multiple = FALSE
-      #   )
-      # }),
-      # shiny::renderUI({
-      #   shiny::req(input$type)
-      #
-      #   cols <- c(
-      #     rv$plot.params()[["secondary.extra"]],
-      #     all_but(
-      #       colnames(subset_types(
-      #         data(),
-      #         rv$plot.params()[["secondary.type"]]
-      #       )),
-      #       input$primary
-      #     )
-      #   )
-      #
-      #   columnSelectInput(
-      #     inputId = ns("secondary"),
-      #     data = data,
-      #     selected = cols[1],
-      #     placeholder = "Please select",
-      #     label = if (isTRUE(rv$plot.params()[["secondary.multi"]])) "Additional variables" else "Secondary variable",
-      #     multiple = rv$plot.params()[["secondary.multi"]],
-      #     maxItems = rv$plot.params()[["secondary.max"]],
-      #     col_subset = cols,
-      #     none_label = "No variable"
-      #   )
-      # }),
-      # shiny::renderUI({
-      #   shiny::req(input$type)
-      #   columnSelectInput(
-      #     inputId = ns("tertiary"),
-      #     data = data,
-      #     placeholder = "Please select",
-      #     label = "Grouping variable",
-      #     multiple = FALSE,
-      #     col_subset = c(
-      #       "none",
-      #       all_but(
-      #         colnames(subset_types(
-      #           data(),
-      #           rv$plot.params()[["tertiary.type"]]
-      #         )),
-      #         input$primary,
-      #         input$secondary
-      #       )
-      #     ),
-      #     none_label = "No stratification"
-      #   )
-      # })
-      # )|> setNames(c("primary","type","secondary","tertiary")),keep.null = TRUE)
-
-
       output$primary <- shiny::renderUI({
         shiny::req(data())
         columnSelectInput(
@@ -258,12 +153,11 @@ data_visuals_server <- function(id,
 
       # shiny::observeEvent(data, {
       #   if (is.null(data()) | NROW(data()) == 0) {
-      #     shiny::updateActionButton(inputId = ns("act_plot"), disabled = TRUE)
+      #     shiny::updateActionButton(inputId = "act_plot", disabled = TRUE)
       #   } else {
-      #     shiny::updateActionButton(inputId = ns("act_plot"), disabled = FALSE)
+      #     shiny::updateActionButton(inputId = "act_plot", disabled = FALSE)
       #   }
       # })
-
 
       output$type <- shiny::renderUI({
         shiny::req(input$primary)
@@ -610,6 +504,7 @@ supported_plots <- function() {
       primary.type = c("dichotomous", "categorical"),
       secondary.type = c("dichotomous", "categorical"),
       secondary.multi = TRUE,
+      secondary.extra = NULL,
       tertiary.type = c("dichotomous", "categorical"),
       secondary.extra = NULL
     )

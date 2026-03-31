@@ -21,16 +21,7 @@
 \usage{
 data_visuals_ui(id, tab_title = "Plots", ...)
 
-data_visuals_server(
-  id,
-  data,
-  palettes = c(`Perceptual (blue-yellow)` = "viridis", `Perceptual (fire)` = "plasma",
-    `Colour-blind friendly` = "Okabe-Ito", `Qualitative (bold)` = "Dark 2",
-    `Qualitative (paired)` = "Paired", `Sequential (blues)` = "Blues",
-    `Diverging (red-blue)` = "RdBu", `Tableau style` = "Tableau 10", Pastel = "Pastel 1",
-    Rainbow = "rainbow"),
-  ...
-)
+data_visuals_server(id, data, palettes, ...)
 
 create_plot(data, type, pri, sec, ter = NULL, color.palette = "viridis", ...)
 
@@ -170,7 +161,7 @@ mtcars |> plot_hbars(pri = "carb", sec = "cyl")
 mtcars |> plot_hbars(pri = "carb", sec = "cyl", ter="am")
 mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Blues")
 mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Magma")
-mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Viridis")
+mtcars |> plot_hbars(pri = "carb", sec = "am",color.palette="Viridis")
 mtcars |> plot_likert(pri = "carb", sec = "cyl")
 mtcars |> plot_likert(pri = "carb", sec = "cyl", ter="am")
 mtcars |> plot_likert(pri = "cyl",color.palette="Blues")

@@ -1,1 +1,1 @@
-app_version <- function()'26.3.5'
+app_version <- function()'26.3.6'
