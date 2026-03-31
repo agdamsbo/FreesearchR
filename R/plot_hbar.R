@@ -10,7 +10,7 @@
 #' mtcars |> plot_hbars(pri = "carb", sec = "cyl", ter="am")
 #' mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Blues")
 #' mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Magma")
-#' mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Viridis")
+#' mtcars |> plot_hbars(pri = "carb", sec = "am",color.palette="Viridis")
 plot_hbars <- function(data,
                        pri,
                        sec,
@@ -41,7 +41,7 @@ vertical_stacked_bars <- function(data,
                                   score = "full_score",
                                   group = "pase_0_q",
                                   strata = NULL,
-                                  t.size = 10,
+                                  t.size = 8,
                                   l.color = "black",
                                   l.size = .5,
                                   draw.lines = TRUE,
@@ -77,11 +77,11 @@ vertical_stacked_bars <- function(data,
   if (isTRUE(reverse)) {
     colors <- rev(colors)
   }
-  contrast_cut <-
-    contrast_text(colors, threshold = .3) == "white"
 
   score_label <- data |> get_label(var = score)
   group_label <- data |> get_label(var = group)
+
+  # browser()
 
   p |>
     (\(.x) {
@@ -94,7 +94,7 @@ vertical_stacked_bars <- function(data,
           ggplot2::aes(
             x = group,
             y = p_prev + 0.49 * p,
-            color = contrast_cut,
+            color = contrast_text(colors[as.numeric(score)], threshold = .3),
             # label = paste0(sprintf("%2.0f", 100 * p),"%"),
             # label = sprintf("%2.0f", 100 * p)
             label = glue::glue(label.str)
@@ -103,8 +103,7 @@ vertical_stacked_bars <- function(data,
         ggplot2::labs(fill = score_label) +
         ggplot2::scale_fill_manual(values = colors) +
         ggplot2::theme(legend.position = "bottom",
-                       axis.title = ggplot2::element_text(),
-        ) +
+                       axis.title = ggplot2::element_text(),) +
         ggplot2::xlab(group_label) +
         ggplot2::ylab(NULL)
     })()
