@@ -2,7 +2,7 @@
 
 *FIX* Plot single variable in Likert plot.
 
-*FIX* Horisontal stacked plot crashed. Fixed!
+*FIX* Horizontal stacked plot crashed. Fixed!
 
 # FreesearchR 26.3.5
 
