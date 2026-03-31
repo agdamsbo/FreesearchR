@@ -22,18 +22,24 @@ plot_likert <- function(data,
     ds <- list(data)
   }
   out <- lapply(ds, \(.x) {
-    .x[c(pri, sec)] |>
-      # na.omit() |>
-      plot_likert_single(color.palette = color.palette)
+    plot_likert_single(
+      data = .x,
+      include = tidyselect::any_of(c(pri, sec)),
+      color.palette = color.palette
+    )
   })
 
   wrap_plot_list(out, title = glue::glue(i18n$t("Grouped by {get_label(data,ter)}")))
 }
 
 
-plot_likert_single <- function(data, color.palette = "viridis") {
-  ggstats::gglikert(data = data) +
-    scale_fill_generate(palette=color.palette)+
+plot_likert_single <- function(data,
+                               include = dplyr::everything(),
+                               color.palette = "viridis") {
+  data |>
+    dplyr::as_tibble() |>
+    ggstats::gglikert(include = include) +
+    scale_fill_generate(palette = color.palette) +
     ggplot2::theme(
       # legend.position = "none",
       # panel.grid.major = element_blank(),
