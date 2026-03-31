@@ -29,16 +29,7 @@ Beautiful violin plot
 ``` r
 data_visuals_ui(id, tab_title = "Plots", ...)
 
-data_visuals_server(
-  id,
-  data,
-  palettes = c(`Perceptual (blue-yellow)` = "viridis", `Perceptual (fire)` = "plasma",
-    `Colour-blind friendly` = "Okabe-Ito", `Qualitative (bold)` = "Dark 2",
-    `Qualitative (paired)` = "Paired", `Sequential (blues)` = "Blues",
-    `Diverging (red-blue)` = "RdBu", `Tableau style` = "Tableau 10", Pastel = "Pastel 1",
-    Rainbow = "rainbow"),
-  ...
-)
+data_visuals_server(id, data, palettes, ...)
 
 create_plot(data, type, pri, sec, ter = NULL, color.palette = "viridis", ...)
 
@@ -712,7 +703,7 @@ create_plot(mtcars, "plot_violin", "mpg", "cyl") |> attributes()
 #> list()
 #> 
 #> $plot_env
-#> <environment: 0x55be33a21918>
+#> <environment: 0x558de882b5e0>
 #> 
 #> $code
 #> FreesearchR::plot_violin(pri = "mpg", sec = "cyl", ter = NULL, 
@@ -754,19 +745,11 @@ gtsummary::trial |> plot_box_single("age","trt")
 mtcars |> plot_hbars(pri = "carb", sec = "cyl")
 #> Scale for fill is already present.
 #> Adding another scale for fill, which will replace the existing scale.
-#> Error in ggplot2::geom_text(data = .x$rectData[which(.x$rectData$n > 0),     ], size = t.size, fontface = "plain", ggplot2::aes(x = group,     y = p_prev + 0.49 * p, color = contrast_cut, label = glue::glue(label.str))): Problem while computing aesthetics.
-#> ℹ Error occurred in the 3rd layer.
-#> Caused by error in `check_aesthetics()`:
-#> ! Aesthetics must be either length 1 or the same as the data (9).
-#> ✖ Fix the following mappings: `colour`.
+
 mtcars |> plot_hbars(pri = "carb", sec = "cyl", ter="am")
 #> Scale for fill is already present.
 #> Adding another scale for fill, which will replace the existing scale.
-#> Error in ggplot2::geom_text(data = .x$rectData[which(.x$rectData$n > 0),     ], size = t.size, fontface = "plain", ggplot2::aes(x = group,     y = p_prev + 0.49 * p, color = contrast_cut, label = glue::glue(label.str))): Problem while computing aesthetics.
-#> ℹ Error occurred in the 3rd layer.
-#> Caused by error in `check_aesthetics()`:
-#> ! Aesthetics must be either length 1 or the same as the data (13).
-#> ✖ Fix the following mappings: `colour`.
+
 mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Blues")
 #> Scale for fill is already present.
 #> Adding another scale for fill, which will replace the existing scale.
@@ -775,7 +758,7 @@ mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Magma")
 #> Scale for fill is already present.
 #> Adding another scale for fill, which will replace the existing scale.
 
-mtcars |> plot_hbars(pri = "carb", sec = NULL,color.palette="Viridis")
+mtcars |> plot_hbars(pri = "carb", sec = "am",color.palette="Viridis")
 #> Scale for fill is already present.
 #> Adding another scale for fill, which will replace the existing scale.
 
@@ -798,15 +781,13 @@ mtcars |> plot_likert(pri = "carb", sec = "cyl", ter="am")
 #> Adding another scale for y, which will replace the existing scale.
 #> Error in plot_likert(mtcars, pri = "carb", sec = "cyl", ter = "am"): object 'i18n' not found
 mtcars |> plot_likert(pri = "cyl",color.palette="Blues")
-#> Error in dplyr::mutate(data, dplyr::bind_cols(forcats::fct_unify(data[,     variables]))): ℹ In argument: `dplyr::bind_cols(forcats::fct_unify(data[,
-#>   variables]))`.
-#> Caused by error in `forcats::fct_unify()`:
-#> ! `fs` must be a list, not a <factor> object.
+#> Scale for fill is already present.
+#> Adding another scale for fill, which will replace the existing scale.
+
 mtcars |> plot_likert(pri = "carb", sec = NULL,color.palette="Magma")
-#> Error in dplyr::mutate(data, dplyr::bind_cols(forcats::fct_unify(data[,     variables]))): ℹ In argument: `dplyr::bind_cols(forcats::fct_unify(data[,
-#>   variables]))`.
-#> Caused by error in `forcats::fct_unify()`:
-#> ! `fs` must be a list, not a <factor> object.
+#> Scale for fill is already present.
+#> Adding another scale for fill, which will replace the existing scale.
+
 mtcars |> plot_likert(pri = "carb", sec = c("cyl","am"),color.palette="Viridis")
 #> Scale for fill is already present.
 #> Adding another scale for fill, which will replace the existing scale.

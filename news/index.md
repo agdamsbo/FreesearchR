@@ -1,5 +1,11 @@
 # Changelog
 
+## FreesearchR 26.3.6
+
+*FIX* Plot single variable in Likert plot.
+
+*FIX* Horizontal stacked plot crashed. Fixed!
+
 ## FreesearchR 26.3.5
 
 *FIX* Labelled categorical variables were not handled correctly

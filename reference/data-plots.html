@@ -29,7 +29,7 @@ Beautiful violin plot"><meta property="og:image" content="https://agdamsbo.githu
 
     <a class="navbar-brand me-2" href="../index.html">FreesearchR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.3.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@ Beautiful violin plot"><meta property="og:image" content="https://agdamsbo.githu
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Data correlations evaluation module</h1>
-      <small class="dont-index">Source: <a href="https://github.com/agdamsbo/FreesearchR/blob/v26.3.5/R/data_plots.R" class="external-link"><code>R/data_plots.R</code></a>, <a href="https://github.com/agdamsbo/FreesearchR/blob/v26.3.5/R/plot_bar.R" class="external-link"><code>R/plot_bar.R</code></a>, <a href="https://github.com/agdamsbo/FreesearchR/blob/v26.3.5/R/plot_box.R" class="external-link"><code>R/plot_box.R</code></a>, and 6 more</small>
+      <small class="dont-index">Source: <a href="https://github.com/agdamsbo/FreesearchR/blob/v26.3.6/R/data_plots.R" class="external-link"><code>R/data_plots.R</code></a>, <a href="https://github.com/agdamsbo/FreesearchR/blob/v26.3.6/R/plot_bar.R" class="external-link"><code>R/plot_bar.R</code></a>, <a href="https://github.com/agdamsbo/FreesearchR/blob/v26.3.6/R/plot_box.R" class="external-link"><code>R/plot_box.R</code></a>, and 6 more</small>
       <div class="d-none name"><code>data-plots.Rd</code></div>
     </div>
 
@@ -83,16 +83,7 @@ Beautiful violin plot"><meta property="og:image" content="https://agdamsbo.githu
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">data_visuals_ui</span><span class="op">(</span><span class="va">id</span>, tab_title <span class="op">=</span> <span class="st">"Plots"</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">data_visuals_server</span><span class="op">(</span></span>
-<span>  <span class="va">id</span>,</span>
-<span>  <span class="va">data</span>,</span>
-<span>  palettes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>`Perceptual (blue-yellow)` <span class="op">=</span> <span class="st">"viridis"</span>, `Perceptual (fire)` <span class="op">=</span> <span class="st">"plasma"</span>,</span>
-<span>    `Colour-blind friendly` <span class="op">=</span> <span class="st">"Okabe-Ito"</span>, `Qualitative (bold)` <span class="op">=</span> <span class="st">"Dark 2"</span>,</span>
-<span>    `Qualitative (paired)` <span class="op">=</span> <span class="st">"Paired"</span>, `Sequential (blues)` <span class="op">=</span> <span class="st">"Blues"</span>,</span>
-<span>    `Diverging (red-blue)` <span class="op">=</span> <span class="st">"RdBu"</span>, `Tableau style` <span class="op">=</span> <span class="st">"Tableau 10"</span>, Pastel <span class="op">=</span> <span class="st">"Pastel 1"</span>,</span>
-<span>    Rainbow <span class="op">=</span> <span class="st">"rainbow"</span><span class="op">)</span>,</span>
-<span>  <span class="va">...</span></span>
-<span><span class="op">)</span></span>
+<span><span class="fu">data_visuals_server</span><span class="op">(</span><span class="va">id</span>, <span class="va">data</span>, <span class="va">palettes</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">create_plot</span><span class="op">(</span><span class="va">data</span>, <span class="va">type</span>, <span class="va">pri</span>, <span class="va">sec</span>, ter <span class="op">=</span> <span class="cn">NULL</span>, color.palette <span class="op">=</span> <span class="st">"viridis"</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
@@ -756,7 +747,7 @@ One of c("stack", "dodge", "fill")</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> list()</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $plot_env</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x55be33a21918&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x558de882b5e0&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $code</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> FreesearchR::plot_violin(pri = "mpg", sec = "cyl", ter = NULL, </span>
@@ -798,35 +789,27 @@ One of c("stack", "dodge", "fill")</p></dd>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_hbars</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"carb"</span>, sec <span class="op">=</span> <span class="st">"cyl"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Scale for <span style="color: #00BB00;">fill</span> is already present.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Adding another scale for <span style="color: #00BB00;">fill</span>, which will replace the existing scale.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in ggplot2::geom_text(data = .x$rectData[which(.x$rectData$n &gt; 0),     ], size = t.size, fontface = "plain", ggplot2::aes(x = group,     y = p_prev + 0.49 * p, color = contrast_cut, label = glue::glue(label.str))):</span> Problem while computing aesthetics.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Error occurred in the 3rd layer.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `check_aesthetics()`:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Aesthetics must be either length 1 or the same as the data (9).</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Fix the following mappings: `colour`.</span>
+<span class="r-plt img"><img src="data-plots-9.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_hbars</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"carb"</span>, sec <span class="op">=</span> <span class="st">"cyl"</span>, ter<span class="op">=</span><span class="st">"am"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Scale for <span style="color: #00BB00;">fill</span> is already present.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Adding another scale for <span style="color: #00BB00;">fill</span>, which will replace the existing scale.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in ggplot2::geom_text(data = .x$rectData[which(.x$rectData$n &gt; 0),     ], size = t.size, fontface = "plain", ggplot2::aes(x = group,     y = p_prev + 0.49 * p, color = contrast_cut, label = glue::glue(label.str))):</span> Problem while computing aesthetics.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Error occurred in the 3rd layer.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `check_aesthetics()`:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Aesthetics must be either length 1 or the same as the data (13).</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BB0000;">✖</span> Fix the following mappings: `colour`.</span>
+<span class="r-plt img"><img src="data-plots-10.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_hbars</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"carb"</span>, sec <span class="op">=</span> <span class="cn">NULL</span>,color.palette<span class="op">=</span><span class="st">"Blues"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Scale for <span style="color: #00BB00;">fill</span> is already present.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Adding another scale for <span style="color: #00BB00;">fill</span>, which will replace the existing scale.</span>
-<span class="r-plt img"><img src="data-plots-9.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-11.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_hbars</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"carb"</span>, sec <span class="op">=</span> <span class="cn">NULL</span>,color.palette<span class="op">=</span><span class="st">"Magma"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Scale for <span style="color: #00BB00;">fill</span> is already present.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Adding another scale for <span style="color: #00BB00;">fill</span>, which will replace the existing scale.</span>
-<span class="r-plt img"><img src="data-plots-10.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_hbars</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"carb"</span>, sec <span class="op">=</span> <span class="cn">NULL</span>,color.palette<span class="op">=</span><span class="st">"Viridis"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="data-plots-12.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_hbars</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"carb"</span>, sec <span class="op">=</span> <span class="st">"am"</span>,color.palette<span class="op">=</span><span class="st">"Viridis"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Scale for <span style="color: #00BB00;">fill</span> is already present.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Adding another scale for <span style="color: #00BB00;">fill</span>, which will replace the existing scale.</span>
-<span class="r-plt img"><img src="data-plots-11.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-13.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_likert</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"carb"</span>, sec <span class="op">=</span> <span class="st">"cyl"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Scale for <span style="color: #00BB00;">fill</span> is already present.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Adding another scale for <span style="color: #00BB00;">fill</span>, which will replace the existing scale.</span>
-<span class="r-plt img"><img src="data-plots-12.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-14.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_likert</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"carb"</span>, sec <span class="op">=</span> <span class="st">"cyl"</span>, ter<span class="op">=</span><span class="st">"am"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Scale for <span style="color: #00BB00;">fill</span> is already present.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Adding another scale for <span style="color: #00BB00;">fill</span>, which will replace the existing scale.</span>
@@ -842,24 +825,22 @@ One of c("stack", "dodge", "fill")</p></dd>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Adding another scale for <span style="color: #00BB00;">y</span>, which will replace the existing scale.</span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in plot_likert(mtcars, pri = "carb", sec = "cyl", ter = "am"):</span> object 'i18n' not found</span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_likert</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"cyl"</span>,color.palette<span class="op">=</span><span class="st">"Blues"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in dplyr::mutate(data, dplyr::bind_cols(forcats::fct_unify(data[,     variables]))):</span> <span style="color: #00BBBB;">ℹ</span> In argument: `dplyr::bind_cols(forcats::fct_unify(data[,</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>   variables]))`.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `forcats::fct_unify()`:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> `fs` must be a list, not a <span style="color: #0000BB;">&lt;factor&gt;</span> object.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Scale for <span style="color: #00BB00;">fill</span> is already present.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Adding another scale for <span style="color: #00BB00;">fill</span>, which will replace the existing scale.</span>
+<span class="r-plt img"><img src="data-plots-15.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_likert</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"carb"</span>, sec <span class="op">=</span> <span class="cn">NULL</span>,color.palette<span class="op">=</span><span class="st">"Magma"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in dplyr::mutate(data, dplyr::bind_cols(forcats::fct_unify(data[,     variables]))):</span> <span style="color: #00BBBB;">ℹ</span> In argument: `dplyr::bind_cols(forcats::fct_unify(data[,</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>   variables]))`.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `forcats::fct_unify()`:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> `fs` must be a list, not a <span style="color: #0000BB;">&lt;factor&gt;</span> object.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Scale for <span style="color: #00BB00;">fill</span> is already present.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Adding another scale for <span style="color: #00BB00;">fill</span>, which will replace the existing scale.</span>
+<span class="r-plt img"><img src="data-plots-16.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_likert</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"carb"</span>, sec <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cyl"</span>,<span class="st">"am"</span><span class="op">)</span>,color.palette<span class="op">=</span><span class="st">"Viridis"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Scale for <span style="color: #00BB00;">fill</span> is already present.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Adding another scale for <span style="color: #00BB00;">fill</span>, which will replace the existing scale.</span>
-<span class="r-plt img"><img src="data-plots-13.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-17.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="default_parsing.html">default_parsing</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">plot_ridge</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"mpg"</span>, y <span class="op">=</span> <span class="st">"cyl"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Picking joint bandwidth of 1.38</span>
-<span class="r-plt img"><img src="data-plots-14.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-18.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_ridge</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"mpg"</span>, y <span class="op">=</span> <span class="st">"cyl"</span>, z <span class="op">=</span> <span class="st">"gear"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Picking joint bandwidth of 1.52</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The following aesthetics were dropped during statistical transformation: <span style="color: #00BB00;">y</span> and</span>
@@ -939,21 +920,21 @@ One of c("stack", "dodge", "fill")</p></dd>
 <span class="r-in"><span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>g <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>, <span class="fl">100</span>, <span class="cn">TRUE</span><span class="op">)</span>, first <span class="op">=</span> <span class="fu">REDCapCAST</span><span class="fu">::</span><span class="fu">as_factor</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="fl">100</span>, <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>, last <span class="op">=</span> <span class="fu">REDCapCAST</span><span class="fu">::</span><span class="fu">as_factor</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="fl">100</span>, <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ds</span> <span class="op">|&gt;</span> <span class="fu">plot_sankey</span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"last"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: ggplot2</span>
-<span class="r-plt img"><img src="data-plots-15.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-19.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">ds</span> <span class="op">|&gt;</span> <span class="fu">plot_sankey</span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"last"</span>, color.group <span class="op">=</span> <span class="st">"sec"</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="data-plots-16.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-20.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">ds</span> <span class="op">|&gt;</span> <span class="fu">plot_sankey</span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"last"</span>, ter <span class="op">=</span> <span class="st">"g"</span>, color.group <span class="op">=</span> <span class="st">"sec"</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
-<span class="r-plt img"><img src="data-plots-17.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-21.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="default_parsing.html">default_parsing</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">plot_sankey</span><span class="op">(</span><span class="st">"cyl"</span>, <span class="st">"gear"</span>, <span class="st">"am"</span>, color.group <span class="op">=</span> <span class="st">"pri"</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
-<span class="r-plt img"><img src="data-plots-18.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-22.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co">## In this case, the last plot as the secondary variable in wrong order</span></span></span>
 <span class="r-in"><span><span class="co">## Dont know why...</span></span></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span></span></span>
@@ -962,17 +943,17 @@ One of c("stack", "dodge", "fill")</p></dd>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some strata appear at multiple axes.</span>
-<span class="r-plt img"><img src="data-plots-19.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-23.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_scatter</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"mpg"</span>, sec <span class="op">=</span> <span class="st">"wt"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Ignoring unknown labels:</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> <span style="color: #00BB00;">legend.title</span> : <span style="color: #0000BB;">""</span></span>
-<span class="r-plt img"><img src="data-plots-20.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-24.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_scatter</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"mpg"</span>, sec <span class="op">=</span> <span class="st">"wt"</span>,ter<span class="op">=</span><span class="st">"carb"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Ignoring unknown labels:</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> <span style="color: #00BB00;">legend.title</span> : <span style="color: #0000BB;">""</span></span>
-<span class="r-plt img"><img src="data-plots-21.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-25.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_violin</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"mpg"</span>, sec <span class="op">=</span> <span class="st">"cyl"</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="data-plots-22.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="data-plots-26.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">mtcars</span> <span class="op">|&gt;</span> <span class="fu">plot_violin</span><span class="op">(</span>pri <span class="op">=</span> <span class="st">"mpg"</span>, sec <span class="op">=</span> <span class="st">"cyl"</span>, ter <span class="op">=</span> <span class="st">"gear"</span>, color.palette<span class="op">=</span><span class="st">"Blues"</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in plot_violin(mtcars, pri = "mpg", sec = "cyl", ter = "gear", color.palette = "Blues"):</span> object 'i18n' not found</span>
 </code></pre></div>
