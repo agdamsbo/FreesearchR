@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">FreesearchR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.3.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Easily get variable icon based on data type or class</h1>
-      <small class="dont-index">Source: <a href="https://github.com/agdamsbo/FreesearchR/blob/v26.3.6/R/data-summary.R" class="external-link"><code>R/data-summary.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/agdamsbo/FreesearchR/blob/main/R/data-summary.R" class="external-link"><code>R/data-summary.R</code></a></small>
       <div class="d-none name"><code>get_var_icon.Rd</code></div>
     </div>
 
@@ -72,29 +72,77 @@
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">|&gt;</span> <span class="fu">get_var_icon</span><span class="op">(</span><span class="st">"class"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $mpg</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256" class="phosphor-svg" height="1.33em" fill="currentColor" style="vertical-align:-0.25em;"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;path d="M176,58H80a6,6,0,0,0-6,6v48a6,6,0,0,0,6,6h96a6,6,0,0,0,6-6V64A6,6,0,0,0,176,58Zm-6,48H86V70h84Zm30-80H56A14,14,0,0,0,42,40V216a14,14,0,0,0,14,14H200a14,14,0,0,0,14-14V40A14,14,0,0,0,200,26Zm2,190a2,2,0,0,1-2,2H56a2,2,0,0,1-2-2V40a2,2,0,0,1,2-2H200a2,2,0,0,1,2,2ZM98,148a10,10,0,1,1-10-10A10,10,0,0,1,98,148Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,138,148Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,178,148ZM98,188a10,10,0,1,1-10-10A10,10,0,0,1,98,188Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,138,188Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,178,188Z"&gt;&lt;/path&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;title&gt;calculator-light&lt;/title&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;/svg&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu"><a href="default_parsing.html">default_parsing</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">get_var_icon</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $mpg</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256" class="phosphor-svg" height="1.33em" fill="currentColor" style="vertical-align:-0.25em;"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;path d="M176,58H80a6,6,0,0,0-6,6v48a6,6,0,0,0,6,6h96a6,6,0,0,0,6-6V64A6,6,0,0,0,176,58Zm-6,48H86V70h84Zm30-80H56A14,14,0,0,0,42,40V216a14,14,0,0,0,14,14H200a14,14,0,0,0,14-14V40A14,14,0,0,0,200,26Zm2,190a2,2,0,0,1-2,2H56a2,2,0,0,1-2-2V40a2,2,0,0,1,2-2H200a2,2,0,0,1,2,2ZM98,148a10,10,0,1,1-10-10A10,10,0,0,1,98,148Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,138,148Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,178,148ZM98,188a10,10,0,1,1-10-10A10,10,0,0,1,98,188Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,138,188Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,178,188Z"&gt;&lt;/path&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;title&gt;calculator-light&lt;/title&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;/svg&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $cyl</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256" class="phosphor-svg" height="1.33em" fill="currentColor" style="vertical-align:-0.25em;"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;path d="M224,202H214V40a6,6,0,0,0-6-6H152a6,6,0,0,0-6,6V82H96a6,6,0,0,0-6,6v42H48a6,6,0,0,0-6,6v66H32a6,6,0,0,0,0,12H224a6,6,0,0,0,0-12ZM158,46h44V202H158ZM102,94h44V202H102ZM54,142H90v60H54Z"&gt;&lt;/path&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;title&gt;chart-bar-light&lt;/title&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;/svg&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $disp</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256" class="phosphor-svg" height="1.33em" fill="currentColor" style="vertical-align:-0.25em;"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;path d="M176,58H80a6,6,0,0,0-6,6v48a6,6,0,0,0,6,6h96a6,6,0,0,0,6-6V64A6,6,0,0,0,176,58Zm-6,48H86V70h84Zm30-80H56A14,14,0,0,0,42,40V216a14,14,0,0,0,14,14H200a14,14,0,0,0,14-14V40A14,14,0,0,0,200,26Zm2,190a2,2,0,0,1-2,2H56a2,2,0,0,1-2-2V40a2,2,0,0,1,2-2H200a2,2,0,0,1,2,2ZM98,148a10,10,0,1,1-10-10A10,10,0,0,1,98,148Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,138,148Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,178,148ZM98,188a10,10,0,1,1-10-10A10,10,0,0,1,98,188Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,138,188Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,178,188Z"&gt;&lt;/path&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;title&gt;calculator-light&lt;/title&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;/svg&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $hp</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256" class="phosphor-svg" height="1.33em" fill="currentColor" style="vertical-align:-0.25em;"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;path d="M176,58H80a6,6,0,0,0-6,6v48a6,6,0,0,0,6,6h96a6,6,0,0,0,6-6V64A6,6,0,0,0,176,58Zm-6,48H86V70h84Zm30-80H56A14,14,0,0,0,42,40V216a14,14,0,0,0,14,14H200a14,14,0,0,0,14-14V40A14,14,0,0,0,200,26Zm2,190a2,2,0,0,1-2,2H56a2,2,0,0,1-2-2V40a2,2,0,0,1,2-2H200a2,2,0,0,1,2,2ZM98,148a10,10,0,1,1-10-10A10,10,0,0,1,98,148Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,138,148Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,178,148ZM98,188a10,10,0,1,1-10-10A10,10,0,0,1,98,188Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,138,188Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,178,188Z"&gt;&lt;/path&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;title&gt;calculator-light&lt;/title&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;/svg&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $drat</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256" class="phosphor-svg" height="1.33em" fill="currentColor" style="vertical-align:-0.25em;"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;path d="M176,58H80a6,6,0,0,0-6,6v48a6,6,0,0,0,6,6h96a6,6,0,0,0,6-6V64A6,6,0,0,0,176,58Zm-6,48H86V70h84Zm30-80H56A14,14,0,0,0,42,40V216a14,14,0,0,0,14,14H200a14,14,0,0,0,14-14V40A14,14,0,0,0,200,26Zm2,190a2,2,0,0,1-2,2H56a2,2,0,0,1-2-2V40a2,2,0,0,1,2-2H200a2,2,0,0,1,2,2ZM98,148a10,10,0,1,1-10-10A10,10,0,0,1,98,148Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,138,148Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,178,148ZM98,188a10,10,0,1,1-10-10A10,10,0,0,1,98,188Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,138,188Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,178,188Z"&gt;&lt;/path&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;title&gt;calculator-light&lt;/title&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;/svg&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $wt</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256" class="phosphor-svg" height="1.33em" fill="currentColor" style="vertical-align:-0.25em;"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;path d="M176,58H80a6,6,0,0,0-6,6v48a6,6,0,0,0,6,6h96a6,6,0,0,0,6-6V64A6,6,0,0,0,176,58Zm-6,48H86V70h84Zm30-80H56A14,14,0,0,0,42,40V216a14,14,0,0,0,14,14H200a14,14,0,0,0,14-14V40A14,14,0,0,0,200,26Zm2,190a2,2,0,0,1-2,2H56a2,2,0,0,1-2-2V40a2,2,0,0,1,2-2H200a2,2,0,0,1,2,2ZM98,148a10,10,0,1,1-10-10A10,10,0,0,1,98,148Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,138,148Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,178,148ZM98,188a10,10,0,1,1-10-10A10,10,0,0,1,98,188Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,138,188Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,178,188Z"&gt;&lt;/path&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;title&gt;calculator-light&lt;/title&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;/svg&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $qsec</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256" class="phosphor-svg" height="1.33em" fill="currentColor" style="vertical-align:-0.25em;"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;path d="M176,58H80a6,6,0,0,0-6,6v48a6,6,0,0,0,6,6h96a6,6,0,0,0,6-6V64A6,6,0,0,0,176,58Zm-6,48H86V70h84Zm30-80H56A14,14,0,0,0,42,40V216a14,14,0,0,0,14,14H200a14,14,0,0,0,14-14V40A14,14,0,0,0,200,26Zm2,190a2,2,0,0,1-2,2H56a2,2,0,0,1-2-2V40a2,2,0,0,1,2-2H200a2,2,0,0,1,2,2ZM98,148a10,10,0,1,1-10-10A10,10,0,0,1,98,148Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,138,148Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,178,148ZM98,188a10,10,0,1,1-10-10A10,10,0,0,1,98,188Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,138,188Zm40,0a10,10,0,1,1-10-10A10,10,0,0,1,178,188Z"&gt;&lt;/path&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;title&gt;calculator-light&lt;/title&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;/svg&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $vs</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256" class="phosphor-svg" height="1.33em" fill="currentColor" style="vertical-align:-0.25em;"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;path d="M176,58H80a70,70,0,0,0,0,140h96a70,70,0,0,0,0-140Zm0,128H80A58,58,0,0,1,80,70h96a58,58,0,0,1,0,116ZM80,90a38,38,0,1,0,38,38A38,38,0,0,0,80,90Zm0,64a26,26,0,1,1,26-26A26,26,0,0,1,80,154Z"&gt;&lt;/path&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;title&gt;toggle-left-light&lt;/title&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;/svg&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $am</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256" class="phosphor-svg" height="1.33em" fill="currentColor" style="vertical-align:-0.25em;"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;path d="M176,58H80a70,70,0,0,0,0,140h96a70,70,0,0,0,0-140Zm0,128H80A58,58,0,0,1,80,70h96a58,58,0,0,1,0,116ZM80,90a38,38,0,1,0,38,38A38,38,0,0,0,80,90Zm0,64a26,26,0,1,1,26-26A26,26,0,0,1,80,154Z"&gt;&lt;/path&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;title&gt;toggle-left-light&lt;/title&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;/svg&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $gear</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256" class="phosphor-svg" height="1.33em" fill="currentColor" style="vertical-align:-0.25em;"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;path d="M224,202H214V40a6,6,0,0,0-6-6H152a6,6,0,0,0-6,6V82H96a6,6,0,0,0-6,6v42H48a6,6,0,0,0-6,6v66H32a6,6,0,0,0,0,12H224a6,6,0,0,0,0-12ZM158,46h44V202H158ZM102,94h44V202H102ZM54,142H90v60H54Z"&gt;&lt;/path&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;title&gt;chart-bar-light&lt;/title&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;/svg&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $carb</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256" class="phosphor-svg" height="1.33em" fill="currentColor" style="vertical-align:-0.25em;"&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;path d="M224,202H214V40a6,6,0,0,0-6-6H152a6,6,0,0,0-6,6V82H96a6,6,0,0,0-6,6v42H48a6,6,0,0,0-6,6v66H32a6,6,0,0,0,0,12H224a6,6,0,0,0,0-12ZM158,46h44V202H158ZM102,94h44V202H102ZM54,142H90v60H54Z"&gt;&lt;/path&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;title&gt;chart-bar-light&lt;/title&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;/svg&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>

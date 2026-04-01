@@ -28,11 +28,11 @@ FreesearchR:::session_data$platform |> knitr::kable()
 | collate     | en_US.UTF-8                                |
 | ctype       | en_US.UTF-8                                |
 | tz          | Europe/Copenhagen                          |
-| date        | 2026-03-31                                 |
+| date        | 2026-04-01                                 |
 | rstudio     | 2026.01.1+403 Apple Blossom (desktop)      |
 | pandoc      | 3.6.4 @ /opt/homebrew/bin/ (via rmarkdown) |
 | quarto      | 1.7.30 @ /usr/local/bin/quarto             |
-| FreesearchR | 26.3.6.260331                              |
+| FreesearchR | 26.4.1.260401                              |
 
 ## Libraries
 
@@ -72,7 +72,6 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | colorspace        | 2.1-2         | 2025-09-22 | CRAN (R 4.5.0) |
 | commonmark        | 2.0.0         | 2025-07-07 | CRAN (R 4.5.0) |
 | crayon            | 1.5.3         | 2024-06-20 | CRAN (R 4.5.0) |
-| curl              | 7.0.0         | 2025-08-19 | CRAN (R 4.5.0) |
 | data.table        | 1.18.2.1      | 2026-01-27 | CRAN (R 4.5.2) |
 | datamods          | 1.5.3         | 2024-10-02 | CRAN (R 4.5.0) |
 | datawizard        | 1.3.0         | 2025-10-11 | CRAN (R 4.5.0) |
@@ -103,7 +102,7 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | foreach           | 1.5.2         | 2022-02-02 | CRAN (R 4.5.0) |
 | foreign           | 0.8-91        | 2026-01-29 | CRAN (R 4.5.2) |
 | Formula           | 1.2-5         | 2023-02-24 | CRAN (R 4.5.0) |
-| FreesearchR       | 26.3.6        | NA         | NA             |
+| FreesearchR       | 26.4.1        | NA         | NA             |
 | fs                | 1.6.7         | 2026-03-06 | CRAN (R 4.5.2) |
 | gdtools           | 0.5.0         | 2026-02-09 | CRAN (R 4.5.2) |
 | generics          | 0.1.4         | 2025-05-09 | CRAN (R 4.5.0) |
@@ -126,7 +125,6 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | htmltools         | 0.5.9         | 2025-12-04 | CRAN (R 4.5.2) |
 | htmlwidgets       | 1.6.4         | 2023-12-06 | CRAN (R 4.5.0) |
 | httpuv            | 1.6.16        | 2025-04-16 | CRAN (R 4.5.0) |
-| httr              | 1.4.8         | 2026-02-13 | CRAN (R 4.5.2) |
 | IDEAFilter        | 0.2.1         | 2025-07-29 | CRAN (R 4.5.0) |
 | insight           | 1.4.6         | 2026-02-04 | CRAN (R 4.5.2) |
 | iterators         | 1.0.14        | 2022-02-05 | CRAN (R 4.5.0) |
@@ -136,7 +134,6 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | keyring           | 1.4.1         | 2025-06-15 | CRAN (R 4.5.0) |
 | knitr             | 1.51          | 2025-12-20 | CRAN (R 4.5.2) |
 | labeling          | 0.4.3         | 2023-08-29 | CRAN (R 4.5.0) |
-| labelled          | 2.16.0        | 2025-10-22 | CRAN (R 4.5.0) |
 | later             | 1.4.8         | 2026-03-05 | CRAN (R 4.5.2) |
 | lattice           | 0.22-7        | 2025-04-02 | CRAN (R 4.5.2) |
 | lifecycle         | 1.0.5         | 2026-01-08 | CRAN (R 4.5.2) |
@@ -169,7 +166,7 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | pkgload           | 1.5.0         | 2026-02-03 | CRAN (R 4.5.2) |
 | plyr              | 1.8.9         | 2023-10-02 | CRAN (R 4.5.0) |
 | polyclip          | 1.10-7        | 2024-07-23 | CRAN (R 4.5.0) |
-| polyglotr         | 1.7.1         | NA         | NA             |
+| polylabelr        | 1.0.0         | 2026-01-19 | CRAN (R 4.5.2) |
 | pracma            | 2.4.6         | 2025-10-22 | CRAN (R 4.5.0) |
 | processx          | 3.8.6         | 2025-02-21 | CRAN (R 4.5.0) |
 | promises          | 1.5.0         | 2025-11-01 | CRAN (R 4.5.0) |
@@ -207,12 +204,10 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | rprojroot         | 2.1.1         | 2025-08-26 | CRAN (R 4.5.0) |
 | rsconnect         | 1.7.0         | 2025-12-06 | CRAN (R 4.5.2) |
 | rstudioapi        | 0.18.0        | 2026-01-16 | CRAN (R 4.5.2) |
-| rvest             | 1.0.5         | NA         | NA             |
 | S7                | 0.2.1         | 2025-11-14 | CRAN (R 4.5.2) |
 | sass              | 0.4.10        | 2025-04-11 | CRAN (R 4.5.0) |
 | scales            | 1.4.0         | 2025-04-24 | CRAN (R 4.5.0) |
 | see               | 0.13.0        | 2026-01-30 | CRAN (R 4.5.2) |
-| selectr           | 0.5-1         | NA         | NA             |
 | sessioninfo       | 1.2.3         | 2025-02-05 | CRAN (R 4.5.0) |
 | shiny             | 1.13.0        | 2026-02-20 | CRAN (R 4.5.2) |
 | shiny.i18n        | 0.3.0         | 2023-01-16 | CRAN (R 4.5.0) |
@@ -233,13 +228,10 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | tidyselect        | 1.2.1         | 2024-03-11 | CRAN (R 4.5.0) |
 | timechange        | 0.4.0         | 2026-01-29 | CRAN (R 4.5.2) |
 | toastui           | 0.4.0         | 2025-04-03 | CRAN (R 4.5.0) |
-| triebeard         | 0.4.1         | NA         | NA             |
 | tweenr            | 2.0.3         | 2024-02-26 | CRAN (R 4.5.0) |
 | twosamples        | 2.0.1         | 2023-06-23 | CRAN (R 4.5.0) |
 | tzdb              | 0.5.0         | 2025-03-15 | CRAN (R 4.5.0) |
-| urltools          | 1.7.3.1       | NA         | NA             |
 | usethis           | 3.2.1         | 2025-09-06 | CRAN (R 4.5.0) |
-| utf8              | 1.2.6         | 2025-06-08 | CRAN (R 4.5.0) |
 | uuid              | 1.2-2         | 2026-01-23 | CRAN (R 4.5.2) |
 | vctrs             | 0.7.1         | 2026-01-23 | CRAN (R 4.5.2) |
 | viridis           | 0.6.5         | 2024-01-29 | CRAN (R 4.5.0) |

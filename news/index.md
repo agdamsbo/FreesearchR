@@ -1,5 +1,10 @@
 # Changelog
 
+## FreesearchR 26.4.1
+
+Minor adjustments and bug fixes including streamlining icon use to only
+use phosphoricons across the app.
+
 ## FreesearchR 26.3.6
 
 *FIX* Plot single variable in Likert plot.
