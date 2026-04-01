@@ -20,7 +20,8 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
           bslib::accordion_panel(
             value = "acc_pan_plot",
             title = "Create plot",
-            icon = bsicons::bs_icon("graph-up"),
+            icon = phosphoricons::ph("chart-line"),
+            # icon = bsicons::bs_icon("graph-up"),
             shiny::uiOutput(outputId = ns("primary")),
             shiny::helpText(
               i18n$t(
@@ -37,7 +38,8 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
               inputId = ns("act_plot"),
               label = i18n$t("Plot"),
               width = "100%",
-              icon = shiny::icon("palette"),
+              icon = phosphoricons::ph("paint-brush"),
+              # icon = shiny::icon("palette"),
               disabled = FALSE
             ),
             shiny::helpText(i18n$t('Adjust settings, then press "Plot".'))
@@ -45,7 +47,8 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
           bslib::accordion_panel(
             value = "acc_pan_download",
             title = "Download",
-            icon = bsicons::bs_icon("download"),
+            icon = phosphoricons::ph("download-simple"),
+            # icon = bsicons::bs_icon("download"),
             shinyWidgets::noUiSliderInput(
               inputId = ns("height_slide"),
               label = i18n$t("Plot height (mm)"),
@@ -84,7 +87,8 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
             shiny::downloadButton(
               outputId = ns("download_plot"),
               label = i18n$t("Download plot"),
-              icon = shiny::icon("download")
+              icon = phosphoricons::ph("arrow-fat-down")
+              # icon = shiny::icon("download")
             )
           )
         ),

@@ -37,20 +37,6 @@ landing_page_ui <- function(i18n) {
     div(
       class = "container my-5",
 
-      # Introduction text
-      # div(
-      #   class = "row mb-5",
-      #   div(
-      #     class = "col-12 text-center",
-      #     p(
-      #       class = "lead",
-      #       i18n$t("Start with FreesearchR for basic data evaluation and analysis."),
-      #       i18n$t("When you need more advanced tools, you'll be better prepared to use R directly."),
-      #       style = "font-size: 1.2rem; color: #555;"
-      #     )
-      #   )
-      # ),
-
       # Core Features Section
       h2(i18n$t("Core Features"), class = "text-center mb-4",
          style = "color: #1E4A8F; font-weight: 600;"),
@@ -68,7 +54,8 @@ landing_page_ui <- function(i18n) {
               class = "card-body text-center p-4",
               div(
                 style = "font-size: 3rem; color: #1E4A8F; margin-bottom: 15px;",
-                fa("file-import")
+                phosphoricons::ph("folder-simple-plus", weight = "bold")
+                # fa("file-import")
               ),
               h4(i18n$t("Import Data"), class = "card-title", style = "color: #2D2D42; font-weight: 600;"),
               p(
@@ -89,7 +76,8 @@ landing_page_ui <- function(i18n) {
               class = "card-body text-center p-4",
               div(
                 style = "font-size: 3rem; color: #1E4A8F; margin-bottom: 15px;",
-                fa("pen-to-square")
+                phosphoricons::ph("note-pencil", weight = "bold")
+                # fa("pen-to-square")
               ),
               h4(i18n$t("Data Management"), class = "card-title", style = "color: #2D2D42; font-weight: 600;"),
               p(
@@ -110,7 +98,8 @@ landing_page_ui <- function(i18n) {
               class = "card-body text-center p-4",
               div(
                 style = "font-size: 3rem; color: #1E4A8F; margin-bottom: 15px;",
-                fa("magnifying-glass-chart")
+                phosphoricons::ph("magnifying-glass", weight = "bold")
+                # fa("magnifying-glass-chart")
               ),
               h4(i18n$t("Descriptive Statistics"), class = "card-title", style = "color: #2D2D42; font-weight: 600;"),
               p(
@@ -135,7 +124,7 @@ landing_page_ui <- function(i18n) {
             style = "border-left: 4px solid #8A4FFF;",
             div(
               class = "card-body",
-              h5(fa("chart-line"), " ", i18n$t("Data Visualization"), class = "card-title", style = "color: #2D2D42;"),
+              h5(phosphoricons::ph("chart-line", weight = "bold"), " ", i18n$t("Data Visualization"), class = "card-title", style = "color: #2D2D42;"),
               p(class = "card-text small", i18n$t("Create simple, clean plots for quick insights and overview"))
             )
           )
@@ -147,7 +136,7 @@ landing_page_ui <- function(i18n) {
             style = "border-left: 4px solid #8A4FFF;",
             div(
               class = "card-body",
-              h5(fa("calculator"), " ", i18n$t("Regression Models"), class = "card-title", style = "color: #2D2D42;"),
+              h5(phosphoricons::ph("calculator", weight = "bold"), " ", i18n$t("Regression Models"), class = "card-title", style = "color: #2D2D42;"),
               p(class = "card-text small", i18n$t("Build simple regression models for advanced analysis"))
             )
           )
@@ -164,7 +153,7 @@ landing_page_ui <- function(i18n) {
             style = "background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border: none;",
             div(
               class = "card-body p-4",
-              h4(fa("download"), " ", i18n$t("Export & Learn"), class = "text-center mb-3", style = "color: #1E4A8F;"),
+              h4(phosphoricons::ph("book-bookmark", weight = "bold"), " ", i18n$t("Export & Learn"), class = "text-center mb-3", style = "color: #1E4A8F;"),
               div(
                 class = "row text-center",
                 div(

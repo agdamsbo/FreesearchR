@@ -19,7 +19,8 @@ data_missings_ui <- function(id, ...) {
         bslib::accordion_panel(
           value = "acc_pan_mis",
           title = "Settings",
-          icon = bsicons::bs_icon("gear"),
+          icon = phosphoricons::ph("gear"),
+          # icon = bsicons::bs_icon("gear"),
           shiny::conditionalPanel(
             condition = "output.missings == true",
             shiny::uiOutput(ns("missings_method")),
@@ -36,14 +37,16 @@ data_missings_ui <- function(id, ...) {
             inputId = ns("act_miss"),
             label = i18n$t("Evaluate"),
             width = "100%",
-            icon = shiny::icon("calculator"),
+            icon = phosphoricons::ph("calculator"),
+            # icon = shiny::icon("calculator"),
             disabled = TRUE
           )
         ),
         do.call(bslib::accordion_panel, c(
           list(
             title = "Download",
-            icon = bsicons::bs_icon("file-earmark-arrow-down")
+            icon = phosphoricons::ph("download-simple")
+            # icon = bsicons::bs_icon("file-earmark-arrow-down")
           ),
           table_download_ui(id = ns("tbl_dwn"), title = NULL)
         ))

@@ -44,7 +44,7 @@ update_factor_ui <- function(id) {
         actionButton(
           disabled = TRUE,
           inputId = ns("drop_levels"),
-          label = tagList(phosphoricons::ph("sort-ascending"), i18n$t("Drop empty")),
+          label = tagList(phosphoricons::ph("trash"), i18n$t("Drop empty")),
           class = "btn-outline-primary mb-3",
           width = "100%"
         )

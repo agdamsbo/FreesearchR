@@ -57,7 +57,8 @@ regression_ui <- function(id, ...) {
             bslib::accordion_panel(
               value = "acc_pan_reg",
               title = i18n$t("Regression"),
-              icon = bsicons::bs_icon("calculator"),
+              icon = phosphoricons::ph("calculator"),
+              # icon = bsicons::bs_icon("calculator"),
               shiny::uiOutput(outputId = ns("outcome_var")),
               # shiny::selectInput(
               #   inputId = "design",
@@ -91,7 +92,8 @@ regression_ui <- function(id, ...) {
               bslib::input_task_button(
                 id = ns("load"),
                 label = i18n$t("Analyse"),
-                icon = bsicons::bs_icon("pencil"),
+                icon = phosphoricons::ph("math-operations"),
+                # icon = bsicons::bs_icon("pencil"),
                 label_busy = i18n$t("Working..."),
                 icon_busy = fontawesome::fa_i("arrows-rotate",
                   class = "fa-spin",
@@ -136,7 +138,8 @@ regression_ui <- function(id, ...) {
                 list(
                   value = "acc_pan_coef_plot",
                   title = "Coefficients plot",
-                  icon = bsicons::bs_icon("bar-chart-steps"),
+                  icon = phosphoricons::ph("chart-bar-horizontal"),
+                  # icon = bsicons::bs_icon("bar-chart-steps"),
                   shiny::tags$br(),
                   shiny::uiOutput(outputId = ns("plot_model"))
                 ),
@@ -179,7 +182,8 @@ regression_ui <- function(id, ...) {
                   shiny::downloadButton(
                     outputId = ns("download_plot"),
                     label = i18n$t("Download plot"),
-                    icon = shiny::icon("download")
+                    icon = phosphoricons::ph("arrow-fat-down")
+                    # icon = shiny::icon("download")
                   )
                 )
               )
@@ -200,7 +204,8 @@ regression_ui <- function(id, ...) {
             bslib::accordion_panel(
               value = "acc_pan_checks",
               title = "Checks",
-              icon = bsicons::bs_icon("clipboard-check"),
+              icon = phosphoricons::ph("checks"),
+              # icon = bsicons::bs_icon("clipboard-check"),
               shiny::uiOutput(outputId = ns("plot_checks"))
             )
           )

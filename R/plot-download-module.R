@@ -39,7 +39,8 @@ plot_download_ui <- regression_ui <- function(id, ...) {
     shiny::downloadButton(
       outputId = ns("download_plot"),
       label = "Download plot",
-      icon = shiny::icon("download")
+      icon = phosphoricons::ph("arrow-fat-down")
+      # icon = shiny::icon("download")
     )
   )
 }

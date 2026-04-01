@@ -37,7 +37,8 @@ table_download_server <- function(id, data, file_name = "table", ...) {
           shiny::downloadButton(
             outputId = ns("act_table"),
             label = i18n$t("Download table"),
-            icon = shiny::icon("download")
+            icon = phosphoricons::ph("arrow-fat-down")
+            # icon = shiny::icon("download")
           )
         } else {
           # Return NULL to show nothing

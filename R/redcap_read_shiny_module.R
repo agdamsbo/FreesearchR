@@ -43,7 +43,8 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
     shiny::actionButton(
       inputId = ns("data_connect"),
       label = i18n$t("Connect"),
-      icon = shiny::icon("link", lib = "glyphicon"),
+      icon = phosphoricons::ph("link",weight = "bold"),
+      # icon = shiny::icon("link", lib = "glyphicon"),
       width = "100%",
       disabled = TRUE
     ),
@@ -99,7 +100,8 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
           shinyWidgets::dropMenu(
             shiny::actionButton(
               inputId = ns("dropdown_params"),
-              label = shiny::icon("filter"),
+              label = phosphoricons::ph("funnel",weight = "bold"),
+              # label = shiny::icon("filter"),
               width = "50px"
             ),
             filter_ui
@@ -118,7 +120,8 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
       shiny::actionButton(
         inputId = ns("data_import"),
         label = i18n$t("Import"),
-        icon = shiny::icon("download", lib = "glyphicon"),
+        icon = phosphoricons::ph("download-simple",weight = "bold"),
+        # icon = shiny::icon("download", lib = "glyphicon"),
         width = "100%",
         disabled = TRUE
       ),

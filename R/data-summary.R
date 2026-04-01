@@ -309,21 +309,29 @@ class_icons <- function(x) {
     lapply(x,class_icons)
   } else {
   if (identical(x, "numeric")) {
-    shiny::icon("calculator")
+    phosphoricons::ph("calculator")
+    # shiny::icon("calculator")
   } else if (identical(x, "factor")) {
-    shiny::icon("chart-simple")
+    phosphoricons::ph("chart-bar")
+    # shiny::icon("chart-simple")
   } else if (identical(x, "integer")) {
-    shiny::icon("arrow-down-1-9")
+    phosphoricons::ph("list-numbers")
+    # shiny::icon("arrow-down-1-9")
   } else if (identical(x, "character")) {
-    shiny::icon("arrow-down-a-z")
+    phosphoricons::ph("text-aa")
+    # shiny::icon("arrow-down-a-z")
   } else if (identical(x, "logical")) {
-    shiny::icon("toggle-off")
+    phosphoricons::ph("toggle-left")
+    # shiny::icon("toggle-off")
   } else if (any(c("Date", "POSIXt") %in% x)) {
-    shiny::icon("calendar-days")
+    phosphoricons::ph("calendar")
+    # shiny::icon("calendar-days")
   } else if (any("POSIXct", "hms") %in% x) {
-    shiny::icon("clock")
+    phosphoricons::ph("clock")
+    # shiny::icon("clock")
   } else {
-    shiny::icon("table")
+    phosphoricons::ph("calendar")
+    # shiny::icon("table")
   }}
 }
 
@@ -342,21 +350,29 @@ type_icons <- function(x) {
     lapply(x,class_icons)
   } else {
     if (identical(x, "continuous")) {
-      shiny::icon("calculator")
+      phosphoricons::ph("calculator")
+      # shiny::icon("calculator")
     } else if (identical(x, "categorical")) {
-      shiny::icon("chart-simple")
+      phosphoricons::ph("chart-bar")
+      # shiny::icon("chart-simple")
     } else if (identical(x, "ordinal")) {
-      shiny::icon("arrow-down-1-9")
+      phosphoricons::ph("list-numbers")
+      # shiny::icon("arrow-down-1-9")
     } else if (identical(x, "text")) {
-      shiny::icon("arrow-down-a-z")
+      phosphoricons::ph("text-aa")
+      # shiny::icon("arrow-down-a-z")
     } else if (identical(x, "dichotomous")) {
-      shiny::icon("toggle-off")
+      phosphoricons::ph("toggle-left")
+      # shiny::icon("toggle-off")
     } else if (identical(x,"datetime")) {
-      shiny::icon("calendar-days")
+      phosphoricons::ph("calendar")
+      # shiny::icon("calendar-days")
     } else if (identical(x,"id")) {
-      shiny::icon("id-card")
+      phosphoricons::ph("identification-badge")
+      # shiny::icon("id-card")
     } else {
-      shiny::icon("table")
+      phosphoricons::ph("table")
+      # shiny::icon("table")
     }
     }
 }

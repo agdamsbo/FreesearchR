@@ -15,7 +15,8 @@ ui_elements <- function(selection) {
     "home" = bslib::nav_panel(
       title = "FreesearchR",
       # title = shiny::div(htmltools::img(src="FreesearchR-logo-white-nobg-h80.png")),
-      icon = shiny::icon("house"),
+      icon = phosphoricons::ph("house", weight = "bold"),
+      # icon = shiny::icon("house"),
       shiny::fluidRow(
         # "The browser language is",
         # textOutput("your_lang"),
@@ -45,7 +46,8 @@ ui_elements <- function(selection) {
     ##############################################################################
     "import" = bslib::nav_panel(
       title = i18n$t("Get started"),
-      icon = shiny::icon("play"),
+      icon = phosphoricons::ph("play", weight = "bold"),
+      # icon = shiny::icon("play"),
       value = "nav_import",
       shiny::fluidRow(
         shiny::column(width = 2),
@@ -122,7 +124,8 @@ ui_elements <- function(selection) {
               inputId = "modal_initial_view",
               label = i18n$t("Quick overview"),
               width = "100%",
-              icon = shiny::icon("binoculars"),
+              icon = phosphoricons::ph("binoculars"),
+              # icon = shiny::icon("binoculars"),
               disabled = FALSE
             ),
             shiny::br(),
@@ -166,7 +169,8 @@ ui_elements <- function(selection) {
               inputId = "act_start",
               label = i18n$t("Let's begin!"),
               width = "100%",
-              icon = shiny::icon("play"),
+              icon = phosphoricons::ph("play"),
+              # icon = shiny::icon("play"),
               disabled = TRUE
             ),
             shiny::br(),
@@ -185,11 +189,13 @@ ui_elements <- function(selection) {
     ##############################################################################
     "prepare" = bslib::nav_menu(
       title = i18n$t("Prepare"),
-      icon = shiny::icon("pen-to-square"),
+      icon = phosphoricons::ph("note-pencil", weight = "bold"),
+      # icon = shiny::icon("pen-to-square"),
       value = "nav_prepare",
       bslib::nav_panel(
         title = i18n$t("Overview and filter"),
-        icon = shiny::icon("eye"),
+        icon = phosphoricons::ph("eye"),
+        # icon = shiny::icon("eye"),
         value = "nav_prepare_overview",
         tags$h3(i18n$t("Overview and filtering")),
         fluidRow(
@@ -264,7 +270,8 @@ ui_elements <- function(selection) {
       ),
       bslib::nav_panel(
         title = i18n$t("Edit and create data"),
-        icon = shiny::icon("file-pen"),
+        icon = phosphoricons::ph("pencil-line"),
+        # icon = shiny::icon("file-pen"),
         tags$h3(i18n$t("Subset, rename and convert variables")),
         fluidRow(shiny::column(
           width = 9, shiny::tags$p(
@@ -293,13 +300,13 @@ ui_elements <- function(selection) {
             width = 3,
             shiny::actionButton(
               inputId = "modal_update",
-              label = i18n$t("Modify factor levels"),
+              label = i18n$t("Modify factor"),
               width = "100%"
             ),
             shiny::tags$br(),
-            shiny::helpText(
-              i18n$t("Reorder or rename the levels of factor/categorical variables.")
-            ),
+            shiny::helpText(i18n$t(
+              "Modify the levels of factor/categorical variables."
+            )),
             shiny::tags$br(),
             shiny::tags$br()
           ),
@@ -312,9 +319,7 @@ ui_elements <- function(selection) {
             ),
             shiny::tags$br(),
             shiny::helpText(
-              i18n$t(
-                "Create factor/categorical variable from a continous variable (number/date/time)."
-              )
+              i18n$t("Create factor/categorical variable from other variables.")
             ),
             shiny::tags$br(),
             shiny::tags$br()
@@ -391,14 +396,16 @@ ui_elements <- function(selection) {
     "describe" =
       bslib::nav_menu(
         title = i18n$t("Evaluate"),
-        icon = shiny::icon("magnifying-glass-chart"),
+        icon = phosphoricons::ph("magnifying-glass", weight = "bold"),
+        # icon = shiny::icon("magnifying-glass-chart"),
         value = "nav_describe",
         # id = "navdescribe",
         # bslib::navset_bar(
         #   title = "",
         bslib::nav_panel(
           title = i18n$t("Characteristics"),
-          icon = bsicons::bs_icon("table"),
+          icon = phosphoricons::ph("table"),
+          # icon = bsicons::bs_icon("table"),
           bslib::layout_sidebar(
             sidebar = bslib::sidebar(
               shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
@@ -410,7 +417,8 @@ ui_elements <- function(selection) {
                   open = TRUE,
                   value = "acc_pan_chars",
                   title = "Settings",
-                  icon = bsicons::bs_icon("table"),
+                  icon = phosphoricons::ph("table"),
+                  # icon = bsicons::bs_icon("table"),
                   # vectorSelectInput(
                   #   inputId = "baseline_theme",
                   #   selected = "none",
@@ -452,7 +460,8 @@ ui_elements <- function(selection) {
                     inputId = "act_eval",
                     label = i18n$t("Evaluate"),
                     width = "100%",
-                    icon = shiny::icon("calculator"),
+                    icon = phosphoricons::ph("calculator"),
+                    # icon = shiny::icon("calculator"),
                     disabled = TRUE
                   ),
                   shiny::helpText(i18n$t(
@@ -466,7 +475,8 @@ ui_elements <- function(selection) {
         ),
         bslib::nav_panel(
           title = i18n$t("Correlations"),
-          icon = bsicons::bs_icon("bounding-box"),
+          icon = phosphoricons::ph("graph"),
+          # icon = bsicons::bs_icon("bounding-box"),
           bslib::layout_sidebar(
             sidebar = bslib::sidebar(
               # shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
@@ -507,7 +517,8 @@ ui_elements <- function(selection) {
         do.call(bslib::nav_panel, c(
           list(
             title = i18n$t("Missings"),
-            icon = bsicons::bs_icon("x-circle")
+            icon = phosphoricons::ph("placeholder")
+            # icon = bsicons::bs_icon("x-circle")
           ),
           data_missings_ui(id = "missingness", validation_ui("validation_mcar"))
         ))
@@ -522,7 +533,8 @@ ui_elements <- function(selection) {
       c(
         list(
           title = i18n$t("Visuals"),
-          icon = shiny::icon("chart-line"),
+          icon = phosphoricons::ph("chart-line", weight = "bold"),
+          # icon = shiny::icon("chart-line"),
           value = "nav_visuals"
         ),
         data_visuals_ui("visuals")
@@ -543,7 +555,8 @@ ui_elements <- function(selection) {
     "analyze" =
       bslib::nav_panel(
         title = i18n$t("Regression"),
-        icon = shiny::icon("calculator"),
+        icon = phosphoricons::ph("calculator", weight = "bold"),
+        # icon = shiny::icon("calculator"),
         value = "nav_analyses",
         do.call(bslib::navset_card_tab, regression_ui("regression"))
       ),
@@ -555,7 +568,8 @@ ui_elements <- function(selection) {
     "download" =
       bslib::nav_panel(
         title = i18n$t("Download"),
-        icon = shiny::icon("download"),
+        icon = phosphoricons::ph("download-simple", weight = "bold"),
+        # icon = shiny::icon("download"),
         value = "nav_download",
         shiny::fluidRow(
           shiny::column(width = 2),
@@ -591,7 +605,8 @@ ui_elements <- function(selection) {
                 shiny::downloadButton(
                   outputId = "report",
                   label = "Download report",
-                  icon = shiny::icon("download")
+                  icon = phosphoricons::ph("arrow-fat-down")
+                  # icon = shiny::icon("download")
                 ),
                 shiny::br()
                 # shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
@@ -621,7 +636,8 @@ ui_elements <- function(selection) {
                 shiny::downloadButton(
                   outputId = "data_modified",
                   label = "Download data",
-                  icon = shiny::icon("download")
+                  icon = phosphoricons::ph("arrow-fat-down")
+                  # icon = shiny::icon("download")
                 )
               )
             ),
