@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpRQAQCo/file4ab61747a8d7.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpmlTuE8/file8be0207bfdc2.R 
 ########
 
 i18n_path <- system.file("translations", package = "FreesearchR")
@@ -64,7 +64,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'26.3.6'
+app_version <- function()'26.4.1'
 
 
 ########
@@ -2157,7 +2157,8 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
           bslib::accordion_panel(
             value = "acc_pan_plot",
             title = "Create plot",
-            icon = bsicons::bs_icon("graph-up"),
+            icon = phosphoricons::ph("chart-line"),
+            # icon = bsicons::bs_icon("graph-up"),
             shiny::uiOutput(outputId = ns("primary")),
             shiny::helpText(
               i18n$t(
@@ -2174,7 +2175,8 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
               inputId = ns("act_plot"),
               label = i18n$t("Plot"),
               width = "100%",
-              icon = shiny::icon("palette"),
+              icon = phosphoricons::ph("paint-brush"),
+              # icon = shiny::icon("palette"),
               disabled = FALSE
             ),
             shiny::helpText(i18n$t('Adjust settings, then press "Plot".'))
@@ -2182,7 +2184,8 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
           bslib::accordion_panel(
             value = "acc_pan_download",
             title = "Download",
-            icon = bsicons::bs_icon("download"),
+            icon = phosphoricons::ph("download-simple"),
+            # icon = bsicons::bs_icon("download"),
             shinyWidgets::noUiSliderInput(
               inputId = ns("height_slide"),
               label = i18n$t("Plot height (mm)"),
@@ -2221,7 +2224,8 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
             shiny::downloadButton(
               outputId = ns("download_plot"),
               label = i18n$t("Download plot"),
-              icon = shiny::icon("download")
+              icon = phosphoricons::ph("arrow-fat-down")
+              # icon = shiny::icon("download")
             )
           )
         ),
@@ -3280,21 +3284,29 @@ class_icons <- function(x) {
     lapply(x,class_icons)
   } else {
   if (identical(x, "numeric")) {
-    shiny::icon("calculator")
+    phosphoricons::ph("calculator")
+    # shiny::icon("calculator")
   } else if (identical(x, "factor")) {
-    shiny::icon("chart-simple")
+    phosphoricons::ph("chart-bar")
+    # shiny::icon("chart-simple")
   } else if (identical(x, "integer")) {
-    shiny::icon("arrow-down-1-9")
+    phosphoricons::ph("list-numbers")
+    # shiny::icon("arrow-down-1-9")
   } else if (identical(x, "character")) {
-    shiny::icon("arrow-down-a-z")
+    phosphoricons::ph("text-aa")
+    # shiny::icon("arrow-down-a-z")
   } else if (identical(x, "logical")) {
-    shiny::icon("toggle-off")
+    phosphoricons::ph("toggle-left")
+    # shiny::icon("toggle-off")
   } else if (any(c("Date", "POSIXt") %in% x)) {
-    shiny::icon("calendar-days")
+    phosphoricons::ph("calendar")
+    # shiny::icon("calendar-days")
   } else if (any("POSIXct", "hms") %in% x) {
-    shiny::icon("clock")
+    phosphoricons::ph("clock")
+    # shiny::icon("clock")
   } else {
-    shiny::icon("table")
+    phosphoricons::ph("calendar")
+    # shiny::icon("table")
   }}
 }
 
@@ -3313,21 +3325,29 @@ type_icons <- function(x) {
     lapply(x,class_icons)
   } else {
     if (identical(x, "continuous")) {
-      shiny::icon("calculator")
+      phosphoricons::ph("calculator")
+      # shiny::icon("calculator")
     } else if (identical(x, "categorical")) {
-      shiny::icon("chart-simple")
+      phosphoricons::ph("chart-bar")
+      # shiny::icon("chart-simple")
     } else if (identical(x, "ordinal")) {
-      shiny::icon("arrow-down-1-9")
+      phosphoricons::ph("list-numbers")
+      # shiny::icon("arrow-down-1-9")
     } else if (identical(x, "text")) {
-      shiny::icon("arrow-down-a-z")
+      phosphoricons::ph("text-aa")
+      # shiny::icon("arrow-down-a-z")
     } else if (identical(x, "dichotomous")) {
-      shiny::icon("toggle-off")
+      phosphoricons::ph("toggle-left")
+      # shiny::icon("toggle-off")
     } else if (identical(x,"datetime")) {
-      shiny::icon("calendar-days")
+      phosphoricons::ph("calendar")
+      # shiny::icon("calendar-days")
     } else if (identical(x,"id")) {
-      shiny::icon("id-card")
+      phosphoricons::ph("identification-badge")
+      # shiny::icon("id-card")
     } else {
-      shiny::icon("table")
+      phosphoricons::ph("table")
+      # shiny::icon("table")
     }
     }
 }
@@ -4925,7 +4945,7 @@ apply_idea_filter <- function(filtered_reactive, df_target, env = parent.frame()
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v26.3.6-260331'
+hosted_version <- function()'v26.4.1-260402'
 
 
 ########
@@ -6137,20 +6157,6 @@ landing_page_ui <- function(i18n) {
     div(
       class = "container my-5",
 
-      # Introduction text
-      # div(
-      #   class = "row mb-5",
-      #   div(
-      #     class = "col-12 text-center",
-      #     p(
-      #       class = "lead",
-      #       i18n$t("Start with FreesearchR for basic data evaluation and analysis."),
-      #       i18n$t("When you need more advanced tools, you'll be better prepared to use R directly."),
-      #       style = "font-size: 1.2rem; color: #555;"
-      #     )
-      #   )
-      # ),
-
       # Core Features Section
       h2(i18n$t("Core Features"), class = "text-center mb-4",
          style = "color: #1E4A8F; font-weight: 600;"),
@@ -6168,7 +6174,8 @@ landing_page_ui <- function(i18n) {
               class = "card-body text-center p-4",
               div(
                 style = "font-size: 3rem; color: #1E4A8F; margin-bottom: 15px;",
-                fa("file-import")
+                phosphoricons::ph("folder-simple-plus", weight = "bold")
+                # fa("file-import")
               ),
               h4(i18n$t("Import Data"), class = "card-title", style = "color: #2D2D42; font-weight: 600;"),
               p(
@@ -6189,7 +6196,8 @@ landing_page_ui <- function(i18n) {
               class = "card-body text-center p-4",
               div(
                 style = "font-size: 3rem; color: #1E4A8F; margin-bottom: 15px;",
-                fa("pen-to-square")
+                phosphoricons::ph("note-pencil", weight = "bold")
+                # fa("pen-to-square")
               ),
               h4(i18n$t("Data Management"), class = "card-title", style = "color: #2D2D42; font-weight: 600;"),
               p(
@@ -6210,7 +6218,8 @@ landing_page_ui <- function(i18n) {
               class = "card-body text-center p-4",
               div(
                 style = "font-size: 3rem; color: #1E4A8F; margin-bottom: 15px;",
-                fa("magnifying-glass-chart")
+                phosphoricons::ph("magnifying-glass", weight = "bold")
+                # fa("magnifying-glass-chart")
               ),
               h4(i18n$t("Descriptive Statistics"), class = "card-title", style = "color: #2D2D42; font-weight: 600;"),
               p(
@@ -6235,7 +6244,7 @@ landing_page_ui <- function(i18n) {
             style = "border-left: 4px solid #8A4FFF;",
             div(
               class = "card-body",
-              h5(fa("chart-line"), " ", i18n$t("Data Visualization"), class = "card-title", style = "color: #2D2D42;"),
+              h5(phosphoricons::ph("chart-line", weight = "bold"), " ", i18n$t("Data Visualization"), class = "card-title", style = "color: #2D2D42;"),
               p(class = "card-text small", i18n$t("Create simple, clean plots for quick insights and overview"))
             )
           )
@@ -6247,7 +6256,7 @@ landing_page_ui <- function(i18n) {
             style = "border-left: 4px solid #8A4FFF;",
             div(
               class = "card-body",
-              h5(fa("calculator"), " ", i18n$t("Regression Models"), class = "card-title", style = "color: #2D2D42;"),
+              h5(phosphoricons::ph("calculator", weight = "bold"), " ", i18n$t("Regression Models"), class = "card-title", style = "color: #2D2D42;"),
               p(class = "card-text small", i18n$t("Build simple regression models for advanced analysis"))
             )
           )
@@ -6264,7 +6273,7 @@ landing_page_ui <- function(i18n) {
             style = "background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border: none;",
             div(
               class = "card-body p-4",
-              h4(fa("download"), " ", i18n$t("Export & Learn"), class = "text-center mb-3", style = "color: #1E4A8F;"),
+              h4(phosphoricons::ph("book-bookmark", weight = "bold"), " ", i18n$t("Export & Learn"), class = "text-center mb-3", style = "color: #1E4A8F;"),
               div(
                 class = "row text-center",
                 div(
@@ -6554,7 +6563,8 @@ data_missings_ui <- function(id, ...) {
         bslib::accordion_panel(
           value = "acc_pan_mis",
           title = "Settings",
-          icon = bsicons::bs_icon("gear"),
+          icon = phosphoricons::ph("gear"),
+          # icon = bsicons::bs_icon("gear"),
           shiny::conditionalPanel(
             condition = "output.missings == true",
             shiny::uiOutput(ns("missings_method")),
@@ -6571,14 +6581,16 @@ data_missings_ui <- function(id, ...) {
             inputId = ns("act_miss"),
             label = i18n$t("Evaluate"),
             width = "100%",
-            icon = shiny::icon("calculator"),
+            icon = phosphoricons::ph("calculator"),
+            # icon = shiny::icon("calculator"),
             disabled = TRUE
           )
         ),
         do.call(bslib::accordion_panel, c(
           list(
             title = "Download",
-            icon = bsicons::bs_icon("file-earmark-arrow-down")
+            icon = phosphoricons::ph("download-simple")
+            # icon = bsicons::bs_icon("file-earmark-arrow-down")
           ),
           table_download_ui(id = ns("tbl_dwn"), title = NULL)
         ))
@@ -7933,7 +7945,8 @@ plot_download_ui <- regression_ui <- function(id, ...) {
     shiny::downloadButton(
       outputId = ns("download_plot"),
       label = "Download plot",
-      icon = shiny::icon("download")
+      icon = phosphoricons::ph("arrow-fat-down")
+      # icon = shiny::icon("download")
     )
   )
 }
@@ -8071,7 +8084,8 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
     shiny::actionButton(
       inputId = ns("data_connect"),
       label = i18n$t("Connect"),
-      icon = shiny::icon("link", lib = "glyphicon"),
+      icon = phosphoricons::ph("link",weight = "bold"),
+      # icon = shiny::icon("link", lib = "glyphicon"),
       width = "100%",
       disabled = TRUE
     ),
@@ -8127,7 +8141,8 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
           shinyWidgets::dropMenu(
             shiny::actionButton(
               inputId = ns("dropdown_params"),
-              label = shiny::icon("filter"),
+              label = phosphoricons::ph("funnel",weight = "bold"),
+              # label = shiny::icon("filter"),
               width = "50px"
             ),
             filter_ui
@@ -8146,7 +8161,8 @@ m_redcap_readUI <- function(id, title = TRUE, url = NULL) {
       shiny::actionButton(
         inputId = ns("data_import"),
         label = i18n$t("Import"),
-        icon = shiny::icon("download", lib = "glyphicon"),
+        icon = phosphoricons::ph("download-simple",weight = "bold"),
+        # icon = shiny::icon("download", lib = "glyphicon"),
         width = "100%",
         disabled = TRUE
       ),
@@ -10141,7 +10157,8 @@ regression_ui <- function(id, ...) {
             bslib::accordion_panel(
               value = "acc_pan_reg",
               title = i18n$t("Regression"),
-              icon = bsicons::bs_icon("calculator"),
+              icon = phosphoricons::ph("calculator"),
+              # icon = bsicons::bs_icon("calculator"),
               shiny::uiOutput(outputId = ns("outcome_var")),
               # shiny::selectInput(
               #   inputId = "design",
@@ -10175,7 +10192,8 @@ regression_ui <- function(id, ...) {
               bslib::input_task_button(
                 id = ns("load"),
                 label = i18n$t("Analyse"),
-                icon = bsicons::bs_icon("pencil"),
+                icon = phosphoricons::ph("math-operations"),
+                # icon = bsicons::bs_icon("pencil"),
                 label_busy = i18n$t("Working..."),
                 icon_busy = fontawesome::fa_i("arrows-rotate",
                   class = "fa-spin",
@@ -10220,7 +10238,8 @@ regression_ui <- function(id, ...) {
                 list(
                   value = "acc_pan_coef_plot",
                   title = "Coefficients plot",
-                  icon = bsicons::bs_icon("bar-chart-steps"),
+                  icon = phosphoricons::ph("chart-bar-horizontal"),
+                  # icon = bsicons::bs_icon("bar-chart-steps"),
                   shiny::tags$br(),
                   shiny::uiOutput(outputId = ns("plot_model"))
                 ),
@@ -10263,7 +10282,8 @@ regression_ui <- function(id, ...) {
                   shiny::downloadButton(
                     outputId = ns("download_plot"),
                     label = i18n$t("Download plot"),
-                    icon = shiny::icon("download")
+                    icon = phosphoricons::ph("arrow-fat-down")
+                    # icon = shiny::icon("download")
                   )
                 )
               )
@@ -10284,7 +10304,8 @@ regression_ui <- function(id, ...) {
             bslib::accordion_panel(
               value = "acc_pan_checks",
               title = "Checks",
-              icon = bsicons::bs_icon("clipboard-check"),
+              icon = phosphoricons::ph("checks"),
+              # icon = bsicons::bs_icon("clipboard-check"),
               shiny::uiOutput(outputId = ns("plot_checks"))
             )
           )
@@ -11428,7 +11449,8 @@ table_download_server <- function(id, data, file_name = "table", ...) {
           shiny::downloadButton(
             outputId = ns("act_table"),
             label = i18n$t("Download table"),
-            icon = shiny::icon("download")
+            icon = phosphoricons::ph("arrow-fat-down")
+            # icon = shiny::icon("download")
           )
         } else {
           # Return NULL to show nothing
@@ -11719,7 +11741,8 @@ ui_elements <- function(selection) {
     "home" = bslib::nav_panel(
       title = "FreesearchR",
       # title = shiny::div(htmltools::img(src="FreesearchR-logo-white-nobg-h80.png")),
-      icon = shiny::icon("house"),
+      icon = phosphoricons::ph("house", weight = "bold"),
+      # icon = shiny::icon("house"),
       shiny::fluidRow(
         # "The browser language is",
         # textOutput("your_lang"),
@@ -11749,7 +11772,8 @@ ui_elements <- function(selection) {
     ##############################################################################
     "import" = bslib::nav_panel(
       title = i18n$t("Get started"),
-      icon = shiny::icon("play"),
+      icon = phosphoricons::ph("play", weight = "bold"),
+      # icon = shiny::icon("play"),
       value = "nav_import",
       shiny::fluidRow(
         shiny::column(width = 2),
@@ -11826,7 +11850,8 @@ ui_elements <- function(selection) {
               inputId = "modal_initial_view",
               label = i18n$t("Quick overview"),
               width = "100%",
-              icon = shiny::icon("binoculars"),
+              icon = phosphoricons::ph("binoculars"),
+              # icon = shiny::icon("binoculars"),
               disabled = FALSE
             ),
             shiny::br(),
@@ -11870,7 +11895,8 @@ ui_elements <- function(selection) {
               inputId = "act_start",
               label = i18n$t("Let's begin!"),
               width = "100%",
-              icon = shiny::icon("play"),
+              icon = phosphoricons::ph("play"),
+              # icon = shiny::icon("play"),
               disabled = TRUE
             ),
             shiny::br(),
@@ -11889,11 +11915,13 @@ ui_elements <- function(selection) {
     ##############################################################################
     "prepare" = bslib::nav_menu(
       title = i18n$t("Prepare"),
-      icon = shiny::icon("pen-to-square"),
+      icon = phosphoricons::ph("note-pencil", weight = "bold"),
+      # icon = shiny::icon("pen-to-square"),
       value = "nav_prepare",
       bslib::nav_panel(
         title = i18n$t("Overview and filter"),
-        icon = shiny::icon("eye"),
+        icon = phosphoricons::ph("eye"),
+        # icon = shiny::icon("eye"),
         value = "nav_prepare_overview",
         tags$h3(i18n$t("Overview and filtering")),
         fluidRow(
@@ -11968,7 +11996,8 @@ ui_elements <- function(selection) {
       ),
       bslib::nav_panel(
         title = i18n$t("Edit and create data"),
-        icon = shiny::icon("file-pen"),
+        icon = phosphoricons::ph("pencil-line"),
+        # icon = shiny::icon("file-pen"),
         tags$h3(i18n$t("Subset, rename and convert variables")),
         fluidRow(shiny::column(
           width = 9, shiny::tags$p(
@@ -11997,13 +12026,13 @@ ui_elements <- function(selection) {
             width = 3,
             shiny::actionButton(
               inputId = "modal_update",
-              label = i18n$t("Modify factor levels"),
+              label = i18n$t("Modify factor"),
               width = "100%"
             ),
             shiny::tags$br(),
-            shiny::helpText(
-              i18n$t("Reorder or rename the levels of factor/categorical variables.")
-            ),
+            shiny::helpText(i18n$t(
+              "Modify the levels of factor/categorical variables."
+            )),
             shiny::tags$br(),
             shiny::tags$br()
           ),
@@ -12016,9 +12045,7 @@ ui_elements <- function(selection) {
             ),
             shiny::tags$br(),
             shiny::helpText(
-              i18n$t(
-                "Create factor/categorical variable from a continous variable (number/date/time)."
-              )
+              i18n$t("Create factor/categorical variable from other variables.")
             ),
             shiny::tags$br(),
             shiny::tags$br()
@@ -12095,14 +12122,16 @@ ui_elements <- function(selection) {
     "describe" =
       bslib::nav_menu(
         title = i18n$t("Evaluate"),
-        icon = shiny::icon("magnifying-glass-chart"),
+        icon = phosphoricons::ph("magnifying-glass", weight = "bold"),
+        # icon = shiny::icon("magnifying-glass-chart"),
         value = "nav_describe",
         # id = "navdescribe",
         # bslib::navset_bar(
         #   title = "",
         bslib::nav_panel(
           title = i18n$t("Characteristics"),
-          icon = bsicons::bs_icon("table"),
+          icon = phosphoricons::ph("table"),
+          # icon = bsicons::bs_icon("table"),
           bslib::layout_sidebar(
             sidebar = bslib::sidebar(
               shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
@@ -12114,7 +12143,8 @@ ui_elements <- function(selection) {
                   open = TRUE,
                   value = "acc_pan_chars",
                   title = "Settings",
-                  icon = bsicons::bs_icon("table"),
+                  icon = phosphoricons::ph("table"),
+                  # icon = bsicons::bs_icon("table"),
                   # vectorSelectInput(
                   #   inputId = "baseline_theme",
                   #   selected = "none",
@@ -12156,7 +12186,8 @@ ui_elements <- function(selection) {
                     inputId = "act_eval",
                     label = i18n$t("Evaluate"),
                     width = "100%",
-                    icon = shiny::icon("calculator"),
+                    icon = phosphoricons::ph("calculator"),
+                    # icon = shiny::icon("calculator"),
                     disabled = TRUE
                   ),
                   shiny::helpText(i18n$t(
@@ -12170,7 +12201,8 @@ ui_elements <- function(selection) {
         ),
         bslib::nav_panel(
           title = i18n$t("Correlations"),
-          icon = bsicons::bs_icon("bounding-box"),
+          icon = phosphoricons::ph("graph"),
+          # icon = bsicons::bs_icon("bounding-box"),
           bslib::layout_sidebar(
             sidebar = bslib::sidebar(
               # shiny::uiOutput(outputId = "data_info_nochar", inline = TRUE),
@@ -12211,7 +12243,8 @@ ui_elements <- function(selection) {
         do.call(bslib::nav_panel, c(
           list(
             title = i18n$t("Missings"),
-            icon = bsicons::bs_icon("x-circle")
+            icon = phosphoricons::ph("placeholder")
+            # icon = bsicons::bs_icon("x-circle")
           ),
           data_missings_ui(id = "missingness", validation_ui("validation_mcar"))
         ))
@@ -12226,7 +12259,8 @@ ui_elements <- function(selection) {
       c(
         list(
           title = i18n$t("Visuals"),
-          icon = shiny::icon("chart-line"),
+          icon = phosphoricons::ph("chart-line", weight = "bold"),
+          # icon = shiny::icon("chart-line"),
           value = "nav_visuals"
         ),
         data_visuals_ui("visuals")
@@ -12247,7 +12281,8 @@ ui_elements <- function(selection) {
     "analyze" =
       bslib::nav_panel(
         title = i18n$t("Regression"),
-        icon = shiny::icon("calculator"),
+        icon = phosphoricons::ph("calculator", weight = "bold"),
+        # icon = shiny::icon("calculator"),
         value = "nav_analyses",
         do.call(bslib::navset_card_tab, regression_ui("regression"))
       ),
@@ -12259,7 +12294,8 @@ ui_elements <- function(selection) {
     "download" =
       bslib::nav_panel(
         title = i18n$t("Download"),
-        icon = shiny::icon("download"),
+        icon = phosphoricons::ph("download-simple", weight = "bold"),
+        # icon = shiny::icon("download"),
         value = "nav_download",
         shiny::fluidRow(
           shiny::column(width = 2),
@@ -12295,7 +12331,8 @@ ui_elements <- function(selection) {
                 shiny::downloadButton(
                   outputId = "report",
                   label = "Download report",
-                  icon = shiny::icon("download")
+                  icon = phosphoricons::ph("arrow-fat-down")
+                  # icon = shiny::icon("download")
                 ),
                 shiny::br()
                 # shiny::helpText("If choosing to output to MS Word, please note, that when opening the document, two errors will pop-up. Choose to repair and choose not to update references. The issue is being worked on. You can always choose LibreOffice instead."),
@@ -12325,7 +12362,8 @@ ui_elements <- function(selection) {
                 shiny::downloadButton(
                   outputId = "data_modified",
                   label = "Download data",
-                  icon = shiny::icon("download")
+                  icon = phosphoricons::ph("arrow-fat-down")
+                  # icon = shiny::icon("download")
                 )
               )
             ),
@@ -12459,7 +12497,7 @@ update_factor_ui <- function(id) {
         actionButton(
           disabled = TRUE,
           inputId = ns("drop_levels"),
-          label = tagList(phosphoricons::ph("sort-ascending"), i18n$t("Drop empty")),
+          label = tagList(phosphoricons::ph("trash"), i18n$t("Drop empty")),
           class = "btn-outline-primary mb-3",
           width = "100%"
         )
