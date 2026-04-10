@@ -1,7 +1,7 @@
 
 
 ########
-#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmpmlTuE8/file8be05102425f.R 
+#### Current file: /var/folders/9l/xbc19wxx0g79jdd2sf_0v291mhwh7f/T//RtmprUCGcI/file4761ae70bf7.R 
 ########
 
 i18n_path <- here::here("translations")
@@ -64,7 +64,7 @@ i18n$set_translation_language("en")
 #### Current file: /Users/au301842/FreesearchR/R//app_version.R 
 ########
 
-app_version <- function()'26.4.1'
+app_version <- function()'26.4.2'
 
 
 ########
@@ -512,7 +512,7 @@ create_column_ui <- function(id) {
       actionButton(
         inputId = ns("compute"),
         label = tagList(
-          phosphoricons::ph("pencil"), i18n$t("Create column")
+          phosphoricons::ph("pencil",weight = "bold"), i18n$t("Create column")
         ),
         class = "btn-outline-primary",
         width = "100%"
@@ -520,7 +520,7 @@ create_column_ui <- function(id) {
       actionButton(
         inputId = ns("remove"),
         label = tagList(
-          phosphoricons::ph("x-circle"),
+          phosphoricons::ph("x-circle",weight = "bold"),
           i18n$t("Cancel")
         ),
         class = "btn-outline-danger",
@@ -1568,7 +1568,7 @@ cut_variable_ui <- function(id) {
     toastui::datagridOutput2(outputId = ns("count")),
     actionButton(
       inputId = ns("create"),
-      label = tagList(phosphoricons::ph("scissors"), i18n$t("Create factor variable")),
+      label = tagList(phosphoricons::ph("scissors",weight = "bold"), i18n$t("Create factor variable")),
       class = "btn-outline-primary float-end"
     ),
     tags$div(class = "clearfix")
@@ -2175,7 +2175,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
               inputId = ns("act_plot"),
               label = i18n$t("Plot"),
               width = "100%",
-              icon = phosphoricons::ph("paint-brush"),
+              icon = phosphoricons::ph("paint-brush",weight = "bold"),
               # icon = shiny::icon("palette"),
               disabled = FALSE
             ),
@@ -2380,7 +2380,8 @@ data_visuals_server <- function(id,
         colorSelectInput(
           inputId = ns("color_palette"),
           label = i18n$t("Choose color palette"),
-          choices = palettes
+          choices = palettes,
+          previews = 5
         )
       })
 
@@ -2858,6 +2859,7 @@ wrap_plot_list <- function(data,
                            guides = "collect",
                            axes = "collect",
                            axis_titles = "collect",
+                           y.axis.percentage = FALSE,
                            ...) {
   if (ggplot2::is_ggplot(data[[1]])) {
     if (length(data) > 1) {
@@ -2871,7 +2873,7 @@ wrap_plot_list <- function(data,
             .x
           }
         })() |>
-        align_axes() |>
+        align_axes(percentage=y.axis.percentage) |>
         patchwork::wrap_plots(guides = guides,
                               axes = axes,
                               axis_titles = axis_titles,
@@ -2916,7 +2918,8 @@ wrap_plot_list <- function(data,
 #'
 align_axes <- function(...,
                        x.axis = TRUE,
-                       y.axis = TRUE) {
+                       y.axis = TRUE,
+                       percentage = FALSE) {
   # https://stackoverflow.com/questions/62818776/get-axis-limits-from-ggplot-object
   # https://github.com/thomasp85/patchwork/blob/main/R/plot_multipage.R#L150
   if (ggplot2::is_ggplot(..1)) {
@@ -2934,7 +2937,7 @@ align_axes <- function(...,
   xr <- clean_common_axis(p, "x")
 
   suppressWarnings({
-    purrr::map(p, \(.x) {
+    p_out <- purrr::map(p, \(.x) {
       out <- .x
       if (isTRUE(x.axis)) {
         out <- out + ggplot2::xlim(xr)
@@ -2945,6 +2948,15 @@ align_axes <- function(...,
       out
     })
   })
+
+  if(isTRUE(percentage)){
+    lapply(p_out,\(.x){
+      .x+
+        ggplot2::scale_y_continuous(labels = scales::percent)
+    })
+  } else {
+    p_out
+  }
 }
 
 #' Extract and clean axis ranges
@@ -4031,13 +4043,13 @@ color_choices <- function() {
     "Perceptual (blue-yellow)"   = "viridis",
     "Perceptual (fire)"          = "plasma",
     "Colour-blind friendly"      = "Okabe-Ito",
-    "Qualitative (bold)"         = "Dark 2",
-    "Qualitative (paired)"       = "Paired",
-    "Sequential (blues)"         = "Blues",
+    "Diverging (red-yellow-green)"= "RdYlGn",
     "Diverging (red-blue)"       = "RdBu",
-    "Tableau style"              = "Tableau 10",
-    "Pastel"                     = "Pastel 1",
-    "Rainbow"                    = "rainbow"
+    "Sequential (blues)"         = "Blues",
+    "Qualitative (paired)"       = "Paired",
+    "Qualitative (bold)"         = "Dark 2",
+    "Rainbow"                    = "Spectral",
+    "Generic"                     = "Set1"
   )
 }
 
@@ -4945,7 +4957,7 @@ apply_idea_filter <- function(filtered_reactive, df_target, env = parent.frame()
 #### Current file: /Users/au301842/FreesearchR/R//hosted_version.R 
 ########
 
-hosted_version <- function()'v26.4.1-260402'
+hosted_version <- function()'v26.4.2-260410'
 
 
 ########
@@ -6085,7 +6097,7 @@ make_success_alert <- function(data,
       i18n$t("Data ready to be imported!")
     ),
     sprintf(
-      i18n$t("Data has %s obs. of %s variables."),
+      i18n$t("The data set has %s obs. in %s variables."),
       nrow(data),
       ncol(data)
     ),
@@ -6096,7 +6108,7 @@ make_success_alert <- function(data,
       i18n$t("Data successfully imported!")
     ),
     sprintf(
-      i18n$t("Data has %s obs. of %s variables."),
+      i18n$t("The data set has %s obs. in %s variables."),
       nrow(data),
       ncol(data)
     ),
@@ -6581,7 +6593,7 @@ data_missings_ui <- function(id, ...) {
             inputId = ns("act_miss"),
             label = i18n$t("Evaluate"),
             width = "100%",
-            icon = phosphoricons::ph("calculator"),
+            icon = phosphoricons::ph("calculator",weight = "bold"),
             # icon = shiny::icon("calculator"),
             disabled = TRUE
           )
@@ -6918,8 +6930,32 @@ missings_logic_across <- function(data, exclude = NULL) {
 #### Current file: /Users/au301842/FreesearchR/R//plot_bar.R 
 ########
 
-plot_bar <- function(data, pri, sec, ter = NULL, style = c("stack", "dodge", "fill"),
-                     color.palette = "viridis", max_level = 30, ...) {
+#' Title
+#'
+#' @name data-plots
+#'
+#' @param style barplot style passed to geom_bar position argument.
+#' One of c("stack", "dodge", "fill")
+#'
+#' @returns ggplot list object
+#' @export
+#'
+#' @examples
+#' mtcars |>
+#'   dplyr::mutate(cyl = factor(cyl), am = factor(am)) |>
+#'   plot_bar(pri = "cyl", sec = "am", style = "fill")
+#'
+#' mtcars |>
+#'   dplyr::mutate(dplyr::across(tidyselect::all_of(c("cyl","am","gear")),factor)) |>
+#'   plot_bar(pri = "cyl", sec = "gear", ter = "am", style = "stack",color.palette="turbo")
+plot_bar <- function(data,
+                     pri,
+                     sec = NULL,
+                     ter = NULL,
+                     style = c("stack", "dodge", "fill"),
+                     color.palette = "viridis",
+                     max_level = 30,
+                     ...) {
   style <- match.arg(style)
 
   if (!is.null(ter)) {
@@ -6928,7 +6964,7 @@ plot_bar <- function(data, pri, sec, ter = NULL, style = c("stack", "dodge", "fi
     ds <- list(data)
   }
 
-  out <- lapply(ds, \(.ds){
+  out <- lapply(ds, \(.ds) {
     plot_bar_single(
       data = .ds,
       pri = pri,
@@ -6939,7 +6975,10 @@ plot_bar <- function(data, pri, sec, ter = NULL, style = c("stack", "dodge", "fi
     )
   })
 
-  wrap_plot_list(out, title = glue::glue(i18n$t("Grouped by {get_label(data,ter)}")), ...)
+  wrap_plot_list(out,
+                 title = glue::glue(i18n$t("Grouped by {get_label(data,ter)}")),
+                 y.axis.percentage = TRUE,
+                 ...)
 }
 
 
@@ -6961,7 +7000,11 @@ plot_bar <- function(data, pri, sec, ter = NULL, style = c("stack", "dodge", "fi
 #' mtcars |>
 #'   dplyr::mutate(cyl = factor(cyl), am = factor(am)) |>
 #'   plot_bar_single(pri = "cyl", style = "stack",color.palette="turbo")
-plot_bar_single <- function(data, pri, sec = NULL, style = c("stack", "dodge", "fill"), max_level = 30,
+plot_bar_single <- function(data,
+                            pri,
+                            sec = NULL,
+                            style = c("stack", "dodge", "fill"),
+                            max_level = 30,
                             color.palette = "viridis") {
   style <- match.arg(style)
 
@@ -6971,16 +7014,11 @@ plot_bar_single <- function(data, pri, sec = NULL, style = c("stack", "dodge", "
 
   p_data <- as.data.frame(table(data[c(pri, sec)])) |>
     dplyr::mutate(dplyr::across(tidyselect::any_of(c(pri, sec)), forcats::as_factor),
-      p = Freq / NROW(data)
-    )
+                  p = Freq / NROW(data))
 
 
   if (nrow(p_data) > max_level) {
-    p_data <- sort_by(
-      p_data,
-      p_data[["Freq"]],
-      decreasing = TRUE
-    ) |>
+    p_data <- sort_by(p_data, p_data[["Freq"]], decreasing = TRUE) |>
       head(max_level)
   }
 
@@ -6993,41 +7031,33 @@ plot_bar_single <- function(data, pri, sec = NULL, style = c("stack", "dodge", "
     fill <- pri
   }
 
-  p <- ggplot2::ggplot(
-    p_data,
-    ggplot2::aes(
-      x = .data[[pri]],
-      y = p,
-      fill = .data[[fill]]
-    )
-  ) +
+  p <- ggplot2::ggplot(p_data, ggplot2::aes(x = .data[[pri]], y = p, fill = .data[[fill]])) +
     ggplot2::geom_bar(position = style, stat = "identity") +
-    ggplot2::scale_y_continuous(labels = scales::percent) +
-    scale_fill_generate(palette=color.palette) +
-    ggplot2::ylab("Percentage") +
-    ggplot2::xlab(get_label(data,pri))+
-    ggplot2::guides(fill = ggplot2::guide_legend(title = get_label(data,fill)))
+    scale_fill_generate(palette = color.palette)  +
+    ggplot2::xlab(get_label(data, pri)) +
+    ggplot2::guides(fill = ggplot2::guide_legend(title = get_label(data, fill)))
 
   ## To handle large number of levels and long level names
 
-  if (nrow(p_data) > 10 | any(nchar(as.character(p_data[[pri]])) > 6)) {
+  if (nrow(p_data) > 10 |
+      any(nchar(as.character(p_data[[pri]])) > 6)) {
     p <- p +
       # ggplot2::guides(fill = "none") +
-      ggplot2::theme(
-        axis.text.x = ggplot2::element_text(
-          angle = 90,
-          vjust = 1, hjust = 1
-        ))+
-      ggplot2::theme(
-        axis.text.x = ggplot2::element_text(vjust = 0.5)
-      )
+      ggplot2::theme(axis.text.x = ggplot2::element_text(
+        angle = 90,
+        vjust = 1,
+        hjust = 1
+      )) +
+      ggplot2::theme(axis.text.x = ggplot2::element_text(vjust = 0.5))
 
-    if (is.null(sec)){
+    if (is.null(sec)) {
       p <- p +
         ggplot2::guides(fill = "none")
     }
   }
-  p
+  p +
+    ggplot2::scale_y_continuous(labels = scales::percent) +
+    ggplot2::ylab("Percentage")
 }
 
 
@@ -10965,7 +10995,7 @@ string_split_ui <- function(id) {
     ),
     actionButton(
       inputId = ns("create"),
-      label = tagList(phosphoricons::ph("pencil"), i18n$t("Apply split")),
+      label = tagList(phosphoricons::ph("pencil",weight = "bold"), i18n$t("Apply split")),
       class = "btn-outline-primary float-end"
     ),
     tags$div(class = "clearfix")
@@ -11850,7 +11880,7 @@ ui_elements <- function(selection) {
               inputId = "modal_initial_view",
               label = i18n$t("Quick overview"),
               width = "100%",
-              icon = phosphoricons::ph("binoculars"),
+              icon = phosphoricons::ph("binoculars",weight = "bold"),
               # icon = shiny::icon("binoculars"),
               disabled = FALSE
             ),
@@ -11895,7 +11925,7 @@ ui_elements <- function(selection) {
               inputId = "act_start",
               label = i18n$t("Let's begin!"),
               width = "100%",
-              icon = phosphoricons::ph("play"),
+              icon = phosphoricons::ph("play",weight = "bold"),
               # icon = shiny::icon("play"),
               disabled = TRUE
             ),
@@ -12186,7 +12216,7 @@ ui_elements <- function(selection) {
                     inputId = "act_eval",
                     label = i18n$t("Evaluate"),
                     width = "100%",
-                    icon = phosphoricons::ph("calculator"),
+                    icon = phosphoricons::ph("calculator",weight = "bold"),
                     # icon = shiny::icon("calculator"),
                     disabled = TRUE
                   ),
@@ -12497,7 +12527,7 @@ update_factor_ui <- function(id) {
         actionButton(
           disabled = TRUE,
           inputId = ns("drop_levels"),
-          label = tagList(phosphoricons::ph("trash"), i18n$t("Drop empty")),
+          label = tagList(phosphoricons::ph("trash",weight = "bold"), i18n$t("Drop empty")),
           class = "btn-outline-primary mb-3",
           width = "100%"
         )
@@ -12508,7 +12538,7 @@ update_factor_ui <- function(id) {
         actionButton(
           inputId = ns("sort_levels"),
           label = tagList(
-            phosphoricons::ph("sort-ascending"),
+            phosphoricons::ph("sort-ascending",weight = "bold"),
             i18n$t("Sort by levels")
           ),
           class = "btn-outline-primary mb-3",
@@ -12521,7 +12551,7 @@ update_factor_ui <- function(id) {
         actionButton(
           inputId = ns("sort_occurrences"),
           label = tagList(
-            phosphoricons::ph("sort-ascending"),
+            phosphoricons::ph("sort-ascending",weight = "bold"),
             i18n$t("Sort by count")
           ),
           class = "btn-outline-primary mb-3",
@@ -12545,7 +12575,7 @@ update_factor_ui <- function(id) {
       actionButton(
         inputId = ns("create"),
         label = tagList(
-          phosphoricons::ph("arrow-clockwise"),
+          phosphoricons::ph("arrow-clockwise",weight = "bold"),
           i18n$t("Update factor variable")
         ),
         class = "btn-outline-primary"
@@ -12897,7 +12927,7 @@ update_variables_ui <- function(id, title = "") {
             placement = "bottom-end",
             shiny::actionButton(
               inputId = ns("settings"),
-              label = phosphoricons::ph("gear"),
+              label = phosphoricons::ph("gear",weight = "bold"),
               class = "pull-right float-right"
             ),
             shinyWidgets::textInputIcon(
@@ -12942,7 +12972,7 @@ update_variables_ui <- function(id, title = "") {
     shiny::actionButton(
       inputId = ns("validate"),
       label = htmltools::tagList(
-        phosphoricons::ph("arrow-circle-right", title = i18n$t("Apply changes")),
+        phosphoricons::ph("arrow-circle-right", title = i18n$t("Apply changes"),weight = "bold"),
         i18n$t("Apply changes")
       ),
       width = "100%"
