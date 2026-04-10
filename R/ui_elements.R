@@ -124,7 +124,7 @@ ui_elements <- function(selection) {
               inputId = "modal_initial_view",
               label = i18n$t("Quick overview"),
               width = "100%",
-              icon = phosphoricons::ph("binoculars"),
+              icon = phosphoricons::ph("binoculars",weight = "bold"),
               # icon = shiny::icon("binoculars"),
               disabled = FALSE
             ),
@@ -169,7 +169,7 @@ ui_elements <- function(selection) {
               inputId = "act_start",
               label = i18n$t("Let's begin!"),
               width = "100%",
-              icon = phosphoricons::ph("play"),
+              icon = phosphoricons::ph("play",weight = "bold"),
               # icon = shiny::icon("play"),
               disabled = TRUE
             ),
@@ -460,7 +460,7 @@ ui_elements <- function(selection) {
                     inputId = "act_eval",
                     label = i18n$t("Evaluate"),
                     width = "100%",
-                    icon = phosphoricons::ph("calculator"),
+                    icon = phosphoricons::ph("calculator",weight = "bold"),
                     # icon = shiny::icon("calculator"),
                     disabled = TRUE
                   ),

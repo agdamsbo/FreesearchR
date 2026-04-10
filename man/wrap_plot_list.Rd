@@ -12,6 +12,7 @@ wrap_plot_list(
   guides = "collect",
   axes = "collect",
   axis_titles = "collect",
+  y.axis.percentage = FALSE,
   ...
 )
 }

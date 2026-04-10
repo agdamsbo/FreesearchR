@@ -4,7 +4,7 @@
 \alias{align_axes}
 \title{Aligns axes between plots}
 \usage{
-align_axes(..., x.axis = TRUE, y.axis = TRUE)
+align_axes(..., x.axis = TRUE, y.axis = TRUE, percentage = FALSE)
 }
 \arguments{
 \item{...}{ggplot2 objects or list of ggplot2 objects}

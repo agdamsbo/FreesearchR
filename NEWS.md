@@ -1,3 +1,7 @@
+# FreesearchR 26.4.2
+
+Bug fixes and revised color choices.
+
 # FreesearchR 26.4.1
 
 Minor adjustments and bug fixes including streamlining icon use to only use phosphoricons across the app.

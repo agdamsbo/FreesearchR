@@ -30,7 +30,7 @@ update_variables_ui <- function(id, title = "") {
             placement = "bottom-end",
             shiny::actionButton(
               inputId = ns("settings"),
-              label = phosphoricons::ph("gear"),
+              label = phosphoricons::ph("gear",weight = "bold"),
               class = "pull-right float-right"
             ),
             shinyWidgets::textInputIcon(
@@ -75,7 +75,7 @@ update_variables_ui <- function(id, title = "") {
     shiny::actionButton(
       inputId = ns("validate"),
       label = htmltools::tagList(
-        phosphoricons::ph("arrow-circle-right", title = i18n$t("Apply changes")),
+        phosphoricons::ph("arrow-circle-right", title = i18n$t("Apply changes"),weight = "bold"),
         i18n$t("Apply changes")
       ),
       width = "100%"

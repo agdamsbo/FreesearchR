@@ -44,7 +44,7 @@ update_factor_ui <- function(id) {
         actionButton(
           disabled = TRUE,
           inputId = ns("drop_levels"),
-          label = tagList(phosphoricons::ph("trash"), i18n$t("Drop empty")),
+          label = tagList(phosphoricons::ph("trash",weight = "bold"), i18n$t("Drop empty")),
           class = "btn-outline-primary mb-3",
           width = "100%"
         )
@@ -55,7 +55,7 @@ update_factor_ui <- function(id) {
         actionButton(
           inputId = ns("sort_levels"),
           label = tagList(
-            phosphoricons::ph("sort-ascending"),
+            phosphoricons::ph("sort-ascending",weight = "bold"),
             i18n$t("Sort by levels")
           ),
           class = "btn-outline-primary mb-3",
@@ -68,7 +68,7 @@ update_factor_ui <- function(id) {
         actionButton(
           inputId = ns("sort_occurrences"),
           label = tagList(
-            phosphoricons::ph("sort-ascending"),
+            phosphoricons::ph("sort-ascending",weight = "bold"),
             i18n$t("Sort by count")
           ),
           class = "btn-outline-primary mb-3",
@@ -92,7 +92,7 @@ update_factor_ui <- function(id) {
       actionButton(
         inputId = ns("create"),
         label = tagList(
-          phosphoricons::ph("arrow-clockwise"),
+          phosphoricons::ph("arrow-clockwise",weight = "bold"),
           i18n$t("Update factor variable")
         ),
         class = "btn-outline-primary"

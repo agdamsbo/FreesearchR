@@ -37,7 +37,7 @@ data_missings_ui <- function(id, ...) {
             inputId = ns("act_miss"),
             label = i18n$t("Evaluate"),
             width = "100%",
-            icon = phosphoricons::ph("calculator"),
+            icon = phosphoricons::ph("calculator",weight = "bold"),
             # icon = shiny::icon("calculator"),
             disabled = TRUE
           )

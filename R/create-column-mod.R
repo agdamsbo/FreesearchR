@@ -76,7 +76,7 @@ create_column_ui <- function(id) {
       actionButton(
         inputId = ns("compute"),
         label = tagList(
-          phosphoricons::ph("pencil"), i18n$t("Create column")
+          phosphoricons::ph("pencil",weight = "bold"), i18n$t("Create column")
         ),
         class = "btn-outline-primary",
         width = "100%"
@@ -84,7 +84,7 @@ create_column_ui <- function(id) {
       actionButton(
         inputId = ns("remove"),
         label = tagList(
-          phosphoricons::ph("x-circle"),
+          phosphoricons::ph("x-circle",weight = "bold"),
           i18n$t("Cancel")
         ),
         class = "btn-outline-danger",

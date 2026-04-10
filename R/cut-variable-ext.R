@@ -64,7 +64,7 @@ cut_variable_ui <- function(id) {
     toastui::datagridOutput2(outputId = ns("count")),
     actionButton(
       inputId = ns("create"),
-      label = tagList(phosphoricons::ph("scissors"), i18n$t("Create factor variable")),
+      label = tagList(phosphoricons::ph("scissors",weight = "bold"), i18n$t("Create factor variable")),
       class = "btn-outline-primary float-end"
     ),
     tags$div(class = "clearfix")

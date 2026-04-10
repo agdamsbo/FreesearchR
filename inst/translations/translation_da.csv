@@ -275,7 +275,6 @@
 "Select a dataset from your environment or sample dataset from a package.","Vælg et datasæt fra din kørende session eller vælg træningsdata."
 "Select a sample dataset from a package.","Vælg et træningsdatasæt."
 "Data ready to be imported!","Data er klar til at blive importeret!"
-"Data has %s obs. of %s variables.","Data har %s obs. på %s variabler."
 "Data successfully imported!","Data successfully imported!"
 "Click to see data","Klik for at se data"
 "No data present.","Ingen data tilstede."
@@ -320,3 +319,4 @@
 "Likert diagram","Likert diagram"
 "Modify factor","Modify factor"
 "Create factor/categorical variable from other variables.","Create factor/categorical variable from other variables."
+"The data set has %s obs. in %s variables.","The data set has %s obs. in %s variables."

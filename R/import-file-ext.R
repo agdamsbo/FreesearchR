@@ -714,7 +714,7 @@ make_success_alert <- function(data,
       i18n$t("Data ready to be imported!")
     ),
     sprintf(
-      i18n$t("Data has %s obs. of %s variables."),
+      i18n$t("The data set has %s obs. in %s variables."),
       nrow(data),
       ncol(data)
     ),
@@ -725,7 +725,7 @@ make_success_alert <- function(data,
       i18n$t("Data successfully imported!")
     ),
     sprintf(
-      i18n$t("Data has %s obs. of %s variables."),
+      i18n$t("The data set has %s obs. in %s variables."),
       nrow(data),
       ncol(data)
     ),

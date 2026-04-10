@@ -7,6 +7,7 @@
 \alias{data_visuals_ui}
 \alias{data_visuals_server}
 \alias{create_plot}
+\alias{plot_bar}
 \alias{plot_bar_single}
 \alias{plot_box}
 \alias{plot_box_single}
@@ -24,6 +25,17 @@ data_visuals_ui(id, tab_title = "Plots", ...)
 data_visuals_server(id, data, palettes, ...)
 
 create_plot(data, type, pri, sec, ter = NULL, color.palette = "viridis", ...)
+
+plot_bar(
+  data,
+  pri,
+  sec = NULL,
+  ter = NULL,
+  style = c("stack", "dodge", "fill"),
+  color.palette = "viridis",
+  max_level = 30,
+  ...
+)
 
 plot_bar_single(
   data,
@@ -91,6 +103,8 @@ shiny server module
 
 ggplot2 object
 
+ggplot list object
+
 ggplot object
 
 ggplot2 object
@@ -116,6 +130,8 @@ Data correlations evaluation module
 
 Wrapper to create plot based on provided type
 
+Title
+
 Single vertical barplot
 
 Beautiful box plot(s)
@@ -138,6 +154,13 @@ Beautiful violin plot
 }
 \examples{
 create_plot(mtcars, "plot_violin", "mpg", "cyl") |> attributes()
+mtcars |>
+  dplyr::mutate(cyl = factor(cyl), am = factor(am)) |>
+  plot_bar(pri = "cyl", sec = "am", style = "fill")
+
+mtcars |>
+  dplyr::mutate(dplyr::across(tidyselect::all_of(c("cyl","am","gear")),factor)) |>
+  plot_bar(pri = "cyl", sec = "gear", ter = "am", style = "stack",color.palette="turbo")
 mtcars |>
   dplyr::mutate(cyl = factor(cyl), am = factor(am)) |>
   plot_bar_single(pri = "cyl", sec = "am", style = "fill")

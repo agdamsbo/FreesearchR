@@ -50,7 +50,7 @@ string_split_ui <- function(id) {
     ),
     actionButton(
       inputId = ns("create"),
-      label = tagList(phosphoricons::ph("pencil"), i18n$t("Apply split")),
+      label = tagList(phosphoricons::ph("pencil",weight = "bold"), i18n$t("Apply split")),
       class = "btn-outline-primary float-end"
     ),
     tags$div(class = "clearfix")
