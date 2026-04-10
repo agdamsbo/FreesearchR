@@ -38,7 +38,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
               inputId = ns("act_plot"),
               label = i18n$t("Plot"),
               width = "100%",
-              icon = phosphoricons::ph("paint-brush"),
+              icon = phosphoricons::ph("paint-brush",weight = "bold"),
               # icon = shiny::icon("palette"),
               disabled = FALSE
             ),
@@ -243,7 +243,8 @@ data_visuals_server <- function(id,
         colorSelectInput(
           inputId = ns("color_palette"),
           label = i18n$t("Choose color palette"),
-          choices = palettes
+          choices = palettes,
+          previews = 5
         )
       })
 
@@ -721,6 +722,7 @@ wrap_plot_list <- function(data,
                            guides = "collect",
                            axes = "collect",
                            axis_titles = "collect",
+                           y.axis.percentage = FALSE,
                            ...) {
   if (ggplot2::is_ggplot(data[[1]])) {
     if (length(data) > 1) {
@@ -734,7 +736,7 @@ wrap_plot_list <- function(data,
             .x
           }
         })() |>
-        align_axes() |>
+        align_axes(percentage=y.axis.percentage) |>
         patchwork::wrap_plots(guides = guides,
                               axes = axes,
                               axis_titles = axis_titles,
@@ -779,7 +781,8 @@ wrap_plot_list <- function(data,
 #'
 align_axes <- function(...,
                        x.axis = TRUE,
-                       y.axis = TRUE) {
+                       y.axis = TRUE,
+                       percentage = FALSE) {
   # https://stackoverflow.com/questions/62818776/get-axis-limits-from-ggplot-object
   # https://github.com/thomasp85/patchwork/blob/main/R/plot_multipage.R#L150
   if (ggplot2::is_ggplot(..1)) {
@@ -797,7 +800,7 @@ align_axes <- function(...,
   xr <- clean_common_axis(p, "x")
 
   suppressWarnings({
-    purrr::map(p, \(.x) {
+    p_out <- purrr::map(p, \(.x) {
       out <- .x
       if (isTRUE(x.axis)) {
         out <- out + ggplot2::xlim(xr)
@@ -808,6 +811,15 @@ align_axes <- function(...,
       out
     })
   })
+
+  if(isTRUE(percentage)){
+    lapply(p_out,\(.x){
+      .x+
+        ggplot2::scale_y_continuous(labels = scales::percent)
+    })
+  } else {
+    p_out
+  }
 }
 
 #' Extract and clean axis ranges
