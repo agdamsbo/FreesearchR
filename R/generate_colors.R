@@ -254,12 +254,12 @@ color_choices <- function() {
     "Perceptual (blue-yellow)"   = "viridis",
     "Perceptual (fire)"          = "plasma",
     "Colour-blind friendly"      = "Okabe-Ito",
-    "Qualitative (bold)"         = "Dark 2",
-    "Qualitative (paired)"       = "Paired",
-    "Sequential (blues)"         = "Blues",
+    "Diverging (red-yellow-green)"= "RdYlGn",
     "Diverging (red-blue)"       = "RdBu",
-    "Tableau style"              = "Tableau 10",
-    "Pastel"                     = "Pastel 1",
-    "Rainbow"                    = "rainbow"
+    "Sequential (blues)"         = "Blues",
+    "Qualitative (paired)"       = "Paired",
+    "Qualitative (bold)"         = "Dark 2",
+    "Rainbow"                    = "Spectral",
+    "Generic"                     = "Set1"
   )
 }
