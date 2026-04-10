@@ -116,6 +116,7 @@
 - [`data_visuals_ui()`](https://agdamsbo.github.io/FreesearchR/reference/data-plots.md)
   [`data_visuals_server()`](https://agdamsbo.github.io/FreesearchR/reference/data-plots.md)
   [`create_plot()`](https://agdamsbo.github.io/FreesearchR/reference/data-plots.md)
+  [`plot_bar()`](https://agdamsbo.github.io/FreesearchR/reference/data-plots.md)
   [`plot_bar_single()`](https://agdamsbo.github.io/FreesearchR/reference/data-plots.md)
   [`plot_box()`](https://agdamsbo.github.io/FreesearchR/reference/data-plots.md)
   [`plot_box_single()`](https://agdamsbo.github.io/FreesearchR/reference/data-plots.md)

@@ -5,7 +5,7 @@ Aligns axes between plots
 ## Usage
 
 ``` r
-align_axes(..., x.axis = TRUE, y.axis = TRUE)
+align_axes(..., x.axis = TRUE, y.axis = TRUE, percentage = FALSE)
 ```
 
 ## Arguments

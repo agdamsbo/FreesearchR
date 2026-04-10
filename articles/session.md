@@ -21,18 +21,18 @@ FreesearchR:::session_data$platform |> knitr::kable()
 | option      | value                                      |
 |:------------|:-------------------------------------------|
 | version     | R version 4.5.2 (2025-10-31)               |
-| os          | macOS Tahoe 26.4                           |
+| os          | macOS Tahoe 26.4.1                         |
 | system      | aarch64, darwin20                          |
 | ui          | RStudio                                    |
 | language    | (EN)                                       |
 | collate     | en_US.UTF-8                                |
 | ctype       | en_US.UTF-8                                |
 | tz          | Europe/Copenhagen                          |
-| date        | 2026-04-01                                 |
+| date        | 2026-04-10                                 |
 | rstudio     | 2026.01.1+403 Apple Blossom (desktop)      |
 | pandoc      | 3.6.4 @ /opt/homebrew/bin/ (via rmarkdown) |
 | quarto      | 1.7.30 @ /usr/local/bin/quarto             |
-| FreesearchR | 26.4.1.260401                              |
+| FreesearchR | 26.4.2.260410                              |
 
 ## Libraries
 
@@ -102,7 +102,7 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | foreach           | 1.5.2         | 2022-02-02 | CRAN (R 4.5.0) |
 | foreign           | 0.8-91        | 2026-01-29 | CRAN (R 4.5.2) |
 | Formula           | 1.2-5         | 2023-02-24 | CRAN (R 4.5.0) |
-| FreesearchR       | 26.4.1        | NA         | NA             |
+| FreesearchR       | 26.4.2        | NA         | NA             |
 | fs                | 1.6.7         | 2026-03-06 | CRAN (R 4.5.2) |
 | gdtools           | 0.5.0         | 2026-02-09 | CRAN (R 4.5.2) |
 | generics          | 0.1.4         | 2025-05-09 | CRAN (R 4.5.0) |
@@ -166,7 +166,6 @@ FreesearchR:::session_data$libs|> knitr::kable()
 | pkgload           | 1.5.0         | 2026-02-03 | CRAN (R 4.5.2) |
 | plyr              | 1.8.9         | 2023-10-02 | CRAN (R 4.5.0) |
 | polyclip          | 1.10-7        | 2024-07-23 | CRAN (R 4.5.0) |
-| polylabelr        | 1.0.0         | 2026-01-19 | CRAN (R 4.5.2) |
 | pracma            | 2.4.6         | 2025-10-22 | CRAN (R 4.5.0) |
 | processx          | 3.8.6         | 2025-02-21 | CRAN (R 4.5.0) |
 | promises          | 1.5.0         | 2025-11-01 | CRAN (R 4.5.0) |

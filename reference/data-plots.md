@@ -4,6 +4,8 @@ Data correlations evaluation module
 
 Wrapper to create plot based on provided type
 
+Title
+
 Single vertical barplot
 
 Beautiful box plot(s)
@@ -32,6 +34,17 @@ data_visuals_ui(id, tab_title = "Plots", ...)
 data_visuals_server(id, data, palettes, ...)
 
 create_plot(data, type, pri, sec, ter = NULL, color.palette = "viridis", ...)
+
+plot_bar(
+  data,
+  pri,
+  sec = NULL,
+  ter = NULL,
+  style = c("stack", "dodge", "fill"),
+  color.palette = "viridis",
+  max_level = 30,
+  ...
+)
 
 plot_bar_single(
   data,
@@ -119,6 +132,8 @@ Shiny ui module
 shiny server module
 
 ggplot2 object
+
+ggplot list object
 
 ggplot object
 
@@ -703,12 +718,29 @@ create_plot(mtcars, "plot_violin", "mpg", "cyl") |> attributes()
 #> list()
 #> 
 #> $plot_env
-#> <environment: 0x55808d503ed8>
+#> <environment: 0x55d8c86e7f90>
 #> 
 #> $code
 #> FreesearchR::plot_violin(pri = "mpg", sec = "cyl", ter = NULL, 
 #>     color.palette = "viridis")
 #> 
+mtcars |>
+  dplyr::mutate(cyl = factor(cyl), am = factor(am)) |>
+  plot_bar(pri = "cyl", sec = "am", style = "fill")
+
+
+mtcars |>
+  dplyr::mutate(dplyr::across(tidyselect::all_of(c("cyl","am","gear")),factor)) |>
+  plot_bar(pri = "cyl", sec = "gear", ter = "am", style = "stack",color.palette="turbo")
+#> Scale for y is already present.
+#> Adding another scale for y, which will replace the existing scale.
+#> Scale for y is already present.
+#> Adding another scale for y, which will replace the existing scale.
+#> Scale for y is already present.
+#> Adding another scale for y, which will replace the existing scale.
+#> Scale for y is already present.
+#> Adding another scale for y, which will replace the existing scale.
+#> Error in plot_bar(dplyr::mutate(mtcars, dplyr::across(tidyselect::all_of(c("cyl",     "am", "gear")), factor)), pri = "cyl", sec = "gear", ter = "am",     style = "stack", color.palette = "turbo"): object 'i18n' not found
 mtcars |>
   dplyr::mutate(cyl = factor(cyl), am = factor(am)) |>
   plot_bar_single(pri = "cyl", sec = "am", style = "fill")
