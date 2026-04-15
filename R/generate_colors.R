@@ -56,38 +56,25 @@
 #'
 #' @export
 generate_colors <- function(n, palette = "viridis", ...) {
-  if (!is.numeric(n) ||
-      length(n) != 1 || n < 1 || n != as.integer(n)) {
+
+  # --- Input validation -------------------------------------------------------
+  if (!is.numeric(n) || length(n) != 1 || n < 1 || n %% 1 != 0) {
     stop("`n` must be a single positive integer.")
   }
+  if (!is.function(palette) && (!is.character(palette) || length(palette) != 1)) {
+    stop("`palette` must be a single character string or a function.")
+  }
 
-  # Function passthrough — call directly with n and ...
+  # --- Function passthrough ---------------------------------------------------
   if (is.function(palette)) {
     return(palette(n, ...))
   }
 
-  if (!is.character(palette) || length(palette) != 1) {
-    stop("`palette` must be a single character string or a function.")
-  }
-
-  if (!is.numeric(n) ||
-      length(n) != 1 || n < 1 || n != as.integer(n)) {
-    stop("`n` must be a single positive integer.")
-  }
-  if (!is.character(palette) || length(palette) != 1) {
-    stop("`palette` must be a single character string.")
-  }
-
+  # --- Named palette dispatch -------------------------------------------------
   palette_lower <- tolower(palette)
 
-  viridis_palettes <- c("viridis",
-                        "magma",
-                        "plasma",
-                        "inferno",
-                        "cividis",
-                        "mako",
-                        "rocket",
-                        "turbo")
+  viridis_palettes <- c("viridis", "magma", "plasma", "inferno",
+                        "cividis", "mako", "rocket", "turbo")
 
   if (palette_lower %in% viridis_palettes) {
     viridisLite::viridis(n = n, option = palette_lower, ...)
@@ -107,35 +94,42 @@ generate_colors <- function(n, palette = "viridis", ...) {
   } else if (palette_lower == "topo") {
     grDevices::topo.colors(n = n, ...)
 
-  } else if (palette %in% rownames(RColorBrewer::brewer.pal.info)) {
-    max_n       <- RColorBrewer::brewer.pal.info[palette, "maxcolors"]
-    fetch_n     <- max(min(n, max_n), 3L)          # clamp to [3, max_n] for brewer.pal()
-    base_colors <- RColorBrewer::brewer.pal(n = fetch_n, name = palette)
-    grDevices::colorRampPalette(base_colors)(n)
-
-  } else if (palette %in% grDevices::palette.pals()) {
-    grDevices::colorRampPalette(palette.colors(palette = palette))(n)
-
-  } else if (palette %in% grDevices::hcl.pals()) {
-    grDevices::hcl.colors(n = n, palette = palette, ...)
-
   } else {
-    message(
-      paste0(
-        "Unknown palette: '",
-        palette,
-        "'. ",
-        "Falling back to default R colors.\n",
-        "Available options:\n",
-        "  viridisLite  : viridis, magma, plasma, inferno, cividis, mako, rocket, turbo\n",
-        "  grDevices    : hcl, rainbow, heat, terrain, topo\n",
-        "  grDevices HCL: use grDevices::hcl.pals() to see all options\n",
-        "  grDevices    : use grDevices::palette.pals() to see all options\n",
-        "  RColorBrewer : use RColorBrewer::brewer.pal.info to see all options"
-      )
-    )
-    viridisLite::viridis(n = n, option = "viridis")
-    # grDevices::hcl.colors(n = n)
+    # Case-insensitive RColorBrewer lookup
+    brewer_names <- rownames(RColorBrewer::brewer.pal.info)
+    brewer_match <- brewer_names[match(palette_lower, tolower(brewer_names))]
+
+    if (!is.na(brewer_match)) {
+      max_n       <- RColorBrewer::brewer.pal.info[brewer_match, "maxcolors"]
+      fetch_n     <- max(min(n, max_n), 3L)
+      base_colors <- RColorBrewer::brewer.pal(n = fetch_n, name = brewer_match)
+      grDevices::colorRampPalette(base_colors)(n)
+
+    } else {
+      # Case-insensitive grDevices palette.pals() lookup
+      pal_names <- grDevices::palette.pals()
+      pal_match <- pal_names[match(palette_lower, tolower(pal_names))]
+
+      if (!is.na(pal_match)) {
+        grDevices::colorRampPalette(grDevices::palette.colors(palette = pal_match))(n)
+
+      } else if (palette %in% grDevices::hcl.pals()) {
+        # Named HCL palettes (e.g. "Rocket", "Plasma") — distinct from viridisLite
+        grDevices::hcl.colors(n = n, palette = palette, ...)
+
+      } else {
+        warning(
+          "Unknown palette: '", palette, "'. Falling back to viridis.\n",
+          "Available options:\n",
+          "  viridisLite  : viridis, magma, plasma, inferno, cividis, mako, rocket, turbo\n",
+          "  grDevices    : hcl, rainbow, heat, terrain, topo\n",
+          "  grDevices HCL: use grDevices::hcl.pals() to see all options\n",
+          "  grDevices    : use grDevices::palette.pals() to see all options\n",
+          "  RColorBrewer : use RColorBrewer::brewer.pal.info to see all options"
+        )
+        viridisLite::viridis(n = n, option = "viridis")
+      }
+    }
   }
 }
 
