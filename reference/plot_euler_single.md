@@ -21,10 +21,15 @@ data.frame(
   C = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE),
   D = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE)
 ) |> plot_euler_single()
-#> Scale for fill is already present.
-#> Adding another scale for fill, which will replace the existing scale.
-
+#> Error in dplyr::mutate(data$centers, label = purrr::map2(labels, quantities,     ~{        if (!is.na(.x) && !is.na(.y) && show_labels) {            paste0(.x, "\n", sprintf(.y, fmt = "%.4g"))        }        else if (!is.na(.x) && show_labels) {            .x        }        else if (!is.na(.y)) {            .y        }        else {            ""        }    })): ℹ In argument: `label = purrr::map2(...)`.
+#> Caused by error in `purrr::map2()`:
+#> ℹ In index: 1.
+#> Caused by error in `sprintf()`:
+#> ! invalid format '%.4g'; use format %s for character objects
 mtcars[c("vs", "am")] |> plot_euler_single("magma")
-#> Scale for fill is already present.
-#> Adding another scale for fill, which will replace the existing scale.
+#> Error in dplyr::mutate(data$centers, label = purrr::map2(labels, quantities,     ~{        if (!is.na(.x) && !is.na(.y) && show_labels) {            paste0(.x, "\n", sprintf(.y, fmt = "%.4g"))        }        else if (!is.na(.x) && show_labels) {            .x        }        else if (!is.na(.y)) {            .y        }        else {            ""        }    })): ℹ In argument: `label = purrr::map2(...)`.
+#> Caused by error in `purrr::map2()`:
+#> ℹ In index: 1.
+#> Caused by error in `sprintf()`:
+#> ! invalid format '%.4g'; use format %s for character objects
 ```

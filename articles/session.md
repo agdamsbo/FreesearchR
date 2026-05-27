@@ -1,6 +1,7 @@
 # Session info
 
 ``` r
+
 library(FreesearchR)
 #> 
 #> Attaching package: 'FreesearchR'
@@ -15,6 +16,7 @@ packages and the latest build info.
 ## Platform info
 
 ``` r
+
 FreesearchR:::session_data$platform |> knitr::kable()
 ```
 
@@ -37,6 +39,7 @@ FreesearchR:::session_data$platform |> knitr::kable()
 ## Libraries
 
 ``` r
+
 FreesearchR:::session_data$libs|> knitr::kable()
 ```
 

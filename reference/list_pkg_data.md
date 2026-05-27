@@ -21,6 +21,7 @@ a `character` vector or `NULL`.
 ## Examples
 
 ``` r
+
 list_pkg_data("ggplot2")
 #>  [1] "diamonds"       "economics"      "economics_long" "faithfuld"     
 #>  [5] "luv_colours"    "midwest"        "mpg"            "msleep"        

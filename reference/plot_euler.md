@@ -43,23 +43,23 @@ data.frame(
   C = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE),
   D = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE)
 ) |> plot_euler("A", c("B", "C"), "D", seed = 4)
-#> Scale for fill is already present.
-#> Adding another scale for fill, which will replace the existing scale.
-#> Scale for fill is already present.
-#> Adding another scale for fill, which will replace the existing scale.
-#> Error in plot_euler(data.frame(A = sample(c(TRUE, TRUE, FALSE), 50, TRUE),     B = sample(c("A", "C"), 50, TRUE), C = sample(c(TRUE, FALSE,         FALSE, FALSE), 50, TRUE), D = sample(c(TRUE, FALSE, FALSE,         FALSE), 50, TRUE)), "A", c("B", "C"), "D", seed = 4): object 'i18n' not found
+#> Error in dplyr::mutate(data$centers, label = purrr::map2(labels, quantities,     ~{        if (!is.na(.x) && !is.na(.y) && show_labels) {            paste0(.x, "\n", sprintf(.y, fmt = "%.4g"))        }        else if (!is.na(.x) && show_labels) {            .x        }        else if (!is.na(.y)) {            .y        }        else {            ""        }    })): ℹ In argument: `label = purrr::map2(...)`.
+#> Caused by error in `purrr::map2()`:
+#> ℹ In index: 1.
+#> Caused by error in `sprintf()`:
+#> ! invalid format '%.4g'; use format %s for character objects
 mtcars |> plot_euler("vs", "am", seed = 1)
-#> Scale for fill is already present.
-#> Adding another scale for fill, which will replace the existing scale.
-
+#> Error in dplyr::mutate(data$centers, label = purrr::map2(labels, quantities,     ~{        if (!is.na(.x) && !is.na(.y) && show_labels) {            paste0(.x, "\n", sprintf(.y, fmt = "%.4g"))        }        else if (!is.na(.x) && show_labels) {            .x        }        else if (!is.na(.y)) {            .y        }        else {            ""        }    })): ℹ In argument: `label = purrr::map2(...)`.
+#> Caused by error in `purrr::map2()`:
+#> ℹ In index: 1.
+#> Caused by error in `sprintf()`:
+#> ! invalid format '%.4g'; use format %s for character objects
 mtcars |> plot_euler("vs", "am", "cyl", seed = 1)
-#> Scale for fill is already present.
-#> Adding another scale for fill, which will replace the existing scale.
-#> Scale for fill is already present.
-#> Adding another scale for fill, which will replace the existing scale.
-#> Scale for fill is already present.
-#> Adding another scale for fill, which will replace the existing scale.
-#> Error in plot_euler(mtcars, "vs", "am", "cyl", seed = 1): object 'i18n' not found
+#> Error in dplyr::mutate(data$centers, label = purrr::map2(labels, quantities,     ~{        if (!is.na(.x) && !is.na(.y) && show_labels) {            paste0(.x, "\n", sprintf(.y, fmt = "%.4g"))        }        else if (!is.na(.x) && show_labels) {            .x        }        else if (!is.na(.y)) {            .y        }        else {            ""        }    })): ℹ In argument: `label = purrr::map2(...)`.
+#> Caused by error in `purrr::map2()`:
+#> ℹ In index: 1.
+#> Caused by error in `sprintf()`:
+#> ! invalid format '%.4g'; use format %s for character objects
 stRoke::trial |>
   dplyr::mutate(
     mfi_cut = cut(mfi_6, c(0, 12, max(mfi_6, na.rm = TRUE))),
@@ -73,11 +73,16 @@ stRoke::trial |>
   ) |>
   dplyr::bind_cols() |>
   plot_euler("mfi_cut", "mdi_cut")
-#> Scale for fill is already present.
-#> Adding another scale for fill, which will replace the existing scale.
-
+#> Error in dplyr::mutate(data$centers, label = purrr::map2(labels, quantities,     ~{        if (!is.na(.x) && !is.na(.y) && show_labels) {            paste0(.x, "\n", sprintf(.y, fmt = "%.4g"))        }        else if (!is.na(.x) && show_labels) {            .x        }        else if (!is.na(.y)) {            .y        }        else {            ""        }    })): ℹ In argument: `label = purrr::map2(...)`.
+#> Caused by error in `purrr::map2()`:
+#> ℹ In index: 1.
+#> Caused by error in `sprintf()`:
+#> ! invalid format '%.4g'; use format %s for character objects
 stRoke::trial |>
   plot_euler(pri="male", sec=c("hypertension"))
-#> Scale for fill is already present.
-#> Adding another scale for fill, which will replace the existing scale.
+#> Error in dplyr::mutate(data$centers, label = purrr::map2(labels, quantities,     ~{        if (!is.na(.x) && !is.na(.y) && show_labels) {            paste0(.x, "\n", sprintf(.y, fmt = "%.4g"))        }        else if (!is.na(.x) && show_labels) {            .x        }        else if (!is.na(.y)) {            .y        }        else {            ""        }    })): ℹ In argument: `label = purrr::map2(...)`.
+#> Caused by error in `purrr::map2()`:
+#> ℹ In index: 1.
+#> Caused by error in `sprintf()`:
+#> ! invalid format '%.4g'; use format %s for character objects
 ```

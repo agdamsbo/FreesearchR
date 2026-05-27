@@ -1,4 +1,4 @@
-pandoc: 3.1.11
+pandoc: 3.8.3
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
@@ -7,7 +7,7 @@ articles:
   missingness: missingness.html
   session: session.html
   visuals: visuals.html
-last_built: 2026-04-10T20:42Z
+last_built: 2026-05-27T18:44Z
 urls:
   reference: https://agdamsbo.github.io/FreesearchR/reference
   article: https://agdamsbo.github.io/FreesearchR/articles

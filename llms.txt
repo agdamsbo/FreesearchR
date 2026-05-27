@@ -47,13 +47,13 @@ values are provided, the app will use the defaults listed below.
 
 **Configuration Variables**
 
-| Variable             | Description                                                                                                 | Default   |
-|----------------------|-------------------------------------------------------------------------------------------------------------|-----------|
-| `INCLUDE_GLOBALENV`  | Load datasets already present in the global R environment into the app                                      | `FALSE`   |
-| `DATA_LIMIT_DEFAULT` | Default number of observations for previewing or working with a dataset                                     | `10,000`  |
-| `DATA_LIMIT_UPPER`   | Maximum number of observations a user can set for the upper limit. If set to 0, no uppper limit is applied. | `100,000` |
-| `DATA_LIMIT_LOWER`   | Minimum number of observations a user can set for the lower limit                                           | `1`       |
-| `CHECK_APP_VERSION`  | Always print version check results. Checks app version against latest release on GitHub.                    | `FALSE`   |
+| Variable | Description | Default |
+|----|----|----|
+| `INCLUDE_GLOBALENV` | Load datasets already present in the global R environment into the app | `FALSE` |
+| `DATA_LIMIT_DEFAULT` | Default number of observations for previewing or working with a dataset | `10,000` |
+| `DATA_LIMIT_UPPER` | Maximum number of observations a user can set for the upper limit. If set to 0, no uppper limit is applied. | `100,000` |
+| `DATA_LIMIT_LOWER` | Minimum number of observations a user can set for the lower limit | `1` |
+| `CHECK_APP_VERSION` | Always print version check results. Checks app version against latest release on GitHub. | `FALSE` |
 
 ### Run from R (or RStudio)
 
@@ -69,6 +69,7 @@ tool for exploratory analysis.
     launch the app:
 
     ``` r
+
     if (!require("devtools")) install.packages("devtools")
     devtools::install_github("agdamsbo/FreesearchR")
     library(FreesearchR)
