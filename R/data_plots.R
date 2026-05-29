@@ -30,8 +30,9 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
             ),
             shiny::tags$br(),
             shiny::uiOutput(outputId = ns("type")),
-            shiny::uiOutput(outputId = ns("secondary")),
-            shiny::uiOutput(outputId = ns("tertiary")),
+            shiny::uiOutput(outputId = ns("basic_parameters")),
+            # shiny::uiOutput(outputId = ns("secondary")),
+            # shiny::uiOutput(outputId = ns("tertiary")),
             shiny::uiOutput(outputId = ns("color_palette")),
             shiny::br(),
             shiny::actionButton(
@@ -174,12 +175,18 @@ data_visuals_server <- function(id,
           plot_data <- data()[input$primary]
         }
 
-        plots <- possible_plots(data = plot_data)
+        plots <- possible_plots(data = plot_data,
+                                source_list=available_plots())
 
-        plots_named <- get_plot_options(plots) |>
+        plots_named <- get_input_params(plots) |>
           lapply(\(.x) {
             stats::setNames(.x$descr, .x$note)
           })
+
+        # plots_named <- get_plot_options(plots) |>
+        #   lapply(\(.x) {
+        #     stats::setNames(.x$descr, .x$note)
+        #   })
 
         vectorSelectInput(
           inputId = ns("type"),
@@ -191,51 +198,124 @@ data_visuals_server <- function(id,
       })
 
       rv$plot.params <- shiny::reactive({
-        get_plot_options(input$type) |> purrr::pluck(1)
+        get_input_params(input$type)|> purrr::pluck(1)
+        # get_plot_options(input$type) |> purrr::pluck(1)
       })
 
-      output$secondary <- shiny::renderUI({
-        shiny::req(input$type)
 
-        cols <- c(rv$plot.params()[["secondary.extra"]], all_but(colnames(
-          subset_types(data(), rv$plot.params()[["secondary.type"]])
-        ), input$primary))
+      output$basic_parameters <- renderUI({
+        req(input$type, rv$plot.params)
 
-        columnSelectInput(
-          inputId = ns("secondary"),
-          data = data,
-          selected = cols[1],
-          placeholder = i18n$t("Please select"),
-          label = if (isTRUE(rv$plot.params()[["secondary.multi"]]))
-            i18n$t("Additional variables")
-          else
-            i18n$t("Secondary variable"),
-          multiple = rv$plot.params()[["secondary.multi"]],
-          maxItems = rv$plot.params()[["secondary.max"]],
-          col_subset = cols,
-          none_label = i18n$t("No variable")
-        )
+        # Get the plot function name
+        base_params <- rv$plot.params()[["basic"]]
+
+
+        params2update <- seq_along(base_params)[sapply(base_params, function(params) {
+          params$type %in% "select_variables"
+        })]
+
+        # browser()
+        updated_params <- seq_along(params2update) |> lapply(function(index){
+          params <- base_params[params2update][[index]]
+          params$exclude <- input$primary
+
+          edits <- base_params[params2update][seq_len(index-1)]
+
+          id_exclude <- unlist(lapply(edits,\(.x){.x[["id"]]}))
+
+          if (length(id_exclude)>0){
+            ids <- paste0("base_", id_exclude)
+
+            params$exclude <- c(params$exclude, names(input)[ids %in% names(input)])
+          }
+
+          return(params)
+        })
+
+        base_params[params2update] <- updated_params
+
+        # Create UI elements for base parameters
+        base_inputs <- lapply(base_params, function(params) {
+          input_id <- paste0("base_", params$id)
+          params$id <- NULL
+          if (params$type %in% "select_variables"){
+              params$data <- data()
+            }
+
+          create_input_element(params, ns, input_id)
+        })
+
+        if(length(base_inputs) > 0) {
+          tagList(base_inputs)
+        } else {
+          p("No basic parameters available for this plot type.")
+        }
       })
 
-      output$tertiary <- shiny::renderUI({
-        shiny::req(input$type)
-        columnSelectInput(
-          inputId = ns("tertiary"),
-          data = data,
-          placeholder = i18n$t("Please select"),
-          label = i18n$t("Grouping variable"),
-          multiple = FALSE,
-          col_subset = c(
-            "none",
-            all_but(
-              colnames(subset_types(data(), rv$plot.params()[["tertiary.type"]])),
-              input$primary,
-              input$secondary
-            )
-          ),
-          none_label = i18n$t("No stratification")
-        )
-      })
+
+      # output$secondary <- shiny::renderUI({
+      #   shiny::req(input$type)
+      #
+      #   browser()
+      #
+      #
+      #   params <- rv$plot.params()[["inputs"]][[1]]
+      #
+      #   # params$fun <- NULL
+      #   params$exclude <- input$primary
+      #   # params$inputId <- paste0("base_", names(available_plots()[[1]][["inputs"]])[1])
+      #
+      #   # input_fun <- rlang::eval_tidy(rlang::sym("selectPlotVariables"), env = asNamespace("shiny"))
+      #   #
+      #   # rlang::inject(input_fun(!!!append_list(data(), params, "data")))
+      #
+      #   create_input_element(input_id = paste0("base_", names(available_plots()[[1]][["inputs"]])[1]),
+      #                        ns = ns,
+      #                        params = append_list(data(), params, "data"))
+      #
+      #   # rlang::exec(selectPlotVariables,
+      #   #             !!!append_list(data(), params, "data"))
+      #
+      #
+      #   # cols <- c(rv$plot.params()[["secondary.extra"]], all_but(colnames(
+      #   #   subset_types(data(), rv$plot.params()[["secondary.type"]])
+      #   # ), input$primary))
+      #   #
+      #   # columnSelectInput(
+      #   #   inputId = ns("secondary"),
+      #   #   data = data,
+      #   #   selected = cols[1],
+      #   #   placeholder = i18n$t("Please select"),
+      #   #   label = if (isTRUE(rv$plot.params()[["secondary.multi"]]))
+      #   #     i18n$t("Additional variables")
+      #   #   else
+      #   #     i18n$t("Secondary variable"),
+      #   #   multiple = rv$plot.params()[["secondary.multi"]],
+      #   #   maxItems = rv$plot.params()[["secondary.max"]],
+      #   #   col_subset = cols,
+      #   #   none_label = i18n$t("No variable")
+      #   # )
+      # })
+      #
+      # output$tertiary <- shiny::renderUI({
+      #   shiny::req(input$type)
+      #   columnSelectInput(
+      #     inputId = ns("tertiary"),
+      #     data = data,
+      #     placeholder = i18n$t("Please select"),
+      #     label = i18n$t("Grouping variable"),
+      #     multiple = FALSE,
+      #     col_subset = c(
+      #       "none",
+      #       all_but(
+      #         colnames(subset_types(data(), rv$plot.params()[["tertiary.type"]])),
+      #         input$primary,
+      #         input$secondary
+      #       )
+      #     ),
+      #     none_label = i18n$t("No stratification")
+      #   )
+      # })
 
       ### Color option
       output$color_palette <- shiny::renderUI({
@@ -251,13 +331,28 @@ data_visuals_server <- function(id,
       shiny::observeEvent(input$act_plot, {
         if (NROW(data()) > 0) {
             tryCatch({
-            parameters <- list(
-              type = rv$plot.params()[["fun"]],
-              pri = input$primary,
-              sec = input$secondary,
-              ter = input$tertiary,
-              color.palette = input$color_palette
-            )
+
+              ## BELOW NEEDS REVISION ###
+
+              # Get all input values with prefixes
+              base_inputs <- reactiveValuesToList(input)[grep("^base_", names(reactiveValuesToList(input)))]
+              advanced_inputs <- reactiveValuesToList(input)[grep("^advanced_", names(reactiveValuesToList(input)))]
+
+              # Remove the prefix from names
+              names(base_inputs) <- gsub("^base_", "", names(base_inputs))
+              names(advanced_inputs) <- gsub("^advanced_", "", names(advanced_inputs))
+
+              # Combine all parameters
+              dynamic_params <- c(base_inputs, advanced_inputs)
+
+              # Build parameters for plotting function
+              parameters <- list(
+                type = rv$plot.params()[["fun"]],
+                pri = input$primary,
+                color.palette = input$color_palette
+              )
+
+              parameters <- modifyList(parameters, dynamic_params)
 
             ## If the dictionary holds additional arguments to pass to the
             ## plotting function, these are included
@@ -342,6 +437,118 @@ data_visuals_server <- function(id,
     }
   )
 }
+
+available_plots <- function() {
+list(
+  plot_bar_rel = list(
+    fun = "plot_bar",
+    fun.args = list(style = "fill"),
+    descr = i18n$t("Stacked relative barplot"),
+    note = i18n$t(
+      "Create relative stacked barplots to show the distribution of categorical levels"
+    ),
+    primary.type = c("dichotomous", "categorical"),
+    ### Input definitions ###
+    basic = list(
+      list(
+        id = "sec",
+        type = "select_variables",
+        var_types = c("dichotomous", "categorical"),
+        allow_none = FALSE,
+        # inputId = "sec",
+        label = i18n$t("Additional variables"),
+        multiple = FALSE
+      ),
+      list(
+        id = "ter",
+        type = "select_variables",
+        var_types = c("dichotomous", "categorical"),
+        # inputId = "sec",
+        label = i18n$t("Grouping variable"),
+        multiple = FALSE
+      )
+    ),
+    advanced = list()
+    #########
+  ),
+  plot_violin = list(
+    fun = "plot_violin",
+    descr = i18n$t("Violin plot"),
+    note = i18n$t(
+      "A modern alternative to the classic boxplot to visualise data distribution"
+    ),
+    primary.type = c("datatime", "continuous"),
+    ### Input definitions ###
+    basic = list(
+      list(
+        id = "sec",
+        type = "select_variables",
+        var_types = c("dichotomous", "categorical"),
+        allow_none = TRUE,
+        # inputId = "sec",
+        label = i18n$t("Additional variables"),
+        multiple = FALSE
+      ),
+      list(
+        id = "ter",
+        type = "select_variables",
+        var_types = c("dichotomous", "categorical"),
+        # inputId = "sec",
+        label = i18n$t("Grouping variable"),
+        multiple = FALSE
+      )
+    ),
+    advanced = list()
+    #########
+  )
+)
+}
+
+# Helper function to create input elements dynamically
+create_input_element <- function(params, ns, input_id) {
+  # Add the namespaced inputId to the arguments
+  params$inputId <- ns(input_id)
+
+  # Map input types to Shiny functions
+  input_function <- switch(params$type,
+                           "numeric_input" = shiny::numericInput,
+                           "select_input" = shiny::selectInput,
+                           "checkbox_input" = shiny::checkboxInput,
+                           "slider_input" = shiny::sliderInput,
+                           "text_input" = shiny::textInput,
+                           "select_variables" = selectPlotVariables
+  )
+
+  params$type <- NULL
+
+  # Call the function with all arguments
+  do.call(input_function, params)
+}
+
+selectPlotVariables <- function(data,exclude=NULL,allow_none=TRUE,var_types,...){
+  datar <- if (is.reactive(data)){
+    data
+    } else {
+    reactive(data)}
+
+  cols <- all_but(colnames(
+    subset_types(datar(), var_types)
+  ), exclude)
+
+  if (isTRUE(allow_none)){
+    cols <- c("none",cols)
+  }
+
+  params <- list(...)
+
+  params$none_label <- i18n$t("No variable")
+  params$col_subset <- cols
+
+  rlang::exec(columnSelectInput,
+              !!!append_list(datar(), params, "data"))
+}
+
+
 
 #' Select all from vector but
 #'
@@ -533,7 +740,7 @@ supported_plots <- function() {
 #'   default_parsing() |>
 #'   dplyr::select("mpg") |>
 #'   possible_plots()
-possible_plots <- function(data) {
+possible_plots <- function(data,source_list = supported_plots()) {
   # browser()
   # data <- if (is.reactive(data)) data() else data
   if (is.data.frame(data)) {
@@ -545,7 +752,7 @@ possible_plots <- function(data) {
   if (type == "unknown") {
     out <- type
   } else {
-    out <- supported_plots() |>
+    out <- source_list |>
       lapply(\(.x) {
         if (type %in% .x$primary.type) {
           .x$descr
@@ -584,6 +791,33 @@ get_plot_options <- function(data) {
     })()
 }
 
+#' Get the function parameters based on the selected function description
+#'
+#' @param data vector
+#'
+#' @returns list
+#' @export
+#'
+#' @examples
+#' ls <- mtcars |>
+#'   default_parsing() |>
+#'   dplyr::pull(mpg) |>
+#'   possible_plots() |>
+#'   (\(.x){
+#'     .x[[1]]
+#'   })() |>
+#'   get_input_params()
+get_input_params <- function(data) {
+  descr <- available_plots() |>
+    lapply(\(.x) {
+      .x$descr
+    }) |>
+    unlist()
+  available_plots() |>
+    (\(.x) {
+      .x[match(data, descr)]
+    })()
+}
 
 
 #' Wrapper to create plot based on provided type
