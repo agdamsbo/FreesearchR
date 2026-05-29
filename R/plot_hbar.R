@@ -15,13 +15,15 @@ plot_hbars <- function(data,
                        pri,
                        sec,
                        ter = NULL,
-                       color.palette = "viridis") {
+                       color.palette = "viridis",
+                       ...) {
   vertical_stacked_bars(
     data = data,
     score = pri,
     group = sec,
     strata = ter,
-    color.palette = color.palette
+    color.palette = color.palette,
+    ...
   )
 }
 

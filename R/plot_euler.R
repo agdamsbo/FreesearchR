@@ -131,7 +131,7 @@ plot_euler <- function(data, pri, sec, ter = NULL, seed = 2103,color.palette="vi
 #'   D = sample(c(TRUE, FALSE, FALSE, FALSE), 50, TRUE)
 #' ) |> plot_euler_single()
 #' mtcars[c("vs", "am")] |> plot_euler_single("magma")
-plot_euler_single <- function(data,color.palette="viridis") {
+plot_euler_single <- function(data,color.palette="viridis", ...) {
 
   data |>
     ggeulerr(shape = "circle") +

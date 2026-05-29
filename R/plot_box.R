@@ -32,11 +32,11 @@ plot_box <- function(data, pri, sec, ter = NULL,color.palette="viridis",...) {
       data = .ds,
       pri = pri,
       sec = sec,
-      color.palette=color.palette
+      color.palette=color.palette, ...
     )
   })
 
-  wrap_plot_list(out,title=glue::glue(i18n$t("Grouped by {get_label(data,ter)}")),...)
+  wrap_plot_list(out,title=glue::glue(i18n$t("Grouped by {get_label(data,ter)}")))
 }
 
 

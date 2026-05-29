@@ -22,7 +22,7 @@ visuals_demo_app <- function() {
     )
   )
   server <- function(input, output, session) {
-    pl <- data_visuals_server("visuals", data = shiny::reactive(default_parsing(mtcars)))
+    pl <- data_visuals_server("visuals", data = shiny::reactive(default_parsing(mtcars)),palettes = color_choices())
   }
   shiny::shinyApp(ui, server)
 }
