@@ -76,7 +76,7 @@ vertical_stacked_bars <- function(data,
 
   colors <- generate_colors(n = nrow(df.table), palette = color.palette)
   ## Colors are reversed by default as that usually gives the best result
-  if (isTRUE(reverse)) {
+  if (isTRUE(reverse) | reverse=="TRUE") {
     colors <- rev(colors)
   }
 
