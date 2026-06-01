@@ -5,7 +5,7 @@ Easily plot single euler diagrams
 ## Usage
 
 ``` r
-plot_euler_single(data, color.palette = "viridis")
+plot_euler_single(data, color.palette = "viridis", ...)
 ```
 
 ## Value

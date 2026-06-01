@@ -5,7 +5,7 @@ Get possible regression models
 ## Usage
 
 ``` r
-possible_plots(data)
+possible_plots(data, source_list = supported_plots())
 ```
 
 ## Arguments

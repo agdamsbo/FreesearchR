@@ -31,7 +31,7 @@ Beautiful violin plot
 ``` r
 data_visuals_ui(id, tab_title = "Plots", ...)
 
-data_visuals_server(id, data, palettes, ...)
+data_visuals_server(id, data, palettes = color_choices(), ...)
 
 create_plot(data, type, pri, sec, ter = NULL, color.palette = "viridis", ...)
 
@@ -59,9 +59,9 @@ plot_box(data, pri, sec, ter = NULL, color.palette = "viridis", ...)
 
 plot_box_single(data, pri, sec = NULL, seed = 2103, color.palette = "viridis")
 
-plot_hbars(data, pri, sec, ter = NULL, color.palette = "viridis")
+plot_hbars(data, pri, sec, ter = NULL, color.palette = "viridis", ...)
 
-plot_likert(data, pri, sec = NULL, ter = NULL, color.palette = "viridis")
+plot_likert(data, pri, sec = NULL, ter = NULL, color.palette = "viridis", ...)
 
 plot_ridge(data, x, y, z = NULL, color.palette = "viridis", ...)
 
@@ -78,12 +78,13 @@ plot_sankey(
   default.color = "#2986cc",
   box.color = "#1E4B66",
   na.color = "grey80",
-  missing.level = "Missing"
+  missing.level = "Missing",
+  ...
 )
 
-plot_scatter(data, pri, sec, ter = NULL, color.palette = "viridis")
+plot_scatter(data, pri, sec, ter = NULL, color.palette = "viridis", ...)
 
-plot_violin(data, pri, sec, ter = NULL, color.palette = "viridis")
+plot_violin(data, pri, sec, ter = NULL, color.palette = "viridis", ...)
 ```
 
 ## Arguments
@@ -718,7 +719,7 @@ create_plot(mtcars, "plot_violin", "mpg", "cyl") |> attributes()
 #> list()
 #> 
 #> $plot_env
-#> <environment: 0x56004979c4c0>
+#> <environment: 0x565299074df8>
 #> 
 #> $code
 #> FreesearchR::plot_violin(pri = "mpg", sec = "cyl", ter = NULL, 
@@ -761,7 +762,7 @@ mtcars |>
 mtcars |>
   default_parsing() |>
   plot_box(pri = "mpg", sec = "cyl", ter = "gear",axis.font.family="mono")
-#> Error in plot_box(default_parsing(mtcars), pri = "mpg", sec = "cyl", ter = "gear",     axis.font.family = "mono"): object 'i18n' not found
+#> Error in plot_box_single(data = .ds, pri = pri, sec = sec, color.palette = color.palette,     ...): unused argument (axis.font.family = "mono")
 mtcars |> plot_box_single("mpg")
 
 mtcars |> plot_box_single("mpg","cyl",color.palette="Blues")

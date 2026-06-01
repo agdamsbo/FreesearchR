@@ -32,6 +32,9 @@
 - [`argsstring2list()`](https://agdamsbo.github.io/FreesearchR/reference/argsstring2list.md)
   : Convert string of arguments to list of arguments
 
+- [`available_plots()`](https://agdamsbo.github.io/FreesearchR/reference/available_plots.md)
+  : Implemented functions
+
 - [`baseline_table()`](https://agdamsbo.github.io/FreesearchR/reference/baseline_table.md)
   : Print a flexible baseline characteristics table
 
@@ -205,6 +208,10 @@
 
 - [`get_fun_options()`](https://agdamsbo.github.io/FreesearchR/reference/get_fun_options.md)
   : Get the function options based on the selected function description
+
+- [`get_input_params()`](https://agdamsbo.github.io/FreesearchR/reference/get_input_params.md)
+  : Get the function parameters based on the selected function
+  description
 
 - [`get_label()`](https://agdamsbo.github.io/FreesearchR/reference/get_label.md)
   : Print label, and if missing print variable name for plots
@@ -403,6 +410,9 @@
 
 - [`selectInputIcon()`](https://agdamsbo.github.io/FreesearchR/reference/selectInputIcon.md)
   : Create a select input control with icon(s)
+
+- [`selectPlotVariables()`](https://agdamsbo.github.io/FreesearchR/reference/selectPlotVariables.md)
+  : Wrapper for columnSelectInput
 
 - [`separate_string()`](https://agdamsbo.github.io/FreesearchR/reference/separate_string.md)
   : Separate string wide or long
