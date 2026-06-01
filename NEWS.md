@@ -1,4 +1,4 @@
-# FreesearchR 26.5.1
+# FreesearchR 26.6.1
 
 *NEW* The visuals module has been restructured to allow for more advanced inputs, which will be added in the future. Basically a more future proof design allowing for more adjustments, while striving to keep the simplicity. Have fun!
 

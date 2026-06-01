@@ -70,7 +70,7 @@ available_plots <- function() {
           id = "secondary",
           type = "select_variables",
           var_types = c("dichotomous", "categorical"),
-          allow_none = FALSE,
+          allow_none = TRUE,
           # inputId = "sec",
           label = i18n$t("Secondary variable"),
           multiple = FALSE
