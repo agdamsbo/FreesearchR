@@ -8,7 +8,7 @@
 #' @examples
 #' mtcars |> plot_scatter(pri = "mpg", sec = "wt")
 #' mtcars |> plot_scatter(pri = "mpg", sec = "wt",ter="carb")
-plot_scatter <- function(data, pri, sec, ter = NULL, color.palette="viridis") {
+plot_scatter <- function(data, pri, sec, ter = NULL, color.palette="viridis", ...) {
   if (is.null(ter)) {
     rempsyc::nice_scatter(
       data = data,

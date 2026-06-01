@@ -1,6 +1,6 @@
 Package: FreesearchR
 Title: Easy data analysis for clinicians
-Version: 26.4.2
+Version: 26.6.1
 Authors@R: c(
     person("Andreas Gammelgaard", "Damsbo",email="agdamsbo@clin.au.dk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7559-1154")),
@@ -118,6 +118,7 @@ Collate:
     'launch_FreesearchR.R'
     'missings-module.R'
     'plot-download-module.R'
+    'plot-helpers.R'
     'plot_bar.R'
     'plot_box.R'
     'plot_euler.R'

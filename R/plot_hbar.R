@@ -15,13 +15,15 @@ plot_hbars <- function(data,
                        pri,
                        sec,
                        ter = NULL,
-                       color.palette = "viridis") {
+                       color.palette = "viridis",
+                       ...) {
   vertical_stacked_bars(
     data = data,
     score = pri,
     group = sec,
     strata = ter,
-    color.palette = color.palette
+    color.palette = color.palette,
+    ...
   )
 }
 
@@ -74,7 +76,7 @@ vertical_stacked_bars <- function(data,
 
   colors <- generate_colors(n = nrow(df.table), palette = color.palette)
   ## Colors are reversed by default as that usually gives the best result
-  if (isTRUE(reverse)) {
+  if (isTRUE(reverse) | reverse=="TRUE") {
     colors <- rev(colors)
   }
 

@@ -14,12 +14,23 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
   list(
     bslib::layout_sidebar(
       sidebar = bslib::sidebar(
+        shiny::actionButton(
+          inputId = ns("act_plot"),
+          label = i18n$t("Plot"),
+          width = "100%",
+          icon = phosphoricons::ph("paint-brush", weight = "bold"),
+          # icon = shiny::icon("palette"),
+          disabled = FALSE
+        ),
+        shiny::helpText(
+          i18n$t('Adjust plot input and settings below, then press "Plot".')
+        ),
         bslib::accordion(
           id = "acc_plot",
           multiple = FALSE,
           bslib::accordion_panel(
             value = "acc_pan_plot",
-            title = "Create plot",
+            title = i18n$t("Define plot"),
             icon = phosphoricons::ph("chart-line"),
             # icon = bsicons::bs_icon("graph-up"),
             shiny::uiOutput(outputId = ns("primary")),
@@ -30,19 +41,16 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
             ),
             shiny::tags$br(),
             shiny::uiOutput(outputId = ns("type")),
+            shiny::h5(i18n$t("Other variables")),
             shiny::uiOutput(outputId = ns("secondary")),
-            shiny::uiOutput(outputId = ns("tertiary")),
+            shiny::uiOutput(outputId = ns("tertiary"))
+          ),
+          bslib::accordion_panel(
+            value = "acc_pan_params",
+            title = i18n$t("Settings"),
+            icon = phosphoricons::ph("gear"),
             shiny::uiOutput(outputId = ns("color_palette")),
-            shiny::br(),
-            shiny::actionButton(
-              inputId = ns("act_plot"),
-              label = i18n$t("Plot"),
-              width = "100%",
-              icon = phosphoricons::ph("paint-brush",weight = "bold"),
-              # icon = shiny::icon("palette"),
-              disabled = FALSE
-            ),
-            shiny::helpText(i18n$t('Adjust settings, then press "Plot".'))
+            shiny::uiOutput(outputId = ns("basic_parameters")),
           ),
           bslib::accordion_panel(
             value = "acc_pan_download",
@@ -95,14 +103,14 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
         shiny::p(
           "We have collected a few notes on visualising data and details on the options included in FreesearchR:",
           shiny::tags$a(
-            href = "https://agdamsbo.github.io/FreesearchR/articles/visuals.html",
+            href = "https://freesearchr.github.io/FreesearchR-knowledge/app/visuals.html",
             "View notes in new tab",
             target = "_blank",
             rel = "noopener noreferrer"
           )
         )
       ),
-      shiny::plotOutput(ns("plot"), height = "70vh"),
+      shiny::plotOutput(ns("plot"), height = "65vh"),
       shiny::tags$br(),
       shiny::tags$br(),
       shiny::htmlOutput(outputId = ns("code_plot"))
@@ -119,10 +127,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
 #' @name data-plots
 #' @returns shiny server module
 #' @export
-data_visuals_server <- function(id,
-                                data,
-                                palettes,
-                                ...) {
+data_visuals_server <- function(id, data, palettes = color_choices(), ...) {
   shiny::moduleServer(
     id = id,
     module = function(input, output, session) {
@@ -174,67 +179,97 @@ data_visuals_server <- function(id,
           plot_data <- data()[input$primary]
         }
 
-        plots <- possible_plots(data = plot_data)
+        plots <- possible_plots(data = plot_data, source_list = available_plots())
 
-        plots_named <- get_plot_options(plots) |>
+        plots_named <- get_input_params(plots) |>
           lapply(\(.x) {
             stats::setNames(.x$descr, .x$note)
           })
 
+        # plots_named <- get_plot_options(plots) |>
+        #   lapply(\(.x) {
+        #     stats::setNames(.x$descr, .x$note)
+        #   })
+
         vectorSelectInput(
           inputId = ns("type"),
           selected = NULL,
-          label = shiny::h4(i18n$t("Plot type")),
+          label = shiny::h5(i18n$t("Plot type")),
           choices = Reduce(c, plots_named),
           multiple = FALSE
         )
       })
 
       rv$plot.params <- shiny::reactive({
-        get_plot_options(input$type) |> purrr::pluck(1)
+        get_input_params(input$type) |> purrr::pluck(1)
+        # get_plot_options(input$type) |> purrr::pluck(1)
       })
 
+
+      ### Include two additional variable inputs
       output$secondary <- shiny::renderUI({
         shiny::req(input$type)
 
-        cols <- c(rv$plot.params()[["secondary.extra"]], all_but(colnames(
-          subset_types(data(), rv$plot.params()[["secondary.type"]])
-        ), input$primary))
+        # Get the plot function name
+        base_params <- rv$plot.params()[["base"]]
 
-        columnSelectInput(
-          inputId = ns("secondary"),
-          data = data,
-          selected = cols[1],
-          placeholder = i18n$t("Please select"),
-          label = if (isTRUE(rv$plot.params()[["secondary.multi"]]))
-            i18n$t("Additional variables")
-          else
-            i18n$t("Secondary variable"),
-          multiple = rv$plot.params()[["secondary.multi"]],
-          maxItems = rv$plot.params()[["secondary.max"]],
-          col_subset = cols,
-          none_label = i18n$t("No variable")
+        filtered_params <- base_params[sapply(base_params, function(params) {
+          params$id %in% "secondary"
+        })][[1]]
+
+        filtered_params$exclude <- input$primary
+
+        create_input_element(
+          input_id = "secondary",
+          ns = ns,
+          params = append_list(data(), filtered_params, "data")
         )
+
       })
 
       output$tertiary <- shiny::renderUI({
         shiny::req(input$type)
-        columnSelectInput(
-          inputId = ns("tertiary"),
-          data = data,
-          placeholder = i18n$t("Please select"),
-          label = i18n$t("Grouping variable"),
-          multiple = FALSE,
-          col_subset = c(
-            "none",
-            all_but(
-              colnames(subset_types(data(), rv$plot.params()[["tertiary.type"]])),
-              input$primary,
-              input$secondary
-            )
-          ),
-          none_label = i18n$t("No stratification")
+        # Get the plot function name
+        base_params <- rv$plot.params()[["base"]]
+
+        filtered_params <- base_params[sapply(base_params, function(params) {
+          params$id %in% "tertiary"
+        })][[1]]
+
+        filtered_params$exclude <- c(input$primary, input$secondary)
+
+        create_input_element(
+          input_id = "tertiary",
+          ns = ns,
+          params = append_list(data(), filtered_params, "data")
         )
+      })
+
+
+      ### Generating additional parameter inputs if any specified
+      output$basic_parameters <- renderUI({
+        req(input$type, rv$plot.params)
+
+        # Get the plot function name
+        base_params <- rv$plot.params()[["base"]]
+
+        filtered_params <- base_params[sapply(base_params, function(params) {
+          !params$id %in% c("secondary", "tertiary")
+        })]
+
+
+        # Create UI elements for base parameters
+        base_inputs <- lapply(filtered_params, function(params) {
+          input_id <- paste0("base_", params$id)
+          params$id <- NULL
+          if (params$type %in% "select_variables") {
+            params$data <- data()
+          }
+
+          create_input_element(params, ns, input_id)
+        })
+        tagList(base_inputs)
+
       })
 
       ### Color option
@@ -250,19 +285,49 @@ data_visuals_server <- function(id,
 
       shiny::observeEvent(input$act_plot, {
         if (NROW(data()) > 0) {
-            tryCatch({
+          tryCatch({
+            # Get all input values with prefixes
+            base_inputs <- reactiveValuesToList(input)[grep("^base_", names(reactiveValuesToList(input)))]
+            # advanced_inputs <- reactiveValuesToList(input)[grep("^advanced_", names(reactiveValuesToList(input)))]
+
+            # Remove the prefix from names
+            names(base_inputs) <- gsub("^base_", "", names(base_inputs))
+            # names(advanced_inputs) <- gsub("^advanced_", "", names(advanced_inputs))
+
+            base_inputs <- c(base_inputs,
+                             list(color.palette = input$color_palette))
+
+            # If any of the specified parameters are NULL/missing, the settings
+            # accordion/panel was never opened, and they can be ignored, as
+            # default settings will the be used.
+            if (any(sapply(base_inputs, is.null))) {
+              dynamic_params <- list()
+            } else {
+              dynamic_params <- base_inputs
+            }
+
+            # Build parameters for plotting function
             parameters <- list(
               type = rv$plot.params()[["fun"]],
               pri = input$primary,
               sec = input$secondary,
-              ter = input$tertiary,
-              color.palette = input$color_palette
+              ter = input$tertiary
             )
+
+            parameters <- modifyList(parameters, dynamic_params)
 
             ## If the dictionary holds additional arguments to pass to the
             ## plotting function, these are included
             if (!is.null(rv$plot.params()[["fun.args"]])) {
-              parameters <- modifyList(parameters, rv$plot.params()[["fun.args"]])
+              default_params <- rv$plot.params()[["fun.args"]]
+
+              ## Ensure not to overwrite user defined parameters are overwritten
+              ## This allows to define default parameters.
+              ##
+              ## This will create a strange edge case, where the plot looks in
+              ## one way, when plotted initially, but may change, when the settings
+              ## accordion is opened. Problem for future me. Really mostly an edge case.
+              parameters <- modifyList(parameters, default_params[!names(default_params) %in% names(parameters)])
             }
 
             shiny::withProgress(message = i18n$t("Drawing the plot. Hold tight for a moment.."),
@@ -298,7 +363,25 @@ data_visuals_server <- function(id,
         if (!is.null(rv$plot)) {
           rv$plot
         } else {
-          return(NULL)
+          # Create a placeholder plot with instructions using ggplot2
+          ggplot2::ggplot() +
+            ggplot2::annotate(
+              "text",
+              x = 0.5,
+              y = 0.5,
+              label = i18n$t("Select variables and plot type,\nthen click 'Plot' to generate visualization"),
+              size = 5,
+              color = "gray50",
+              lineheight = 0.8
+            ) +
+            ggplot2::xlim(0, 1) +
+            ggplot2::ylim(0, 1) +
+            ggplot2::theme_void() +
+            ggplot2::theme(
+              panel.background = ggplot2::element_rect(fill = "white"),
+              plot.background = ggplot2::element_rect(fill = "white")
+            )
+          # return(NULL)
         }
       })
 
@@ -341,504 +424,4 @@ data_visuals_server <- function(id,
       shiny::observe(return(rv$plot))
     }
   )
-}
-
-#' Select all from vector but
-#'
-#' @param data vector
-#' @param ... exclude
-#'
-#' @returns vector
-#' @export
-#'
-#' @examples
-#' all_but(1:10, c(2, 3), 11, 5)
-all_but <- function(data, ...) {
-  data[!data %in% c(...)]
-}
-
-#' Easily subset by data type function
-#'
-#' @param data data
-#' @param types desired types
-#' @param type.fun function to get type. Default is outcome_type
-#'
-#' @returns vector
-#' @export
-#'
-#' @examples
-#' default_parsing(mtcars) |> subset_types("ordinal")
-#' default_parsing(mtcars) |> subset_types(c("dichotomous", "categorical"))
-#' #' default_parsing(mtcars) |> subset_types("factor",class)
-subset_types <- function(data, types, type.fun = data_type) {
-  data[sapply(data, type.fun) %in% types]
-}
-
-
-#' Implemented functions
-#'
-#' @description
-#' Library of supported functions. The list name and "descr" element should be
-#' unique for each element on list.
-#'
-#' -   descr: Plot description
-#'
-#' -   primary.type: Primary variable data type (continuous, dichotomous or ordinal)
-#'
-#' -   secondary.type: Secondary variable data type (continuous, dichotomous or ordinal)
-#'
-#' -   secondary.extra: "none" or NULL to have option to choose none.
-#'
-#' -   tertiary.type: Tertiary variable data type (continuous, dichotomous or ordinal)
-#'
-#'
-#' @returns list
-#' @export
-#'
-#' @examples
-#' supported_plots() |> str()
-supported_plots <- function() {
-  list(
-    plot_bar_rel = list(
-      fun = "plot_bar",
-      fun.args = list(style = "fill"),
-      descr = i18n$t("Stacked relative barplot"),
-      note = i18n$t(
-        "Create relative stacked barplots to show the distribution of categorical levels"
-      ),
-      primary.type = c("dichotomous", "categorical"),
-      secondary.type = c("dichotomous", "categorical"),
-      secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "categorical"),
-      secondary.extra = NULL
-    ),
-    plot_bar_abs = list(
-      fun = "plot_bar",
-      fun.args = list(style = "dodge"),
-      descr = i18n$t("Side-by-side barplot"),
-      note = i18n$t(
-        "Create side-by-side barplot to show the distribution of categorical levels"
-      ),
-      primary.type = c("dichotomous", "categorical"),
-      secondary.type = c("dichotomous", "categorical"),
-      secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "categorical"),
-      secondary.extra = "none"
-    ),
-    plot_hbars = list(
-      fun = "plot_hbars",
-      descr = i18n$t("Stacked horizontal bars"),
-      note = i18n$t(
-        "A classical way of visualising the distribution of an ordinal scale like the modified Ranking Scale and known as Grotta bars"
-      ),
-      primary.type = c("dichotomous", "categorical"),
-      secondary.type = c("dichotomous", "categorical"),
-      secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "categorical"),
-      secondary.extra = "none"
-    ),
-    plot_violin = list(
-      fun = "plot_violin",
-      descr = i18n$t("Violin plot"),
-      note = i18n$t(
-        "A modern alternative to the classic boxplot to visualise data distribution"
-      ),
-      primary.type = c("datatime", "continuous"),
-      secondary.type = c("dichotomous", "categorical"),
-      secondary.multi = FALSE,
-      secondary.extra = "none",
-      tertiary.type = c("dichotomous", "categorical")
-    ),
-    # plot_ridge = list(
-    #   descr = "Ridge plot",
-    #   note = "An alternative option to visualise data distribution",
-    #   primary.type = "continuous",
-    #   secondary.type = c("dichotomous" ,"categorical"),
-    #   tertiary.type = c("dichotomous" ,"categorical"),
-    #   secondary.extra = NULL
-    # ),
-    plot_sankey = list(
-      fun = "plot_sankey",
-      descr = i18n$t("Sankey plot"),
-      note = i18n$t("A way of visualising change between groups"),
-      primary.type = c("dichotomous", "categorical"),
-      secondary.type = c("dichotomous", "categorical"),
-      secondary.multi = FALSE,
-      secondary.extra = NULL,
-      tertiary.type = c("dichotomous", "categorical")
-    ),
-    plot_scatter = list(
-      fun = "plot_scatter",
-      descr = i18n$t("Scatter plot"),
-      note = i18n$t("A classic way of showing the association between to variables"),
-      primary.type = c("datatime", "continuous"),
-      secondary.type = c("datatime", "continuous", "categorical"),
-      secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "categorical"),
-      secondary.extra = NULL
-    ),
-    plot_box = list(
-      fun = "plot_box",
-      descr = i18n$t("Box plot"),
-      note = i18n$t("A classic way to plot data distribution by groups"),
-      primary.type = c("datatime", "continuous"),
-      secondary.type = c("dichotomous", "categorical"),
-      secondary.multi = FALSE,
-      tertiary.type = c("dichotomous", "categorical"),
-      secondary.extra = "none"
-    ),
-    plot_euler = list(
-      fun = "plot_euler",
-      descr = i18n$t("Euler diagram"),
-      note = i18n$t(
-        "Generate area-proportional Euler diagrams to display set relationships"
-      ),
-      primary.type = c("dichotomous"),
-      secondary.type = c("dichotomous"),
-      secondary.multi = TRUE,
-      secondary.max = 4,
-      tertiary.type = c("dichotomous"),
-      secondary.extra = NULL
-    ),
-    plot_euler = list(
-      fun = "plot_likert",
-      descr = i18n$t("Likert diagram"),
-      note = i18n$t(
-        "Plot survey results"
-      ),
-      primary.type = c("dichotomous", "categorical"),
-      secondary.type = c("dichotomous", "categorical"),
-      secondary.multi = TRUE,
-      secondary.extra = NULL,
-      tertiary.type = c("dichotomous", "categorical"),
-      secondary.extra = NULL
-    )
-  )
-}
-
-#' Get possible regression models
-#'
-#' @param data data
-#'
-#' @returns character vector
-#' @export
-#'
-#' @examples
-#' mtcars |>
-#'   default_parsing() |>
-#'   dplyr::pull("cyl") |>
-#'   possible_plots()
-#'
-#' mtcars |>
-#'   default_parsing() |>
-#'   dplyr::select("mpg") |>
-#'   possible_plots()
-possible_plots <- function(data) {
-  # browser()
-  # data <- if (is.reactive(data)) data() else data
-  if (is.data.frame(data)) {
-    data <- data[[1]]
-  }
-
-  type <- data_type(data)
-
-  if (type == "unknown") {
-    out <- type
-  } else {
-    out <- supported_plots() |>
-      lapply(\(.x) {
-        if (type %in% .x$primary.type) {
-          .x$descr
-        }
-      }) |>
-      unlist()
-  }
-  unname(out)
-}
-
-#' Get the function options based on the selected function description
-#'
-#' @param data vector
-#'
-#' @returns list
-#' @export
-#'
-#' @examples
-#' ls <- mtcars |>
-#'   default_parsing() |>
-#'   dplyr::pull(mpg) |>
-#'   possible_plots() |>
-#'   (\(.x){
-#'     .x[[1]]
-#'   })() |>
-#'   get_plot_options()
-get_plot_options <- function(data) {
-  descrs <- supported_plots() |>
-    lapply(\(.x) {
-      .x$descr
-    }) |>
-    unlist()
-  supported_plots() |>
-    (\(.x) {
-      .x[match(data, descrs)]
-    })()
-}
-
-
-
-#' Wrapper to create plot based on provided type
-#'
-#' @param data data.frame
-#' @param pri primary variable
-#' @param sec secondary variable
-#' @param ter tertiary variable
-#' @param type plot type (derived from possible_plots() and matches custom function)
-#' @param color.palette choose color palette. See \code{\link{plot_colors}} for support.
-#' @param ... ignored for now
-#'
-#' @name data-plots
-#'
-#' @returns ggplot2 object
-#' @export
-#'
-#' @examples
-#' create_plot(mtcars, "plot_violin", "mpg", "cyl") |> attributes()
-create_plot <- function(data,
-                        type,
-                        pri,
-                        sec,
-                        ter = NULL,
-                        color.palette = "viridis",
-                        ...) {
-  if (!is.null(sec)) {
-    if (!any(sec %in% names(data))) {
-      sec <- NULL
-    }
-  }
-
-  if (!is.null(ter)) {
-    if (!ter %in% names(data)) {
-      ter <- NULL
-    }
-  }
-
-  parameters <- list(
-    pri = pri,
-    sec = sec,
-    ter = ter,
-    color.palette = color.palette,
-    ...
-  )
-
-  out <- do.call(type, modifyList(parameters, list(data = data)))
-
-  code <- rlang::call2(type, !!!parameters, .ns = "FreesearchR")
-
-  attr(out, "code") <- code
-  out
-}
-
-#' Print label, and if missing print variable name for plots
-#'
-#' @param data vector or data frame
-#' @param var variable name. Optional.
-#'
-#' @returns character string
-#' @export
-#'
-#' @examples
-#' mtcars |> get_label(var = "mpg")
-#' mtcars |> get_label()
-#' mtcars$mpg |> get_label()
-#' gtsummary::trial |> get_label(var = "trt")
-#' gtsummary::trial$trt |> get_label()
-#' 1:10 |> get_label()
-get_label <- function(data, var = NULL) {
-  # data <- if (is.reactive(data)) data() else data
-  if (!is.null(var) & is.data.frame(data)) {
-    data <- data[[var]]
-  }
-  out <- REDCapCAST::get_attr(data = data, attr = "label")
-  if (is.na(out)) {
-    if (is.null(var)) {
-      out <- deparse(substitute(data))
-    } else {
-      if (is.symbol(var)) {
-        out <- gsub('\"', "", deparse(substitute(var)))
-      } else {
-        out <- var
-      }
-    }
-  }
-  out
-}
-
-
-#' Line breaking at given number of characters for nicely plotting labels
-#'
-#' @param data string
-#' @param lineLength maximum line length
-#' @param fixed flag to force split at exactly the value given in lineLength.
-#' Default is FALSE, only splitting at spaces.
-#'
-#' @returns character string
-#' @export
-#'
-#' @examples
-#' "Lorem ipsum... you know the routine" |> line_break()
-#' paste(sample(letters[1:10], 100, TRUE), collapse = "") |> line_break(force = TRUE)
-line_break <- function(data,
-                       lineLength = 20,
-                       force = FALSE) {
-  if (isTRUE(force)) {
-    ## This eats some letters when splitting a sentence... ??
-    gsub(paste0("(.{1,", lineLength, "})(\\s|[[:alnum:]])"),
-         "\\1\n",
-         data)
-  } else {
-    paste(strwrap(data, lineLength), collapse = "\n")
-  }
-  ## https://stackoverflow.com/a/29847221
-}
-
-
-#' Wrapping
-#'
-#' @param data list of ggplot2 objects
-#' @param tag_levels passed to patchwork::plot_annotation if given. Default is NULL
-#' @param title panel title
-#' @param guides passed to patchwork::wrap_plots()
-#' @param axes passed to patchwork::wrap_plots()
-#' @param axis_titles passed to patchwork::wrap_plots()
-#' @param ... passed to patchwork::wrap_plots()
-#'
-#' @returns list of ggplot2 objects
-#' @export
-#'
-wrap_plot_list <- function(data,
-                           tag_levels = NULL,
-                           title = NULL,
-                           axis.font.family = NULL,
-                           guides = "collect",
-                           axes = "collect",
-                           axis_titles = "collect",
-                           y.axis.percentage = FALSE,
-                           ...) {
-  if (ggplot2::is_ggplot(data[[1]])) {
-    if (length(data) > 1) {
-      out <- data |>
-        (\(.x) {
-          if (rlang::is_named(.x)) {
-            purrr::imap(.x, \(.y, .i) {
-              .y + ggplot2::ggtitle(.i)
-            })
-          } else {
-            .x
-          }
-        })() |>
-        align_axes(percentage=y.axis.percentage) |>
-        patchwork::wrap_plots(guides = guides,
-                              axes = axes,
-                              axis_titles = axis_titles,
-                              ...)
-      if (!is.null(tag_levels)) {
-        out <- out + patchwork::plot_annotation(tag_levels = tag_levels)
-      }
-      if (!is.null(title)) {
-        out <- out +
-          patchwork::plot_annotation(
-            title = title,
-            theme = ggplot2::theme(plot.title = ggplot2::element_text(size = 25))
-          )
-      }
-    } else {
-      out <- data[[1]]
-    }
-  } else {
-    cli::cli_abort("Can only wrap lists of {.cls ggplot} objects")
-  }
-
-  if (!is.null(axis.font.family)) {
-    if (inherits(x = out, what = "patchwork")) {
-      out <- out &
-        ggplot2::theme(axis.text = ggplot2::element_text(family = axis.font.family))
-    } else {
-      out <- out +
-        ggplot2::theme(axis.text = ggplot2::element_text(family = axis.font.family))
-    }
-  }
-
-  out
-}
-
-
-#' Aligns axes between plots
-#'
-#' @param ... ggplot2 objects or list of ggplot2 objects
-#'
-#' @returns list of ggplot2 objects
-#' @export
-#'
-align_axes <- function(...,
-                       x.axis = TRUE,
-                       y.axis = TRUE,
-                       percentage = FALSE) {
-  # https://stackoverflow.com/questions/62818776/get-axis-limits-from-ggplot-object
-  # https://github.com/thomasp85/patchwork/blob/main/R/plot_multipage.R#L150
-  if (ggplot2::is_ggplot(..1)) {
-    ## Assumes list of ggplots
-    p <- list(...)
-  } else if (is.list(..1)) {
-    ## Assumes list with list of ggplots
-    p <- ..1
-  } else {
-    cli::cli_abort("Can only align {.cls ggplot} objects or a list of them")
-  }
-
-  yr <- clean_common_axis(p, "y")
-
-  xr <- clean_common_axis(p, "x")
-
-  suppressWarnings({
-    p_out <- purrr::map(p, \(.x) {
-      out <- .x
-      if (isTRUE(x.axis)) {
-        out <- out + ggplot2::xlim(xr)
-      }
-      if (isTRUE(y.axis)) {
-        out <- out + ggplot2::ylim(yr)
-      }
-      out
-    })
-  })
-
-  if(isTRUE(percentage)){
-    lapply(p_out,\(.x){
-      .x+
-        ggplot2::scale_y_continuous(labels = scales::percent)
-    })
-  } else {
-    p_out
-  }
-}
-
-#' Extract and clean axis ranges
-#'
-#' @param p plot
-#' @param axis axis. x or y.
-#'
-#' @returns vector
-#' @export
-#'
-clean_common_axis <- function(p, axis) {
-  purrr::map(p, ~ ggplot2::layer_scales(.x)[[axis]]$get_limits()) |>
-    unlist() |>
-    (\(.x) {
-      if (is.numeric(.x)) {
-        range(.x)
-      } else {
-        as.character(.x)
-      }
-    })() |>
-    unique()
 }

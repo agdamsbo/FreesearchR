@@ -4,7 +4,7 @@
 \alias{plot_euler_single}
 \title{Easily plot single euler diagrams}
 \usage{
-plot_euler_single(data, color.palette = "viridis")
+plot_euler_single(data, color.palette = "viridis", ...)
 }
 \value{
 ggplot2 object

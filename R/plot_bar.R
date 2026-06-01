@@ -39,14 +39,14 @@ plot_bar <- function(data,
       sec = sec,
       style = style,
       max_level = max_level,
-      color.palette = color.palette
+      color.palette = color.palette,
+      ...
     )
   })
 
   wrap_plot_list(out,
                  title = glue::glue(i18n$t("Grouped by {get_label(data,ter)}")),
-                 y.axis.percentage = TRUE,
-                 ...)
+                 y.axis.percentage = TRUE)
 }
 
 

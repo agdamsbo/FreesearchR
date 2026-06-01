@@ -8,7 +8,7 @@
 #' @examples
 #' mtcars |> plot_violin(pri = "mpg", sec = "cyl")
 #' mtcars |> plot_violin(pri = "mpg", sec = "cyl", ter = "gear", color.palette="Blues")
-plot_violin <- function(data, pri, sec, ter = NULL, color.palette="viridis") {
+plot_violin <- function(data, pri, sec, ter = NULL, color.palette="viridis", ...) {
   if (!is.null(ter)) {
     ds <- split(data, data[ter])
   } else {
@@ -23,7 +23,8 @@ plot_violin <- function(data, pri, sec, ter = NULL, color.palette="viridis") {
         group = sec,
         response = pri,
         xtitle = get_label(data, var = sec),
-        ytitle = get_label(data, var = pri)
+        ytitle = get_label(data, var = pri),
+        ...
       )+
         scale_fill_generate(palette=color.palette)
     })

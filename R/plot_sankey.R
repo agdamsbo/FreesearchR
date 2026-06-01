@@ -95,7 +95,8 @@ plot_sankey <- function(data,
                         default.color = "#2986cc",
                         box.color = "#1E4B66",
                         na.color = "grey80",
-                        missing.level = "Missing") {
+                        missing.level = "Missing",
+                        ...) {
   if (!is.null(ter)) {
     ds <- split(data, data[ter])
   } else {

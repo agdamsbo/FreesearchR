@@ -15,7 +15,8 @@ plot_likert <- function(data,
                         pri,
                         sec = NULL,
                         ter = NULL,
-                        color.palette = "viridis") {
+                        color.palette = "viridis",
+                        ...) {
   if (!is.null(ter)) {
     ds <- split(data, data[ter])
   } else {
