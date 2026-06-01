@@ -41,6 +41,7 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
             ),
             shiny::tags$br(),
             shiny::uiOutput(outputId = ns("type")),
+            shiny::h5(i18n$t("Other variables")),
             shiny::uiOutput(outputId = ns("secondary")),
             shiny::uiOutput(outputId = ns("tertiary"))
           ),
@@ -102,14 +103,14 @@ data_visuals_ui <- function(id, tab_title = "Plots", ...) {
         shiny::p(
           "We have collected a few notes on visualising data and details on the options included in FreesearchR:",
           shiny::tags$a(
-            href = "https://agdamsbo.github.io/FreesearchR/articles/visuals.html",
+            href = "https://freesearchr.github.io/FreesearchR-knowledge/app/visuals.html",
             "View notes in new tab",
             target = "_blank",
             rel = "noopener noreferrer"
           )
         )
       ),
-      shiny::plotOutput(ns("plot"), height = "70vh"),
+      shiny::plotOutput(ns("plot"), height = "65vh"),
       shiny::tags$br(),
       shiny::tags$br(),
       shiny::htmlOutput(outputId = ns("code_plot"))
@@ -193,7 +194,7 @@ data_visuals_server <- function(id, data, palettes = color_choices(), ...) {
         vectorSelectInput(
           inputId = ns("type"),
           selected = NULL,
-          label = shiny::h4(i18n$t("Plot type")),
+          label = shiny::h5(i18n$t("Plot type")),
           choices = Reduce(c, plots_named),
           multiple = FALSE
         )
@@ -362,7 +363,25 @@ data_visuals_server <- function(id, data, palettes = color_choices(), ...) {
         if (!is.null(rv$plot)) {
           rv$plot
         } else {
-          return(NULL)
+          # Create a placeholder plot with instructions using ggplot2
+          ggplot2::ggplot() +
+            ggplot2::annotate(
+              "text",
+              x = 0.5,
+              y = 0.5,
+              label = i18n$t("Select variables and plot type,\nthen click 'Plot' to generate visualization"),
+              size = 5,
+              color = "gray50",
+              lineheight = 0.8
+            ) +
+            ggplot2::xlim(0, 1) +
+            ggplot2::ylim(0, 1) +
+            ggplot2::theme_void() +
+            ggplot2::theme(
+              panel.background = ggplot2::element_rect(fill = "white"),
+              plot.background = ggplot2::element_rect(fill = "white")
+            )
+          # return(NULL)
         }
       })
 

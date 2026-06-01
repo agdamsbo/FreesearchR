@@ -247,7 +247,7 @@ ui_elements <- function(selection) {
               "Read more on how ",
               tags$a(
                 "data types",
-                href = "https://agdamsbo.github.io/FreesearchR/articles/data-types.html",
+                href = "https://freesearchr.github.io/FreesearchR-knowledge/app/data_types.html",
                 target = "_blank",
                 rel = "noopener noreferrer"
               ),
@@ -694,7 +694,7 @@ ui_elements <- function(selection) {
     "docs" = bslib::nav_item(
       # shiny::img(shiny::icon("book")),
       shiny::tags$a(
-        href = "https://agdamsbo.github.io/FreesearchR/",
+        href = "https://freesearchr.github.io/FreesearchR-knowledge/",
         "Docs",
         shiny::icon("arrow-up-right-from-square"),
         target = "_blank",
